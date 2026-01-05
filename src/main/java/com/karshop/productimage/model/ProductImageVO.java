@@ -1,75 +1,63 @@
 package com.karshop.productimage.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.karshop.product.model.ProductVO;
-import jakarta.persistence.*;
-
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.sql.Date;
 
-@Entity
-@Table(name = "product_image")
-public class ProductImageVO implements Serializable {
+public class ProductImageVO implements Serializable{
+    private Integer imgno;
+    private Integer prodno;
+    private String prodname;
+    private Date uploaddate;
+    private byte[] upfile;
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "img_no")
-    private Integer imgNo;
 
-    @ManyToOne
-    @JoinColumn(name = "prod_no")
-    @JsonIgnore
-    private ProductVO product;
-//   @Column(name = "prod_no")
-//    private Integer prodNo;
-
-    @Column(name = "upload_date")
-    private LocalDate uploadDate;
-
-    @Column(name = "up_file")
-    private byte[] upFile;
-
-    public ProductImageVO() {
+    public ProductImageVO () {
 
     }
 
-    public Integer getImgNo() {
-        return imgNo;
+    public Integer getImgno() {
+        return imgno;
     }
 
-    public void setImgNo(Integer imgNo) {
-        this.imgNo = imgNo;
+    public void setImgno(Integer imgno) {
+        this.imgno = imgno;
     }
 
-    public ProductVO getProduct() {
-        return product;
+    public Integer getProdno() {
+        return prodno;
     }
 
-    public void setProduct(ProductVO product) {
-        this.product = product;
+    public void setProdno(Integer prodno) {
+        this.prodno = prodno;
     }
 
-    //    public Integer getProdNo() {
-//        return prodNo;
-//    }
-//
-//    public void setProdNo(Integer prodNo) {
-//        this.prodNo = prodNo;
-//    }
 
-    public LocalDate getUploadDate() {
-        return uploadDate;
+    public String getProdname() {
+        return prodname;
     }
 
-    public void setUploadDate(LocalDate uploadDate) {
-        this.uploadDate = uploadDate;
+    public void setProdname(String prodname) {
+        this.prodname = prodname;
     }
 
-    public byte[] getUpFile() {
-        return upFile;
+
+    public Date getUploaddate() {
+        return uploaddate;
     }
 
-    public void setUpFile(byte[] upFile) {
-        this.upFile = upFile;
+    public void setUploaddate(Date uploaddate) {
+        this.uploaddate = uploaddate;
     }
+
+    public byte[] getUpfile() {
+        return upfile;
+    }
+
+    public void setUpfile(byte[] upfile) {
+        this.upfile = upfile;
+    }
+
+
+
+
 }
