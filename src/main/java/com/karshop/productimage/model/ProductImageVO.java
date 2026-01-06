@@ -3,61 +3,54 @@ package com.karshop.productimage.model;
 import java.io.Serializable;
 import java.sql.Date;
 
-public class ProductImageVO implements Serializable{
-    private Integer imgno;
-    private Integer prodno;
-    private String prodname;
-    private Date uploaddate;
-    private byte[] upfile;
+public class ProductImageVO implements Serializable {
+    private Integer imgNo;
+    private Integer prodNo;
+    private String prodName;
+    private Date uploadDate;
+    private byte[] upFile;
 
-
-    public ProductImageVO () {
+    public ProductImageVO() {
 
     }
 
-    public Integer getImgno() {
-        return imgno;
+    public Integer getImgNo() {
+        return imgNo;
     }
 
-    public void setImgno(Integer imgno) {
-        this.imgno = imgno;
+    public void setImgNo(Integer imgNo) {
+        this.imgNo = imgNo;
     }
 
-    public Integer getProdno() {
-        return prodno;
+    public Integer getProdNo() {
+        return prodNo;
     }
 
-    public void setProdno(Integer prodno) {
-        this.prodno = prodno;
+    public void setProdNo(Integer prodNo) {
+        this.prodNo = prodNo;
     }
 
-
-    public String getProdname() {
-        return prodname;
+    public String getProdName() {
+        return prodName;
     }
 
-    public void setProdname(String prodname) {
-        this.prodname = prodname;
+    public void setProdName(String prodName) {
+        this.prodName = prodName;
     }
 
-
-    public Date getUploaddate() {
-        return uploaddate;
+    public Date getUploadDate() {
+        return uploadDate;
     }
 
-    public void setUploaddate(Date uploaddate) {
-        this.uploaddate = uploaddate;
+    public void setUploadDate(Date uploadDate) {
+        this.uploadDate = uploadDate;
     }
 
-    public byte[] getUpfile() {
-        return upfile;
+    public byte[] getUpFile() {
+        return upFile;
     }
 
-    public void setUpfile(byte[] upfile) {
-        this.upfile = upfile;
+    public void setUpFile(byte[] upFile) {
+        this.upFile = upFile;
     }
-
-
-
-
 }
