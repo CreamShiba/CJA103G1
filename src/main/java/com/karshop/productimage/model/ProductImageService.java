@@ -1,40 +1,56 @@
 package com.karshop.productimage.model;
 
-import com.karshop.product.model.ProductVO;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-
-import java.time.LocalDate;
+import java.sql.Date;
 import java.util.List;
 
-@Service
 public class ProductImageService {
 
-    @Autowired
-    ProductImageRepository productImageRepository;
+    private ProductImageDAO_interface dao;
 
-    @Transactional
-    public void addImages(ProductImageVO piVO){
-        piVO.setUploadDate(LocalDate.now());
-        productImageRepository.save(piVO);
+    public ProductImageService() {
+        dao = new ProductImageJDBCDAO();
     }
 
-    public void updateImages(ProductImageVO piVO){
-        productImageRepository.save(piVO);
+    public ProductImageVO addProductImage(Integer prodNo, String prodName, byte[] upFile) {
+
+        ProductImageVO piVO = new ProductImageVO();
+        piVO.setProdNo(prodNo);
+        piVO.setProdName(prodName);
+        piVO.setUpFile(upFile);
+        piVO.setUploadDate(new java.sql.Date(System.currentTimeMillis()));
+        dao.insert(piVO);
+
+        return piVO;
+
     }
 
-    public void deleteImage(Integer imgNo){
-        productImageRepository.deleteById(imgNo);
+    public ProductImageVO updateProductImage(Integer imgNo, Integer prodNo, String prodName, Date uploadDate, byte[] upFile) {
+
+        ProductImageVO piVO = new ProductImageVO();
+        piVO.setImgNo(imgNo);
+        piVO.setProdNo(prodNo);
+        piVO.setProdName(prodName);
+        piVO.setUpFile(upFile);
+        piVO.setUploadDate(uploadDate);
+        dao.update(piVO);
+
+        return piVO;
     }
 
-    public ProductImageVO getOneImage(Integer imgNo){
-        return productImageRepository.findById(imgNo).orElse(null);
+    public void deleteImage(Integer imgNo) {
+        dao.delete(imgNo);
     }
 
-    public void deleteByProduct(ProductVO productVO){
-        productImageRepository.deleteByProduct(productVO);
+    public ProductImageVO getOneImage(Integer imgNo) {
+        return dao.findByPrimaryKey(imgNo);
+    }
+
+    public List<ProductImageVO> getAll(){
+        return dao.getAll();
+    }
+
+    public String getProdNameByProdNo(Integer prodNo) {
+        return dao.getProdNameByProdNo(prodNo);
     }
 
 }
