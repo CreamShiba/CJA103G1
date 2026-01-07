@@ -11,11 +11,10 @@ public class ProductImageService {
         dao = new ProductImageJDBCDAO();
     }
 
-    public ProductImageVO addProductImage(Integer prodNo, String prodName, byte[] upFile) {
+    public ProductImageVO addProductImage(Integer prodNo, byte[] upFile) {
 
         ProductImageVO piVO = new ProductImageVO();
         piVO.setProdNo(prodNo);
-        piVO.setProdName(prodName);
         piVO.setUpFile(upFile);
         piVO.setUploadDate(new java.sql.Date(System.currentTimeMillis()));
         dao.insert(piVO);
@@ -24,12 +23,11 @@ public class ProductImageService {
 
     }
 
-    public ProductImageVO updateProductImage(Integer imgNo, Integer prodNo, String prodName, Date uploadDate, byte[] upFile) {
+    public ProductImageVO updateProductImage(Integer imgNo, Integer prodNo, Date uploadDate, byte[] upFile) {
 
         ProductImageVO piVO = new ProductImageVO();
         piVO.setImgNo(imgNo);
         piVO.setProdNo(prodNo);
-        piVO.setProdName(prodName);
         piVO.setUpFile(upFile);
         piVO.setUploadDate(uploadDate);
         dao.update(piVO);
@@ -47,10 +45,6 @@ public class ProductImageService {
 
     public List<ProductImageVO> getAll(){
         return dao.getAll();
-    }
-
-    public String getProdNameByProdNo(Integer prodNo) {
-        return dao.getProdNameByProdNo(prodNo);
     }
 
 }

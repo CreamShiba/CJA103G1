@@ -7,7 +7,8 @@ public interface ProductImageDAO_interface {
     public void update(ProductImageVO piVO);
     public void delete(Integer imgNo);
     public ProductImageVO findByPrimaryKey(Integer imgNo);
-    public String getProdNameByProdNo(Integer prodNo);
     //	public List<ProductImageVO> getAllImageByProdNo(Integer prodNo);
     public List<ProductImageVO> getAll();
 }
+
+
