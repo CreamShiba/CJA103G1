@@ -38,7 +38,6 @@ public class ProductImageServlet extends HttpServlet {
             List<String> errorMsgs = new LinkedList<String>();
             req.setAttribute("errorMsgs", errorMsgs);
 
-            // 接收請求參數
             String str = req.getParameter("imgNo");
             if (str == null || (str.trim().length() == 0)) {
                 errorMsgs.add("請輸入商品圖片編號");
@@ -61,7 +60,6 @@ public class ProductImageServlet extends HttpServlet {
                 return;
             }
 
-            // 開始查詢資料
             ProductImageService piSvc = new ProductImageService();
             ProductImageVO piVO = piSvc.getOneImage(imgNo);
             if(piVO == null) {
@@ -73,7 +71,6 @@ public class ProductImageServlet extends HttpServlet {
                 return;
             }
 
-            // 查詢完成，準備轉交
             req.setAttribute("piVO", piVO);
             String url = "/back_end/productimage/listOneProductImage.jsp";
             RequestDispatcher successView = req.getRequestDispatcher(url);
@@ -84,7 +81,6 @@ public class ProductImageServlet extends HttpServlet {
             List<String> errorMsgs = new LinkedList<String>();
             req.setAttribute("errorMsgs", errorMsgs);
 
-            // 接受請求參數
             String prodNoReg ="^\\d{4}$";
             String str = req.getParameter("prodNo");
             if (str == null || (str.trim().length() == 0)) {
@@ -96,13 +92,6 @@ public class ProductImageServlet extends HttpServlet {
             Integer prodNo = null;
             if(errorMsgs.isEmpty()) {
                 prodNo = Integer.valueOf(str);
-            }
-
-            ProductImageService piSvc = new ProductImageService();
-            String prodName = (prodNo != null) ? piSvc.getProdNameByProdNo(prodNo) : "";
-
-            if(prodName == null || prodName.trim().length() == 0) {
-                errorMsgs.add("商品名稱: 請勿空白");
             }
 
             Part part = req.getPart("upFile");
@@ -120,7 +109,6 @@ public class ProductImageServlet extends HttpServlet {
 
             ProductImageVO piVO = new ProductImageVO();
             piVO.setProdNo(prodNo);
-            piVO.setProdName(prodName);
             piVO.setUpFile(upFile);
 
             if(!errorMsgs.isEmpty()) {
@@ -130,13 +118,12 @@ public class ProductImageServlet extends HttpServlet {
                 return;
             }
 
-            // 開始新增資料
-            piVO = piSvc.addProductImage(prodNo, prodName, upFile);
+            ProductImageService piSvc = new ProductImageService();
+            piVO = piSvc.addProductImage(prodNo, upFile);
 
             List<ProductImageVO> piList = piSvc.getAll();
             req.setAttribute("piList", piList);
 
-            // 新增完成，準備轉交
             String url = "/back_end/productimage/listAllProductImage.jsp";
             RequestDispatcher successView = req.getRequestDispatcher(url);
             successView.forward(req, res);
@@ -156,14 +143,8 @@ public class ProductImageServlet extends HttpServlet {
             List<String> errorMsgs = new LinkedList<String>();
             req.setAttribute("errorMsgs", errorMsgs);
 
-            // 接收請求參數
             Integer imgNo = Integer.valueOf(req.getParameter("imgNo").trim());
             Integer prodNo = Integer.valueOf(req.getParameter("prodNo").trim());
-            String prodName = req.getParameter("prodName");
-
-            if(prodName == null || prodName.trim().length() == 0) {
-                errorMsgs.add("商品名稱: 請勿空白");
-            }
 
             ProductImageService piSvc = new ProductImageService();
             ProductImageVO oldpiVO = piSvc.getOneImage(imgNo);
@@ -188,7 +169,6 @@ public class ProductImageServlet extends HttpServlet {
             ProductImageVO piVO = new ProductImageVO();
             piVO.setImgNo(imgNo);
             piVO.setProdNo(prodNo);
-            piVO.setProdName(prodName);
             piVO.setUploadDate(uploadDate);
             piVO.setUpFile(upFile);
 
@@ -199,10 +179,8 @@ public class ProductImageServlet extends HttpServlet {
                 return;
             }
 
-            // 開始修改資料
-            piVO = piSvc.updateProductImage(imgNo, prodNo, prodName, uploadDate, upFile);
+            piVO = piSvc.updateProductImage(imgNo, prodNo, uploadDate, upFile);
 
-            // 修改完成，準備轉交
             req.setAttribute("piVO", piVO);
             String url = "/back_end/productimage/listOneProductImage.jsp";
             RequestDispatcher successView = req.getRequestDispatcher(url);

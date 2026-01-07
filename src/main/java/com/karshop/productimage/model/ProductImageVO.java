@@ -1,13 +1,26 @@
 package com.karshop.productimage.model;
 
+import jakarta.persistence.*;
+
 import java.io.Serializable;
 import java.sql.Date;
 
+@Entity
+@Table(name = "product_image")
 public class ProductImageVO implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "img_no")
     private Integer imgNo;
+
+   @Column(name = "prod_no")
     private Integer prodNo;
-    private String prodName;
+
+    @Column(name = "upload_date")
     private Date uploadDate;
+
+    @Column(name = "up_file")
     private byte[] upFile;
 
     public ProductImageVO() {
@@ -28,14 +41,6 @@ public class ProductImageVO implements Serializable {
 
     public void setProdNo(Integer prodNo) {
         this.prodNo = prodNo;
-    }
-
-    public String getProdName() {
-        return prodName;
-    }
-
-    public void setProdName(String prodName) {
-        this.prodName = prodName;
     }
 
     public Date getUploadDate() {
