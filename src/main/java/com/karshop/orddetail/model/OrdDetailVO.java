@@ -1,27 +1,18 @@
 package com.karshop.orddetail.model;
 
-import com.karshop.ord.model.OrdVO;
-import com.karshop.product.model.ProductVO;
 import jakarta.persistence.*;
-
-import java.io.Serializable;
 
 @Entity
 @Table(name = "ord_detail")
-public class OrdDetailVO implements Serializable {
+public class OrdDetailVO {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "detail_no")
-    private Integer detailNo;
+    @Column(name = "ord_no")
+    private Integer ordNo;
 
-    @ManyToOne
-    @JoinColumn(name = "ord_no")
-    private OrdVO order;
-
-    @ManyToOne
-    @JoinColumn(name = "prod_no")
-    private ProductVO product;
+    @Id
+    @Column(name = "prod_no")
+    private Integer prodNo;
 
     @Column(name = "quantity")
     private Integer quantity;
@@ -29,28 +20,20 @@ public class OrdDetailVO implements Serializable {
     @Column(name = "price")
     private Integer price;
 
-    public Integer getDetailNo() {
-        return detailNo;
+    public Integer getOrdNo() {
+        return ordNo;
     }
 
-    public void setDetailNo(Integer detailNo) {
-        this.detailNo = detailNo;
+    public void setOrdNo(Integer ordNo) {
+        this.ordNo = ordNo;
     }
 
-    public OrdVO getOrder() {
-        return order;
+    public Integer getProdNo() {
+        return prodNo;
     }
 
-    public void setOrder(OrdVO order) {
-        this.order = order;
-    }
-
-    public ProductVO getProduct() {
-        return product;
-    }
-
-    public void setProduct(ProductVO product) {
-        this.product = product;
+    public void setProdNo(Integer prodNo) {
+        this.prodNo = prodNo;
     }
 
     public Integer getQuantity() {

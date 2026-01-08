@@ -1,32 +1,23 @@
 package com.karshop.ord.model;
 
-import com.karshop.buyerrating.model.BuyerRatingVO;
-import com.karshop.membertest.model.MemberVO;
-import com.karshop.orddetail.model.OrdDetailVO;
-import com.karshop.rating.model.RatingVO;
-import com.karshop.sellertest.model.SellerVO;
 import jakarta.persistence.*;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "ord")
-public class OrdVO implements Serializable {
+public class OrdVO {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ord_no")
     private Integer ordNo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_no")
-    private SellerVO seller;
+    @Column(name = "seller_no")
+    private Integer sellerNo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_no")
-    private MemberVO member;
+    @Column(name = "member_no")
+    private Integer memberNo;
 
     @Column(name = "coupon_no")
     private Integer couponNo;
@@ -67,34 +58,6 @@ public class OrdVO implements Serializable {
     @Column(name = "ord_completed_date")
     private LocalDateTime ordCompletedDate;
 
-    @Column(name = "cancel_reason")
-    private String cancelReason;
-
-    @OneToMany(mappedBy ="order", cascade = CascadeType.ALL)
-    private List<OrdDetailVO> orderDetail;
-
-//  賣家寫的評價
-    @OneToOne(mappedBy = "ord")
-    private RatingVO sellerRating;
-
-    @Column(name = "payout_status")
-    private String payoutStatus;
-
-//  買家寫的評價
-    @OneToOne(mappedBy = "ord")
-    private BuyerRatingVO buyerRating;
-
-//  平台抽成5%
-    private static final double commission = 0.05;
-//  平台手續費
-    public Integer getPlatformFee(){
-        return (int)Math.round(this.ordPrice*commission);
-    }
-//  賣家實收金額
-    public Integer getSellerNetIncome(){
-        return this.ordPrice - getPlatformFee();
-    }
-
     public Integer getOrdNo() {
         return ordNo;
     }
@@ -103,20 +66,20 @@ public class OrdVO implements Serializable {
         this.ordNo = ordNo;
     }
 
-    public SellerVO getSeller() {
-        return seller;
+    public Integer getSellerNo() {
+        return sellerNo;
     }
 
-    public void setSeller(SellerVO seller) {
-        this.seller = seller;
+    public void setSellerNo(Integer sellerNo) {
+        this.sellerNo = sellerNo;
     }
 
-    public MemberVO getMember() {
-        return member;
+    public Integer getMemberNo() {
+        return memberNo;
     }
 
-    public void setMember(MemberVO member) {
-        this.member = member;
+    public void setMemberNo(Integer memberNo) {
+        this.memberNo = memberNo;
     }
 
     public Integer getCouponNo() {
@@ -221,46 +184,6 @@ public class OrdVO implements Serializable {
 
     public void setOrdCompletedDate(LocalDateTime ordCompletedDate) {
         this.ordCompletedDate = ordCompletedDate;
-    }
-
-    public List<OrdDetailVO> getOrderDetail() {
-        return orderDetail;
-    }
-
-    public void setOrderDetail(List<OrdDetailVO> orderDetail) {
-        this.orderDetail = orderDetail;
-    }
-
-    public String getCancelReason() {
-        return cancelReason;
-    }
-
-    public void setCancelReason(String cancelReason) {
-        this.cancelReason = cancelReason;
-    }
-
-    public RatingVO getSellerRating() {
-        return sellerRating;
-    }
-
-    public void setSellerRating(RatingVO sellerRating) {
-        this.sellerRating = sellerRating;
-    }
-
-    public String getPayoutStatus() {
-        return payoutStatus;
-    }
-
-    public void setPayoutStatus(String payoutStatus) {
-        this.payoutStatus = payoutStatus;
-    }
-
-    public BuyerRatingVO getBuyerRating() {
-        return buyerRating;
-    }
-
-    public void setBuyerRating(BuyerRatingVO buyerRating) {
-        this.buyerRating = buyerRating;
     }
 }
 
