@@ -1,6 +1,9 @@
 package com.karshop.product.model;
 
+import com.karshop.productimage.model.ProductImageVO;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "product")
@@ -34,6 +37,9 @@ public class ProductVO {
 
     @Column(name = "rating_star")
     Integer ratingStar;
+
+    @OneToMany(mappedBy ="product", cascade = CascadeType.ALL)
+    private List<ProductImageVO> productImage;
 
     public Integer getProdNo() {
         return prodNo;
@@ -105,5 +111,13 @@ public class ProductVO {
 
     public void setRatingStar(Integer ratingStar) {
         this.ratingStar = ratingStar;
+    }
+
+    public List<ProductImageVO> getProductImage() {
+        return productImage;
+    }
+
+    public void setProductImage(List<ProductImageVO> productImage) {
+        this.productImage = productImage;
     }
 }
