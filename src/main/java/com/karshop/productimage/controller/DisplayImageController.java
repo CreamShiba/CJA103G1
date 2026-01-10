@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/product")
-public class DisplayImageServlet extends HttpServlet {
+public class DisplayImageController extends HttpServlet {
 
     @Autowired
     private ProductService productService;
