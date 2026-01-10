@@ -1,50 +1,31 @@
 package com.karshop.productimage.model;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.sql.Date;
 import java.util.List;
 
+@Service
 public class ProductImageService {
 
-    private ProductImageDAO_interface dao;
+    @Autowired
+    ProductImageRepository productImageRepository;
 
-    public ProductImageService() {
-        dao = new ProductImageJDBCDAO();
+    public void addImages(ProductImageVO piVO){
+        productImageRepository.save(piVO);
     }
 
-    public ProductImageVO addProductImage(Integer prodNo, byte[] upFile) {
-
-        ProductImageVO piVO = new ProductImageVO();
-        piVO.setProdNo(prodNo);
-        piVO.setUpFile(upFile);
-        piVO.setUploadDate(new java.sql.Date(System.currentTimeMillis()));
-        dao.insert(piVO);
-
-        return piVO;
-
+    public void updateImages(ProductImageVO piVO){
+        productImageRepository.save(piVO);
     }
 
-    public ProductImageVO updateProductImage(Integer imgNo, Integer prodNo, Date uploadDate, byte[] upFile) {
-
-        ProductImageVO piVO = new ProductImageVO();
-        piVO.setImgNo(imgNo);
-        piVO.setProdNo(prodNo);
-        piVO.setUpFile(upFile);
-        piVO.setUploadDate(uploadDate);
-        dao.update(piVO);
-
-        return piVO;
+    public void deleteImages(ProductImageVO piVO){
+        productImageRepository.delete(piVO);
     }
 
-    public void deleteImage(Integer imgNo) {
-        dao.delete(imgNo);
-    }
-
-    public ProductImageVO getOneImage(Integer imgNo) {
-        return dao.findByPrimaryKey(imgNo);
-    }
-
-    public List<ProductImageVO> getAll(){
-        return dao.getAll();
+    public ProductImageVO getOneImage(Integer imgNo){
+        return productImageRepository.findById(imgNo).orElse(null);
     }
 
 }

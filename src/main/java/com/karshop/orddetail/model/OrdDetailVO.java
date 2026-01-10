@@ -10,7 +10,7 @@ public class OrdDetailVO {
     @Column(name = "ord_no")
     private Integer ordNo;
 
-    @Id
+
     @Column(name = "prod_no")
     private Integer prodNo;
 

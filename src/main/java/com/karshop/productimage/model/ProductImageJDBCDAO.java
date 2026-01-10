@@ -1,5 +1,7 @@
 package com.karshop.productimage.model;
 
+import com.karshop.product.model.ProductVO;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,7 +41,7 @@ public class ProductImageJDBCDAO implements ProductImageDAO_interface {
         try (Connection con = DriverManager.getConnection(url, userid, passwd);
              PreparedStatement pstmt = con.prepareStatement(INSERT_STMT, cols);) {
 
-            pstmt.setInt(1, piVO.getProdNo());
+            pstmt.setInt(1, piVO.getProduct().getProdNo());
             pstmt.setDate(2, piVO.getUploadDate());
             pstmt.setBytes(3, piVO.getUpFile());
 
@@ -63,7 +65,7 @@ public class ProductImageJDBCDAO implements ProductImageDAO_interface {
         try (Connection con = DriverManager.getConnection(url, userid, passwd);
              PreparedStatement pstmt = con.prepareStatement(UPDATE)) {
 
-            pstmt.setInt(1, piVO.getProdNo());
+            pstmt.setInt(1, piVO.getProduct().getProdNo());
             pstmt.setDate(2, piVO.getUploadDate());
             pstmt.setBytes(3, piVO.getUpFile());
             pstmt.setInt(4, piVO.getImgNo());
@@ -101,9 +103,11 @@ public class ProductImageJDBCDAO implements ProductImageDAO_interface {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
+                    ProductVO productVO = new ProductVO();
                     piVO = new ProductImageVO();
                     piVO.setImgNo(rs.getInt("img_no"));
-                    piVO.setProdNo(rs.getInt("prod_no"));
+                    productVO.setProdNo(rs.getInt("prod_no"));
+                    piVO.setProduct(productVO);
                     piVO.setUploadDate(rs.getDate("upload_date"));
                     piVO.setUpFile(rs.getBytes("up_file"));
                 }
@@ -125,8 +129,10 @@ public class ProductImageJDBCDAO implements ProductImageDAO_interface {
 
             while (rs.next()) {
                 piVO = new ProductImageVO();
+                ProductVO productVO = new ProductVO();
                 piVO.setImgNo(rs.getInt("img_no"));
-                piVO.setProdNo(rs.getInt("prod_no"));
+                productVO.setProdNo(rs.getInt("prod_no"));
+                piVO.setProduct(productVO);
                 piVO.setUploadDate(rs.getDate("upload_date"));
                 piVO.setUpFile(rs.getBytes("up_file"));
                 list.add(piVO);
