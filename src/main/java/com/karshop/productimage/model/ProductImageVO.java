@@ -5,7 +5,7 @@ import com.karshop.product.model.ProductVO;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "product_image")
@@ -24,7 +24,7 @@ public class ProductImageVO implements Serializable {
 //    private Integer prodNo;
 
     @Column(name = "upload_date")
-    private Date uploadDate;
+    private LocalDate uploadDate;
 
     @Column(name = "up_file")
     private byte[] upFile;
@@ -57,11 +57,11 @@ public class ProductImageVO implements Serializable {
 //        this.prodNo = prodNo;
 //    }
 
-    public Date getUploadDate() {
+    public LocalDate getUploadDate() {
         return uploadDate;
     }
 
-    public void setUploadDate(Date uploadDate) {
+    public void setUploadDate(LocalDate uploadDate) {
         this.uploadDate = uploadDate;
     }
 

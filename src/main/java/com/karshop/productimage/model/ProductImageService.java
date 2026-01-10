@@ -3,7 +3,8 @@ package com.karshop.productimage.model;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -13,6 +14,7 @@ public class ProductImageService {
     ProductImageRepository productImageRepository;
 
     public void addImages(ProductImageVO piVO){
+        piVO.setUploadDate(LocalDate.now());
         productImageRepository.save(piVO);
     }
 
@@ -20,8 +22,8 @@ public class ProductImageService {
         productImageRepository.save(piVO);
     }
 
-    public void deleteImages(ProductImageVO piVO){
-        productImageRepository.delete(piVO);
+    public void deleteImage(Integer imgNo){
+        productImageRepository.deleteById(imgNo);
     }
 
     public ProductImageVO getOneImage(Integer imgNo){

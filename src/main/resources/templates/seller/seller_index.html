@@ -206,6 +206,12 @@
 
             <div id="view-products" class="view-section">
                 <h2 style="margin-bottom:20px;">商品庫存列表</h2>
+                <div style="margin: 20px 0; display: flex; justify-content: flex-end;">
+                    <a th:href="@{/product/addProduct}"
+                       style="background-color: #6200ea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                        + 新增商品上架
+                    </a>
+                </div>
                 <table class="data-table">
                     <thead>
                     <tr><th>ID</th><th>名稱</th><th>圖片</th><th>狀態</th><th>價格<th>評價</th><th>操作</th></tr>
