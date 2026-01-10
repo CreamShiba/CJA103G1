@@ -1,5 +1,7 @@
 package com.karshop.productimage.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.karshop.product.model.ProductVO;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -14,8 +16,12 @@ public class ProductImageVO implements Serializable {
     @Column(name = "img_no")
     private Integer imgNo;
 
-   @Column(name = "prod_no")
-    private Integer prodNo;
+    @ManyToOne
+    @JoinColumn(name = "prod_no")
+    @JsonIgnore
+    private ProductVO product;
+//   @Column(name = "prod_no")
+//    private Integer prodNo;
 
     @Column(name = "upload_date")
     private Date uploadDate;
@@ -35,13 +41,21 @@ public class ProductImageVO implements Serializable {
         this.imgNo = imgNo;
     }
 
-    public Integer getProdNo() {
-        return prodNo;
+    public ProductVO getProduct() {
+        return product;
     }
 
-    public void setProdNo(Integer prodNo) {
-        this.prodNo = prodNo;
+    public void setProduct(ProductVO product) {
+        this.product = product;
     }
+
+    //    public Integer getProdNo() {
+//        return prodNo;
+//    }
+//
+//    public void setProdNo(Integer prodNo) {
+//        this.prodNo = prodNo;
+//    }
 
     public Date getUploadDate() {
         return uploadDate;
