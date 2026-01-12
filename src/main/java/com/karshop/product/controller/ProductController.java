@@ -1,10 +1,14 @@
 package com.karshop.product.controller;
 
+import com.karshop.product.model.ProductRepository;
 import com.karshop.product.model.ProductService;
 import com.karshop.product.model.ProductVO;
+import com.karshop.productimage.model.ProductImageRepository;
 import com.karshop.productimage.model.ProductImageService;
 import com.karshop.productimage.model.ProductImageVO;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -14,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -27,6 +32,9 @@ public class ProductController {
     @Autowired
     private ProductImageService productImageService;
 
+    @Autowired
+    private EntityManager entityManager;
+
     @GetMapping("/addProduct")
     public String addProduct(ModelMap model){
         ProductVO productVO = new ProductVO();
@@ -34,31 +42,24 @@ public class ProductController {
         return "seller/addProduct";
     }
 
-    @GetMapping("/dashboard")
-    public String sellerDashboard(ModelMap model) {
-        Integer sellerNo = 101;
-
-        List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
-
-        model.addAttribute("productList", productList);
-
-        return "seller/seller_index";
-    }
 
     @Transactional
     @PostMapping("/insert")
-    public String insert(ProductVO productVO, BindingResult result, ModelMap model, @RequestParam("upFile") MultipartFile[] upFile)throws IOException {
+    public String insert(@Valid ProductVO productVO, BindingResult result, ModelMap model, @RequestParam("upFile") MultipartFile[] upFile)throws IOException {
 
-        if(upFile[0].isEmpty()){
-            model.addAttribute("errorMessage", "請上傳商品圖片");
+        if (result.hasErrors() || upFile[0].isEmpty()) {
+            if(upFile[0].isEmpty()) {
+                model.addAttribute("errorMessage", "請上傳商品圖片");
+            }
             return  "seller/addProduct";
         }
 
+
         productVO.setProductCategoryNo(3);
         productVO.setSellerNo(101);
-        productVO.setProdStatus("上架中");
-        productVO.setRatingStar(0);  //評分總星數初始為0
-        productVO.setRatingAmount(0); //評分總人數初始為0
+//        productVO.setProdStatus("上架中");
+//        productVO.setRatingStar(0);  //評分總星數初始為0
+//        productVO.setRatingAmount(0); //評分總人數初始為0
 
         productService.addProduct(productVO);
 
@@ -73,6 +74,98 @@ public class ProductController {
         }
 
         return "redirect:/product/dashboard";
+    }
+
+    @GetMapping("/getOne_For_Update")
+    public String getOne_For_Update(@RequestParam Integer prodNo, ModelMap model){
+        ProductVO productVO = productService.getOneProduct(prodNo);
+        model.addAttribute("productVO",productVO);
+        return "seller/updateProduct";
+    }
+
+    @Transactional
+    @PostMapping("/update")
+    public String update(@Valid ProductVO productVO, BindingResult result, ModelMap model,
+                         @RequestParam(value = "deleteImageNos", required = false) String deleteImageNos,
+                         @RequestParam("upFile") MultipartFile[] upFile) throws IOException {
+
+        if (result.hasErrors()) {
+            return "seller/updateProduct";
+        }
+
+        // 1. 圖片數量檢查
+        ProductVO originalProductVO = productService.getOneProduct(productVO.getProdNo());
+        int currentAmount = originalProductVO.getProductImage().size();
+        int deleteAmount = (deleteImageNos != null && !deleteImageNos.trim().isEmpty()) ? deleteImageNos.split(",").length : 0;
+        int newAmount = (upFile != null && !upFile[0].isEmpty()) ? upFile.length : 0;
+
+        if (currentAmount - deleteAmount + newAmount == 0) {
+            model.addAttribute("errorMessage", "請至少保留一張圖片");
+            model.addAttribute("productVO", originalProductVO);
+            return "seller/updateProduct";
+        }
+
+        // 2. 更新商品文字資料
+        productService.updateProduct(productVO);
+
+        // 3. 處理刪除舊圖
+        if (deleteAmount > 0) {
+            String[] ids = deleteImageNos.split(",");
+            for (String id : ids) {
+                productImageService.deleteImage(Integer.valueOf(id));
+            }
+        }
+
+        // 4. 處理新圖
+        if (newAmount > 0) {
+            // 【關鍵點】確保 productVO 內部的 List 已經被 new 出來
+            List<ProductImageVO> list = productVO.getProductImage();
+            if (list == null) {
+                list = new ArrayList<>();
+                productVO.setProductImage(list); // 重新塞回 VO 確保兩邊同步
+            }
+
+            for (MultipartFile multipartFile : upFile) {
+                byte[] pic = multipartFile.getBytes();
+
+                ProductImageVO piVO = new ProductImageVO();
+                piVO.setProduct(productVO);
+                piVO.setUpFile(pic);
+
+                list.add(piVO);
+                productImageService.addImages(piVO);
+            }
+        } else {
+            // 【額外保險】如果沒有新圖，也幫它初始化一個空清單，防止 size() 報錯
+            if (productVO.getProductImage() == null) {
+                productVO.setProductImage(new ArrayList<>());
+            }
+        }
+
+        entityManager.flush(); // 強制讓剛剛的刪除和新增生效
+        entityManager.clear(); // 清空快取，強迫 JPA 重新去資料庫撈資料
+
+
+        ProductVO finalProductVO = productService.getOneProduct(productVO.getProdNo());
+
+        // 這裡印出來看看，數量應該會等於 (舊圖 - 刪圖 + 新圖)
+        if (finalProductVO != null) {
+            System.out.println("最終顯示圖片張數: " + finalProductVO.getProductImage().size());
+        }
+
+        model.addAttribute("productVO", finalProductVO); // 把最後這個完整的物件傳給頁面
+        return "seller/listOneProduct";
+    }
+
+    @GetMapping("/dashboard")
+    public String sellerDashboard(ModelMap model) {
+        Integer sellerNo = 101;
+
+        List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
+
+        model.addAttribute("productList", productList);
+
+        return "seller/seller_index";
     }
 
 //    @GetMapping("/getAll")
