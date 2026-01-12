@@ -214,7 +214,7 @@
                 </div>
                 <table class="data-table">
                     <thead>
-                    <tr><th>ID</th><th>名稱</th><th>圖片</th><th>狀態</th><th>價格<th>評價</th><th>操作</th></tr>
+                    <tr><th>ID</th><th>名稱</th><th>圖片</th><th>狀態</th><th>價格<th>評價</th><th>庫存</th><th>操作</th></tr>
                     </thead>
                     <tbody>
                     <tr th:each="product : ${productList}">
@@ -229,9 +229,12 @@
                             </span>
                         </td>
                         <td th:text="${'$' + product.prodPrice}">$880</td>
-                        <td th:text="${product.ratingAmount > 0 ? (product.ratingStar/product.ratingAmount) : '尚無評價'}">100</td>
+                        <td th:text="${product.ratingAmount > 0 ? (product.ratingStar/product.ratingAmount) + '⭐': '尚無評價'}">5⭐</td>
+                        <td th:text="${product.prodQty}">100</td>
                         <td>
-                            <button style="background:none; border:1px solid #555; color:#fff; padding:4px 8px; cursor:pointer; border-radius:4px;">編輯</button>
+                            <a th:href="@{/product/getOne_For_Update(prodNo=${product.prodNo})}" class="btn-edit">
+                                <i class="fas fa-edit"></i> 編輯
+                            </a>
                         </td>
                     </tr>
                     </tbody>
