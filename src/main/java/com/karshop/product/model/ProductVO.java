@@ -2,6 +2,8 @@ package com.karshop.product.model;
 
 import com.karshop.productimage.model.ProductImageVO;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
 
 import java.util.List;
 
@@ -15,30 +17,41 @@ public class ProductVO {
     Integer prodNo;
 
     @Column(name = "product_category_no")
-    Integer productCategoryNo;
+    @NotNull(message = "請選擇商品類別")
+    Integer productCategoryNo = 3;
 
     @Column(name = "seller_no")
-    Integer sellerNo;
+    Integer sellerNo = 101;
 
     @Column(name = "prod_name")
+    @NotBlank(message = "請輸入商品名稱")
+    @Size(min = 2, max = 30, message = "商品名稱長度須在 2 至 30 字之間")
     String prodName;
 
     @Column(name = "prod_desc")
+    @NotBlank(message = "請填寫商品描述")
     String prodDesc;
 
     @Column(name = "prod_price")
+    @NotNull(message = "請填寫商品價格")
+    @Min(value = 1, message = "商品價格不可小於${value}")
     Integer prodPrice;
 
     @Column(name = "prod_status")
-    String prodStatus;
+    String prodStatus = "上架中"; //商品狀態初始為"上架中"
 
     @Column(name = "rating_amount")
-    Integer ratingAmount;
+    Integer ratingAmount = 0; //評分總人數初始為0
 
     @Column(name = "rating_star")
-    Integer ratingStar;
+    Integer ratingStar = 0;  //評分總星數初始為0
 
-    @OneToMany(mappedBy ="product", cascade = CascadeType.ALL)
+    @Column(name = "prod_qty")
+    @NotNull(message = "請填寫庫存數量")
+    @Min(value = 0, message = "庫存數量不可小於0")
+    Integer prodQty = 0;
+
+    @OneToMany(mappedBy ="product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProductImageVO> productImage;
 
     public Integer getProdNo() {
@@ -119,5 +132,13 @@ public class ProductVO {
 
     public void setProductImage(List<ProductImageVO> productImage) {
         this.productImage = productImage;
+    }
+
+    public Integer getProdQty() {
+        return prodQty;
+    }
+
+    public void setProdQty(Integer prodQty) {
+        this.prodQty = prodQty;
     }
 }

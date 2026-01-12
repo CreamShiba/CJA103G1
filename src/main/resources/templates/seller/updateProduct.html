@@ -116,6 +116,11 @@
         }
         .btn-remove-img:hover { background: red; transform: scale(1.1); }
 
+        .old-img-box img {
+            filter: brightness(0.8);
+            border: 1px dashed var(--accent-purple) !important;
+        }
+
         /* Submit Button */
         .btn-submit {
             width: 100%; padding: 15px; background: var(--accent-purple);
@@ -158,11 +163,13 @@
 
     <div class="form-card">
         <div class="form-header">
-            <h2>新增商品 Add Product</h2>
+            <h2>修改商品 Edit Product</h2>
             <a th:href="@{/product/dashboard}" class="btn-back">← 返回列表</a>
         </div>
 
-        <form th:action="@{/product/insert}" th:object="${productVO}" method="post" enctype="multipart/form-data">
+        <form th:action="@{/product/update}" th:object="${productVO}" method="post" enctype="multipart/form-data">
+
+            <input type="hidden" th:field="*{prodNo}">
 
             <div class="form-group">
                 <label style="color:#ccc; font-size:14px;">商品名稱 Product Name</label>
@@ -189,12 +196,30 @@
             </div>
 
             <div class="form-group">
-                <label style="color:#ccc; font-size:14px;">上傳圖片 Upload Image</label>
+                <label style="color:#ccc; font-size:14px;">目前商品圖片 (點擊 X 標記刪除)</label>
+                <div id="old-images-container" style="display: flex; flex-wrap: wrap; gap: 15px;">
+
+                    <th:block th:each="piVO : ${productVO.productImage}">
+                        <div class="old-img-box" th:id="'old-img-' + ${piVO.imgNo}" style="position: relative; width: 100px; height: 100px;">
+                            <img th:src="@{/product/displayDetail(imgNo=${piVO.imgNo})}"
+                                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+
+                            <button type="button" class="btn-remove-img"
+                                    th:onclick="'markForDelete(' + ${piVO.imgNo} + ')'">×</button>
+                        </div>
+                    </th:block>
+                </div>
+
+                <input type="hidden" name="deleteImageNos" id="deleteImageNos" value="">
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">上傳新圖片 Upload New Images</label>
                 <input type="file" name="upFile" id="fileInput" multiple accept="image/*"/>
                 <div id="preview-container"></div>
             </div>
 
-            <button type="submit" class="btn-submit">確認上架 Submit</button>
+            <button type="submit" class="btn-submit">儲存修改 Save Change</button>
         </form>
     </div>
 
@@ -281,6 +306,28 @@
         dataTransfer.items.clear();
         Array.from(newDataTransfer.files).forEach(file => dataTransfer.items.add(file));
         fileInput.files = dataTransfer.files;
+    }
+
+    let deleteIds = [];
+
+    function markForDelete(imgNo) {
+        const imgElement = document.getElementById('old-img-' + imgNo);
+
+        if (!deleteIds.includes(imgNo)) {
+            // 1. 加入刪除清單
+            deleteIds.push(imgNo);
+            // 2. 視覺回饋：變透明並加紅色邊框
+            imgElement.style.opacity = "0.3";
+            imgElement.style.border = "2px solid red";
+        } else {
+            // 3. 再次點擊則取消刪除
+            deleteIds = deleteIds.filter(id => id !== imgNo);
+            imgElement.style.opacity = "1";
+            imgElement.style.border = "none";
+        }
+
+        // 4. 將陣列轉為逗號分隔的字串，填入隱藏欄位 (例如: "10,12,15")
+        document.getElementById('deleteImageNos').value = deleteIds.join(',');
     }
 </script>
 
