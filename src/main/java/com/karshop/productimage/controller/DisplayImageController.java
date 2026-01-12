@@ -30,7 +30,7 @@ public class DisplayImageController extends HttpServlet {
     private ProductService productService;
 
     @Autowired
-    private ProductImageRepository productImageRepository;
+    private ProductImageService productImageService;
 
     @GetMapping("/displayMain")
     public void displayMain(@RequestParam("prodNo") String prodNo, HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -54,7 +54,7 @@ public class DisplayImageController extends HttpServlet {
         ServletOutputStream out = res.getOutputStream();
 
         try{
-            ProductImageVO  piVO = productImageRepository.findById(Integer.valueOf(imgNo)).orElse(null);
+            ProductImageVO  piVO = productImageService.getOneImage(Integer.valueOf(imgNo));
             byte[] pic = piVO.getUpFile();
             out.write(pic);
         }catch(Exception e){
