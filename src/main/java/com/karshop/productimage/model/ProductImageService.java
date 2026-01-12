@@ -1,5 +1,6 @@
 package com.karshop.productimage.model;
 
+import com.karshop.product.model.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,10 @@ public class ProductImageService {
 
     public ProductImageVO getOneImage(Integer imgNo){
         return productImageRepository.findById(imgNo).orElse(null);
+    }
+
+    public void deleteByProduct(ProductVO productVO){
+        productImageRepository.deleteByProduct(productVO);
     }
 
 }
