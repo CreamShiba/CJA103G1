@@ -11,4 +11,6 @@ public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
     List<ProductVO> findByProdStatus(String prodStatus);
 
     List<ProductVO> findByProdNameContainingAndProdStatus(String prodName,String prodStatus);
+
+    List<ProductVO> findBySellerNoAndProdNameContaining(Integer sellerNo, String prodName);
 }
