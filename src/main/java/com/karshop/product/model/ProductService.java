@@ -49,5 +49,9 @@ public class ProductService {
         return productRepository.findByProdNameContainingAndProdStatus(prodName,prodStatus);
     }
 
+    public List<ProductVO> getProductBySearchForSeller(Integer sellerNo, String Keyword){
+        return  productRepository.findBySellerNoAndProdNameContaining(sellerNo, Keyword);
+    }
+
 
 }

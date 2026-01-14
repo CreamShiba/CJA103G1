@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>賣家中心 | Layout調整版</title>
+    <title>賣家中心 | Karshop 卡爾夏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         /* --- 1. 核心變數 --- */
         :root {
@@ -25,21 +26,19 @@
             background: linear-gradient(180deg, var(--bg-dark-top) 0%, var(--bg-dark-bottom) 100%);
             color: var(--text-primary);
             height: 100vh;
-            /* 修改 A: 改為垂直排列，讓 Footer 可以置底且滿版 */
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* 修改 B: 新增中間佈局包覆層 (Sidebar + Main) */
         .app-wrapper {
             display: flex;
-            flex: 1; /* 佔據剩餘高度 */
-            overflow: hidden; /* 確保內容滾動是在這個區域內 */
+            flex: 1;
+            overflow: hidden;
             width: 100%;
         }
 
-        /* --- 3. 左側導航欄 (Sidebar) --- */
+        /* --- 3. Sidebar --- */
         .sidebar {
             width: 260px;
             background: rgba(0, 0, 0, 0.9);
@@ -51,93 +50,74 @@
         .logo-area { font-size: 20px; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .logo-icon { width: 12px; height: 12px; background: var(--accent-purple); border-radius: 50%; box-shadow: 0 0 10px var(--accent-purple); }
         .nav-title { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; padding-left: 10px; text-transform: uppercase; }
-        .nav-item { display: block; padding: 12px 15px; color: var(--text-primary); text-decoration: none; font-size: 14px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
-        .nav-item:hover, .nav-item.active { background: rgba(255, 255, 255, 0.1); border-left: 3px solid var(--accent-purple); }
 
-        /* --- 4. 主內容區 (Main Content) --- */
+        .nav-item {
+            display: block; padding: 12px 15px; color: var(--text-primary); text-decoration: none;
+            font-size: 14px; border-radius: 6px; cursor: pointer; transition: 0.3s;
+            margin-bottom: 5px; border-left: 3px solid transparent;
+        }
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        /* --- 4. Main Content --- */
         .main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
-        /* Top Bar */
         .top-bar { height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
         .page-title { font-size: 18px; font-weight: 500; }
 
-        /* --- 修改 C: 使用者下拉選單樣式 --- */
-        .user-profile-container {
-            position: relative;
-            cursor: pointer;
-        }
-        .user-profile {
-            display: flex; align-items: center; gap: 10px;
-            padding: 5px 10px; border-radius: 8px; transition: 0.2s;
-        }
+        .user-profile-container { position: relative; cursor: pointer; }
+        .user-profile { display: flex; align-items: center; gap: 10px; padding: 5px 10px; border-radius: 8px; transition: 0.2s; }
         .user-profile:hover { background: rgba(255,255,255,0.05); }
         .user-avatar { width: 30px; height: 30px; background: #333; border-radius: 50%; border: 1px solid var(--border-color); }
 
-        /* 下拉選單本體 */
         .dropdown-menu {
-            position: absolute;
-            top: 100%; right: 0; width: 160px; margin-top: 10px;
-            background: #1a1a1a;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            opacity: 0; visibility: hidden; transform: translateY(-10px);
-            transition: all 0.2s ease;
-            z-index: 100;
+            position: absolute; top: 100%; right: 0; width: 160px; margin-top: 10px;
+            background: #1a1a1a; border: 1px solid var(--border-color); border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); opacity: 0; visibility: hidden; transform: translateY(-10px);
+            transition: all 0.2s ease; z-index: 100;
         }
         .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
-
-        .dropdown-item {
-            display: block; padding: 12px 16px;
-            color: #ccc; text-decoration: none; font-size: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: 0.2s;
-        }
-        .dropdown-item:last-child { border-bottom: none; }
+        .dropdown-item { display: block; padding: 12px 16px; color: #ccc; text-decoration: none; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
         .dropdown-item:hover { background: var(--accent-purple); color: white; }
 
-        /* Scrollable Area (只捲動內容部分) */
-        .content-scroll-area {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            padding: 40px;
-        }
+        .content-scroll-area { flex: 1; overflow-y: auto; padding: 40px; }
 
-        /* --- 5. 儀表板與表格樣式 --- */
+        /* --- 5. View Sections --- */
         .view-section { display: none; animation: fadeIn 0.4s ease; }
         .view-section.active { display: block; }
+
+        /* --- 6. Cards & Tables --- */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px; }
         .stat-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 25px; border-radius: 12px; cursor: pointer; transition: 0.3s; }
         .stat-card:hover { transform: translateY(-5px); border-color: var(--accent-purple); }
         .stat-value { font-size: 36px; font-weight: 700; margin: 5px 0; }
-        .color-red { color: var(--danger-red); } .color-yellow { color: #ffd740; }
+        .color-red { color: var(--danger-red); }
+
         .data-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 12px; margin-top: 20px; overflow: hidden; }
         .data-table th, .data-table td { padding: 15px 20px; text-align: left; border-bottom: 1px solid var(--border-color); }
         .data-table th { background: rgba(0,0,0,0.3); color: var(--text-secondary); text-transform: uppercase; font-size: 13px; }
+
         .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
-        .status-Pending, .status-Processing { background: rgba(255, 215, 64, 0.15); color: #ffd740; }
         .status-Active, .status-Done { background: rgba(0, 230, 118, 0.15); color: #00e676; }
-        .status-Violation { background: rgba(255, 82, 82, 0.15); color: #ff5252; }
+        .status-Violation, .status-Cancel { background: rgba(255, 82, 82, 0.15); color: #ff5252; }
+        .status-New { background: rgba(125, 95, 255, 0.15); color: #7d5fff; }
 
-        /* --- 6. 網站 Footer (滿版樣式) --- */
-        .site-footer {
-            /* 修改 D: Footer 移出 content 區塊，背景色微調 */
-            background: #080101;
-            border-top: 1px solid var(--border-color);
-            padding: 40px;
-            /* 讓它自然置底 */
-            flex-shrink: 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 40px;
-            width: 100%; /* 強制滿版 */
-            z-index: 10; /* 確保在最上層 */
+        /* --- 7. Search & No Result --- */
+        .search-bar-container { margin-bottom: 20px; display: flex; gap: 10px; }
+        .no-result {
+            text-align: center; padding: 60px 20px; background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 12px; margin-top: 20px;
         }
+        .btn-edit { color: var(--accent-purple); text-decoration: none; font-size: 14px; font-weight: bold; }
 
+        /* --- 8. Footer (恢復你的完整版 CSS) --- */
+        .site-footer {
+            background: #080101; border-top: 1px solid var(--border-color); padding: 40px;
+            display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 40px;
+            width: 100%; z-index: 10; flex-shrink: 0;
+        }
         .footer-brand { display: flex; align-items: center; gap: 15px; font-size: 24px; font-weight: bold; color: #fff; min-width: 200px; }
         .toggle-icon { width: 40px; height: 20px; background: #fff; border-radius: 20px; position: relative; }
         .footer-links { display: flex; gap: 80px; flex-wrap: wrap; }
@@ -152,29 +132,25 @@
 <body>
 
 <div class="app-wrapper">
-
     <aside class="sidebar">
         <div class="logo-area" onclick="switchTab('dashboard')">
-            <div class="logo-icon"></div> SELLER CENTER
+            <div class="logo-icon"></div> KARSHOP SELLER
         </div>
-
         <div class="nav-title">管理 Menu</div>
-        <div class="nav-item active" onclick="switchTab('dashboard')">儀表板 Dashboard</div>
-        <div class="nav-item" onclick="switchTab('products')">商品列表 Products</div>
-        <div class="nav-item" onclick="switchTab('orders')">訂單列表 Orders</div>
+        <div class="nav-item" id="nav-dashboard" onclick="switchTab('dashboard')">儀表板 Dashboard</div>
+        <div class="nav-item" id="nav-products" onclick="switchTab('products')">商品列表 Products</div>
+        <div class="nav-item" id="nav-orders" onclick="switchTab('orders')">訂單列表 Orders</div>
     </aside>
 
     <main class="main-content">
         <header class="top-bar">
             <div class="page-title">賣家中心</div>
-
             <div class="user-profile-container" id="userTrigger">
                 <div class="user-profile">
                     <div class="user-avatar"></div>
                     <span>賣家帳號</span>
                     <span style="font-size:10px; color:#aaa;">▼</span>
                 </div>
-
                 <div class="dropdown-menu" id="userDropdown">
                     <a href="#" class="dropdown-item">個人資料</a>
                     <a href="#" class="dropdown-item" style="color: var(--accent-purple);">切換為會員</a>
@@ -184,8 +160,7 @@
         </header>
 
         <div class="content-scroll-area">
-
-            <div id="view-dashboard" class="view-section active">
+            <div id="view-dashboard" class="view-section">
                 <div class="stats-grid">
                     <div class="stat-card" onclick="switchTab('orders')">
                         <div>處理中訂單</div>
@@ -193,9 +168,9 @@
                         <div style="font-size:12px; color:#aaa;">需盡快出貨</div>
                     </div>
                     <div class="stat-card" onclick="switchTab('products')">
-                        <div>待上架商品</div>
-                        <div class="stat-value color-yellow">0</div>
-                        <div style="font-size:12px; color:#aaa;">庫存充足</div>
+                        <div>上架中商品</div>
+                        <div class="stat-value" style="color: var(--success-green);" th:text="${activeProductCount}">0</div>
+                        <div style="font-size:12px; color:#aaa;">目前前台可見</div>
                     </div>
                     <div class="stat-card">
                         <div>總訂單數</div>
@@ -205,69 +180,89 @@
             </div>
 
             <div id="view-products" class="view-section">
-                <h2 style="margin-bottom:20px;">商品庫存列表</h2>
-                <div style="margin: 20px 0; display: flex; justify-content: flex-end;">
-                    <a th:href="@{/product/addProduct}"
-                       style="background-color: #6200ea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                        + 新增商品上架
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom:20px;">
+                    <h2>商品庫存列表</h2>
+                    <a th:href="@{/product/addProduct}" style="background: var(--accent-purple); color: white; padding: 10px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                        + 新增商品
                     </a>
                 </div>
-                <table class="data-table">
+
+                <div class="search-bar-container">
+                    <form method="post" th:action="@{/product/searchForSeller}" style="display: flex; gap: 10px; width: 100%;">
+                        <input type="text" name="keyword" th:value="${keyword}" placeholder="搜尋商品名稱..."
+                               style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: #0a0a0a; color: white;">
+                        <button type="submit" style="padding: 10px 20px; background: var(--accent-purple); color: white; border: none; border-radius: 6px; cursor: pointer;">
+                            <i class="fas fa-search"></i> 搜尋
+                        </button>
+                        <a th:href="@{/product/dashboard(tab='products')}" style="padding: 10px 20px; background: rgba(255,255,255,0.1); color: #ccc; text-decoration: none; border-radius: 6px; display: flex; align-items: center;">
+                            清除
+                        </a>
+                    </form>
+                </div>
+
+                <table class="data-table" th:if="${not #lists.isEmpty(productList)}">
                     <thead>
-                    <tr><th>ID</th><th>名稱</th><th>圖片</th><th>狀態</th><th>價格<th>評價</th><th>庫存</th><th>操作</th></tr>
+                    <tr><th>ID</th><th>名稱</th><th>圖片</th><th>狀態</th><th>價格</th><th>庫存</th><th>操作</th></tr>
                     </thead>
                     <tbody>
                     <tr th:each="product : ${productList}">
-                        <td th:text="${product.prodNo}">2001</td>
-                        <td style="font-weight:bold;" th:text="${product.prodName}">範例商品-真皮方向盤</td>
-                        <td><img th:src="@{/product/displayMain(prodNo=${product.prodNo})}"
-                        width="60" height="60" style="object-fit: cover; border-radius: 5px;"></td>
+                        <td th:text="${product.prodNo}"></td>
+                        <td style="font-weight:bold;" th:text="${product.prodName}"></td>
+                        <td><img th:src="@{/product/displayMain(prodNo=${product.prodNo})}" width="50" height="50" style="object-fit: cover; border-radius: 4px;"></td>
                         <td>
-                            <span th:class="${product.prodStatus == '上架中' ? 'status-badge status-Active' : 'status-badge status-Violation'}"
-                                  th:text="${product.prodStatus}">
-                                上架中
-                            </span>
+                                <span th:class="${product.prodStatus == '上架中' ? 'status-badge status-Active' : 'status-badge status-Violation'}"
+                                      th:text="${product.prodStatus}"></span>
                         </td>
-                        <td th:text="${'$' + product.prodPrice}">$880</td>
-                        <td th:text="${product.ratingAmount > 0 ? (product.ratingStar/product.ratingAmount) + '⭐': '尚無評價'}">5⭐</td>
-                        <td th:text="${product.prodQty}">100</td>
-                        <td>
-                            <a th:href="@{/product/getOne_For_Update(prodNo=${product.prodNo})}" class="btn-edit">
-                                <i class="fas fa-edit"></i> 編輯
-                            </a>
-                        </td>
+                        <td th:text="${'$' + product.prodPrice}"></td>
+                        <td th:text="${product.prodQty}"></td>
+                        <td><a th:href="@{/product/getOne_For_Update(prodNo=${product.prodNo})}" class="btn-edit">編輯</a></td>
                     </tr>
                     </tbody>
                 </table>
+
+                <div class="no-result" th:if="${#lists.isEmpty(productList)}">
+                    <div class="icon-box">🔍</div>
+                    <h3>找不到相關商品</h3>
+                    <p>試試其他關鍵字，或是點擊清除回到列表。</p>
+                </div>
             </div>
 
             <div id="view-orders" class="view-section">
                 <h2 style="margin-bottom:20px;">訂單管理列表</h2>
-                <table class="data-table">
+                <table class="data-table" th:if="${not #lists.isEmpty(ordList)}">
                     <thead>
-                    <tr><th>訂單號</th><th>客戶</th><th>狀態</th><th>金額</th></tr>
+                    <tr><th>訂單號</th><th>買家ID</th><th>下單時間</th><th>狀態</th><th>金額</th></tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td>400</td>
-                        <td>王小明</td>
-                        <td>
-                            <span class="status-badge status-Done">已完成</span>
+                    <tr th:each="ord : ${ordList}">
+                        <td th:text="${ord.ordNo}"></td>
+                        <td th:text="${ord.memberNo}"></td>
+                        <td th:text="${#dates.format(ord.ordDate, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td th:switch="${ord.ordStatus}">
+                            <span th:case="0" class="status-badge status-New">新訂單</span>
+                            <span th:case="1" class="status-badge status-New">已付款</span>
+                            <span th:case="2" class="status-badge status-New">待出貨</span>
+                            <span th:case="3" class="status-badge status-Done">已完成</span>
+                            <span th:case="4" class="status-badge status-Violation">已取消</span>
                         </td>
-                        <td style="color:#00e676;">$1100</td>
+                        <td th:text="${'$ ' + #numbers.formatInteger(ord.ordPrice, 1, 'COMMA')}" style="color:var(--success-green); font-weight:bold;"></td>
                     </tr>
                     </tbody>
                 </table>
+                <div class="no-result" th:if="${#lists.isEmpty(ordList)}">
+                    <div class="icon-box">📦</div>
+                    <h3>目前沒有訂單</h3>
+                </div>
             </div>
-
         </div>
     </main>
-</div> <footer class="site-footer">
+</div>
+
+<footer class="site-footer">
     <div class="footer-brand">
         <div class="toggle-icon"></div>
         <span>卡爾夏</span>
     </div>
-
     <div class="footer-links">
         <div class="footer-col">
             <h4>Shop</h4>
@@ -290,32 +285,35 @@
     </div>
 </footer>
 
-<script>
-    // 切換頁籤功能
+<script th:inline="javascript">
+    // 1. 切換分頁核心邏輯
     function switchTab(tabId) {
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        // 簡單處理 active class
-        event.currentTarget.classList.add('active');
-        document.getElementById('view-' + tabId).classList.add('active');
+
+        const targetView = document.getElementById('view-' + tabId);
+        const targetNav = document.getElementById('nav-' + tabId);
+
+        if (targetView) targetView.classList.add('active');
+        if (targetNav) targetNav.classList.add('active');
     }
 
-    // 修改 H: 下拉選單控制邏輯
+    // 2. 頁面載入自動判斷停留分頁
+    document.addEventListener("DOMContentLoaded", function() {
+        /*[# th:if="${activeTab != null}"]*/
+        var currentTab = /*[[${activeTab}]]*/ 'dashboard';
+        /*[/]*/
+        /*[# th:if="${activeTab == null}"]*/
+        var currentTab = 'dashboard';
+        /*[/]*/
+        switchTab(currentTab);
+    });
+
+    // 3. 使用者選單
     const userTrigger = document.getElementById('userTrigger');
     const userDropdown = document.getElementById('userDropdown');
-
-    // 點擊切換顯示
-    userTrigger.addEventListener('click', function(e) {
-        e.stopPropagation(); // 防止事件冒泡
-        userDropdown.classList.toggle('show');
-    });
-
-    // 點擊外部關閉選單
-    document.addEventListener('click', function(e) {
-        if (!userTrigger.contains(e.target)) {
-            userDropdown.classList.remove('show');
-        }
-    });
+    userTrigger.onclick = (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); };
+    window.onclick = () => userDropdown.classList.remove('show');
 </script>
 </body>
 </html>
