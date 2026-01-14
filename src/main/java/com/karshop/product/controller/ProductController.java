@@ -1,6 +1,6 @@
 package com.karshop.product.controller;
 
-import com.karshop.product.model.ProductRepository;
+
 import com.karshop.product.model.ProductService;
 import com.karshop.product.model.ProductVO;
 import com.karshop.productimage.model.ProductImageRepository;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.ui.Model;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -157,13 +156,36 @@ public class ProductController {
         return "seller/listOneProduct";
     }
 
+    @PostMapping("/searchForSeller")
+    public String searchForSeller(@RequestParam (value = "keyword")  String keyword, ModelMap model){
+
+        Integer sellerNo = 101;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return sellerDashboard("products", model);
+        }
+        List<ProductVO> searchResult = productService.getProductBySearchForSeller(sellerNo, keyword);
+
+        model.addAttribute("activeTab", "products");
+        model.addAttribute("productList", searchResult);
+        return "seller/seller_index";
+    }
+
     @GetMapping("/dashboard")
-    public String sellerDashboard(ModelMap model) {
+    public String sellerDashboard(@RequestParam(value = "tab", defaultValue = "dashboard") String tab, ModelMap model) {
         Integer sellerNo = 101;
 
         List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
 
+        int activeProductCount = 0;
+        for(ProductVO productVO : productList){
+            if(productVO.getProdStatus().equals("上架中")){
+                activeProductCount++;
+            }
+        }
+
+        model.addAttribute("activeProductCount", activeProductCount);
         model.addAttribute("productList", productList);
+        model.addAttribute("activeTab", tab);
 
         return "seller/seller_index";
     }
