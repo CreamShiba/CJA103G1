@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/back-end/admin_index.css" th:href="@{/css/back-end/admin_index.css}">
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"></div>
+                <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="menu-item has-submenu"><!-- 改下拉選單加"has-submenu" -->
+                        <a class="submenu-toggle">
+                            <span><i class="fas fa-users-cog"></i> 自訂</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="#">自訂</a></li>
+                            <li><a href="#">自訂</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="submenu-toggle">
+                            <span><i class="fas fa-users-cog"></i> 自訂</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="#">自訂</a></li>
+                            <li><a href="#">自訂</a></li>
+                        </ul>
+                    </li>
+                    
+                    <li class="menu-item has-submenu open">
+                        <a class="submenu-toggle">
+                            <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="#">會員帳號管理</a></li><!--a標籤加class="active"表示已選擇-->
+                            <li><a href="#">管理員帳號管理</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item has-submenu">
+                        <a class="submenu-toggle">
+                            <span><i class="fas fa-users-cog"></i> 自訂</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="#">自訂</a></li>
+                            <li><a href="#">自訂</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item has-submenu">
+                        <a class="submenu-toggle">
+                            <span><i class="fas fa-users-cog"></i> 自訂</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="#">自訂</a></li>
+                            <li><a href="#">自訂</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#"><i class="fas fa-star"></i> 自訂</a>
+                    </li>
+                    <li class="menu-item">
+                        <a href="#"><i class="fas fa-headset"></i> 自訂</a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#">登出 (Logout)</a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <h2 class="page-title">頁首頭</h2>
+                <div class="user-profile">
+                    <span>Admin</span>
+                    <div class="avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </header>
+        </main>
+    </div>
+
+    <script src="../../static/js/back-end/admin_index.js" th:src="@{/js/back-end/admin_index.js}"></script>
+</body>
+</html>
