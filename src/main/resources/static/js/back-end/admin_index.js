@@ -1,4 +1,4 @@
-// admin-index.js
+// index.js
 // 側邊欄摺疊邏輯 (保留原功能)
 const menuItems = document.querySelectorAll('.has-submenu .submenu-toggle');
 menuItems.forEach(item => {
