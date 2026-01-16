@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>提交成功</title>
+  <style>
+    body { background-color: #1a1a1a; color: white; text-align: center; font-family: sans-serif; padding-top: 100px; }
+    .success-icon { font-size: 80px; color: #00c853; margin-bottom: 20px; }
+    .no-badge { background-color: #e60000; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+    a { color: #e60000; text-decoration: none; border: 1px solid #e60000; padding: 10px 20px; border-radius: 5px; transition: 0.3s; }
+    a:hover { background-color: #e60000; color: white; }
+  </style>
+</head>
+<body>
+<div class="success-icon">✔</div>
+<h1>檢舉已成功送出！</h1>
+<p>您的檢舉編號為：<span class="no-badge" th:text="${reportNo}"></span></p>
+<p style="color: #888;">管理員將會在 24 小時內處理您的案件。</p>
+<br><br>
+<a th:href="@{/reports/add}">返回檢舉頁面</a>
+</body>
+</html>

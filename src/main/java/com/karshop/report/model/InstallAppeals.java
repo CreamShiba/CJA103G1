@@ -1,18 +1,21 @@
-package com.karshop.report.model;
+package com.karshop.report.model; //路徑
 
-import lombok.Data;
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import lombok.Data; //使用 Lombok @Data 標籤，自動產生 Getter/Setter 等
+import jakarta.persistence.*; // 連結 JPA API，讓 @Id 等標籤可以對應到資料庫表格
+import java.time.LocalDateTime; // Java 的日期時間處理工具
 
-@Entity
-@Table(name = "install_appeals")
-@Data
+@Entity //告訴Spring Boot這不只是一個普通類別,要連結到資料庫的一張表讓 JPA (Java Persistence API) 自動幫我管理這個物件，
+        //讓我不用寫 SQL 指令，就能直接用 Java 物件來存取資料。
+@Table(name = "install_appeals") //告訴Java要對應到哪一張表
+@Data //幫我寫好get set方法
 public class InstallAppeals {
 
-    @Id
+    @Id //主鍵(PK),身分證字號
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //告訴資料庫「這個號碼請幫我自動生成，不需要我手動輸入」。
+    // 作用：這對應到 SQL 中的 AUTO_INCREMENT。
     @Column(name = "appeals_no")
-    private Integer appealsNo;
+    private Integer appealsNo; //案件編號
 
     @Column(name = "install_order_no", nullable = false)
     private Integer installOrderNo; //安裝訂單編號
