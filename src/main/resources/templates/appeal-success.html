@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>KarShop | 提交成功</title>
+    <link rel="stylesheet" th:href="@{/front-end/css/index.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body { background-color: #000000; color: #ffffff; font-family: 'Arial', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .success-card { background-color: #111; border: 2px solid #8b0000; padding: 50px; text-align: center; max-width: 500px; width: 90%; }
+        .icon-box { color: #8b0000; font-size: 4rem; margin-bottom: 20px; }
+        .btn-return { background-color: #8b0000; color: white; border: none; padding: 12px 30px; text-decoration: none; font-weight: bold; transition: 0.3s; display: inline-block; margin-top: 30px; }
+        .btn-return:hover { background-color: #ff0000; color: white; transform: scale(1.05); }
+        .order-info { color: #8b0000; font-family: 'Courier New', Courier, monospace; font-size: 1.2rem; font-weight: bold; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="success-card">
+    <div class="icon-box">✓</div>
+    <h1 style="font-weight: 900; letter-spacing: 2px;">SUCCESS <span style="color: #8b0000;">/</span> 提交成功</h1>
+    <p class="text-muted mt-3">您的汽車安裝申訴已成功送出，專員將於 24 小時內聯繫您。</p>
+
+    <div class="mt-4">
+        <p class="mb-0" style="font-size: 0.8rem; text-transform: uppercase; color: #666;">申訴訂單編號</p>
+        <div class="order-info" th:text="${orderNo}">#000000</div>
+    </div>
+
+    <a href="/appeals/add" class="btn-return">返回申訴頁面 RETURN</a>
+</div>
+
+</body>
+</html>

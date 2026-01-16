@@ -1,12 +1,12 @@
 package com.karshop.report.service;
 
-import com.karshop.report.model.InstallAppeals;
-import com.karshop.report.repository.InstallAppealsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.karshop.report.model.InstallAppeals; //引用model裡的InstallAppeals
+import com.karshop.report.repository.InstallAppealsRepository; //引用repository裡的InstallAppeals
+import org.springframework.beans.factory.annotation.Autowired; //引入自動注入，用來將 Repository 自動裝配進這個 Service 中。
+import org.springframework.stereotype.Service; //標記這是一個服務層。讓 Spring Boot 知道這個類別是用來寫邏輯、算資料的地方。
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.LocalDateTime; //引入時間工具，用來在存檔時紀錄當下的日期與時間。
+import java.util.List; //引入清單工具，用來裝載從資料庫抓回來的多筆申訴紀錄。
 
 @Service
 public class InstallAppealsService {
