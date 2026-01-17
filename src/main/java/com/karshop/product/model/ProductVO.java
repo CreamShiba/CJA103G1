@@ -1,15 +1,17 @@
 package com.karshop.product.model;
 
+import com.karshop.orddetail.model.OrdDetailVO;
 import com.karshop.productimage.model.ProductImageVO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
 
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
 @Table(name = "product")
-public class ProductVO {
+public class ProductVO implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,6 +55,9 @@ public class ProductVO {
 
     @OneToMany(mappedBy ="product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProductImageVO> productImage;
+
+    @OneToMany(mappedBy ="product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<OrdDetailVO> orderDetail;
 
     public Integer getProdNo() {
         return prodNo;
@@ -140,5 +145,13 @@ public class ProductVO {
 
     public void setProdQty(Integer prodQty) {
         this.prodQty = prodQty;
+    }
+
+    public List<OrdDetailVO> getOrderDetail() {
+        return orderDetail;
+    }
+
+    public void setOrderDetail(List<OrdDetailVO> orderDetail) {
+        this.orderDetail = orderDetail;
     }
 }

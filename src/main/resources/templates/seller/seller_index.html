@@ -112,6 +112,42 @@
         }
         .btn-edit { color: var(--accent-purple); text-decoration: none; font-size: 14px; font-weight: bold; }
 
+        /* Toggle Switch 樣式 */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            text-decoration: none; /* 去除連結底線 */
+        }
+
+        /* 軌道背景 */
+        .toggle-track {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 34px;
+            transition: .4s;
+        }
+
+        /* 圓形按鈕 */
+        .toggle-thumb {
+            position: absolute;
+            height: 18px; width: 18px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: .4s;
+        }
+
+        /* 狀態：開啟 (綠色) */
+        .toggle-active .toggle-track { background-color: #00e676; }
+        .toggle-active .toggle-thumb { transform: translateX(20px); }
+
+        /* 狀態：關閉 (灰色) */
+        .toggle-inactive .toggle-track { background-color: #ccc; }
+        /* 如果是深色模式背景，灰色可能要深一點或亮一點，看你喜好 */
+        .toggle-inactive .toggle-track { background-color: #444; }
+
         /* --- 8. Footer (恢復你的完整版 CSS) --- */
         .site-footer {
             background: #080101; border-top: 1px solid var(--border-color); padding: 40px;
@@ -134,7 +170,7 @@
 <div class="app-wrapper">
     <aside class="sidebar">
         <div class="logo-area" onclick="switchTab('dashboard')">
-            <div class="logo-icon"></div> KARSHOP SELLER
+            <div class="logo-icon"></div> SELLER CENTER
         </div>
         <div class="nav-title">管理 Menu</div>
         <div class="nav-item" id="nav-dashboard" onclick="switchTab('dashboard')">儀表板 Dashboard</div>
@@ -201,24 +237,40 @@
                 </div>
 
                 <table class="data-table" th:if="${not #lists.isEmpty(productList)}">
-                    <thead>
-                    <tr><th>ID</th><th>名稱</th><th>圖片</th><th>狀態</th><th>價格</th><th>庫存</th><th>操作</th></tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="product : ${productList}">
-                        <td th:text="${product.prodNo}"></td>
-                        <td style="font-weight:bold;" th:text="${product.prodName}"></td>
-                        <td><img th:src="@{/product/displayMain(prodNo=${product.prodNo})}" width="50" height="50" style="object-fit: cover; border-radius: 4px;"></td>
-                        <td>
-                                <span th:class="${product.prodStatus == '上架中' ? 'status-badge status-Active' : 'status-badge status-Violation'}"
-                                      th:text="${product.prodStatus}"></span>
-                        </td>
-                        <td th:text="${'$' + product.prodPrice}"></td>
-                        <td th:text="${product.prodQty}"></td>
-                        <td><a th:href="@{/product/getOne_For_Update(prodNo=${product.prodNo})}" class="btn-edit">編輯</a></td>
-                    </tr>
-                    </tbody>
-                </table>
+                <thead>
+                <tr><th>ID</th><th>名稱</th><th>圖片</th><th>狀態</th><th>價格</th><th>庫存</th><th>操作</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${productList}">
+                    <td th:text="${product.prodNo}"></td>
+                    <td style="font-weight:bold;" th:text="${product.prodName}"></td>
+                    <td><img th:src="@{/product/displayMain(prodNo=${product.prodNo})}" width="50" height="50" style="object-fit: cover; border-radius: 4px;"></td>
+                    <td>
+                        <a th:if="${product.prodStatus == '上架中'}"
+                           th:href="@{/product/updateStatus(prodNo=${product.prodNo}, prodStatus='下架中')}"
+                           class="toggle-switch toggle-active"
+                           title="點擊下架">
+                            <span class="toggle-track"></span>
+                            <span class="toggle-thumb"></span>
+                        </a>
+
+                        <a th:unless="${product.prodStatus == '上架中'}"
+                           th:href="@{/product/updateStatus(prodNo=${product.prodNo}, prodStatus='上架中')}"
+                           class="toggle-switch toggle-inactive"
+                           title="點擊上架">
+                            <span class="toggle-track"></span>
+                            <span class="toggle-thumb"></span>
+                        </a>
+
+                        <span style="margin-left: 8px; font-size: 13px; color: #aaa;"
+                              th:text="${product.prodStatus}">狀態</span>
+                    </td>
+                    <td th:text="${'$' + #numbers.formatInteger(product.prodPrice, 1, 'COMMA')}"></td>
+                    <td th:text="${product.prodQty}"></td>
+                    <td><a th:href="@{/product/getOne_For_Update(prodNo=${product.prodNo})}" class="btn-edit">編輯</a></td>
+                </tr>
+                </tbody>
+            </table>
 
                 <div class="no-result" th:if="${#lists.isEmpty(productList)}">
                     <div class="icon-box">🔍</div>
@@ -228,34 +280,225 @@
             </div>
 
             <div id="view-orders" class="view-section">
-                <h2 style="margin-bottom:20px;">訂單管理列表</h2>
+
+                <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+
+                    <h3 style="color: #fff; margin: 0;">訂單管理</h3>
+
+                    <form th:action="@{/product/dashboard}" method="get" style="display: flex; gap: 10px;">
+
+                        <input type="hidden" name="tab" value="orders">
+
+                        <div style="position: relative;">
+                            <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
+                            <input type="text" name="keyword"
+                                   th:value="${keyword}"
+                                   placeholder="搜尋訂單號或姓名..."
+                                   style="padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; width: 250px; outline: none;">
+                        </div>
+
+                        <button type="submit"
+                                style="padding: 8px 20px; border-radius: 20px; border: none; background: var(--accent-purple); color: white; cursor: pointer; font-weight: bold;">
+                            搜尋
+                        </button>
+
+                        <a th:if="${keyword != null and keyword != ''}"
+                           th:href="@{/product/dashboard(tab='orders')}"
+                           style="padding: 8px 15px; border-radius: 20px; border: 1px solid #444; background: transparent; color: #aaa; text-decoration: none; display: flex; align-items: center;">
+                            清除
+                        </a>
+                    </form>
+                </div>
+
                 <table class="data-table" th:if="${not #lists.isEmpty(ordList)}">
                     <thead>
-                    <tr><th>訂單號</th><th>買家ID</th><th>下單時間</th><th>狀態</th><th>金額</th></tr>
+                    <tr>
+                        <th style="width: 15%;">訂單資訊</th>
+
+                        <th style="width: 18%;">配送詳情</th>
+
+                        <th style="width: 12%;">狀態概覽</th>
+
+                        <th style="width: 10%;">金額</th>
+
+                        <th>操作</th>
+                    </tr>
                     </thead>
                     <tbody>
                     <tr th:each="ord : ${ordList}">
-                        <td th:text="${ord.ordNo}"></td>
-                        <td th:text="${ord.memberNo}"></td>
-                        <td th:text="${#dates.format(ord.ordDate, 'yyyy-MM-dd HH:mm')}"></td>
-                        <td th:switch="${ord.ordStatus}">
-                            <span th:case="0" class="status-badge status-New">新訂單</span>
-                            <span th:case="1" class="status-badge status-New">已付款</span>
-                            <span th:case="2" class="status-badge status-New">待出貨</span>
-                            <span th:case="3" class="status-badge status-Done">已完成</span>
-                            <span th:case="4" class="status-badge status-Violation">已取消</span>
+
+                        <td>
+                            <div style="font-weight: bold; font-size: 15px; color: #fff; margin-bottom: 4px;"
+                                 th:text="'#' + ${ord.ordNo}"></div>
+                            <div style="font-size: 12px; color: #888;">
+                                <i class="far fa-clock"></i> <span th:text="${#temporals.format(ord.ordDate, 'yyyy-MM-dd HH:mm')}"></span>
+                            </div>
                         </td>
-                        <td th:text="${'$ ' + #numbers.formatInteger(ord.ordPrice, 1, 'COMMA')}" style="color:var(--success-green); font-weight:bold;"></td>
+
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                <div style="width: 24px; height: 24px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-user" style="color: #aaa; font-size: 12px;"></i>
+                                </div>
+                                <span th:text="${ord.ordRecipient}" style="font-weight: 500; color: #eee;"></span>
+                            </div>
+                            <div style="font-size: 12px; color: #aaa; display: flex; align-items: center; gap: 5px;">
+                                <i class="fas fa-truck" style="font-size: 10px;"></i>
+                                <span th:text="${ord.ordShipMethod}"></span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
+                    <span th:if="${ord.ordPaymentMethod == '貨到付款'}"
+                          style="font-size: 11px; color: #ffa726; border: 1px solid #ffa726; padding: 1px 5px; border-radius: 4px;">
+                        貨到付款
+                    </span>
+                                <span th:if="${ord.ordPaymentMethod != '貨到付款' and ord.ordPaymentStatus == '已付款'}"
+                                      style="font-size: 11px; color: #00e676; background: rgba(0,230,118,0.1); padding: 1px 6px; border-radius: 4px;">
+                        ✔ 已付款
+                    </span>
+                                <span th:if="${ord.ordPaymentMethod != '貨到付款' and ord.ordPaymentStatus != '已付款'}"
+                                      style="font-size: 11px; color: #ff5252; background: rgba(255,82,82,0.1); padding: 1px 6px; border-radius: 4px;">
+                        ✘ 未付款
+                    </span>
+                                <span th:class="${
+                        ord.ordStatus == '待出貨' ? 'status-badge status-Processing' :
+                        (ord.ordStatus == '已出貨' ? 'status-badge status-Active' :
+                        (ord.ordStatus == '已完成' ? 'status-badge status-Done' :
+                        'status-badge status-Violation'))
+                    }"
+                                      th:text="${ord.ordStatus}"
+                                      style="font-size: 12px;">
+                    </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div th:text="${'$' + #numbers.formatInteger(ord.sellerNetIncome, 1, 'COMMA')}"
+                                 style="color: var(--success-green); font-weight: bold; font-size: 16px;">
+                            </div>
+
+                            <div style="font-size: 11px; color: #888; margin-top: 4px; display: flex; flex-direction: column;">
+                                <span>
+                                    總額: <span th:text="${'$' + #numbers.formatInteger(ord.ordPrice, 1, 'COMMA')}"></span>
+                                </span>
+                                <span style="color: #ff5252;">
+                                    平台抽成: -<span th:text="${'$' + #numbers.formatInteger(ord.platformFee, 1, 'COMMA')}"></span>
+                                </span>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+
+                                <form th:if="${ord.ordStatus == '待出貨' and (ord.ordPaymentStatus == '已付款' or ord.ordPaymentMethod == '貨到付款')}"
+                                      th:action="@{/ord/ship}" method="post"
+                                      style="display: flex; flex-direction: column; gap: 6px;">
+
+                                    <input type="hidden" name="ordNo" th:value="${ord.ordNo}">
+
+                                    <input type="text" name="ordShipNo" required placeholder="輸入物流單號"
+                                           style="width: 100%; padding: 6px 10px; border-radius: 4px; border: 1px solid #444; background: #222; color: white; font-size: 13px;">
+
+                                    <button type="submit"
+                                            style="width: 100%; background: var(--accent-purple); color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;">
+                                        確認出貨
+                                    </button>
+                                </form>
+
+                                <div th:if="${ord.ordStatus == '待出貨' and ord.ordPaymentStatus != '已付款' and ord.ordPaymentMethod != '貨到付款'}"
+                                     style="color: #ff5252; font-size: 12px; display: flex; align-items: center; gap: 5px; padding: 4px 0;">
+                                    <i class="fas fa-exclamation-triangle"></i> 等待買家付款
+                                </div>
+
+                                <button type="button"
+                                        th:if="${ord.ordStatus == '待出貨'}"
+                                        th:onclick="'openCancelModal(' + ${ord.ordNo} + ')'"
+                                        style="width: 100%; background: transparent; border: 1px solid #ff5252; color: #ff5252; padding: 5px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.3s;">
+                                    <i class="fas fa-ban"></i> 取消訂單
+                                </button>
+
+                                <div th:if="${ord.ordStatus != '待出貨'}">
+                                    <div th:if="${ord.ordStatus == '已出貨' or ord.ordStatus == '已完成'}"
+                                         style="font-size: 12px; color: #888; margin-bottom: 5px;">
+                                        單號: <span th:text="${ord.ordShipNo}" style="color: #ccc;"></span>
+                                    </div>
+                                    <a th:href="@{/ord/getOneOrder(ordNo=${ord.ordNo})}"
+                                       style="display:block; text-align:center; font-size: 13px; color: #aaa; text-decoration: none; border: 1px solid #444; padding: 4px; border-radius: 4px;">
+                                        查看詳情
+                                    </a>
+                                </div>
+
+                            </div>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
                 <div class="no-result" th:if="${#lists.isEmpty(ordList)}">
-                    <div class="icon-box">📦</div>
-                    <h3>目前沒有訂單</h3>
+
+                    <div th:if="${keyword != null and keyword != ''}">
+                        <div class="icon-box" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 style="margin-bottom: 10px;">找不到符合 "<span th:text="${keyword}" style="color: var(--accent-purple);"></span>" 的訂單</h3>
+                        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
+                            請檢查訂單編號或收件人姓名是否正確
+                        </p>
+                        <a th:href="@{/product/dashboard(tab='orders')}"
+                           style="padding: 8px 20px; background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; border-radius: 20px; font-size: 13px; transition: 0.3s;">
+                            <i class="fas fa-undo"></i> 清除搜尋
+                        </a>
+                    </div>
+
+                    <div th:unless="${keyword != null and keyword != ''}">
+                        <div class="icon-box" style="font-size: 40px; margin-bottom: 15px;">📦</div>
+                        <h3 style="margin-bottom: 5px;">目前還沒有訂單</h3>
+                        <p style="color: var(--text-secondary); font-size: 14px;">加油！第一筆訂單就在路上了！</p>
+                    </div>
+
                 </div>
             </div>
         </div>
     </main>
+</div>
+
+<div id="cancelModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+
+    <div style="background: #1e1e1e; width: 400px; padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+
+        <h3 style="color: #fff; margin-bottom: 15px;">確認取消訂單?</h3>
+
+        <form th:action="@{/ord/cancel}" method="post">
+            <input type="hidden" name="ordNo" id="modalOrdNo">
+
+            <p style="color: #aaa; font-size: 14px; margin-bottom: 10px;">請填寫取消原因 (買家將會看到此訊息)：</p>
+
+            <select name="cancelReasonSelect" onchange="updateReason(this)"
+                    style="width: 100%; padding: 8px; margin-bottom: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px;">
+                <option value="">-- 選擇常用原因 --</option>
+                <option value="商品庫存不足">商品庫存不足</option>
+                <option value="買家要求取消">買家要求取消</option>
+                <option value="訂單資訊有誤">訂單資訊有誤</option>
+                <option value="無法配送至該地址">無法配送至該地址</option>
+            </select>
+
+            <textarea name="cancelReason" id="reasonText" required placeholder="或是輸入詳細原因..." rows="3"
+                      style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; resize: none;"></textarea>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                <button type="button" onclick="closeCancelModal()"
+                        style="padding: 8px 16px; background: transparent; border: 1px solid #666; color: #ccc; border-radius: 6px; cursor: pointer;">
+                    再考慮一下
+                </button>
+
+                <button type="submit"
+                        style="padding: 8px 16px; background: #ff5252; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    確認取消
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <footer class="site-footer">
@@ -314,6 +557,34 @@
     const userDropdown = document.getElementById('userDropdown');
     userTrigger.onclick = (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); };
     window.onclick = () => userDropdown.classList.remove('show');
+
+    // 開啟 Modal
+    function openCancelModal(ordNo) {
+        document.getElementById('modalOrdNo').value = ordNo; // 把訂單號填入 hidden input
+        document.getElementById('cancelModal').style.display = 'flex'; // 顯示視窗
+    }
+
+    // 關閉 Modal
+    function closeCancelModal() {
+        document.getElementById('cancelModal').style.display = 'none';
+    }
+
+    // 點擊視窗外部也可以關閉
+    window.onclick = function(event) {
+        var modal = document.getElementById('cancelModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    // 選單連動 Textarea
+    function updateReason(select) {
+        var text = document.getElementById('reasonText');
+        if(select.value !== "") {
+            text.value = select.value;
+        }
+    }
+
 </script>
 </body>
 </html>
