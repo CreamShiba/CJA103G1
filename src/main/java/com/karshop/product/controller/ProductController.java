@@ -1,9 +1,10 @@
 package com.karshop.product.controller;
 
 
+import com.karshop.ord.model.OrdService;
+import com.karshop.ord.model.OrdVO;
 import com.karshop.product.model.ProductService;
 import com.karshop.product.model.ProductVO;
-import com.karshop.productimage.model.ProductImageRepository;
 import com.karshop.productimage.model.ProductImageService;
 import com.karshop.productimage.model.ProductImageVO;
 import jakarta.persistence.EntityManager;
@@ -27,6 +28,9 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private OrdService ordService;
 
     @Autowired
     private ProductImageService productImageService;
@@ -152,16 +156,28 @@ public class ProductController {
             System.out.println("最終顯示圖片張數: " + finalProductVO.getProductImage().size());
         }
 
-        model.addAttribute("productVO", finalProductVO); // 把最後這個完整的物件傳給頁面
+        model.addAttribute("productVO", finalProductVO);
         return "seller/listOneProduct";
     }
+
+    @GetMapping("/updateStatus")
+    public String updateStatus(@RequestParam(value = "prodNo") Integer prodNo,
+                               @RequestParam(value = "prodStatus") String prodStatus){
+
+        ProductVO productVO = productService.getOneProduct(prodNo);
+        productVO.setProdStatus(prodStatus);
+        productService.updateProduct(productVO);
+
+        return "redirect:/product/dashboard?tab=products";
+    }
+
 
     @PostMapping("/searchForSeller")
     public String searchForSeller(@RequestParam (value = "keyword")  String keyword, ModelMap model){
 
         Integer sellerNo = 101;
         if (keyword == null || keyword.trim().isEmpty()) {
-            return sellerDashboard("products", model);
+            return sellerDashboard("products", "", model);
         }
         List<ProductVO> searchResult = productService.getProductBySearchForSeller(sellerNo, keyword);
 
@@ -171,8 +187,16 @@ public class ProductController {
     }
 
     @GetMapping("/dashboard")
-    public String sellerDashboard(@RequestParam(value = "tab", defaultValue = "dashboard") String tab, ModelMap model) {
+    public String sellerDashboard(@RequestParam(value = "tab", defaultValue = "dashboard") String tab,
+                                  @RequestParam(value = "keyword", required = false) String keyword  ,ModelMap model) {
         Integer sellerNo = 101;
+
+        List<OrdVO> ordList ;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            ordList = ordService.searchOrdersForSeller(sellerNo, keyword);
+        }else{
+            ordList = ordService.getOrdBySeller(sellerNo);
+        }
 
         List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
 
@@ -184,6 +208,8 @@ public class ProductController {
         }
 
         model.addAttribute("activeProductCount", activeProductCount);
+        model.addAttribute("ordList", ordList);
+        model.addAttribute("keyword", keyword);
         model.addAttribute("productList", productList);
         model.addAttribute("activeTab", tab);
 

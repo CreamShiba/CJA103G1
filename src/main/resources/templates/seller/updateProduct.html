@@ -150,7 +150,7 @@
 <body>
 
 <header class="top-bar">
-    <div class="brand-area" onclick="location.href='/seller/index'" style="cursor: pointer;">
+    <div class="brand-area" th:onclick="|location.href='@{/product/dashboard(tab=products)}'|" style="cursor: pointer;">
         <div class="logo-icon"></div> SELLER CENTER
     </div>
     <div class="user-profile">
@@ -164,7 +164,7 @@
     <div class="form-card">
         <div class="form-header">
             <h2>修改商品 Edit Product</h2>
-            <a th:href="@{/product/dashboard}" class="btn-back">← 返回列表</a>
+            <a th:href="@{/product/dashboard(tab=products)}" class="btn-back">← 返回列表</a>
         </div>
 
         <form th:action="@{/product/update}" th:object="${productVO}" method="post" enctype="multipart/form-data">
