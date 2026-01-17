@@ -31,7 +31,7 @@ public class InstallAppealsController {
     // 網址：http://localhost:8080/appeals/add
     @GetMapping("/add")
     public String showAddPage() {
-        return "add-appeal"; // 這會去 templates 資料夾找 add-appeal.html
+        return "templates-report/add-appeal"; // 這會去 templates 資料夾找 add-appeal.html
     }
 
     // 3. 處理表單提交
@@ -50,6 +50,6 @@ public class InstallAppealsController {
 
         // 這裡不要用 redirect，直接 return "appeal-success"
         // 這樣瀏覽器才會顯示 templates/appeal-success.html
-        return "appeal-success";
+        return "templates-report/appeal-report";
     }
 }
