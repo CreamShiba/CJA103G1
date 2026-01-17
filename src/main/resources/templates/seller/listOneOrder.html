@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>訂單詳情 | 賣家中心</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* --- 1. 核心變數 (完全套用 seller_index 的設定) --- */
+        :root {
+            --bg-dark-top: #050505;
+            --bg-dark-bottom: #1a0505;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-purple: #7d5fff;
+            --card-bg: rgba(255, 255, 255, 0.05); /* 關鍵：半透明背景 */
+            --border-color: rgba(255, 255, 255, 0.1);
+            --danger-red: #ff5252;
+            --success-green: #00e676;
+            --warning-orange: #ffa726; /* 補上這個給待出貨用 */
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+
+        /* --- 2. Body 設定 (關鍵：背景漸層) --- */
+        body {
+            /* 使用線性漸層，營造深邃感 */
+            background: linear-gradient(180deg, var(--bg-dark-top) 0%, var(--bg-dark-bottom) 100%);
+            color: var(--text-primary);
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh; /* 確保漸層拉滿整個螢幕 */
+            background-attachment: fixed; /* 讓背景固定，滾動時更有質感 */
+        }
+
+        .container { width: 100%; max-width: 1000px; }
+
+        /* --- Header --- */
+        .header-section {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 30px; padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .btn-back {
+            color: var(--text-secondary); text-decoration: none; font-size: 14px;
+            display: flex; align-items: center; gap: 8px; transition: 0.3s;
+            padding: 8px 12px; border-radius: 6px;
+            background: rgba(255,255,255,0.05); /* 微亮背景 */
+        }
+        .btn-back:hover { color: var(--text-primary); background: rgba(255,255,255,0.1); }
+        .order-title { font-size: 24px; font-weight: bold; color: var(--text-primary); }
+        .order-id { color: var(--accent-purple); margin-left: 10px; font-family: monospace; font-size: 26px; }
+
+        /* --- Cards (改用半透明玻璃質感) --- */
+        .info-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px; margin-bottom: 30px;
+        }
+        .info-card {
+            background: var(--card-bg); /* 套用變數：半透明 */
+            backdrop-filter: blur(10px); /* 毛玻璃效果 (Optional, 看你喜歡) */
+            border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 25px;
+            transition: transform 0.2s;
+        }
+        .info-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
+
+        .card-title {
+            font-size: 15px; color: var(--text-secondary); margin-bottom: 20px;
+            text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 10px;
+        }
+        .info-row {
+            display: flex; justify-content: space-between; margin-bottom: 12px;
+            font-size: 14px; line-height: 1.6;
+        }
+        .info-label { color: var(--text-secondary); }
+        .info-value { font-weight: 500; text-align: right; color: var(--text-primary); }
+
+        /* --- Status Badges --- */
+        .status-badge {
+            padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .status-badge.processing { background: rgba(255, 167, 38, 0.2); color: var(--warning-orange); border: 1px solid rgba(255, 167, 38, 0.3); }
+        .status-badge.shipped { background: rgba(125, 95, 255, 0.2); color: var(--accent-purple); border: 1px solid rgba(125, 95, 255, 0.3); }
+        .status-badge.success { background: rgba(0, 230, 118, 0.2); color: var(--success-green); border: 1px solid rgba(0, 230, 118, 0.3); }
+        .status-badge.danger { background: rgba(255, 82, 82, 0.2); color: var(--danger-red); border: 1px solid rgba(255, 82, 82, 0.3); }
+
+        /* --- Product Table --- */
+        .product-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px; overflow: hidden;
+            margin-bottom: 30px;
+        }
+        .detail-table { width: 100%; border-collapse: collapse; }
+        .detail-table th {
+            background: rgba(255,255,255,0.05); /* 微透表頭 */
+            color: var(--text-secondary); text-align: left;
+            padding: 15px 25px; font-size: 13px; font-weight: 600;
+        }
+        .detail-table td {
+            padding: 20px 25px; border-bottom: 1px solid var(--border-color);
+            vertical-align: middle; color: var(--text-primary);
+        }
+        .detail-table tr:last-child td { border-bottom: none; }
+
+        .product-info { display: flex; align-items: center; gap: 15px; font-weight: 500; }
+
+        /* --- 圖片白框 (維持這個，因為在深色漸層上這樣最好看) --- */
+        .img-box {
+            width: 150px;
+            height: 150px;
+            background-color: #fff;
+            border-radius: 6px; /* 圓角稍微小一點 */
+
+            padding: 2px;       /* 白邊從 4px -> 改成 2px，比例比較好看 */
+
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            flex-shrink: 0;     /* 防止被擠壓 */
+        }
+        .product-img {
+            max-width: 100%; max-height: 100%;
+            object-fit: contain; border-radius: 4px; display: block;
+        }
+
+        /* --- Summary Section --- */
+        .summary-section { display: flex; justify-content: flex-end; }
+        .summary-box {
+            width: 320px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 25px; border-radius: 12px;
+        }
+        .summary-row {
+            display: flex; justify-content: space-between; margin-bottom: 12px;
+            font-size: 14px; color: var(--text-secondary);
+        }
+        .summary-row.total {
+            border-top: 1px solid var(--border-color); padding-top: 20px; margin-top: 20px;
+            font-size: 20px; font-weight: bold; color: var(--text-primary); align-items: flex-end;
+        }
+        .highlight-green { color: var(--success-green); font-size: 24px; }
+        .highlight-red { color: var(--danger-red); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="header-section">
+        <div>
+            <a th:href="@{/product/dashboard(tab=orders)}" class="btn-back">
+                <i class="fas fa-arrow-left"></i> 返回訂單列表
+            </a>
+            <div style="margin-top: 10px; display: flex; align-items: baseline;">
+                <h1 class="order-title">訂單詳情</h1>
+                <span th:text="'#' + ${ordVO.ordNo}" class="order-id">#408</span>
+            </div>
+        </div>
+
+        <span th:text="${ordVO.ordStatus}"
+              th:classappend="${
+                  ordVO.ordStatus == '待出貨' ? 'processing' :
+                  (ordVO.ordStatus == '已出貨' ? 'shipped' :
+                  (ordVO.ordStatus == '已完成' ? 'success' :
+                  'danger'))
+              }"
+              class="status-badge"
+              style="font-size: 16px; padding: 8px 16px;">
+        </span>
+    </div>
+
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="card-title"><i class="far fa-calendar-alt"></i> 訂單資訊</div>
+            <div class="info-row">
+                <span class="info-label">下單日期</span>
+                <span th:text="${#temporals.format(ordVO.ordDate, 'yyyy-MM-dd HH:mm')}" class="info-value"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">買家會員 ID</span>
+                <span th:text="${ordVO.memberNo}" class="info-value"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">優惠券編號</span>
+                <span th:text="${ordVO.couponNo != null ? ordVO.couponNo : '-'}" class="info-value"></span>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="card-title"><i class="fas fa-truck"></i> 物流配送</div>
+            <div class="info-row">
+                <span class="info-label">配送方式</span>
+                <span th:text="${ordVO.ordShipMethod}" class="info-value"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">物流單號</span>
+                <span th:text="${ordVO.ordShipNo != null ? ordVO.ordShipNo : '尚未產生'}"
+                      class="info-value"
+                      th:style="${ordVO.ordShipNo == null ? 'color: #aaa;' : ''}"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">收件人</span>
+                <span th:text="${ordVO.ordRecipient}" class="info-value"></span>
+            </div>
+            <div class="info-row" style="flex-direction: column; gap:5px;">
+                <span class="info-label">收件地址</span>
+                <span th:text="${ordVO.ordAddress}" class="info-value" style="text-align: left; line-height: 1.4;"></span>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="card-title"><i class="far fa-credit-card"></i> 付款詳情</div>
+            <div class="info-row">
+                <span class="info-label">付款方式</span>
+                <span th:text="${ordVO.ordPaymentMethod}" class="info-value"></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">付款狀態</span>
+                <span th:text="${ordVO.ordPaymentStatus}"
+                      th:classappend="${ordVO.ordPaymentStatus == '已付款' ? 'success' : 'danger'}"
+                      class="status-badge">
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <h3 style="margin-bottom: 15px; font-size: 18px;">商品明細</h3>
+    <div class="product-section">
+        <table class="detail-table">
+            <thead>
+            <tr>
+                <th style="width: 50%;">商品名稱</th>
+                <th style="width: 15%; text-align: center;">單價</th>
+                <th style="width: 15%; text-align: center;">數量</th>
+                <th style="width: 20%; text-align: right;">小計</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="orderDetail : ${ordVO.orderDetail}">
+                <td>
+                    <div class="product-info">
+                        <div class="img-box">
+                            <img th:src="@{/product/displayMain(prodNo=${orderDetail.product.prodNo})}"
+                                 class="product-img">
+                        </div>
+
+                        <span th:text="${orderDetail.product.prodName}"></span>
+                    </div>
+                </td>
+                <td th:text="${'$' + #numbers.formatInteger(orderDetail.price, 1, 'COMMA')}" style="text-align: center;"></td>
+                <td th:text="${orderDetail.quantity}" style="text-align: center;"></td>
+                <td th:text="${'$' + #numbers.formatInteger(orderDetail.price * orderDetail.quantity, 1, 'COMMA')}" style="text-align: right;"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="summary-section">
+        <div class="summary-box">
+
+            <div class="summary-row">
+                <span class="info-label">商品總額</span>
+                <span th:text="${'$' + #numbers.formatInteger(ordVO.originPrice, 1, 'COMMA')}" class="info-value"></span>
+            </div>
+            <div class="summary-row">
+                <span class="info-label">折扣金額</span>
+                <span th:text="'- $' + ${#numbers.formatInteger(ordVO.discountPrice, 1, 'COMMA')}"
+                      class="info-value highlight-red"></span>
+            </div>
+
+            <div class="summary-row" style="border-bottom: 1px dashed var(--border-color); padding-bottom: 15px; margin-bottom: 15px;">
+                <span class="info-label" style="color: #fff;">訂單總金額</span>
+                <span th:text="${'$' + #numbers.formatInteger(ordVO.ordPrice, 1, 'COMMA')}"
+                      class="info-value" style="font-weight: bold;"></span>
+            </div>
+
+            <div class="summary-row">
+                <span class="info-label">平台手續費 (5%)</span>
+                <span th:text="'- $' + ${#numbers.formatInteger(ordVO.platformFee, 1, 'COMMA')}"
+                      class="info-value" style="color: #ff5252;"></span>
+            </div>
+
+            <div class="summary-row total">
+                <span>預計實收金額</span>
+                <span th:text="${'$' + #numbers.formatInteger(ordVO.sellerNetIncome, 1, 'COMMA')}"
+                      class="highlight-green"></span>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

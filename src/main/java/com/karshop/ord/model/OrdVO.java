@@ -1,12 +1,15 @@
 package com.karshop.ord.model;
 
+import com.karshop.orddetail.model.OrdDetailVO;
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "ord")
-public class OrdVO {
+public class OrdVO implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,6 +60,23 @@ public class OrdVO {
 
     @Column(name = "ord_completed_date")
     private LocalDateTime ordCompletedDate;
+
+    @Column(name = "cancel_reason")
+    private String cancelReason;
+
+    @OneToMany(mappedBy ="order", cascade = CascadeType.ALL)
+    private List<OrdDetailVO> orderDetail;
+
+//  平台抽成5%
+    private static final double commission = 0.05;
+//  平台手續費
+    public Integer getPlatformFee(){
+        return (int)Math.round(this.ordPrice*commission);
+    }
+//  賣家實收金額
+    public Integer getSellerNetIncome(){
+        return this.ordPrice - getPlatformFee();
+    }
 
     public Integer getOrdNo() {
         return ordNo;
@@ -184,6 +204,22 @@ public class OrdVO {
 
     public void setOrdCompletedDate(LocalDateTime ordCompletedDate) {
         this.ordCompletedDate = ordCompletedDate;
+    }
+
+    public List<OrdDetailVO> getOrderDetail() {
+        return orderDetail;
+    }
+
+    public void setOrderDetail(List<OrdDetailVO> orderDetail) {
+        this.orderDetail = orderDetail;
+    }
+
+    public String getCancelReason() {
+        return cancelReason;
+    }
+
+    public void setCancelReason(String cancelReason) {
+        this.cancelReason = cancelReason;
     }
 }
 
