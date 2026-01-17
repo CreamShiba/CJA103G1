@@ -16,7 +16,7 @@ public class ReportsController {
 
     @GetMapping("/add")
     public String showAddPage(){
-        return "add-report";
+        return "templates-report/add-report";
     }
 
     @PostMapping("/submit")
@@ -24,6 +24,6 @@ public class ReportsController {
         reportsService.submitReport(report);
 
         model.addAttribute("reportNo", report.getReportsNo());
-        return "report-success";
+        return "templates-report/report-success";
     }
 }
