@@ -26,7 +26,7 @@ public class OrdController {
         OrdVO ordVO = ordService.getOneOrd(ordNo);
 
         model.addAttribute("ordVO", ordVO);
-        return "seller/listOneOrder";
+        return "back-end/seller/listOneOrder";
     }
 
     @PostMapping("/ship")

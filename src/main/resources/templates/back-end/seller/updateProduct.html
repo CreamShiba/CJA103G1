@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增商品 | 賣家中心</title>
+    <link rel="stylesheet" th:href="@{/back-end/css/updateProduct.css}">
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="brand-area" th:onclick="|location.href='@{/product/dashboard(tab=products)}'|" style="cursor: pointer;">
+        <div class="logo-icon"></div> SELLER CENTER
+    </div>
+    <div class="user-profile">
+        <div class="user-avatar"></div>
+        <span>賣家帳號</span>
+    </div>
+</header>
+
+<main class="main-content">
+
+    <div class="form-card">
+        <div class="form-header">
+            <h2>修改商品 Edit Product</h2>
+            <a th:href="@{/product/dashboard(tab=products)}" class="btn-back">← 返回列表</a>
+        </div>
+
+        <form th:action="@{/product/update}" th:object="${productVO}" method="post" enctype="multipart/form-data">
+
+            <input type="hidden" th:field="*{prodNo}">
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">商品名稱 Product Name</label>
+                <input type="text" class="form-control" th:field="*{prodName}" placeholder="請輸入商品名稱" required/>
+                <span th:if="${#fields.hasErrors('prodName')}" th:errors="*{prodName}" style="color: #ff4d4d; font-size: 12px;"></span>
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">商品價格 Price</label>
+                <input type="number" class="form-control" th:field="*{prodPrice}" placeholder="請輸入價格" required/>
+                <span th:if="${#fields.hasErrors('prodPrice')}" th:errors="*{prodPrice}" style="color: #ff4d4d; font-size: 12px;"></span>
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">商品庫存 Quantity</label>
+                <input type="number" class="form-control" th:field="*{prodQty}" placeholder="請輸入庫存數量" required/>
+                <span th:if="${#fields.hasErrors('prodQty')}" th:errors="*{prodQty}" style="color: #ff4d4d; font-size: 12px;"></span>
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">商品資訊 Description</label>
+                <textarea class="form-control" th:field="*{prodDesc}" placeholder="請輸入商品詳細資訊..." required></textarea>
+                <span th:if="${#fields.hasErrors('prodDesc')}" th:errors="*{prodDesc}" style="color: #ff4d4d; font-size: 12px;"></span>
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">目前商品圖片 (點擊 X 標記刪除)</label>
+                <div id="old-images-container" style="display: flex; flex-wrap: wrap; gap: 15px;">
+
+                    <th:block th:each="piVO : ${productVO.productImage}">
+                        <div class="old-img-box" th:id="'old-img-' + ${piVO.imgNo}" style="position: relative; width: 100px; height: 100px;">
+                            <img th:src="@{/product/displayDetail(imgNo=${piVO.imgNo})}"
+                                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+
+                            <button type="button" class="btn-remove-img"
+                                    th:onclick="'markForDelete(' + ${piVO.imgNo} + ')'">×</button>
+                        </div>
+                    </th:block>
+                </div>
+
+                <input type="hidden" name="deleteImageNos" id="deleteImageNos" value="">
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">上傳新圖片 Upload New Images</label>
+                <input type="file" name="upFile" id="fileInput" multiple accept="image/*"/>
+                <div id="preview-container"></div>
+            </div>
+
+            <button type="submit" class="btn-submit">儲存修改 Save Change</button>
+        </form>
+    </div>
+
+</main>
+
+<footer class="site-footer">
+    <div class="footer-brand">
+        <div class="toggle-icon"></div>
+        <span>卡爾夏</span>
+    </div>
+    <div class="footer-links">
+        <div class="footer-col">
+            <h4>Shop</h4>
+            <a href="#">Shop Parts</a>
+            <a href="#">Wholesale</a>
+        </div>
+        <div class="footer-col">
+            <h4>The Company</h4>
+            <a href="#">About Us</a>
+            <a href="#">FAQ</a>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <a href="#">info@mysite.com</a>
+        </div>
+        <div class="footer-col">
+            <h4>Follow Us</h4>
+            <a href="#">Instagram</a>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/back-end/js/updateProduct.js}"></script>
+
+</body>
+</html>
