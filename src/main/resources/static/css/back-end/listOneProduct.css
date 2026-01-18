@@ -1,0 +1,33 @@
+:root {
+    --bg-dark-top: #050505; --bg-dark-bottom: #1a0505;
+    --text-primary: #ffffff; --text-secondary: #a0a0a0;
+    --accent-purple: #7d5fff; --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+body {
+    background: linear-gradient(180deg, var(--bg-dark-top) 0%, var(--bg-dark-bottom) 100%);
+    color: var(--text-primary); font-family: sans-serif; min-height: 100vh; padding: 40px 20px;
+}
+.detail-card {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: 12px; padding: 40px; width: 100%; max-width: 800px; margin: 0 auto;
+}
+.info-group { margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+.label { color: var(--text-secondary); font-size: 14px; }
+.value { font-size: 18px; margin-top: 5px; }
+
+/* 圖片展示區 */
+.gallery { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px; }
+.img-box {
+    width: 150px; height: 150px; border-radius: 8px; overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+.img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+.btn-group { margin-top: 30px; display: flex; gap: 15px; }
+.btn {
+    text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; transition: 0.3s;
+}
+.btn-primary { background: var(--accent-purple); color: white; }
+.btn-secondary { border: 1px solid var(--border-color); color: var(--text-secondary); }
+.btn:hover { opacity: 0.8; transform: translateY(-2px); }
