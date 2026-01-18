@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新增商品 | 賣家中心</title>
-    <link rel="stylesheet" th:href="@{/css/back-end/seller/addProduct.css}">
-    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
+    <link rel="stylesheet" th:href="@{/back-end/css/addProduct.css}">
 </head>
 <body>
 
@@ -35,17 +34,6 @@
                 <span th:if="${#fields.hasErrors('prodName')}" th:errors="*{prodName}" style="color: #ff4d4d; font-size: 12px;"></span>
             </div>
 
-            <div>
-                <label>商品分類：</label>
-                <select th:field="*{productCategory.productCategoryNo}">
-                    <option th:each="cat : ${categoryList}"
-                            th:value="${cat.productCategoryNo}"
-                            th:text="${cat.productCategoryName}">
-                    </option>
-                </select>
-                <span th:if="${#fields.hasErrors('productCategory.productCategoryNo')}" th:errors="*{productCategory.productCategoryNo}" class="error"></span>
-            </div>
-
             <div class="form-group">
                 <label style="color:#ccc; font-size:14px;">商品價格 Price</label>
                 <input type="number" class="form-control" th:field="*{prodPrice}" placeholder="請輸入價格" required/>
@@ -67,7 +55,6 @@
             <div class="form-group">
                 <label style="color:#ccc; font-size:14px;">上傳圖片 Upload Image</label>
                 <input type="file" name="upFile" id="fileInput" multiple accept="image/*"/>
-                <span th:if="${errorMessage}" th:text="${errorMessage}" style="color: #ff4d4d; font-size: 12px; font-weight: bold; display: block; margin-top: 5px;"></span>
                 <div id="preview-container"></div>
             </div>
 
@@ -76,8 +63,35 @@
     </div>
 
 </main>
-<footer th:replace="~{fragments/footer :: Footer}"></footer>
-<script th:src="@{/js/back-end/seller/addProduct.js}"></script>
+
+<footer class="site-footer">
+    <div class="footer-brand">
+        <div class="toggle-icon"></div>
+        <span>卡爾夏</span>
+    </div>
+    <div class="footer-links">
+        <div class="footer-col">
+            <h4>Shop</h4>
+            <a href="#">Shop Parts</a>
+            <a href="#">Wholesale</a>
+        </div>
+        <div class="footer-col">
+            <h4>The Company</h4>
+            <a href="#">About Us</a>
+            <a href="#">FAQ</a>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <a href="#">info@mysite.com</a>
+        </div>
+        <div class="footer-col">
+            <h4>Follow Us</h4>
+            <a href="#">Instagram</a>
+        </div>
+    </div>
+</footer>
+
+<script th:src="@{/back-end/js/addProduct.js}"></script>
 
 </body>
 </html>

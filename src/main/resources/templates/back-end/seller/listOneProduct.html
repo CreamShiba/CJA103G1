@@ -3,21 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>商品詳情 | 賣家中心</title>
-    <link rel="stylesheet" th:href="@{/css/back-end/seller/listOneProduct.css}">
-    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
-    <style>
-        /* 補強一點樣式，確保圖片排版不跑版 */
-        .gallery {
-            display: flex; gap: 10px; flex-wrap: wrap;
-        }
-        .img-box {
-            width: 100px; height: 100px; border: 1px solid #ddd;
-            display: flex; justify-content: center; align-items: center; overflow: hidden;
-        }
-        .img-box img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
-    </style>
+   <link rel="stylesheet" th:href="@{/back-end/css/listOneProduct.css}">
 </head>
 <body>
 
@@ -33,31 +19,9 @@
     </div>
 
     <div style="display: flex; gap: 40px;">
-
-        <div class="info-group" style="flex: 1;">
-            <div class="label">商品分類 Category</div>
-            <div class="value"
-                 th:text="${productVO.productCategory != null} ? ${productVO.productCategory.productCategoryName} : '未分類'">
-            </div>
-        </div>
-
-        <div class="info-group" style="flex: 1;">
-            <div class="label">目前評價 Rating</div>
-            <div class="value">
-                <span th:text="${productVO.ratingStar} + ' 顆星 / ' + ${productVO.ratingAmount} + ' 人評價'"></span>
-
-                <span style="color: #666; font-size: 0.9em; margin-left: 10px;"
-                      th:if="${productVO.ratingAmount > 0}"
-                      th:text="'(平均 ' + ${#numbers.formatDecimal(productVO.ratingStar * 1.0 / productVO.ratingAmount, 1, 1)} + ' 分)'">
-                </span>
-            </div>
-        </div>
-    </div>
-
-    <div style="display: flex; gap: 40px;">
         <div class="info-group" style="flex: 1;">
             <div class="label">價格 Price</div>
-            <div class="value" th:text="'$ ' + ${#numbers.formatInteger(productVO.prodPrice, 1, 'COMMA')}"></div>
+            <div class="value" th:text="'$ ' + ${productVO.prodPrice}"></div>
         </div>
         <div class="info-group" style="flex: 1;">
             <div class="label">庫存 Stock</div>
@@ -78,15 +42,14 @@
                     <img th:src="@{/product/displayDetail(imgNo=${piVO.imgNo})}" alt="商品圖">
                 </div>
             </th:block>
-            <span th:if="${#lists.isEmpty(productVO.productImage)}" style="color: #999;">暫無圖片</span>
         </div>
     </div>
 
     <div class="btn-group">
         <a th:href="@{/product/getOne_For_Update(prodNo=${productVO.prodNo})}" class="btn btn-primary">再次編輯</a>
-        <a th:href="@{/product/dashboard(tab=products)}" class="btn btn-secondary">回列表</a>
+        <a th:href="@{/product/dashboard}" class="btn btn-secondary">回首頁</a>
     </div>
 </div>
-<footer th:replace="~{fragments/footer :: Footer}"></footer>
+
 </body>
 </html>

@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>訂單詳情 | 賣家中心</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" th:href="@{/css/back-end/seller/listOneOrder.css}">
-    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
+    <link rel="stylesheet" th:href="@{/back-end/css/listOneOrder.css}">
 </head>
 <body>
 
@@ -44,7 +43,7 @@
             </div>
             <div class="info-row">
                 <span class="info-label">買家會員 ID</span>
-                <span th:text="${ordVO.member.memberNo}" class="info-value"></span>
+                <span th:text="${ordVO.memberNo}" class="info-value"></span>
             </div>
             <div class="info-row">
                 <span class="info-label">優惠券編號</span>
@@ -157,6 +156,5 @@
 
 </div>
 
-<footer th:replace="~{fragments/footer :: Footer}"></footer>
 </body>
 </html>

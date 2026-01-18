@@ -42,7 +42,7 @@ public class ProductController {
     public String addProduct(ModelMap model){
         ProductVO productVO = new ProductVO();
         model.addAttribute("productVO",productVO);
-        return "seller/addProduct";
+        return "back-end/seller/addProduct";
     }
 
 
@@ -54,7 +54,7 @@ public class ProductController {
             if(upFile[0].isEmpty()) {
                 model.addAttribute("errorMessage", "請上傳商品圖片");
             }
-            return  "seller/addProduct";
+            return  "back-end/seller/addProduct";
         }
 
 
@@ -83,7 +83,7 @@ public class ProductController {
     public String getOne_For_Update(@RequestParam Integer prodNo, ModelMap model){
         ProductVO productVO = productService.getOneProduct(prodNo);
         model.addAttribute("productVO",productVO);
-        return "seller/updateProduct";
+        return "back-end/seller/updateProduct";
     }
 
     @Transactional
@@ -93,7 +93,7 @@ public class ProductController {
                          @RequestParam("upFile") MultipartFile[] upFile) throws IOException {
 
         if (result.hasErrors()) {
-            return "seller/updateProduct";
+            return "back-end/seller/updateProduct";
         }
 
         // 1. 圖片數量檢查
@@ -105,7 +105,7 @@ public class ProductController {
         if (currentAmount - deleteAmount + newAmount == 0) {
             model.addAttribute("errorMessage", "請至少保留一張圖片");
             model.addAttribute("productVO", originalProductVO);
-            return "seller/updateProduct";
+            return "back-end/seller/updateProduct";
         }
 
         // 2. 更新商品文字資料
@@ -157,7 +157,7 @@ public class ProductController {
         }
 
         model.addAttribute("productVO", finalProductVO);
-        return "seller/listOneProduct";
+        return "back-end/seller/listOneProduct";
     }
 
     @GetMapping("/updateStatus")
@@ -176,14 +176,16 @@ public class ProductController {
     public String searchForSeller(@RequestParam (value = "keyword")  String keyword, ModelMap model){
 
         Integer sellerNo = 101;
+        List<ProductVO> searchResult;
         if (keyword == null || keyword.trim().isEmpty()) {
-            return sellerDashboard("products", "", model);
+            searchResult = productService.getProductsBySellerNo(sellerNo);
+        }else {
+            searchResult = productService.getProductBySearchForSeller(sellerNo, keyword);
         }
-        List<ProductVO> searchResult = productService.getProductBySearchForSeller(sellerNo, keyword);
 
         model.addAttribute("activeTab", "products");
         model.addAttribute("productList", searchResult);
-        return "seller/seller_index";
+        return "back-end/seller/seller_index";
     }
 
     @GetMapping("/dashboard")
@@ -213,7 +215,7 @@ public class ProductController {
         model.addAttribute("productList", productList);
         model.addAttribute("activeTab", tab);
 
-        return "seller/seller_index";
+        return "back-end/seller/seller_index";
     }
 
 //    @GetMapping("/getAll")
