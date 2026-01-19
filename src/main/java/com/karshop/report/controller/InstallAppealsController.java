@@ -5,16 +5,17 @@ import com.karshop.report.service.InstallAppealsService; //引用service裡的In
 import org.springframework.beans.factory.annotation.Autowired; //引入自動注入工具。它可以自動幫我把寫好的 Service 實體「裝」進這個 Controller 裡。
 import org.springframework.stereotype.Controller; //標記這是一個「控制器」。主要負責接收網址請求，並導向（跳轉）到 templates 裡的 HTML 網頁。
 import org.springframework.web.bind.annotation.*; //引入網頁標籤工具（例如 @GetMapping, @PostMapping, @RequestParam 等）。
-                                                  // 用來定義這段程式是要處理「瀏覽器輸入網址」還是「按下表單送出」。
+// 用來定義這段程式是要處理「瀏覽器輸入網址」還是「按下表單送出」。
 import org.springframework.ui.Model; //引入模型對象。它像是一個「傳送袋」，讓你把 Java 抓到的資料（如申訴編號）塞進去，傳給 HTML 顯示。
 import java.util.List; //引入 Java 標準的清單工具。當你要從資料庫抓「一整群」申訴單時，會用 List 來裝。
+import java.time.LocalDateTime;
 
 @Controller //控制器,主要任務是「接聽請求」並「回傳網頁」。
-            //當你 return "add-appeal" 時，它會去 templates 找 add-appeal.html 顯示出來。
-            //如果要回傳 HTML 頁面，建議使用 @Controller 而非 @RestController
+//當你 return "add-appeal" 時，它會去 templates 找 add-appeal.html 顯示出來。
+//如果要回傳 HTML 頁面，建議使用 @Controller 而非 @RestController
 @RequestMapping("/appeals") //定義這個控制器的「大門口網址」。
-                               //作用：這就像是給這組功能設定一個「分類目錄」。
-                               //所有跟申訴功能有關的網址，開頭都必須是 /appeals。
+//作用：這就像是給這組功能設定一個「分類目錄」。
+//所有跟申訴功能有關的網址，開頭都必須是 /appeals。
 public class InstallAppealsController {
 
     @Autowired //自動注入
@@ -36,11 +37,26 @@ public class InstallAppealsController {
 
     // 3. 處理表單提交
     @PostMapping("/submit")
-    public String handleForm(@ModelAttribute InstallAppeals appeal, Model model) {
+    public String handleForm(@ModelAttribute InstallAppeals appeal,
+                             @RequestParam(value = "type", required = false) String[] types,
+                             Model model) {
+
+        // 補上處理多選類別邏輯
+        if (types != null && types.length > 0) {
+            appeal.setCategories(String.join(",", types));
+        }
+
         // 設定預設值
         appeal.setResponse("尚未回覆");
-        appeal.setStatus("PENDING");
-        appeal.setPriority("MEDIUM");
+        appeal.setStatus("待處理");
+        appeal.setPriority("一般");
+
+        // 補上資料庫 NOT NULL 必填欄位
+        appeal.setApplyDate(LocalDateTime.now());
+        appeal.setUpdatedDate(LocalDateTime.now());
+        appeal.setMemberNo(1);
+        appeal.setTargetMemberNo(999);
+        appeal.setAdmNo(1);
 
         // 呼叫 Service 存入資料庫
         installAppealsService.submitInstallAppeal(appeal);
@@ -50,6 +66,6 @@ public class InstallAppealsController {
 
         // 這裡不要用 redirect，直接 return "appeal-success"
         // 這樣瀏覽器才會顯示 templates/appeal-success.html
-        return "templates-report/appeal-report";
+        return "templates-report/appeal-success";
     }
 }

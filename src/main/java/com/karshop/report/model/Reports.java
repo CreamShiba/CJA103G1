@@ -4,21 +4,22 @@ import jakarta.persistence.*; // 連結 JPA API，讓 @Id 等標籤可以對應�
 import lombok.Data;          // 使用 Lombok @Data 標籤，自動產生 Getter/Setter 等
 import java.time.LocalDateTime; // Java 的日期時間處理工具
 
-@Entity //告訴Spring Boot這不只是一個普通類別,要連結到資料庫的一張表讓 JPA (Java Persistence API) 自動幫我管理這個物件，
-        //讓我不用寫 SQL 指令，就能直接用 Java 物件來存取資料。
+@Entity //告訴Spring Boot這不只是一個普通類別,要連結到資料庫的一張表讓 JPA (Java Persistence API) 自動幫我管理這個物件
 @Table(name = "reports") //告訴Java要對應到哪一張表
 @Data //幫我寫好get set方法
 public class Reports {
 
     @Id //主鍵(PK),身分證字號
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    //告訴資料庫「這個號碼請幫我自動生成，不需要我手動輸入」。
-    // 作用：這對應到 SQL 中的 AUTO_INCREMENT。
+    @GeneratedValue(strategy = GenerationType.IDENTITY) //告訴資料庫「這個號碼請幫我自動生成」
     @Column(name = "reports_no")
     private Integer reportsNo; // 檢舉編號
 
     @Column(name = "reports_type", nullable = false, length = 50)
     private String reportsType; // 檢舉類型
+
+    // 檢舉對象，用來存被檢舉的會員帳號或文章ID
+    @Column(name = "reports_target", length = 100)
+    private String reportsTarget; // 檢舉對象
 
     @Column(name = "reports_reason", nullable = false, length = 200)
     private String reportsReason; // 檢舉原因
