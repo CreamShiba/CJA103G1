@@ -66,15 +66,45 @@
                     </a>
                 </div>
 
-                <div class="search-bar-container">
-                    <form method="post" th:action="@{/product/searchForSeller}" style="display: flex; gap: 10px; width: 100%;">
-                        <input type="text" name="keyword" th:value="${keyword}" placeholder="搜尋商品名稱..."
-                               style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: #0a0a0a; color: white;">
-                        <button type="submit" style="padding: 10px 20px; background: var(--accent-purple); color: white; border: none; border-radius: 6px; cursor: pointer;">
-                            <i class="fas fa-search"></i> 搜尋
+                <div class="search-bar-container" style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px dashed #444; margin-bottom: 20px;">
+
+                    <form th:action="@{/product/searchForSeller}" method="get"
+                          style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+
+                        <div style="flex: 1; min-width: 200px; display: flex; align-items: center; gap: 5px;">
+                            <i class="fas fa-search" style="color: #666;"></i>
+                            <input type="text" name="searchName" th:value="${searchName}"
+                                   placeholder="搜尋商品名稱..."
+                                   style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #444; background: #0a0a0a; color: white;">
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="color: #aaa; font-size: 13px;">價格</span>
+                            <input type="number" name="minPrice" th:value="${minPrice}" placeholder="Min"
+                                   style="padding: 10px; border-radius: 6px; border: 1px solid #444; background: #0a0a0a; color: white; width: 80px;">
+                            <span style="color: #666;">-</span>
+                            <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="Max"
+                                   style="padding: 10px; border-radius: 6px; border: 1px solid #444; background: #0a0a0a; color: white; width: 80px;">
+                        </div>
+
+                        <div style="display: flex; align-items: center;">
+                            <select name="searchStatus"
+                                    style="padding: 10px; border-radius: 6px; border: 1px solid #444; background: #0a0a0a; color: white; cursor: pointer;">
+                                <option value="">所有狀態</option>
+                                <option value="上架中" th:selected="${searchStatus == '上架中'}">上架中</option>
+                                <option value="下架中" th:selected="${searchStatus == '下架中'}">下架中</option>
+                            </select>
+                        </div>
+
+                        <button type="submit"
+                                style="padding: 10px 20px; background: var(--accent-purple); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                            篩選
                         </button>
-                        <a th:href="@{/product/dashboard(tab='products')}" style="padding: 10px 20px; background: rgba(255,255,255,0.1); color: #ccc; text-decoration: none; border-radius: 6px; display: flex; align-items: center;">
-                            清除
+
+                        <a th:if="${searchName != null or minPrice != null or maxPrice != null or searchStatus != null}"
+                           th:href="@{/product/dashboard(tab='products')}"
+                           style="padding: 10px 15px; background: rgba(255,255,255,0.1); color: #ccc; text-decoration: none; border-radius: 6px; display: flex; align-items: center; transition: 0.3s;">
+                            <i class="fas fa-undo"></i> 重置
                         </a>
                     </form>
                 </div>
@@ -117,38 +147,64 @@
 
                 <div class="no-result" th:if="${#lists.isEmpty(productList)}">
                     <div class="icon-box">🔍</div>
-                    <h3>找不到相關商品</h3>
-                    <p>試試其他關鍵字，或是點擊清除回到列表。</p>
+                    <h3>找不到符合條件的商品</h3>
+                    <p>請嘗試調整價格範圍、關鍵字或狀態，或是點擊重置回到列表。</p>
                 </div>
             </div>
 
             <div id="view-orders" class="view-section">
 
-                <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="margin-bottom: 20px;">
+                    <h2 style="color: #fff; margin: 0;">訂單管理</h2>
+                </div>
 
-                    <h3 style="color: #fff; margin: 0;">訂單管理</h3>
+                <div class="search-bar-container" style="background: rgba(255,255,255,0.02); padding: 15px; border-radius: 12px; border: 1px dashed #444; margin-bottom: 20px;">
 
-                    <form th:action="@{/product/dashboard}" method="get" style="display: flex; gap: 10px;">
+                    <form th:action="@{/ord/searchOrders}" method="get" onsubmit="return validateOrderDate()"
+                          style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
 
-                        <input type="hidden" name="tab" value="orders">
+                        <div style="flex: 1; min-width: 250px; display: flex; align-items: center; gap: 5px;">
+                            <i class="fas fa-search" style="color: #666;"></i>
+                            <input type="text" name="keyword" th:value="${keyword}"
+                                   placeholder="搜尋訂單編號 / 收件人 "
+                                   style="width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #444; background: #0a0a0a; color: white;">
+                        </div>
 
-                        <div style="position: relative;">
-                            <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #aaa;"></i>
-                            <input type="text" name="keyword"
-                                   th:value="${keyword}"
-                                   placeholder="搜尋訂單號或姓名..."
-                                   style="padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #444; background: #222; color: #fff; width: 250px; outline: none;">
+                        <div>
+                            <select name="ordStatus"
+                                    style="padding: 12px; border-radius: 6px; border: 1px solid #444; background: #0a0a0a; color: white; cursor: pointer; min-width: 120px;">
+                                <option value="">-- 所有狀態 --</option>
+                                <option value="待出貨" th:selected="${ordStatus == '待出貨'}">待出貨</option>
+                                <option value="已出貨" th:selected="${ordStatus == '已出貨'}">已出貨</option>
+                                <option value="已完成" th:selected="${ordStatus == '已完成'}">已完成</option>
+                                <option value="已取消" th:selected="${ordStatus == '已取消'}">已取消</option>
+                            </select>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 5px; background: #0a0a0a; padding: 5px 10px; border-radius: 6px; border: 1px solid #444;">
+
+                            <span style="color: #aaa; font-size: 13px; white-space: nowrap;">日期:</span>
+
+                            <input type="date" id="startDateInput" name="startDate" th:value="${startDate}"
+                                   onclick="this.showPicker()"
+                                   style="width: 135px; text-align: center; padding: 8px 0; border: none; background: transparent; color: white; cursor: pointer; font-family: inherit; outline: none;">
+
+                            <span style="color: #666; font-size: 14px;">~</span>
+
+                            <input type="date" id="endDateInput" name="endDate" th:value="${endDate}"
+                                   onclick="this.showPicker()"
+                                   style="width: 135px; text-align: center; padding: 8px 0; border: none; background: transparent; color: white; cursor: pointer; font-family: inherit; outline: none;">
                         </div>
 
                         <button type="submit"
-                                style="padding: 8px 20px; border-radius: 20px; border: none; background: var(--accent-purple); color: white; cursor: pointer; font-weight: bold;">
-                            搜尋
+                                style="padding: 12px 25px; background: var(--accent-purple); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s;">
+                            <i class="fas fa-filter"></i> 篩選
                         </button>
 
-                        <a th:if="${keyword != null and keyword != ''}"
+                        <a th:if="${keyword != null or ordStatus != null or startDate != null or endDate != null}"
                            th:href="@{/product/dashboard(tab='orders')}"
-                           style="padding: 8px 15px; border-radius: 20px; border: 1px solid #444; background: transparent; color: #aaa; text-decoration: none; display: flex; align-items: center;">
-                            清除
+                           style="padding: 12px 20px; background: rgba(255,255,255,0.1); color: #ccc; text-decoration: none; border-radius: 6px; display: flex; align-items: center; transition: 0.3s;">
+                            <i class="fas fa-undo"></i> 重置
                         </a>
                     </form>
                 </div>
@@ -157,13 +213,9 @@
                     <thead>
                     <tr>
                         <th style="width: 15%;">訂單資訊</th>
-
                         <th style="width: 18%;">配送詳情</th>
-
                         <th style="width: 12%;">狀態概覽</th>
-
                         <th style="width: 10%;">金額</th>
-
                         <th>操作</th>
                     </tr>
                     </thead>
@@ -223,27 +275,25 @@
                             </div>
 
                             <div style="font-size: 11px; color: #888; margin-top: 4px; display: flex; flex-direction: column;">
-                                <span>
-                                    總額: <span th:text="${'$' + #numbers.formatInteger(ord.ordPrice, 1, 'COMMA')}"></span>
-                                </span>
+                    <span>
+                        總額: <span th:text="${'$' + #numbers.formatInteger(ord.ordPrice, 1, 'COMMA')}"></span>
+                    </span>
                                 <span style="color: #ff5252;">
-                                    平台抽成: -<span th:text="${'$' + #numbers.formatInteger(ord.platformFee, 1, 'COMMA')}"></span>
-                                </span>
+                        平台抽成: -<span th:text="${'$' + #numbers.formatInteger(ord.platformFee, 1, 'COMMA')}"></span>
+                    </span>
                             </div>
                         </td>
 
-                        <td>
-                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <td style="vertical-align: top;">
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
 
                                 <form th:if="${ord.ordStatus == '待出貨' and (ord.ordPaymentStatus == '已付款' or ord.ordPaymentMethod == '貨到付款')}"
                                       th:action="@{/ord/ship}" method="post"
                                       style="display: flex; flex-direction: column; gap: 6px;">
 
                                     <input type="hidden" name="ordNo" th:value="${ord.ordNo}">
-
                                     <input type="text" name="ordShipNo" required placeholder="輸入物流單號"
                                            style="width: 100%; padding: 6px 10px; border-radius: 4px; border: 1px solid #444; background: #222; color: white; font-size: 13px;">
-
                                     <button type="submit"
                                             style="width: 100%; background: var(--accent-purple); color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;">
                                         確認出貨
@@ -258,48 +308,47 @@
                                 <button type="button"
                                         th:if="${ord.ordStatus == '待出貨'}"
                                         th:onclick="'openCancelModal(' + ${ord.ordNo} + ')'"
-                                        style="width: 100%; background: transparent; border: 1px solid #ff5252; color: #ff5252; padding: 5px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.3s;">
+                                        style="width: 100%; background: transparent; border: 1px solid #ff5252; color: #ff5252; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.3s;">
                                     <i class="fas fa-ban"></i> 取消訂單
                                 </button>
 
-                                <div th:if="${ord.ordStatus != '待出貨'}">
-                                    <div th:if="${ord.ordStatus == '已出貨' or ord.ordStatus == '已完成'}"
-                                         style="font-size: 12px; color: #888; margin-bottom: 5px;">
-                                        單號: <span th:text="${ord.ordShipNo}" style="color: #ccc;"></span>
-                                    </div>
-                                    <a th:href="@{/ord/getOneOrder(ordNo=${ord.ordNo})}"
-                                       style="display:block; text-align:center; font-size: 13px; color: #aaa; text-decoration: none; border: 1px solid #444; padding: 4px; border-radius: 4px;">
-                                        查看詳情
-                                    </a>
+                                <div th:if="${ord.ordStatus == '已出貨' or ord.ordStatus == '已完成'}"
+                                     style="font-size: 12px; color: #888;">
+                                    單號: <span th:text="${ord.ordShipNo}" style="color: #ccc;"></span>
                                 </div>
+
+                                <a th:href="@{/ord/getOneOrder(ordNo=${ord.ordNo})}"
+                                   style="display:block; text-align:center; font-size: 13px; color: #aaa; text-decoration: none; border: 1px solid #444; padding: 6px; border-radius: 4px; background: rgba(255,255,255,0.05);">
+                                    查看詳情
+                                </a>
 
                             </div>
                         </td>
                     </tr>
                     </tbody>
                 </table>
+
                 <div class="no-result" th:if="${#lists.isEmpty(ordList)}">
 
-                    <div th:if="${keyword != null and keyword != ''}">
+                    <div th:if="${keyword != null or ordStatus != null or startDate != null or endDate != null}">
                         <div class="icon-box" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;">
                             <i class="fas fa-search"></i>
                         </div>
-                        <h3 style="margin-bottom: 10px;">找不到符合 "<span th:text="${keyword}" style="color: var(--accent-purple);"></span>" 的訂單</h3>
+                        <h3 style="margin-bottom: 10px;">找不到符合條件的訂單</h3>
                         <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
-                            請檢查訂單編號或收件人姓名是否正確
+                            請嘗試調整搜尋關鍵字、日期範圍或訂單狀態。
                         </p>
                         <a th:href="@{/product/dashboard(tab='orders')}"
                            style="padding: 8px 20px; background: rgba(255,255,255,0.1); color: #fff; text-decoration: none; border-radius: 20px; font-size: 13px; transition: 0.3s;">
-                            <i class="fas fa-undo"></i> 清除搜尋
+                            <i class="fas fa-undo"></i> 清除所有條件
                         </a>
                     </div>
 
-                    <div th:unless="${keyword != null and keyword != ''}">
+                    <div th:unless="${keyword != null or ordStatus != null or startDate != null or endDate != null}">
                         <div class="icon-box" style="font-size: 40px; margin-bottom: 15px;">📦</div>
                         <h3 style="margin-bottom: 5px;">目前還沒有訂單</h3>
                         <p style="color: var(--text-secondary); font-size: 14px;">加油！第一筆訂單就在路上了！</p>
                     </div>
-
                 </div>
             </div>
         </div>

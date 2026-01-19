@@ -3,14 +3,14 @@ package com.karshop.ord.controller;
 
 import com.karshop.ord.model.OrdService;
 import com.karshop.ord.model.OrdVO;
+import com.karshop.product.model.ProductService;
+import com.karshop.product.model.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -19,6 +19,9 @@ public class OrdController {
 
     @Autowired
     private OrdService ordService;
+
+    @Autowired
+    private ProductService productService;
 
     @GetMapping("/getOneOrder")
     public String getOneOrder(@RequestParam(value = "ordNo") Integer ordNo, ModelMap model) {
@@ -64,18 +67,39 @@ public class OrdController {
         return "redirect:/product/dashboard?tab=orders";
     }
 
+    @GetMapping("/searchOrders")
+    public String searchOrders(@RequestParam(value = "keyword", required = false) String keyword,
+                               @RequestParam(value = "ordStatus", required = false) String ordStatus,
+                               @RequestParam(value = "startDate", required = false) LocalDate startDate,
+                               @RequestParam(value = "endDate", required = false) LocalDate endDate, ModelMap model) {
 
+        Integer sellerNo = 101;
+        List<OrdVO> searchResult = ordService.searchOrdersForSeller(sellerNo, keyword, ordStatus, startDate, endDate);
+        model.addAttribute("ordList", searchResult);
+        model.addAttribute("activeTab", "orders");
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("ordStatus", ordStatus);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
 
+        return "back-end/seller/seller_index";
+    }
 
-//    @GetMapping("/sellerOrder")
-//    public String sellerOrder(ModelMap model) {
-//        int sellerNo = 101;
-//        List<OrdVO> ordList = ordService.getOrdBySeller(sellerNo);
-//
-//        model.addAttribute("ordList", ordList);
-//
-//
-//        return "seller/seller_order";
-//    }
+    @ModelAttribute
+    public void populateCommonData(ModelMap model) {
+        Integer sellerNo = 101;
+
+        List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
+
+        int activeProductCount = 0;
+        for(ProductVO productVO : productList){
+            if(productVO.getProdStatus().equals("上架中")){
+                activeProductCount++;
+            }
+        }
+        model.addAttribute("productList", productList);
+        model.addAttribute("activeProductCount", activeProductCount);
+
+    }
 
 }
