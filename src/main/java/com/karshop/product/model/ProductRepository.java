@@ -1,6 +1,8 @@
 package com.karshop.product.model;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -10,7 +12,17 @@ public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
 
     List<ProductVO> findByProdStatus(String prodStatus);
 
-    List<ProductVO> findByProdNameContainingAndProdStatus(String prodName,String prodStatus);
+    List<ProductVO> findByProdNameContainingAndProdStatus(String prodName, String prodStatus);
 
-    List<ProductVO> findBySellerNoAndProdNameContaining(Integer sellerNo, String prodName);
+    @Query("SELECT p FROM ProductVO p WHERE p.sellerNo = :sellerNo " +
+            "AND (:prodName IS NULL OR p.prodName LIKE %:prodName%) " +
+            "AND (:minPrice IS NULL OR p.prodPrice >= :minPrice) " +
+            "AND (:maxPrice IS NULL OR p.prodPrice <= :maxPrice) " +
+            "AND (:prodStatus IS NULL OR p.prodStatus = :prodStatus) " +
+            "ORDER BY p.prodNo DESC")
+    List<ProductVO> compositeSearch(@Param("sellerNo") Integer sellerNo,
+                                    @Param("prodName") String prodName,
+                                    @Param("minPrice") Integer minPrice,
+                                    @Param("maxPrice") Integer maxPrice,
+                                    @Param("prodStatus") String prodStatus);
 }

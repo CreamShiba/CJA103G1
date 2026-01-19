@@ -49,9 +49,25 @@ public class ProductService {
         return productRepository.findByProdNameContainingAndProdStatus(prodName,prodStatus);
     }
 
-    public List<ProductVO> getProductBySearchForSeller(Integer sellerNo, String Keyword){
-        return  productRepository.findBySellerNoAndProdNameContaining(sellerNo, Keyword);
+    public List<ProductVO> getProductBySearchForSeller(Integer sellerNo, String prodName, Integer minPrice, Integer maxPrice, String prodStatus){
+        if(prodName != null && prodName.trim().isEmpty()){
+            prodName = null;
+        }
+
+        if(prodStatus != null && prodStatus.trim().isEmpty()){
+            prodStatus = null;
+        }
+
+        if(minPrice != null && maxPrice != null && minPrice > maxPrice){
+            Integer maxPriceTemp = minPrice;
+            minPrice = maxPrice;
+            maxPrice = maxPriceTemp;
+        }
+
+        return productRepository.compositeSearch(sellerNo, prodName, minPrice, maxPrice, prodStatus);
     }
+
+
 
 
 }
