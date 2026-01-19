@@ -78,3 +78,16 @@ function updateReason(select) {
         text.value = select.value;
     }
 }
+
+    function validateOrderDate() {
+    var startInput = document.getElementById('startDateInput').value;
+    var endInput = document.getElementById('endDateInput').value;
+
+    if (startInput && endInput) {
+    if (startInput > endInput) {
+    alert("⚠️ 開始日期不能晚於結束日期！");
+    return false; // 阻止表單送出
+}
+}
+    return true; // 允許送出
+}
