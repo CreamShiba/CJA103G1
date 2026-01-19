@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.EvaluationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -56,7 +57,6 @@ public class ProductController {
             }
             return  "back-end/seller/addProduct";
         }
-
 
         productVO.setProductCategoryNo(3);
         productVO.setSellerNo(101);
@@ -172,33 +172,46 @@ public class ProductController {
     }
 
 
-    @PostMapping("/searchForSeller")
-    public String searchForSeller(@RequestParam (value = "keyword")  String keyword, ModelMap model){
+    @GetMapping("/searchForSeller")
+    public String searchForSeller(@RequestParam(value = "searchName", required = false)  String searchName,
+                                  @RequestParam(value = "minPrice", required = false) Integer minPrice,
+                                  @RequestParam(value = "maxPrice", required = false) Integer maxPrice,
+                                  @RequestParam(value = "searchStatus", required = false) String searchStatus,
+                                  ModelMap model){
 
         Integer sellerNo = 101;
-        List<ProductVO> searchResult;
-        if (keyword == null || keyword.trim().isEmpty()) {
-            searchResult = productService.getProductsBySellerNo(sellerNo);
-        }else {
-            searchResult = productService.getProductBySearchForSeller(sellerNo, keyword);
-        }
+        List<ProductVO> searchResult = productService.getProductBySearchForSeller(sellerNo, searchName, minPrice, maxPrice, searchStatus);
 
         model.addAttribute("activeTab", "products");
         model.addAttribute("productList", searchResult);
+
+//      保留輸入傳回前端
+        model.addAttribute("searchName", searchName);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("searchStatus", searchStatus);
+        model.addAttribute("activeTab", "products");
+
         return "back-end/seller/seller_index";
     }
 
     @GetMapping("/dashboard")
-    public String sellerDashboard(@RequestParam(value = "tab", defaultValue = "dashboard") String tab,
-                                  @RequestParam(value = "keyword", required = false) String keyword  ,ModelMap model) {
+    public String sellerDashboard(@RequestParam(value = "tab", defaultValue = "dashboard") String tab, ModelMap model) {
         Integer sellerNo = 101;
 
-        List<OrdVO> ordList ;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            ordList = ordService.searchOrdersForSeller(sellerNo, keyword);
-        }else{
-            ordList = ordService.getOrdBySeller(sellerNo);
-        }
+        List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
+
+        model.addAttribute("productList", productList);
+        model.addAttribute("activeTab", tab);
+
+        return "back-end/seller/seller_index";
+    }
+
+    @ModelAttribute
+    public void populateCommonData(ModelMap model) {
+        Integer sellerNo = 101;
+        List<OrdVO> ordList = ordService.getOrdBySeller(sellerNo);
+        model.addAttribute("ordList", ordList);
 
         List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
 
@@ -210,36 +223,8 @@ public class ProductController {
         }
 
         model.addAttribute("activeProductCount", activeProductCount);
-        model.addAttribute("ordList", ordList);
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("productList", productList);
-        model.addAttribute("activeTab", tab);
 
-        return "back-end/seller/seller_index";
     }
-
-//    @GetMapping("/getAll")
-//    public List<ProductVO> getAllProducts() {
-//        return productService.getAllProducts();
-//    }
-//
-//    @GetMapping("/getOne/{productNo}")
-//    public ProductVO getOneProduct(@PathVariable Integer productNo) {
-//        return productService.getOneProduct(productNo);
-//    }
-//
-//
-
-//
-//    @PutMapping
-//    public void UpdateProduct(@RequestBody ProductVO productVO) {
-//        productService.updateProduct(productVO);
-//    }
-//
-//    @DeleteMapping
-//    public void deleteProduct(Integer prodNo) {
-//        productService.deleteProduct(prodNo);
-//    }
 
 
 //
