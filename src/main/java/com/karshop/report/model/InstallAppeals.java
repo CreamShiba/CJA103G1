@@ -20,6 +20,9 @@ public class InstallAppeals {
     @Column(name = "install_order_no", nullable = false)
     private Integer installOrderNo; //安裝訂單編號
 
+    @Column(name = "categories", length = 100)
+    private String categories; //申訴類別
+
     @Column(name = "description", length = 200, nullable = false)
     private String description; //申訴描述
 

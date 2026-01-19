@@ -2,10 +2,11 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>卡爾夏 - 提交安裝申訴</title>
+    <title>卡爾夏Karshop - 提交安裝申訴</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* --- 1. 基礎設定與背景漸層 --- */
+        /* --- 1. 基礎佈局 --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -13,136 +14,78 @@
             background-image: linear-gradient(to bottom, #000000 0%, #2a0000 40%, #000000 100%);
             color: #ffffff;
             min-height: 100vh;
-        }
-
-        /* --- 2. 雙層 Header --- */
-        header { background-color: #000; padding: 0 60px; }
-
-        .top-bar {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 50px;
-            border-bottom: 1px solid #1a1a1a;
+            flex-direction: column; /* 讓頁尾能在底部橫向排開 */
         }
-        .xxx-text { font-size: 13px; letter-spacing: 5px; font-weight: 300; }
-        .top-right { display: flex; align-items: center; gap: 25px; }
 
-        .search-box {
-            border: 1px solid #333; background: #000; padding: 4px 10px;
-            display: flex; align-items: center; width: 320px;
-        }
-        .search-box input { background: transparent; border: none; color: #666; width: 100%; outline: none; }
-        .search-box i { color: #40c4ff; font-size: 18px; }
-        .user-icon { color: #7b5dc1; font-size: 19px; }
-        .cart-icon { color: #ccc; font-size: 19px; }
-
-        .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 80px;
-        }
+        /* --- 2. Header --- */
+        header { background-color: #000; padding: 0 60px; width: 100%; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; height: 50px; border-bottom: 1px solid #1a1a1a; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; height: 80px; }
         .logo-group { display: flex; align-items: center; gap: 15px; }
         .white-dot { width: 38px; height: 18px; background: white; border-radius: 12px; }
         .brand-name { font-size: 28px; font-weight: bold; letter-spacing: 8px; }
         .nav-links { display: flex; gap: 40px; }
         .nav-links a { color: white; text-decoration: none; font-size: 16px; font-weight: 500; }
 
-        /* --- 3. 內容佈局 --- */
-        .main-layout { display: flex; padding: 60px; max-width: 1400px; margin: 0 auto; }
-
+        /* --- 3. 主內容區 --- */
+        .main-layout { display: flex; padding: 60px; max-width: 1400px; margin: 0 auto; flex: 1; width: 100%; }
         aside { width: 240px; flex-shrink: 0; }
-        .aside-title {
-            font-size: 32px; font-weight: bold; border-left: 6px solid #cc0000;
-            padding-left: 18px; margin-bottom: 40px;
-        }
+        .aside-title { font-size: 32px; font-weight: bold; border-left: 6px solid #cc0000; padding-left: 18px; margin-bottom: 40px; }
         .sidebar-menu { list-style: none; }
-        .sidebar-menu li {
-            color: #999; margin-bottom: 25px; font-size: 18px;
-            display: flex; align-items: center; cursor: pointer;
-        }
-        .sidebar-menu li::before { content: "•"; color: #777; margin-right: 15px; font-size: 22px; }
+        .sidebar-menu li { color: #999; margin-bottom: 25px; font-size: 18px; display: flex; align-items: center; }
         .sidebar-menu li.active { color: white; font-weight: bold; }
 
         .function-area { flex-grow: 1; padding-left: 60px; }
-        .appeal-card {
-            border: 1px solid #4a0000; background-color: rgba(0,0,0,0.5);
-            padding: 50px; max-width: 950px;
-        }
+        .appeal-card { border: 1px solid #4a0000; background-color: rgba(0,0,0,0.5); padding: 50px; max-width: 950px; }
         .appeal-title { color: #cc0000; font-size: 36px; font-weight: 900; margin-bottom: 12px; }
-        .appeal-desc { color: #888; font-size: 16px; margin-bottom: 40px; }
 
-        /* 表單與多選群組樣式 */
+        /* --- 4. 表單與選項樣式 --- */
         .form-row { display: flex; gap: 30px; margin-bottom: 25px; }
-        .field { flex: 1; }
-        .field label { display: block; margin-bottom: 12px; font-size: 15px; }
+        .field { flex: 1; margin-bottom: 20px; }
+        .field label { display: block; margin-bottom: 12px; font-size: 15px; color: #eee; }
 
-        /* 多選容器 */
         .checkbox-group {
-            background: #111;
-            border: 1px solid #333;
-            padding: 15px;
-            border-radius: 4px;
-            max-height: 250px;
-            overflow-y: auto;
+            background: #111; border: 1px solid #333; padding: 20px; border-radius: 4px;
+            display: flex; flex-direction: column; gap: 12px;
+            max-height: none; overflow-y: visible; /* 確保選項不縮減且不產生內部捲軸 */
         }
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            cursor: pointer;
-            font-size: 15px;
-            color: #ccc;
-            transition: color 0.2s;
-        }
-        .checkbox-item:hover { color: #fff; }
-        .checkbox-item input {
-            width: 18px;
-            height: 18px;
-            margin-right: 12px;
-            cursor: pointer;
-            accent-color: #cc0000; /* 勾選顏色 */
-        }
+        .checkbox-item { display: flex; align-items: center; cursor: pointer; font-size: 15px; color: #ccc; }
+        .checkbox-item input { width: 18px; height: 18px; margin-right: 12px; accent-color: #cc0000; }
 
-        .field input[type="text"], .field textarea {
-            width: 100%; background: #111; border: 1px solid #333;
-            color: white; padding: 14px; border-radius: 4px; font-size: 15px;
-        }
+        input[type="text"], textarea { width: 100%; background: #111; border: 1px solid #333; color: white; padding: 14px; border-radius: 4px; font-size: 15px; }
+        .submit-btn { width: 100%; background: #cc0000; border: none; padding: 18px; color: white; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 18px; margin-top: 20px; }
 
-        /* --- 4. Footer --- */
+        /* --- 5. Footer 徹底修正 --- */
         .site-footer {
-            margin-top: 100px; padding: 80px 60px; border-top: 1px solid #1a1a1a;
-            display: flex; justify-content: space-between; max-width: 1400px; margin-inline: auto;
+            background-color: #000;
+            border-top: 1px solid #1a1a1a;
+            padding: 80px 60px;
+            width: 100%; /* 確保寬度撐滿 */
+            margin-top: auto; /* 推到最底部 */
+        }
+        .footer-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex; /* 關鍵：強制橫向排列 */
+            justify-content: space-between;
+            align-items: flex-start;
         }
         .f-col h4 { color: white; margin-bottom: 25px; font-size: 16px; }
         .f-col ul { list-style: none; }
-        .f-col ul li { color: #aaa; margin-bottom: 15px; font-size: 14px; cursor: pointer; }
-        .f-col ul li:hover { color: #ff3333; }
+        .f-col ul li { color: #aaa; margin-bottom: 15px; font-size: 14px; }
+
+        .swal2-popup { background-color: #1a1a1a !important; color: #fff !important; border: 1px solid #4a0000 !important; }
+        .swal2-title { color: #cc0000 !important; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="top-bar">
-        <div class="xxx-text">XXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>
-        <div class="top-right">
-            <div class="search-box">
-                <input type="text" placeholder="Search...">
-                <i class="fas fa-search"></i>
-            </div>
-            <i class="fas fa-user user-icon"></i>
-            <i class="fas fa-shopping-cart cart-icon"></i>
-        </div>
-    </div>
+    <div class="top-bar"><div class="xxx-text">XXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div></div>
     <div class="main-header">
-        <div class="logo-group">
-            <div class="white-dot"></div>
-            <div class="brand-name">卡爾夏</div>
-        </div>
-        <nav class="nav-links">
-            <a href="#">商城</a><a href="#">安裝區</a><a href="#">論壇</a><a href="#">公告</a><a href="#">常見問題</a>
-        </nav>
+        <div class="logo-group"><div class="white-dot"></div><div class="brand-name">卡爾夏</div></div>
+        <nav class="nav-links"><a href="#">商城</a><a href="#">安裝區</a><a href="#">論壇</a><a href="#">公告</a><a href="#">常見問題</a></nav>
     </div>
 </header>
 
@@ -150,75 +93,105 @@
     <aside>
         <div class="aside-title">Browse by</div>
         <ul class="sidebar-menu">
-            <li class="active">所有商品</li>
-            <li>預設欄位</li><li>預設欄位</li><li>預設欄位</li>
-            <li>預設欄位</li><li>預設欄位</li><li>預設欄位</li><li>預設欄位</li>
+            <li class="active">提交申訴</li>
+            <li>我的訂單</li><li>技師評價</li><li>服務紀錄</li>
         </ul>
     </aside>
 
     <main class="function-area">
         <div class="appeal-card">
             <h1 class="appeal-title">INSTALLATION APPEAL SERVICE</h1>
-            <p class="appeal-desc">如果您在安裝服務中有任何問題，請填寫下方表單（類別可多選）。</p>
+            <p class="appeal-desc">如果您在安裝服務中有任何問題，請填寫下方表單。</p>
 
-            <form id="appealForm">
+            <form id="appealForm" action="/appeals/submit" method="post">
                 <div class="form-row">
                     <div class="field" style="flex: 0.4;">
                         <label>安裝訂單編號</label>
-                        <input type="text" placeholder="請輸入編號">
+                        <input type="text" id="orderNoInput" name="installOrderNo" placeholder="請輸入編號">
                     </div>
 
                     <div class="field" style="flex: 0.6;">
-                        <label>申訴類別 (可多選)</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-item"><input type="checkbox" name="type" value="ATTITUDE"> 技師態度不佳</label>
-                            <label class="checkbox-item"><input type="checkbox" name="type" value="LATE"> 技師遲到 / 早退</label>
-                            <label class="checkbox-item"><input type="checkbox" name="type" value="NOT_DONE"> 商品安裝未落實</label>
-                            <label class="checkbox-item"><input type="checkbox" name="type" value="DAMAGE"> 車體受損</label>
-                            <label class="checkbox-item"><input type="checkbox" name="type" value="FUNCTION"> 與預期功能不符</label>
-                            <label class="checkbox-item"><input type="checkbox" name="type" value="SPEC"> 規格安裝錯誤</label>
-                            <label class="checkbox-item"><input type="checkbox" name="type" value="DELAY"> 施工時程嚴重拖延</label>
-                            <label class="checkbox-item"><input type="checkbox" name="type" value="VENUE"> 預約場地不符</label>
-                            <label class="checkbox-item"><input type="checkbox" name="type" value="UNAUTHORIZED"> 未經許可動用車輛</label>
-                            <hr style="border: 0; border-top: 1px solid #333; margin: 10px 0;">
+                        <label>申訴類別 (必選)</label>
+                        <div class="checkbox-group" id="categoryGroup">
+                            <label class="checkbox-item"><input type="checkbox" name="type" value="技師態度不佳"> 技師態度不佳</label>
+                            <label class="checkbox-item"><input type="checkbox" name="type" value="技師遲到"> 技師遲到 / 早退</label>
+                            <label class="checkbox-item"><input type="checkbox" name="type" value="商品安裝未落實"> 商品安裝未落實</label>
+                            <label class="checkbox-item"><input type="checkbox" name="type" value="車體受損"> 車體受損</label>
+                            <label class="checkbox-item"><input type="checkbox" name="type" value="功能不符"> 與預期功能不符</label>
+                            <label class="checkbox-item"><input type="checkbox" name="type" value="規格安裝錯誤"> 規格安裝錯誤</label>
+                            <label class="checkbox-item"><input type="checkbox" name="type" value="施工時程嚴重拖延"> 施工時程嚴重拖延</label>
+                            <label class="checkbox-item"><input type="checkbox" name="type" value="預約場地不符"> 預約場地不符</label>
+                            <label class="checkbox-item"><input type="checkbox" name="type" value="未經許可動用車輛"> 未經許可動用車輛</label>
                             <label class="checkbox-item">
-                                <input type="checkbox" id="otherTrigger" name="type" value="OTHER" onchange="toggleOther()"> 其他（請勾選並於下方輸入）
+                                <input type="checkbox" id="otherTrigger" name="type" value="其他" onchange="toggleOther()"> 其他
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <div id="otherInputRow" class="field" style="display: none; margin-bottom: 25px;">
+                <div id="otherInputRow" class="field" style="display: none;">
                     <label>請詳述其他原因</label>
-                    <input type="text" placeholder="在此輸入原因...">
+                    <input type="text" id="otherDetailInput" placeholder="在此輸入原因...">
                 </div>
 
                 <div class="field">
                     <label>問題詳細描述</label>
-                    <textarea rows="6" placeholder="請詳細說明您遇到的問題..."></textarea>
+                    <textarea id="descInput" name="description" rows="6" placeholder="請詳細說明您遇到的問題..."></textarea>
                 </div>
+
+                <button type="button" class="submit-btn" onclick="validateAndSubmit()">SUBMIT APPEAL</button>
             </form>
         </div>
     </main>
 </div>
 
 <footer class="site-footer">
-    <div class="f-logo-area" style="display: flex; align-items: center; gap: 10px;">
-        <div class="white-dot" style="width: 28px; height: 13px;"></div>
-        <span style="font-size: 22px; font-weight: bold; letter-spacing: 2px;">卡爾夏</span>
+    <div class="footer-inner">
+        <div class="f-logo-area" style="display: flex; align-items: center; gap: 10px;">
+            <div class="white-dot" style="width: 28px; height: 13px;"></div>
+            <span style="font-size: 22px; font-weight: bold; letter-spacing: 2px;">卡爾夏</span>
+        </div>
+        <div class="f-col"><h4>Shop</h4><ul><li>Shop Parts</li><li>Wholesale</li></ul></div>
+        <div class="f-col"><h4>The Company</h4><ul><li>About Us</li><li>FAQ</li></ul></div>
+        <div class="f-col"><h4>Contact Us</h4><ul><li>info@mysite.com</li></ul></div>
+        <div class="f-col"><h4>Follow Us</h4><ul><li>Instagram</li></ul></div>
     </div>
-    <div class="f-col"><h4>Shop</h4><ul><li>Shop Parts</li><li>Wholesale</li></ul></div>
-    <div class="f-col"><h4>The Company</h4><ul><li>About Us</li><li>FAQ</li></ul></div>
-    <div class="f-col"><h4>Contact Us</h4><ul><li>info@mysite.com</li></ul></div>
-    <div class="f-col"><h4>Follow Us</h4><ul><li>Instagram</li></ul></div>
 </footer>
 
 <script>
     function toggleOther() {
         const otherTrigger = document.getElementById('otherTrigger');
         const otherRow = document.getElementById('otherInputRow');
-        // 判斷該 checkbox 是否被勾選
         otherRow.style.display = otherTrigger.checked ? 'block' : 'none';
+    }
+
+    function validateAndSubmit() {
+        const orderNo = document.getElementById('orderNoInput').value.trim();
+        const desc = document.getElementById('descInput').value.trim();
+        const otherTrigger = document.getElementById('otherTrigger');
+        const otherDetail = document.getElementById('otherDetailInput').value.trim();
+        const checkboxes = document.querySelectorAll('input[name="type"]');
+        let isChecked = false;
+
+        checkboxes.forEach(cb => { if (cb.checked) isChecked = true; });
+
+        if (orderNo === "") {
+            Swal.fire({ title: '卡爾夏Karshop', text: '請填寫安裝訂單編號！', icon: 'warning', confirmButtonColor: '#cc0000' });
+            return;
+        }
+        if (!isChecked) {
+            Swal.fire({ title: '卡爾夏Karshop', text: '請至少勾選一個申訴類別！', icon: 'warning', confirmButtonColor: '#cc0000' });
+            return;
+        }
+        if (otherTrigger.checked && otherDetail === "") {
+            Swal.fire({ title: '卡爾夏Karshop', text: '請填寫要描述其他原因！', icon: 'warning', confirmButtonColor: '#cc0000' });
+            return;
+        }
+        if (desc === "") {
+            Swal.fire({ title: '卡爾夏Karshop', text: '請填寫問題詳細描述！', icon: 'warning', confirmButtonColor: '#cc0000' });
+            return;
+        }
+        document.getElementById('appealForm').submit();
     }
 </script>
 </body>
