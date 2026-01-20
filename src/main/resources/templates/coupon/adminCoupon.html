@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>優惠券管理 - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/back-end/admin_index.css}">
+    <link rel="stylesheet" th:href="@{/css/couponStyle.css}">
+</head>
+<body>
+<div class="app-container">
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar scrollbar-styled">
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">會員帳號管理</a></li>
+                        <li><a href="#">管理員帳號管理</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu open">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-ticket-alt"></i> 優惠券管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#coupon-list" class="active">優惠券列表</a></li>
+                        <li><a href="#coupon-query">複合查詢</a></li>
+                        <li><a href="#coupon-add">新增優惠券</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-star"></i> 自訂</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-headset"></i> 自訂</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#">登出 (Logout)</a>
+        </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">🎟️ 優惠券管理系統</h2>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area scrollbar-styled">
+
+            <!-- 優惠券列表 -->
+            <section id="coupon-list" class="page-section">
+                <h1><i class="fas fa-list"></i> 優惠券列表</h1>
+
+                <div class="page-actions">
+                    <a href="#coupon-query" class="btn btn-query">🔍 複合查詢優惠券</a>
+                    <a href="#coupon-add" class="btn btn-add">➕ 新增優惠券</a>
+                </div>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th>優惠券編號</th>
+                        <th>優惠券名稱</th>
+                        <th>優惠內容</th>
+                        <th>折價金額</th>
+                        <th>開始時間</th>
+                        <th>結束時間</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="c : ${coupons}">
+                        <td th:text="${c.couponNo}"></td>
+                        <td th:text="${c.couponTitle}"></td>
+                        <td th:text="${c.couponContent}"></td>
+                        <td th:text="${c.discountValue}"></td>
+                        <td th:text="${#temporals.format(c.couponStart, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td th:text="${#temporals.format(c.couponEnd, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td>
+                            <a th:href="@{/coupon/update-page/{no}(no=${c.couponNo})}" class="btn-edit"
+                               style="background-color: #ffc107; color: black; padding: 5px 10px; text-decoration: none; border-radius: 4px;">修改</a>
+
+                            <form th:action="@{/coupon/delete}" method="post" style="display:inline;"
+                                  onsubmit="return confirm('確定要刪除這筆優惠券嗎？');">
+                                <input type="hidden" name="couponNo" th:value="${c.couponNo}">
+                                <button type="submit" class="btn-delete" style="background-color: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">刪除</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 複合查詢 -->
+            <section id="coupon-query" class="page-section" style="display:none;">
+                <h1><i class="fas fa-search"></i> 複合查詢優惠券</h1>
+
+                <div class="search-box">
+                    <h2>查詢條件</h2>
+                    <form th:action="@{/coupon/listByCompositeQuery}" method="post">
+                        <div class="row">
+                            <label>優惠券名稱:</label>
+                            <input type="text" name="title" placeholder="例如：週年慶">
+                        </div>
+                        <div class="row">
+                            <label>優惠券內容:</label>
+                            <input type="text" name="content">
+                        </div>
+
+                        <div class="row">
+                            <label>開始日期:</label>
+                            <input type="date" name="start">
+                        </div>
+                        <div class="row">
+                            <label>結束日期:</label>
+                            <input type="date" name="end">
+                        </div>
+                        <div class="btn-row">
+                            <button type="submit">開始查詢</button>
+                            <button type="reset">重設條件</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="back-link">
+                    <a href="#coupon-list">回優惠券列表</a>
+                </div>
+            </section>
+
+            <!-- 新增優惠券 -->
+            <section id="coupon-add" class="page-section" style="display:none;">
+                <h1><i class="fas fa-plus-circle"></i> 新增優惠券</h1>
+
+                <div class="form-container">
+                    <form th:action="@{/coupon/insert}" th:object="${coupon}" method="post">
+
+                        <div th:if="${errorMessage}" class="error-msg" th:text="${errorMessage}"></div>
+
+                        <div class="row">
+                            <label>管理員編號</label>
+                            <input type="number" th:field="*{admNo}" placeholder="請輸入管理員編號">
+
+
+                            <!--            <select th:field="*{admNo}">-->
+                            <!--                <option value="">&#45;&#45; 請選擇管理員 &#45;&#45;</option>-->
+                            <!--                <option th:each="no : ${adminNoList}"-->
+                            <!--                        th:value="${no}"-->
+                            <!--                        th:text="'管理員編號: ' + ${no}">-->
+                            <!--                </option>-->
+                            <!--            </select>-->
+                            <!--            <select th:field="*{admNo}">-->
+                            <!--                <option value="">&#45;&#45; 請選擇管理員 &#45;&#45;</option>-->
+                            <!--                <option th:each="admin : ${adminList}"-->
+                            <!--                        th:value="${admin.admNo}"-->
+                            <!--                        th:text="${admin.admName} + ' (' + ${admin.admNo} + ')'">-->
+                            <!--                </option>-->
+                            <!--            </select>-->
+                            <span th:if="${#fields.hasErrors('admNo')}" th:errors="*{admNo}" class="error"></span>
+                        </div>
+                        <div class="row">
+                            <label>優惠券標題</label>
+                            <input type="text" th:field="*{couponTitle}" maxlength="30" placeholder="最多30字，例如：新春大放送">
+                            <span th:if="${#fields.hasErrors('couponTitle')}" th:errors="*{couponTitle}" class="error"></span>
+                        </div>
+
+                        <div class="row">
+                            <label>優惠內容</label>
+                            <textarea th:field="*{couponContent}" rows="4" maxlength="200" placeholder="最多200字，請輸入詳細優惠規則..."></textarea>
+                            <span th:if="${#fields.hasErrors('couponContent')}" th:errors="*{couponContent}" class="error"></span>
+                        </div>
+
+                        <div class="row">
+                            <label>折價金額</label>
+                            <input type="number" th:field="*{discountValue}" placeholder="請輸入折價金額">
+                            <span th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}" class="error"></span>
+                        </div>
+
+                        <div class="row">
+                            <label>開始時間</label>
+                            <input type="datetime-local" th:field="*{couponStart}">
+                            <span th:if="${#fields.hasErrors('couponStart')}" th:errors="*{couponStart}" class="error"></span>
+                        </div>
+
+                        <div class="row">
+                            <label>結束時間</label>
+                            <input type="datetime-local" th:field="*{couponEnd}">
+                            <span th:if="${#fields.hasErrors('couponEnd')}" th:errors="*{couponEnd}" class="error"></span>
+                        </div>
+
+                        <div class="btn-row">
+                            <button type="submit" class="btn-submit">確認新增</button>
+                            <button type="reset" class="btn-reset">重設</button>
+                            <a th:href="@{/coupon/list-page}" class="btn btn-cancel">取消</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 修改優惠券 -->
+            <section id="coupon-edit" class="page-section" style="display:none;">
+                <h1><i class="fas fa-edit"></i> 修改優惠券資訊</h1>
+
+                <div class="form-container">
+                    <form>
+                        <div class="row">
+                            <label>優惠券編號:</label>
+                            <input type="text" value="COUP001" readonly>
+                        </div>
+
+                        <div class="row">
+                            <label>管理員編號:</label>
+                            <input type="text" value="ADM001" readonly style="background-color: #f5f5f5;">
+                        </div>
+
+                        <div class="row">
+                            <label>標題 <span style="color: red;">*</span></label>
+                            <input type="text" name="couponTitle" value="新春大放送" required>
+                        </div>
+
+                        <div class="row">
+                            <label>內容 <span style="color: red;">*</span></label>
+                            <textarea name="couponContent" rows="4" required>新年優惠，滿額折扣</textarea>
+                        </div>
+
+                        <div class="row">
+                            <label>折價金額 <span style="color: red;">*</span></label>
+                            <input type="number" name="discountValue" value="500" required>
+                        </div>
+
+                        <div class="row">
+                            <label>開始時間 <span style="color: red;">*</span></label>
+                            <input type="datetime-local" name="couponStart" value="2025-01-01T00:00" required>
+                        </div>
+
+                        <div class="row">
+                            <label>結束時間 <span style="color: red;">*</span></label>
+                            <input type="datetime-local" name="couponEnd" value="2025-02-28T23:59" required>
+                        </div>
+
+                        <div class="btn-row">
+                            <button type="submit" class="btn btn-submit">確認儲存</button>
+                            <a href="#coupon-list" class="btn btn-cancel">取消返回</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<script>
+    // 側邊欄子選單切換
+    document.querySelectorAll('.submenu-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const parent = this.parentElement;
+            parent.classList.toggle('open');
+        });
+    });
+
+    // 頁面切換
+    document.querySelectorAll('.submenu a, .page-actions a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href.startsWith('#')) {
+                e.preventDefault();
+
+                // 隱藏所有頁面
+                document.querySelectorAll('.page-section').forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                // 移除所有active狀態
+                document.querySelectorAll('.submenu a').forEach(a => {
+                    a.classList.remove('active');
+                });
+
+                // 顯示選中的頁面
+                const target = document.querySelector(href);
+                if (target) {
+                    target.style.display = 'block';
+                    this.classList.add('active');
+                }
+            }
+        });
+    });
+
+    // 表單提交確認
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (this.querySelector('button[type="submit"]').textContent.includes('刪除')) {
+                return true;
+            }
+            // 可在此添加表單驗證邏輯
+        });
+    });
+</script>
+</body>
+</html>
