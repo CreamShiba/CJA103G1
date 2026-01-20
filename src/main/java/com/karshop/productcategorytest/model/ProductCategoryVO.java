@@ -1,4 +1,4 @@
-package com.karshop.productcategory.model;
+package com.karshop.productcategorytest.model;
 
 import jakarta.persistence.*;
 import java.util.Set;
