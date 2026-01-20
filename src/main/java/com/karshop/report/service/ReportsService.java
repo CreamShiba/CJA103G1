@@ -15,13 +15,21 @@ public class ReportsService {
 
     public void submitReport(Reports report) {
         report.setReportsTimestamp(LocalDateTime.now());
-
         report.setStatus("PENDING");
         report.setAdmNo(1);
-
         reportsRepository.save(report);
     }
     public List<Reports> getAllReports() {
         return reportsRepository.findAll();
+    }
+
+    public void handleReport(Integer id, String status, Integer admNo){
+        Reports report =  reportsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("找不到編號為 " + id + " 的檢舉紀錄"));
+
+        report.setStatus(status);
+        report.setAdmNo(admNo);
+        report.setHandled(LocalDateTime.now());
+        reportsRepository.save(report);
     }
 }

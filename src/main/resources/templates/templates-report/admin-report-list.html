@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head><title>檢舉管理後台</title></head>
+<body>
+<h1>檢舉管理列表</h1>
+<table border="1">
+    <thead>
+    <tr>
+        <th>編號</th><th>類型</th><th>原因</th><th>狀態</th>
+    </tr>
+    </thead>
+    <tbody id="reportList"></tbody>
+</table>
+
+<script>
+    // 一進網頁就去抓 JSON 資料
+    fetch('/reports/api/all')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.getElementById('reportList');
+            data.forEach(item => {
+                tbody.innerHTML += `<tr>
+                        <td>${item.reportsNo}</td>
+                        <td>${item.reportsType}</td>
+                        <td>${item.reportsReason}</td>
+                        <td>${item.status}</td>
+                    </tr>`;
+            });
+        });
+</script>
+</body>
+</html>
