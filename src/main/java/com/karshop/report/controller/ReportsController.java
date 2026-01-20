@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @RequestMapping("/reports")
@@ -38,5 +39,29 @@ public class ReportsController {
         model.addAttribute("target", report.getReportsTarget());
 
         return "templates-report/report-success";
+    }
+
+    @GetMapping("/api/all")
+    @ResponseBody //加這個註解 才會回傳JSON資料而不是找HTML頁面
+    public List<Reports> getAllReportsForAdmin(){
+        return reportsService.getAllReports();
+    }
+
+    @PostMapping("/api/handle")
+    @ResponseBody
+    public String handleReportByAdmin(@RequestParam Integer id,
+                                      @RequestParam String status,
+                                      @RequestParam Integer admNo){
+        try{
+            reportsService.handleReport(id, status, admNo);
+            return "success";
+        }catch (Exception e){
+            return "error" + e.getMessage();
+        }
+    }
+
+    @GetMapping("/admin/list")
+    public String showAdminListPage(){
+        return "templates-report/admin-report-list";
     }
 }
