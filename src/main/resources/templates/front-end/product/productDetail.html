@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${productVO.prodName} + ' | Karshop 卡爾夏'"></title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/front-end/css/productDetail.css}">
+</head>
+<body>
+
+<header>
+    <div class="top-bar">
+        <div>Welcome to Karshop</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <form th:action="@{/product/shop}" method="get" style="display: flex; width: 100%; align-items: center;">
+
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Search..."
+                           style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+
+                    <button type="submit" style="background: transparent; border: none; cursor: pointer; padding: 0;">
+                        <span style="font-size: 16px;">🔍</span>
+                    </button>
+
+                </form>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer; font-size: 18px;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+                    <a href="#">登入</a>
+                    <a href="#">註冊</a>
+                </div>
+            </div>
+            <a th:href="@{/cart/view}" style="text-decoration: none;">
+                <span id="cart" style="cursor: pointer; font-size: 18px;">🛒</span>
+            </a>
+        </div>
+    </div>
+    <div class="main-header">
+        <a th:href="@{/product/shop}" class="logo">卡爾夏</a>
+        <nav class="nav-links">
+            <a th:href="@{/product/shop}">商城</a>
+            <a href="#">安裝區</a>
+            <a href="#">論壇</a>
+            <a href="#">公告</a>
+            <a href="#">常見問題</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+
+    <aside>
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Browse by</h3>
+            <ul class="category-list" id="category-list">
+                <li>
+                    <a th:href="@{/product/shop}"
+                       th:style="${productCategoryNo == null} ? 'color: #ff3333; font-weight: bold;' : ''">
+                        所有商品
+                    </a>
+                </li>
+
+                <li th:each="cat : ${categoryList}">
+                    <a th:href="@{/product/shop(productCategoryNo=${cat.productCategoryNo})}"
+                       th:text="${cat.productCategoryName}"
+                       th:style="${productCategoryNo == cat.productCategoryNo} ? 'color: #ff3333; font-weight: bold;' : ''">
+                        分類名稱
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </aside>
+
+    <div class="main-content-wrapper">
+
+        <div class="product-image-section">
+            <div class="main-image-box">
+                <img id="mainImg"
+                     th:if="${not #lists.isEmpty(productVO.productImage)}"
+                     th:src="@{/product/displayDetail(imgNo=${productVO.productImage[0].imgNo})}"
+                     alt="Product Image">
+                <div th:if="${#lists.isEmpty(productVO.productImage)}" style="color: #666;">
+                    暫無圖片
+                </div>
+            </div>
+
+            <div class="thumbnail-container" th:if="${not #lists.isEmpty(productVO.productImage)}">
+                <div class="thumb-box"
+                     th:each="piVO, iterStat : ${productVO.productImage}"
+                     th:classappend="${iterStat.index == 0} ? 'active'"
+                     onclick="switchImage(this)">
+                    <img th:src="@{/product/displayDetail(imgNo=${piVO.imgNo})}">
+                </div>
+            </div>
+        </div>
+
+        <div class="product-info-section">
+            <div class="breadcrumb">
+                <a th:href="@{/product/all}">首頁</a> / 商品詳情 / <span th:text="${productVO.prodName}"></span>
+            </div>
+
+            <h1 class="product-title" th:text="${productVO.prodName}">商品名稱</h1>
+
+            <div class="product-rating-detail"
+                 th:with="avg=${productVO.ratingAmount > 0 ? (productVO.ratingStar * 1.0 / productVO.ratingAmount) : 0}">
+
+                <span style="color: #ffc107; font-weight: bold; margin-right: 5px;"
+                      th:text="${#numbers.formatDecimal(avg, 1, 1)}">4.8</span>
+
+                <th:block th:each="i : ${#numbers.sequence(1, 5)}">
+                    <i class="fas fa-star" th:if="${avg >= i}"></i>
+                    <i class="fas fa-star-half-alt" th:if="${avg < i and avg >= i - 0.5}"></i>
+                    <i class="far fa-star" style="color: #444;" th:if="${avg < i - 0.5}"></i>
+                </th:block>
+
+                <span class="rating-count-detail" th:text="'(' + ${productVO.ratingAmount} + ' 則評價)'"></span>
+            </div>
+
+            <div class="product-price" th:text="${'$' + #numbers.formatInteger(productVO.prodPrice, 1, 'COMMA')}">$999</div>
+
+            <div class="divider"></div>
+
+            <div class="product-desc" th:text="${productVO.prodDesc}">
+                這裡是商品描述...
+            </div>
+
+            <!--檢舉商品 -->
+            <button type="button" class="report-btn" onclick="openReportModal()">
+                <i class="fas fa-exclamation-circle"></i> 檢舉此商品
+            </button>
+
+            <div class="divider"></div>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+
+                <form th:action="@{/cart/add}" method="post" style="display: flex; align-items: center;">
+                    <input type="hidden" name="prodNo" th:value="${productVO.prodNo}">
+
+                    <div class="qty-selector" th:if="${productVO.prodQty > 0}">
+                        <button type="button" class="qty-btn" onclick="updateQty(-1)">-</button>
+                        <input type="number" name="qty" id="qtyInput" class="qty-input" value="1" min="1" th:max="${productVO.prodQty}" readonly>
+                        <button type="button" class="qty-btn" onclick="updateQty(1)">+</button>
+                    </div>
+
+                    <button type="submit" class="add-cart-btn" th:if="${productVO.prodQty > 0}">
+                        加入購物車
+                    </button>
+                    <button type="button" class="add-cart-btn" disabled th:if="${productVO.prodQty <= 0}" style="background: #555;">
+                        暫無庫存
+                    </button>
+                </form>
+
+                <!-- 商品收藏-->
+                <form th:action="@{/fav/toggle}" method="post" style="display: flex;">
+                    <input type="hidden" name="prodNo" th:value="${productVO.prodNo}">
+
+                    <button type="submit" class="fav-btn"
+                            th:classappend="${isFavorite} ? 'active'"
+                            th:title="${isFavorite} ? '取消收藏' : '加入收藏'">
+
+                        <i th:class="${isFavorite} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                    </button>
+                </form>
+
+            </div>
+
+            <div style="margin-top: 10px; color: #00e676; font-size: 13px;" th:if="${productVO.prodQty > 0}">
+                <i class="fas fa-check-circle"></i> 現貨充足 (剩餘 <span th:text="${productVO.prodQty}"></span>)
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-col"><div class="footer-logo logo">卡爾夏</div></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li>Shop Parts</li><li>Wholesale</li></ul></div>
+    <div class="footer-col"><h4>The Company</h4><ul><li>About Us</li><li>FAQ</li></ul></div>
+    <div class="footer-col"><h4>Contact Us</h4><ul><li>info@karshop.com</li></ul></div>
+    <div class="footer-col"><h4>Follow Us</h4><ul><li>Instagram</li></ul></div>
+</footer>
+
+<!--檢舉商品 -->
+<div id="reportModal" class="modal-overlay">
+    <div class="modal-box">
+        <h3 class="modal-title">檢舉商品</h3>
+        <p style="color: #aaa; font-size: 14px; margin-bottom: 10px;">請告訴我們檢舉的原因：</p>
+        <textarea class="modal-textarea" placeholder="例如：商品資訊不實、仿冒品..."></textarea>
+        <div class="modal-actions">
+            <button class="modal-close" onclick="closeReportModal()">取消</button>
+            <button class="modal-submit" onclick="submitReport()">送出檢舉</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/front-end/js/productDetail.js}"></script>
+</body>
+</html>
