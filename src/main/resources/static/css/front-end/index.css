@@ -160,40 +160,40 @@ footer {
 
 /* 下拉選單容器 */
 .user-dropdown-container {
-    position: relative;
-    display: inline-block;
+	position: relative;
+	display: inline-block;
 }
 
 /* 下拉選單本體 (預設隱藏) */
 .dropdown-menu {
-    display: none; /* 預設隱藏 */
-    position: absolute;
-    right: 0;
-    top: 30px;
-    background-color: #1a1a1a;
-    min-width: 120px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
-    z-index: 100;
-    border: 1px solid #333;
-    border-radius: 4px;
+	display: none; /* 預設隱藏 */
+	position: absolute;
+	right: 0;
+	top: 30px;
+	background-color: #1a1a1a;
+	min-width: 120px;
+	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+	z-index: 100;
+	border: 1px solid #333;
+	border-radius: 4px;
 }
 
 /* 顯示狀態 (透過 JS 切換) */
 .dropdown-menu.show {
-    display: block;
+	display: block;
 }
 
 /* 選單連結樣式 */
 .dropdown-menu a {
-    color: #ccc;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    font-size: 13px;
-    transition: 0.2s;
+	color: #ccc;
+	padding: 12px 16px;
+	text-decoration: none;
+	display: block;
+	font-size: 13px;
+	transition: 0.2s;
 }
 
 .dropdown-menu a:hover {
-    background-color: #333;
-    color: #ff3333;
+	background-color: #333;
+	color: #ff3333;
 }

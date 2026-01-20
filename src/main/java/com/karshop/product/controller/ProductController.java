@@ -5,13 +5,15 @@ import com.karshop.ord.model.OrdService;
 import com.karshop.ord.model.OrdVO;
 import com.karshop.product.model.ProductService;
 import com.karshop.product.model.ProductVO;
+import com.karshop.productcategory.model.ProductCategoryService;
+import com.karshop.productcategory.model.ProductCategoryVO;
 import com.karshop.productimage.model.ProductImageService;
 import com.karshop.productimage.model.ProductImageVO;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.EvaluationException;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -37,6 +39,9 @@ public class ProductController {
     private ProductImageService productImageService;
 
     @Autowired
+    private ProductCategoryService productCategoryService;
+
+    @Autowired
     private EntityManager entityManager;
 
     @GetMapping("/addProduct")
@@ -58,7 +63,7 @@ public class ProductController {
             return  "back-end/seller/addProduct";
         }
 
-        productVO.setProductCategoryNo(3);
+        productVO.getProductCategory().setProductCategoryNo(3);
         productVO.setSellerNo(101);
 //        productVO.setProdStatus("上架中");
 //        productVO.setRatingStar(0);  //評分總星數初始為0
@@ -207,10 +212,56 @@ public class ProductController {
         return "back-end/seller/seller_index";
     }
 
+//  商城首頁
+    @GetMapping("/shop")
+    public String getAllForBuyer(@RequestParam(defaultValue = "1") int page ,
+                                 @RequestParam(required = false) String keyword,
+                                 @RequestParam(required = false) Integer productCategoryNo, ModelMap model) {
+
+        Page<ProductVO> productPage = productService.getAllForBuyer(page, keyword, productCategoryNo);
+
+        model.addAttribute("productPage", productPage);
+        model.addAttribute("currentPage", page);
+//      搜尋條件存回去
+        model.addAttribute("productCategoryNo", productCategoryNo);
+        model.addAttribute("keyword", keyword);
+
+
+
+        return "front-end/index2";
+    }
+
+//    商品詳情頁
+    @GetMapping("/detail")
+    public String getOneProduct(@RequestParam(value = "prodNo")  Integer prodNo, ModelMap model) {
+        ProductVO productVO = productService.getOneProduct(prodNo);
+        model.addAttribute("productVO", productVO);
+
+        return "front-end/product/productDetail";
+    }
+
+
+
     @ModelAttribute
     public void populateCommonData(ModelMap model) {
         Integer sellerNo = 101;
         List<OrdVO> ordList = ordService.getOrdBySeller(sellerNo);
+
+        int pendingOrder = 0;
+        int allOrder = 0;
+
+        for (OrdVO ordVO : ordList) {
+            String status = ordVO.getOrdStatus();
+            if (status.equals("待出貨")) {
+                pendingOrder++;
+            }
+            if (status.equals("待出貨") || status.equals("已完成") || status.equals("已出貨")) {
+                allOrder++;
+            }
+        }
+        model.addAttribute("pendingOrder", pendingOrder);
+        model.addAttribute("allOrder", allOrder);
+
         model.addAttribute("ordList", ordList);
 
         List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
@@ -223,6 +274,10 @@ public class ProductController {
         }
 
         model.addAttribute("activeProductCount", activeProductCount);
+
+        //   側邊攔、下拉選單
+        List<ProductCategoryVO> categoryList = productCategoryService.getAll();
+        model.addAttribute("categoryList", categoryList);
 
     }
 

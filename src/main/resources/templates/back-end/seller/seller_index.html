@@ -43,7 +43,7 @@
                 <div class="stats-grid">
                     <div class="stat-card" onclick="switchTab('orders')">
                         <div>處理中訂單</div>
-                        <div class="stat-value color-red">0</div>
+                        <div class="stat-value color-red" th:text="${pendingOrder}">0</div>
                         <div style="font-size:12px; color:#aaa;">需盡快出貨</div>
                     </div>
                     <div class="stat-card" onclick="switchTab('products')">
@@ -53,7 +53,7 @@
                     </div>
                     <div class="stat-card">
                         <div>總訂單數</div>
-                        <div class="stat-value" style="color:var(--accent-purple)">0</div>
+                        <div class="stat-value" style="color:var(--accent-purple)" th:text="${allOrder}">0</div>
                     </div>
                 </div>
             </div>
@@ -111,11 +111,12 @@
 
                 <table class="data-table" th:if="${not #lists.isEmpty(productList)}">
                 <thead>
-                <tr><th>ID</th><th>名稱</th><th>圖片</th><th>狀態</th><th>價格</th><th>庫存</th><th>操作</th></tr>
+                <tr><th>ID</th><th>分類</th><th>名稱</th><th>圖片</th><th>狀態</th><th>價格</th><th>庫存</th><th>操作</th></tr>
                 </thead>
                 <tbody>
                 <tr th:each="product : ${productList}">
                     <td th:text="${product.prodNo}"></td>
+                    <td th:text="${product.productCategory != null} ? ${product.productCategory.productCategoryName} : '未分類'"></td>
                     <td style="font-weight:bold;" th:text="${product.prodName}"></td>
                     <td><img th:src="@{/product/displayMain(prodNo=${product.prodNo})}" width="50" height="50" style="object-fit: cover; border-radius: 4px;"></td>
                     <td>
@@ -306,7 +307,7 @@
                                 </div>
 
                                 <button type="button"
-                                        th:if="${ord.ordStatus == '待出貨'}"
+                                        th:if="${ord.ordStatus == '待出貨' and ord.ordPaymentStatus != '已付款'}"
                                         th:onclick="'openCancelModal(' + ${ord.ordNo} + ')'"
                                         style="width: 100%; background: transparent; border: 1px solid #ff5252; color: #ff5252; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.3s;">
                                     <i class="fas fa-ban"></i> 取消訂單
@@ -355,6 +356,33 @@
     </main>
 </div>
 
+<footer class="site-footer">
+    <div class="footer-brand">
+        <div class="toggle-icon"></div>
+        <span>卡爾夏</span>
+    </div>
+    <div class="footer-links">
+        <div class="footer-col">
+            <h4>Shop</h4>
+            <a href="#">Shop Parts</a>
+            <a href="#">Wholesale</a>
+        </div>
+        <div class="footer-col">
+            <h4>The Company</h4>
+            <a href="#">About Us</a>
+            <a href="#">FAQ</a>
+        </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <a href="#">info@mysite.com</a>
+        </div>
+        <div class="footer-col">
+            <h4>Follow Us</h4>
+            <a href="#">Instagram</a>
+        </div>
+    </div>
+</footer>
+
 <div id="cancelModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
 
     <div style="background: #1e1e1e; width: 400px; padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
@@ -393,35 +421,9 @@
     </div>
 </div>
 
-<footer class="site-footer">
-    <div class="footer-brand">
-        <div class="toggle-icon"></div>
-        <span>卡爾夏</span>
-    </div>
-    <div class="footer-links">
-        <div class="footer-col">
-            <h4>Shop</h4>
-            <a href="#">Shop Parts</a>
-            <a href="#">Wholesale</a>
-        </div>
-        <div class="footer-col">
-            <h4>The Company</h4>
-            <a href="#">About Us</a>
-            <a href="#">FAQ</a>
-        </div>
-        <div class="footer-col">
-            <h4>Contact Us</h4>
-            <a href="#">info@mysite.com</a>
-        </div>
-        <div class="footer-col">
-            <h4>Follow Us</h4>
-            <a href="#">Instagram</a>
-        </div>
-    </div>
-</footer>
+
 
 <input type="hidden" id="currentActiveTab" th:value="${activeTab != null ? activeTab : 'dashboard'}">
-<!--<script th:inline="javascript"></script>-->
 <script th:src="@{/back-end/js/seller_index.js}"></script>
 </body>
 </html>
