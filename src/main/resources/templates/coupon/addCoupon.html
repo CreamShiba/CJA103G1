@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>新增優惠券</title>
+    <link rel="stylesheet" th:href="@{/css/couponStyle.css}">
+</head>
+<body>
+
+<div class="form-container">
+    <h2>🎟️ 新增優惠券</h2>
+    <form th:action="@{/coupon/insert}" th:object="${coupon}" method="post">
+
+        <div th:if="${errorMessage}" class="error-msg" th:text="${errorMessage}"></div>
+
+        <div class="row">
+            <label>管理員編號</label>
+            <input type="number" th:field="*{admNo}" placeholder="請輸入管理員編號">
+
+
+<!--            <select th:field="*{admNo}">-->
+<!--                <option value="">&#45;&#45; 請選擇管理員 &#45;&#45;</option>-->
+<!--                <option th:each="no : ${adminNoList}"-->
+<!--                        th:value="${no}"-->
+<!--                        th:text="'管理員編號: ' + ${no}">-->
+<!--                </option>-->
+<!--            </select>-->
+<!--            <select th:field="*{admNo}">-->
+<!--                <option value="">&#45;&#45; 請選擇管理員 &#45;&#45;</option>-->
+<!--                <option th:each="admin : ${adminList}"-->
+<!--                        th:value="${admin.admNo}"-->
+<!--                        th:text="${admin.admName} + ' (' + ${admin.admNo} + ')'">-->
+<!--                </option>-->
+<!--            </select>-->
+            <span th:if="${#fields.hasErrors('admNo')}" th:errors="*{admNo}" class="error"></span>
+        </div>
+        <div class="row">
+            <label>優惠券標題</label>
+            <input type="text" th:field="*{couponTitle}" maxlength="30" placeholder="最多30字，例如：新春大放送">
+            <span th:if="${#fields.hasErrors('couponTitle')}" th:errors="*{couponTitle}" class="error"></span>
+        </div>
+
+        <div class="row">
+            <label>優惠內容</label>
+            <textarea th:field="*{couponContent}" rows="4" maxlength="200" placeholder="最多200字，請輸入詳細優惠規則..."></textarea>
+            <span th:if="${#fields.hasErrors('couponContent')}" th:errors="*{couponContent}" class="error"></span>
+        </div>
+
+        <div class="row">
+            <label>折價金額</label>
+            <input type="number" th:field="*{discountValue}" placeholder="請輸入折價金額">
+            <span th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}" class="error"></span>
+        </div>
+
+        <div class="row">
+            <label>開始時間</label>
+            <input type="datetime-local" th:field="*{couponStart}">
+            <span th:if="${#fields.hasErrors('couponStart')}" th:errors="*{couponStart}" class="error"></span>
+        </div>
+
+        <div class="row">
+            <label>結束時間</label>
+            <input type="datetime-local" th:field="*{couponEnd}">
+            <span th:if="${#fields.hasErrors('couponEnd')}" th:errors="*{couponEnd}" class="error"></span>
+        </div>
+
+        <div class="btn-row">
+            <button type="submit" class="btn-submit">確認新增</button>
+            <button type="reset" class="btn-reset">重設</button>
+            <a th:href="@{/coupon/list-page}" class="btn btn-cancel">取消</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

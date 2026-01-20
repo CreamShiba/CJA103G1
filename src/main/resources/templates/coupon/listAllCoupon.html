@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>優惠券管理系統</title>
+    <link rel="stylesheet" th:href="@{/css/couponStyle.css}">
+</head>
+<body>
+<h1>🎟️ 優惠券管理列表</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>優惠券編號</th>
+        <th>優惠券名稱</th>
+        <th>優惠內容</th>
+        <th>折價金額</th>
+        <th>開始時間</th>
+        <th>結束時間</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="c : ${coupons}">
+        <td th:text="${c.couponNo}"></td>
+        <td th:text="${c.couponTitle}"></td>
+        <td th:text="${c.couponContent}"></td>
+        <td th:text="${c.discountValue}"></td>
+        <td th:text="${#temporals.format(c.couponStart, 'yyyy-MM-dd HH:mm')}"></td>
+        <td th:text="${#temporals.format(c.couponEnd, 'yyyy-MM-dd HH:mm')}"></td>
+        <td>
+            <a th:href="@{/coupon/update-page/{no}(no=${c.couponNo})}" class="btn-edit"
+               style="background-color: #ffc107; color: black; padding: 5px 10px; text-decoration: none; border-radius: 4px;">修改</a>
+
+            <form th:action="@{/coupon/delete}" method="post" style="display:inline;"
+                  onsubmit="return confirm('確定要刪除這筆優惠券嗎？');">
+                <input type="hidden" name="couponNo" th:value="${c.couponNo}">
+                <button type="submit" class="btn-delete" style="background-color: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;">刪除</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="header-actions">
+    <a th:href="@{/coupon/select-page}" class="btn-query">🔍 複合查詢優惠券</a>
+</div>
+
+</body>
+</html>
