@@ -1,4 +1,4 @@
-package com.karshop.productcategory.model;
+package com.karshop.productcategorytest.model;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

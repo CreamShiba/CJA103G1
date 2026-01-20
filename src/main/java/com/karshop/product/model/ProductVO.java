@@ -1,7 +1,7 @@
 package com.karshop.product.model;
 
 import com.karshop.orddetail.model.OrdDetailVO;
-import com.karshop.productcategory.model.ProductCategoryVO;
+import com.karshop.productcategorytest.model.ProductCategoryVO;
 import com.karshop.productimage.model.ProductImageVO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
