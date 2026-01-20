@@ -17,27 +17,24 @@
 body {
     background: linear-gradient(180deg, var(--bg-dark-top) 0%, var(--bg-dark-bottom) 100%);
     color: var(--text-primary);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    min-height: 100vh;          /* 設定全螢幕高度 */
+    display: flex;          /* 使用 Flex 排版 */
+    flex-direction: column; /* 上下排列 (上面是 AppWrapper，下面是 Footer) */
+    /*overflow: hidden;       !* 防止 Body 出現雙重捲軸 *!*/
 }
 
 .app-wrapper {
     display: flex;
-    flex: 1;
-    overflow: hidden;
+    flex: 1;              /* 🔥 關鍵：讓它自動填滿「除了 Footer 以外」的所有剩餘空間 */
+    overflow: hidden;     /* 限制溢出 */
     width: 100%;
 }
 
 /* --- 3. Sidebar --- */
 .sidebar {
-    width: 260px;
-    background: rgba(0, 0, 0, 0.9);
-    border-right: 1px solid var(--border-color);
-    padding: 20px;
-    flex-shrink: 0;
-    display: flex; flex-direction: column;
+    /* 確保 Sidebar 高度是跟隨父層，而不是寫死 */
+    height: 100%;
+    overflow-y: auto;     /* 如果 Sidebar 選單太多，自己捲動 */
 }
 .logo-area { font-size: 20px; font-weight: 700; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .logo-icon { width: 12px; height: 12px; background: var(--accent-purple); border-radius: 50%; box-shadow: 0 0 10px var(--accent-purple); }
@@ -140,11 +137,22 @@ body {
 /* 如果是深色模式背景，灰色可能要深一點或亮一點，看你喜好 */
 .toggle-inactive .toggle-track { background-color: #444; }
 
-/* --- 8. Footer (恢復你的完整版 CSS) --- */
+/* --- 8. Footer --- */
 .site-footer {
-    background: #080101; border-top: 1px solid var(--border-color); padding: 40px;
-    display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 40px;
-    width: 100%; z-index: 10; flex-shrink: 0;
+    background: #080101;
+    border-top: 1px solid var(--border-color);
+    padding: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 40px;
+    width: 100%;
+    z-index: 20;
+
+    /* 🔥 關鍵設定 */
+    flex-shrink: 0;   /* 防止 Footer 被擠壓 */
+    position: relative; /* 正常流動 */
 }
 .footer-brand { display: flex; align-items: center; gap: 15px; font-size: 24px; font-weight: bold; color: #fff; min-width: 200px; }
 .toggle-icon { width: 40px; height: 20px; background: #fff; border-radius: 20px; position: relative; }

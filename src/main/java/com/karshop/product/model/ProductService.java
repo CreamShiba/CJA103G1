@@ -3,6 +3,10 @@ package com.karshop.product.model;
 import com.karshop.productimage.model.ProductImageVO;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,13 +45,25 @@ public class ProductService {
         return productRepository.findBySellerNo(sellerNo);
     }
 
-    public List<ProductVO> getProductsByProdStatus(String prodStatus){
-        return productRepository.findByProdStatus(prodStatus);
+    public Page<ProductVO> getAllForBuyer(int pageNumber, String keyword, Integer productCategoryNo){
+        // 設定分頁：
+        // pageNumber - 1 : 因為 Spring 的頁數是從 0 開始算，但網址我們通常傳 1
+        // 9 : 每頁顯示 9 筆
+        // Sort : 按照商品編號 (prodNo) 降序排列 (最新的在最前面)
+        Pageable pageable = PageRequest.of(pageNumber - 1, 9, Sort.by("prodNo").descending());
+
+//      關鍵字搜尋
+        if(keyword != null && !keyword.trim().isEmpty()){
+            return productRepository.findByProdNameContainingAndProdStatus(keyword, "上架中",  pageable);
+        }
+//      商品類別搜尋
+        if(productCategoryNo != null){
+            return productRepository.findByProductCategory_ProductCategoryNoAndProdStatus(productCategoryNo, "上架中", pageable);
+        }
+//      首頁
+        return productRepository.findByProdStatus("上架中",  pageable);
     }
 
-    public List<ProductVO> getProductsByNameContainingAndProdStatus(String prodName,String prodStatus){
-        return productRepository.findByProdNameContainingAndProdStatus(prodName,prodStatus);
-    }
 
     public List<ProductVO> getProductBySearchForSeller(Integer sellerNo, String prodName, Integer minPrice, Integer maxPrice, String prodStatus){
         if(prodName != null && prodName.trim().isEmpty()){
@@ -66,8 +82,6 @@ public class ProductService {
 
         return productRepository.compositeSearch(sellerNo, prodName, minPrice, maxPrice, prodStatus);
     }
-
-
 
 
 }

@@ -89,6 +89,24 @@ public class OrdController {
     public void populateCommonData(ModelMap model) {
         Integer sellerNo = 101;
 
+        List<OrdVO> ordList = ordService.getOrdBySeller(sellerNo);
+
+        int pendingOrder = 0;
+        int allOrder = 0;
+
+        for (OrdVO ordVO : ordList) {
+            String status = ordVO.getOrdStatus();
+            if (status.equals("待出貨")) {
+                pendingOrder++;
+            }
+            if (status.equals("待出貨") || status.equals("已完成") || status.equals("已出貨")) {
+                allOrder++;
+            }
+        }
+        model.addAttribute("pendingOrder", pendingOrder);
+        model.addAttribute("allOrder", allOrder);
+
+
         List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
 
         int activeProductCount = 0;
