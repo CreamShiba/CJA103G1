@@ -1,5 +1,7 @@
 package com.karshop.product.model;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,9 +12,14 @@ public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
 
     List<ProductVO> findBySellerNo(Integer sellerNo);
 
-    List<ProductVO> findByProdStatus(String prodStatus);
+//   首頁
+    Page<ProductVO> findByProdStatus(String prodStatus, Pageable pageable);
 
-    List<ProductVO> findByProdNameContainingAndProdStatus(String prodName, String prodStatus);
+//  首頁分類搜尋
+    Page<ProductVO> findByProductCategory_ProductCategoryNoAndProdStatus(Integer productCategoryNo, String productStatus, Pageable pageable);
+
+//  首頁關鍵字搜尋
+    Page<ProductVO> findByProdNameContainingAndProdStatus(String prodName, String prodStatus, Pageable pageable);
 
     @Query("SELECT p FROM ProductVO p WHERE p.sellerNo = :sellerNo " +
             "AND (:prodName IS NULL OR p.prodName LIKE %:prodName%) " +
