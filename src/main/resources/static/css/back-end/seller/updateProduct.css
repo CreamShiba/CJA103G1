@@ -123,47 +123,18 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-purple
 }
 .btn-submit:hover { background: #6c4ce5; box-shadow: 0 0 20px rgba(125, 95, 255, 0.4); transform: translateY(-2px); }
 
+/* --- 6. Footer --- */
+.site-footer {
+    background: #080101; border-top: 1px solid var(--border-color); padding: 40px; margin-top: auto;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 40px;
+}
+.footer-brand { display: flex; align-items: center; gap: 15px; font-size: 24px; font-weight: bold; color: #fff; min-width: 200px; }
+.toggle-icon { width: 40px; height: 20px; background: #fff; border-radius: 20px; position: relative; }
+/*.toggle-icon::after { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; background: #000; border-radius: 50%; }*/
+.footer-links { display: flex; gap: 80px; flex-wrap: wrap; }
+.footer-col { display: flex; flex-direction: column; gap: 15px; }
+.footer-col h4 { color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+.footer-col a { color: #a0a0a0; text-decoration: none; font-size: 14px; transition: color 0.2s; }
+.footer-col a:hover { color: #fff; text-decoration: underline; }
+
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-/* --- 6. 違規警告區塊 (Violation Alert) --- */
-.violation-alert {
-    background: rgba(220, 53, 69, 0.15); /* 深紅色背景，低透明度 */
-    border: 1px solid #dc3545;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 30px;
-    color: #ffb3b9; /* 淺粉紅文字 */
-    animation: fadeIn 0.5s ease;
-}
-
-.violation-alert h3 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #ff6b75; /* 標題用亮一點的紅色 */
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.alert-content p {
-    margin-bottom: 8px;
-    font-size: 15px;
-    line-height: 1.5;
-    color: #e2e3e5;
-}
-
-.alert-content strong {
-    color: #fff; /* 強調文字用白色 */
-}
-
-.alert-footer {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(220, 53, 69, 0.4);
-    font-size: 14px;
-    color: #ff8a93;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
