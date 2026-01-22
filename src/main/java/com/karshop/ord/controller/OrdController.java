@@ -26,9 +26,6 @@ public class OrdController {
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    private RatingService ratingService;
-
     @GetMapping("/getOneOrder")
     public String getOneOrder(@RequestParam(value = "ordNo") Integer ordNo, ModelMap model) {
 
@@ -125,8 +122,6 @@ public class OrdController {
         model.addAttribute("productList", productList);
         model.addAttribute("activeProductCount", activeProductCount);
 
-//        List<Integer> ratedOrderNo = ratingService.getRatedOrderNoBySeller(sellerNo);
-//        model.addAttribute("ratedOrderNo", ratedOrderNo);
     }
 
 }
