@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安裝申訴管理 - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            display: flex;
+            height: 100%;
+        }
+
+        /* --- 左側側邊欄 --- */
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #e1e4e8;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 24px;
+            height: 12px;
+            background-color: #0066cc;
+            border-radius: 4px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+
+        .badge {
+            font-size: 10px;
+            background: #e6f0ff;
+            color: #0066cc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+
+        .sidebar-nav {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-top: 20px;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            color: #555;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.2s;
+            justify-content: space-between;
+            cursor: pointer;
+        }
+
+        .menu-item a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-item a:hover {
+            background-color: #f0f7ff;
+            color: #0066cc;
+        }
+
+        .submenu {
+            list-style: none;
+            background-color: #fafafa;
+            display: none;
+        }
+
+        .has-submenu.open .submenu {
+            display: block;
+        }
+
+        .has-submenu.open .arrow {
+            transform: rotate(180deg);
+        }
+
+        .submenu a {
+            padding-left: 58px;
+            font-size: 14px;
+        }
+
+        .submenu a.active {
+            background-color: #e0f2f1;
+            color: #00796b;
+            font-weight: bold;
+            border-right: 3px solid #00796b;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .sidebar-footer a {
+            color: #d9534f;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        /* --- 右側主內容 --- */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            background-color: white;
+            padding: 15px 40px;
+            border-bottom: 1px solid #e1e4e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title {
+            font-size: 20px;
+            color: #00796b;
+            font-weight: bold;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #333;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- 申訴管理內容區 --- */
+        .content-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 30px 40px;
+        }
+
+        .table-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .appeal-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .appeal-table thead {
+            background-color: #f8f9fa;
+        }
+
+        .appeal-table th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #00796b;
+            font-size: 15px;
+            border-bottom: 2px solid #e1e4e8;
+        }
+
+        .appeal-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .appeal-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background-color: #e0f2f1;
+            color: #00796b;
+        }
+
+        .btn-process {
+            background-color: #00796b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-process:hover {
+            background-color: #00695c;
+        }
+
+        /* 彈窗樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00796b;
+            margin-bottom: 20px;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-body p {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .modal-body textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background-color: #ccc;
+            color: #333;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-submit {
+            background-color: #00796b;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background-color: #00695c;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu open">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">會員帳號管理</a></li>
+                        <li><a href="#">管理員帳號管理</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu open">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-exclamation-circle"></i> 申訴/檢舉管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#" class="active">申訴總攬報表</a></li>
+                        <li><a href="#">檢舉總攬報表</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-star"></i> 自訂</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-headset"></i> 自訂</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#">登出 (Logout)</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">安裝申訴管理</h2>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="table-container">
+                <table class="appeal-table">
+                    <thead>
+                    <tr>
+                        <th>編號</th>
+                        <th>訂單編號</th>
+                        <th>申訴內容</th>
+                        <th>狀態</th>
+                        <th>申請時間</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>#123</td>
+                        <td>12345T</td>
+                        <td><span class="status-badge status-pending">PENDING</span></td>
+                        <td>2026-01-20 14:22</td>
+                        <td><button class="btn-process" onclick="openReplyModal(1, '#123', '12345T')">處理</button></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>#12345</td>
+                        <td>123</td>
+                        <td><span class="status-badge status-pending">PENDING</span></td>
+                        <td>2026-01-20 14:24</td>
+                        <td><button class="btn-process" onclick="openReplyModal(2, '#12345', '123')">處理</button></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>#123456543</td>
+                        <td>1234567</td>
+                        <td><span class="status-badge status-pending">PENDING</span></td>
+                        <td>2026-01-22 14:53</td>
+                        <td><button class="btn-process" onclick="openReplyModal(3, '#123456543', '1234567')">處理</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 回復彈窗 -->
+<div id="replyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            回復申訴
+        </div>
+        <div class="modal-body">
+            <p><strong>編號：</strong><span id="modalAppealId"></span></p>
+            <p><strong>訂單編號：</strong><span id="modalOrderId"></span></p>
+            <p><strong>申訴內容：</strong><span id="modalContent"></span></p>
+            <p><strong>回復內容：</strong></p>
+            <textarea id="replyText" placeholder="請輸入回復內容..."></textarea>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeReplyModal()">取消</button>
+            <button class="btn-submit" onclick="submitReply()">送出</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 側邊欄下拉選單功能
+    document.querySelectorAll('.submenu-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            const menuItem = this.closest('.menu-item');
+            menuItem.classList.toggle('open');
+        });
+    });
+
+    // 開啟回復彈窗
+    function openReplyModal(id, orderId, content) {
+        document.getElementById('modalAppealId').textContent = id;
+        document.getElementById('modalOrderId').textContent = orderId;
+        document.getElementById('modalContent').textContent = content;
+        document.getElementById('replyText').value = '';
+        document.getElementById('replyModal').classList.add('active');
+    }
+
+    // 關閉回復彈窗
+    function closeReplyModal() {
+        document.getElementById('replyModal').classList.remove('active');
+    }
+
+    // 送出回復
+    function submitReply() {
+        const replyText = document.getElementById('replyText').value;
+        const appealId = document.getElementById('modalAppealId').textContent;
+
+        if (replyText.trim() === '') {
+            alert('請輸入回復內容！');
+            return;
+        }
+
+        // 這裡可以加入實際的API請求
+        alert(`已送出回復給申訴編號 ${appealId}\n回復內容：${replyText}`);
+
+        closeReplyModal();
+    }
+
+    // 點擊彈窗外部關閉
+    document.getElementById('replyModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeReplyModal();
+        }
+    });
+</script>
+</body>
+</html>
