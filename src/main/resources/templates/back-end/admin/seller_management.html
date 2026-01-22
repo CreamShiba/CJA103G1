@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>賣家管理 - Karshop Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <link rel="stylesheet" th:href="@{/css/back-end/admin_index.css}">
+
+  <style>
+    .content-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      margin: 20px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    /* 搜尋列 */
+    .search-area {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .form-input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    .btn-primary { background: #0066cc; color: white; }
+    .btn-primary:hover { background: #0052a3; }
+
+    /* 表格樣式 */
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .admin-table th, .admin-table td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
+    .admin-table th {
+      background-color: #f8f9fa;
+      color: #555;
+      font-weight: 600;
+    }
+    .admin-table tr:hover { background-color: #f5faff; }
+
+    /* 狀態標籤 */
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .status-wait { background: #fff3cd; color: #856404; } /* 待審核 (黃) */
+    .status-ok { background: #d4edda; color: #155724; }   /* 已開通 (綠) */
+    .status-block { background: #f8d7da; color: #721c24; } /* 停權 (紅) */
+
+    /* 操作按鈕 */
+    .btn-sm { padding: 4px 10px; font-size: 12px; margin-right: 5px; }
+    .btn-success { background: #28a745; color: white; }
+    .btn-danger { background: #dc3545; color: white; }
+
+    /* --- Modal 樣式 --- */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center; align-items: center;
+      display: flex; /* 預設隱藏，由 JS 控制 */
+    }
+    .modal-content {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      width: 600px; /* 寬度大一點 */
+      max-width: 90%;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .close-btn { font-size: 24px; cursor: pointer; color: #999; }
+    .close-btn:hover { color: #333; }
+
+    /* 資訊網格排版 */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .info-item { display: flex; flex-direction: column; }
+    .info-item.full-width { grid-column: span 2; }
+    .info-item label { font-size: 12px; color: #888; margin-bottom: 4px; }
+    .info-item span { font-size: 15px; color: #333; font-weight: 500; }
+
+    .btn-info { background: #17a2b8; color: white; }
+    .btn-info:hover { background: #138496; }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon"></div>
+      <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul>
+        <li class="menu-item has-submenu">
+          <a class="submenu-toggle">
+            <span><i class="fas fa-users-cog"></i> 自訂</span>
+            <i class="fas fa-chevron-down arrow"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="#">自訂</a></li>
+            <li><a href="#">自訂</a></li>
+          </ul>
+        </li>
+
+        <li class="menu-item has-submenu">
+          <a class="submenu-toggle">
+            <span><i class="fas fa-users-cog"></i> 自訂</span>
+            <i class="fas fa-chevron-down arrow"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="#">自訂</a></li>
+            <li><a href="#">自訂</a></li>
+          </ul>
+        </li>
+
+        <li class="menu-item has-submenu open">
+          <a class="submenu-toggle">
+            <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+            <i class="fas fa-chevron-down arrow"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="#">會員帳號管理</a></li>
+            <li><a href="#" th:href="@{/admin/sellers}" class="active">賣家帳號管理</a></li>
+            <li><a href="#">管理員帳號管理</a></li>
+          </ul>
+        </li>
+
+        <li class="menu-item has-submenu">
+          <a class="submenu-toggle">
+            <span><i class="fas fa-clipboard-list"></i> 商城訂單管理</span>
+            <i class="fas fa-chevron-down arrow"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="#">訂單列表</a></li>
+            <li><a href="#">撥款作業</a></li>
+          </ul>
+        </li>
+
+        <li class="menu-item has-submenu">
+          <a class="submenu-toggle">
+            <span><i class="fas fa-users-cog"></i> 自訂</span>
+            <i class="fas fa-chevron-down arrow"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="#">自訂</a></li>
+            <li><a href="#">自訂</a></li>
+          </ul>
+        </li>
+
+        <li class="menu-item has-submenu">
+          <a class="submenu-toggle">
+            <span><i class="fas fa-users-cog"></i> 自訂</span>
+            <i class="fas fa-chevron-down arrow"></i>
+          </a>
+          <ul class="submenu">
+            <li><a href="#">自訂</a></li>
+            <li><a href="#">自訂</a></li>
+          </ul>
+        </li>
+
+        <li class="menu-item">
+          <a href="#"><i class="fas fa-star"></i> 自訂</a>
+        </li>
+        <li class="menu-item">
+          <a href="#"><i class="fas fa-headset"></i> 自訂</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a href="#">登出 (Logout)</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-bar">
+      <h2 class="page-title">帳號管理 / 賣家管理</h2>
+      <div class="user-profile">
+        <span>Admin</span>
+        <div class="avatar"><i class="fas fa-user"></i></div>
+      </div>
+    </header>
+
+    <div class="content-card">
+
+      <form th:action="@{/admin/sellers}" method="get" class="search-area">
+        <input type="text" name="keyword" th:value="${keyword}" class="form-input" placeholder="輸入賣家名稱或Email..." style="width: 250px;">
+
+        <select name="status" class="form-input">
+          <option value="">-- 所有狀態 --</option>
+          <option value="待審核" th:selected="${status == '待審核'}">待審核</option>
+          <option value="已開通" th:selected="${status == '已開通'}">已開通</option>
+          <option value="停權" th:selected="${status == '停權'}">停權</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> 搜尋</button>
+        <a th:href="@{/admin/sellers}" class="btn" style="background:#ddd; color:#333; text-decoration:none;">重置</a>
+      </form>
+
+      <table class="admin-table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>賣家名稱</th>
+          <th>Email</th>
+          <th>銀行帳號</th>
+          <th>狀態</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="seller : ${sellerList}">
+          <td th:text="${seller.sellerNo}">101</td>
+          <td th:text="${seller.sellerName}" style="font-weight:bold;">Karshop</td>
+          <td th:text="${seller.sellerEmail}">abc@gmail.com</td>
+          <td th:text="${seller.bankAccount}">822-1234567</td>
+
+          <td>
+            <span th:if="${seller.sellerStatus == '待審核'}" class="status-badge status-wait">待審核</span>
+            <span th:if="${seller.sellerStatus == '已開通'}" class="status-badge status-ok">已開通</span>
+            <span th:if="${seller.sellerStatus == '停權'}" class="status-badge status-block">停權</span>
+          </td>
+          <td>
+            <button type="button" class="btn btn-sm btn-info"
+                    th:data-id="${seller.sellerNo}"
+                    th:data-name="${seller.sellerName}"
+                    th:data-email="${seller.sellerEmail}"
+                    th:data-tax="${seller.sellerTaxId}"
+                    th:data-bank="${seller.bankAccount}"
+                    th:data-status="${seller.sellerStatus}"
+                    th:data-time="${seller.createTime}"
+                    onclick="openAuditModal(this)">
+              <i class="fas fa-file-contract"></i>
+              <span th:text="${seller.sellerStatus == '待審核' ? '審核資料' : '查看詳情'}"></span>
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div id="auditModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 id="modalTitle">賣家資料審核</h3>
+            <span class="close-btn" onclick="closeAuditModal()">&times;</span>
+          </div>
+
+          <div class="modal-body">
+            <div class="info-grid">
+              <div class="info-item">
+                <label>賣家編號</label>
+                <span id="m_sellerNo"></span>
+              </div>
+              <div class="info-item">
+                <label>申請時間</label>
+                <span id="m_createTime"></span>
+              </div>
+              <div class="info-item full-width">
+                <label>賣家名稱 (商店名)</label>
+                <span id="m_sellerName" style="font-weight: bold; color: #333;"></span>
+              </div>
+              <div class="info-item">
+                <label>統一編號 (Tax ID)</label>
+                <span id="m_taxId"></span>
+              </div>
+              <div class="info-item">
+                <label>聯絡信箱</label>
+                <span id="m_email"></span>
+              </div>
+              <div class="info-item full-width">
+                <label>銀行帳號 (撥款用)</label>
+                <span id="m_bankAccount" style="color: #0066cc; font-family: monospace; font-size: 1.1em;"></span>
+              </div>
+              <div class="info-item">
+                <label>目前狀態</label>
+                <span id="m_status" class="status-badge"></span>
+              </div>
+            </div>
+
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+            <div class="action-area" style="text-align: right;">
+
+              <form id="formApprove" th:action="@{/admin/sellers/updateStatus}" method="post" style="display: inline-block;">
+                <input type="hidden" name="sellerNo" id="input_sellerNo_approve">
+                <input type="hidden" name="status" value="已開通">
+                <button type="submit" class="btn btn-success" onclick="return confirm('確定資料無誤，允許開通？')">
+                  <i class="fas fa-check-circle"></i> 通過審核 / 開通
+                </button>
+              </form>
+
+              <form id="formBan" th:action="@{/admin/sellers/updateStatus}" method="post" style="display: inline-block;">
+                <input type="hidden" name="sellerNo" id="input_sellerNo_ban">
+                <input type="hidden" name="status" value="停權">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('確定要停權此賣家？')">
+                  <i class="fas fa-ban"></i> 停權 / 駁回
+                </button>
+              </form>
+
+              <button type="button" class="btn" onclick="closeAuditModal()" style="background: #eee; color: #555; margin-left: 10px;">取消</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${#lists.isEmpty(sellerList)}" style="text-align:center; padding: 40px; color: #999;">
+        <i class="fas fa-inbox" style="font-size: 30px; margin-bottom: 10px;"></i>
+        <p>沒有符合條件的賣家資料</p>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script th:src="@{/js/back-end/admin_index.js}"></script>
+<script>
+  // 1. 開啟視窗 (保持全域函式，讓 HTML 按鈕可以呼叫)
+  function openAuditModal(btn) {
+    // 從按鈕 dataset 取得資料
+    let sellerNo = btn.dataset.id;
+    let name = btn.dataset.name;
+    let email = btn.dataset.email;
+    let taxId = btn.dataset.tax;
+    let bankAccount = btn.dataset.bank;
+    let status = btn.dataset.status;
+    let createTime = btn.dataset.time;
+
+    // 填入資料
+    document.getElementById('m_sellerNo').innerText = sellerNo || '';
+    document.getElementById('m_sellerName').innerText = name || '';
+    document.getElementById('m_email').innerText = email || '';
+    document.getElementById('m_taxId').innerText = taxId || '';
+    document.getElementById('m_bankAccount').innerText = bankAccount || '';
+
+    if(createTime) {
+      document.getElementById('m_createTime').innerText = createTime.replace('T', ' ').substring(0, 16);
+    } else {
+      document.getElementById('m_createTime').innerText = '';
+    }
+
+    // 狀態標籤顏色
+    let statusSpan = document.getElementById('m_status');
+    statusSpan.innerText = status;
+    statusSpan.className = 'status-badge';
+    if (status === '待審核') statusSpan.classList.add('status-wait');
+    else if (status === '已開通') statusSpan.classList.add('status-ok');
+    else statusSpan.classList.add('status-block');
+
+    // 設定 hidden input
+    document.getElementById('input_sellerNo_approve').value = sellerNo;
+    document.getElementById('input_sellerNo_ban').value = sellerNo;
+
+    // 按鈕顯示邏輯
+    let btnApprove = document.getElementById('formApprove');
+    let btnBan = document.getElementById('formBan');
+
+    if (status === '待審核') {
+      btnApprove.style.display = 'inline-block';
+      btnBan.style.display = 'inline-block';
+      document.getElementById('modalTitle').innerText = '📋 審核賣家申請';
+    } else if (status === '已開通') {
+      btnApprove.style.display = 'none';
+      btnBan.style.display = 'inline-block';
+      document.getElementById('modalTitle').innerText = 'ℹ️ 賣家詳細資料';
+    } else {
+      btnApprove.style.display = 'inline-block';
+      btnBan.style.display = 'none';
+      document.getElementById('modalTitle').innerText = 'ℹ️ 賣家詳細資料 (已停權)';
+    }
+
+    // 顯示彈窗
+    document.getElementById('auditModal').style.display = 'flex';
+  }
+
+  // 2. 關閉視窗 (明確定義)
+  function closeAuditModal() {
+    document.getElementById('auditModal').style.display = 'none';
+  }
+
+  // 3. 點擊背景關閉 (改用 addEventListener 防止衝突)
+  window.addEventListener('click', function(event) {
+    let modal = document.getElementById('auditModal');
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  });
+</script>
+</body>
+</html>
