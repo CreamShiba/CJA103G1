@@ -327,7 +327,7 @@
 
                                     <button type="button"
                                             th:if="${ord.ordStatus == '已完成' and ord.sellerRating == null}"
-                                            th:onclick="'openRatingModal(' + ${ord.ordNo} + ',' + ${ord.memberNo} + ')'"
+                                            th:onclick="'openRatingModal(' + ${ord.ordNo} + ',' + ${ord.member.memberNo} + ')'"
                                             class="btn-rate-add">
                                         <i class="fas fa-star"></i> 評價買家
                                     </button>

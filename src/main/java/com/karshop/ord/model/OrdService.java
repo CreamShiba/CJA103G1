@@ -31,7 +31,7 @@ public class OrdService {
     }
 
     public List<OrdVO> getOrdBySeller(Integer sellerNo) {
-        return ordRepository.findBySellerNoOrderByOrdDateDesc(sellerNo);
+        return ordRepository.findBySellerSellerNoOrderByOrdDateDesc(sellerNo);
     }
 
     public List<OrdVO> searchOrdersForSeller(Integer sellerNo, String keyword, String ordStatus, LocalDate startDate, LocalDate endDate) {
