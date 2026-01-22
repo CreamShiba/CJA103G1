@@ -162,4 +162,106 @@ body {
 .footer-col a { color: #a0a0a0; text-decoration: none; font-size: 14px; transition: color 0.2s; }
 .footer-col a:hover { color: #fff; text-decoration: underline; }
 
+/* 星星評分 */
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    font-size: 30px;
+}
+.star-rating input { display: none; }
+.star-rating label { color: #555; cursor: pointer; transition: color 0.2s; padding: 0 5px; }
+.star-rating label:hover,
+.star-rating label:hover ~ label,
+.star-rating input:checked ~ label {
+    color: #ffc107;
+}
+
+/* =========================================
+   新增：評價系統專用樣式
+   ========================================= */
+
+/* 1. 評價買家按鈕 (綠色實心) */
+.btn-rate-add {
+    width: 100%;
+    background: var(--success-green); /* 引用變數 #00e676 */
+    color: #000;
+    border: none;
+    padding: 8px; /* 稍微加大一點點，比較好按 */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    margin-top: 5px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px; /* 圖示跟文字的距離 */
+}
+
+.btn-rate-add:hover {
+    background: #00c853; /* 滑鼠移過去變深一點的綠 */
+    transform: translateY(-1px); /* 微幅上浮效果 */
+    box-shadow: 0 2px 5px rgba(0, 230, 118, 0.3);
+}
+
+/* 2. 查看我的評價按鈕 (綠色邊框、透明底) */
+.btn-rate-view {
+    width: 100%;
+    background: transparent;
+    color: var(--success-green);
+    border: 1px solid var(--success-green);
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-top: 5px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-rate-view:hover {
+    background: rgba(0, 230, 118, 0.1); /* 滑鼠移過去出現淡淡的綠色背景 */
+}
+
+/* 3. 買家評價區塊優化 (取代原本 HTML 裡的部分 inline style) */
+.buyer-feedback-box {
+    margin-top: 8px;
+    font-size: 13px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.15);
+    padding-top: 8px;
+}
+
+.buyer-comment-text {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 4px;
+    line-height: 1.4; /* 增加行距，閱讀比較舒服 */
+}
+
+/* 4. 查看買家評價按鈕 (金黃色邊框) */
+.btn-view-buyer {
+    width: 100%;
+    background: transparent;
+    color: #ffc107; /* 金黃色 */
+    border: 1px solid #ffc107;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-top: 5px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-view-buyer:hover {
+    background: rgba(255, 193, 7, 0.1); /* 滑鼠移過去出現淡淡黃色背景 */
+}
+
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
