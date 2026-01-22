@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
 
-    List<ProductVO> findBySellerNo(Integer sellerNo);
+    List<ProductVO> findBySellerSellerNo(Integer sellerNo);
 
 //   首頁
     Page<ProductVO> findByProdStatus(String prodStatus, Pageable pageable);
@@ -21,7 +21,7 @@ public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
 //  首頁關鍵字搜尋
     Page<ProductVO> findByProdNameContainingAndProdStatus(String prodName, String prodStatus, Pageable pageable);
 
-    @Query("SELECT p FROM ProductVO p WHERE p.sellerNo = :sellerNo " +
+    @Query("SELECT p FROM ProductVO p WHERE p.seller.sellerNo = :sellerNo " +
             "AND (:prodName IS NULL OR p.prodName LIKE %:prodName%) " +
             "AND (:minPrice IS NULL OR p.prodPrice >= :minPrice) " +
             "AND (:maxPrice IS NULL OR p.prodPrice <= :maxPrice) " +

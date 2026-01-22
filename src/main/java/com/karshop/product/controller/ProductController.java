@@ -10,6 +10,7 @@ import com.karshop.productcategorytest.model.ProductCategoryVO;
 import com.karshop.productimage.model.ProductImageService;
 import com.karshop.productimage.model.ProductImageVO;
 import com.karshop.rating.model.RatingService;
+import com.karshop.sellertest.model.SellerVO;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -69,9 +70,10 @@ public class ProductController {
             }
             return  "back-end/seller/addProduct";
         }
-
-//        productVO.getProductCategory().setProductCategoryNo(3);
-        productVO.setSellerNo(101);
+        SellerVO sellerVO = new SellerVO();
+        sellerVO.setSellerNo(101);
+        productVO.setSeller(sellerVO);
+//        productVO.getProductCategory().setProductCategoryNo(3)
 //        productVO.setProdStatus("上架中");
 //        productVO.setRatingStar(0);  //評分總星數初始為0
 //        productVO.setRatingAmount(0); //評分總人數初始為0
@@ -106,6 +108,10 @@ public class ProductController {
     public String update(@Valid ProductVO productVO, BindingResult result, ModelMap model,
                          @RequestParam(value = "deleteImageNos", required = false) String deleteImageNos,
                          @RequestParam("upFile") MultipartFile[] upFile) throws IOException {
+
+        SellerVO sellerVO = new SellerVO();
+        sellerVO.setSellerNo(101);
+        productVO.setSeller(sellerVO);
 
         if (result.hasErrors()) {
             return "back-end/seller/updateProduct";
@@ -284,11 +290,7 @@ public class ProductController {
         List<ProductCategoryVO> categoryList = productCategoryService.getAll();
         model.addAttribute("categoryList", categoryList);
 
-//        List<Integer> ratedOrderNo = ratingService.getRatedOrderNoBySeller(sellerNo);
-//        model.addAttribute("ratedOrderNo", ratedOrderNo);
-
     }
-
 
 //
 //    public List<ProductVO> getProductsByProdStatus(String prodStatus) {
