@@ -17,15 +17,11 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-//    @Autowired
-//    private SessionFactory sessionFactory;
-
     public void addProduct(ProductVO prodVO){
         productRepository.save(prodVO);
     }
 
     public void updateProduct(ProductVO prodVO){
-        ProductVO productVO = new ProductVO();
         productRepository.save(prodVO);
     }
 
@@ -42,7 +38,7 @@ public class ProductService {
     }
 
     public List<ProductVO> getProductsBySellerNo(Integer sellerNo){
-        return productRepository.findBySellerNo(sellerNo);
+        return productRepository.findBySellerSellerNo(sellerNo);
     }
 
     public Page<ProductVO> getAllForBuyer(int pageNumber, String keyword, Integer productCategoryNo){
@@ -82,6 +78,5 @@ public class ProductService {
 
         return productRepository.compositeSearch(sellerNo, prodName, minPrice, maxPrice, prodStatus);
     }
-
 
 }

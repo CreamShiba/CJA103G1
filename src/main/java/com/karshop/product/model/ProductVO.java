@@ -3,6 +3,7 @@ package com.karshop.product.model;
 import com.karshop.orddetail.model.OrdDetailVO;
 import com.karshop.productcategorytest.model.ProductCategoryVO;
 import com.karshop.productimage.model.ProductImageVO;
+import com.karshop.sellertest.model.SellerVO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -23,8 +24,9 @@ public class ProductVO implements Serializable {
     @JoinColumn(name = "product_category_no") // 對應資料庫的外來鍵欄位名稱
     private ProductCategoryVO productCategory;
 
-    @Column(name = "seller_no")
-    Integer sellerNo = 101;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_no")
+    private SellerVO seller;
 
     @Column(name = "prod_name")
     @NotBlank(message = "請輸入商品名稱")
@@ -76,12 +78,12 @@ public class ProductVO implements Serializable {
         this.productCategory = productCategory;
     }
 
-    public Integer getSellerNo() {
-        return sellerNo;
+    public SellerVO getSeller() {
+        return seller;
     }
 
-    public void setSellerNo(Integer sellerNo) {
-        this.sellerNo = sellerNo;
+    public void setSeller(SellerVO seller) {
+        this.seller = seller;
     }
 
     public String getProdName() {

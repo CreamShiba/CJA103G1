@@ -1,8 +1,10 @@
 package com.karshop.ord.model;
 
 import com.karshop.buyerrating.model.BuyerRatingVO;
+import com.karshop.membertest.model.MemberVO;
 import com.karshop.orddetail.model.OrdDetailVO;
 import com.karshop.rating.model.RatingVO;
+import com.karshop.sellertest.model.SellerVO;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -18,11 +20,13 @@ public class OrdVO implements Serializable {
     @Column(name = "ord_no")
     private Integer ordNo;
 
-    @Column(name = "seller_no")
-    private Integer sellerNo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_no")
+    private SellerVO seller;
 
-    @Column(name = "member_no")
-    private Integer memberNo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_no")
+    private MemberVO member;
 
     @Column(name = "coupon_no")
     private Integer couponNo;
@@ -96,20 +100,20 @@ public class OrdVO implements Serializable {
         this.ordNo = ordNo;
     }
 
-    public Integer getSellerNo() {
-        return sellerNo;
+    public SellerVO getSeller() {
+        return seller;
     }
 
-    public void setSellerNo(Integer sellerNo) {
-        this.sellerNo = sellerNo;
+    public void setSeller(SellerVO seller) {
+        this.seller = seller;
     }
 
-    public Integer getMemberNo() {
-        return memberNo;
+    public MemberVO getMember() {
+        return member;
     }
 
-    public void setMemberNo(Integer memberNo) {
-        this.memberNo = memberNo;
+    public void setMember(MemberVO member) {
+        this.member = member;
     }
 
     public Integer getCouponNo() {

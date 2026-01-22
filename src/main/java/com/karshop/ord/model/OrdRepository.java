@@ -9,14 +9,14 @@ import java.util.List;
 
 public interface OrdRepository extends JpaRepository<OrdVO, Integer> {
 
-    List<OrdVO> findBySellerNoOrderByOrdDateDesc(Integer sellerNo);
+    List<OrdVO> findBySellerSellerNoOrderByOrdDateDesc(Integer sellerNo);
 
 //    @Query("SELECT o FROM OrdVO o WHERE o.sellerNo = :sellerNo AND " +
 //            "(CAST(o.ordNo AS string) LIKE %:keyword% OR o.ordRecipient LIKE %:keyword%) " +
 //            "ORDER BY o.ordDate DESC")
 //    List<OrdVO> searchOrdersForSeller(@Param("sellerNo") Integer sellerNo, @Param("keyword") String keyword);
 
-    @Query("SELECT o FROM OrdVO o WHERE o.sellerNo = :sellerNo " +
+    @Query("SELECT o FROM OrdVO o WHERE o.seller.sellerNo = :sellerNo " +
             "AND (:keyword IS NULL OR CAST(o.ordNo AS string) LIKE %:keyword% OR o.ordRecipient LIKE %:keyword%) " +
             "AND (:ordStatus IS NULL OR o.ordStatus = :ordStatus) " +
             "AND (:startDate IS NULL OR o.ordDate >= :startDate) " +
