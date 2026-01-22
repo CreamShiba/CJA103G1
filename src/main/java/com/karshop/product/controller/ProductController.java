@@ -9,6 +9,7 @@ import com.karshop.productcategorytest.model.ProductCategoryService;
 import com.karshop.productcategorytest.model.ProductCategoryVO;
 import com.karshop.productimage.model.ProductImageService;
 import com.karshop.productimage.model.ProductImageVO;
+import com.karshop.rating.model.RatingService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -42,12 +43,18 @@ public class ProductController {
     private ProductCategoryService productCategoryService;
 
     @Autowired
+    private RatingService ratingService;
+
+    @Autowired
     private EntityManager entityManager;
 
     @GetMapping("/addProduct")
     public String addProduct(ModelMap model){
         ProductVO productVO = new ProductVO();
         model.addAttribute("productVO",productVO);
+
+        List<ProductCategoryVO> categoryList = productCategoryService.getAll();
+        model.addAttribute("categoryList", categoryList);
         return "back-end/seller/addProduct";
     }
 
@@ -63,7 +70,7 @@ public class ProductController {
             return  "back-end/seller/addProduct";
         }
 
-        productVO.getProductCategory().setProductCategoryNo(3);
+//        productVO.getProductCategory().setProductCategoryNo(3);
         productVO.setSellerNo(101);
 //        productVO.setProdStatus("上架中");
 //        productVO.setRatingStar(0);  //評分總星數初始為0
@@ -88,6 +95,9 @@ public class ProductController {
     public String getOne_For_Update(@RequestParam Integer prodNo, ModelMap model){
         ProductVO productVO = productService.getOneProduct(prodNo);
         model.addAttribute("productVO",productVO);
+
+        List<ProductCategoryVO> categoryList = productCategoryService.getAll();
+        model.addAttribute("categoryList", categoryList);
         return "back-end/seller/updateProduct";
     }
 
@@ -153,7 +163,6 @@ public class ProductController {
         entityManager.flush(); // 強制讓剛剛的刪除和新增生效
         entityManager.clear(); // 清空快取，強迫 JPA 重新去資料庫撈資料
 
-
         ProductVO finalProductVO = productService.getOneProduct(productVO.getProdNo());
 
         // 這裡印出來看看，數量應該會等於 (舊圖 - 刪圖 + 新圖)
@@ -184,12 +193,13 @@ public class ProductController {
                                   @RequestParam(value = "searchStatus", required = false) String searchStatus,
                                   ModelMap model){
 
+        prepareSellerDashboardData(model);
+
         Integer sellerNo = 101;
         List<ProductVO> searchResult = productService.getProductBySearchForSeller(sellerNo, searchName, minPrice, maxPrice, searchStatus);
 
         model.addAttribute("activeTab", "products");
         model.addAttribute("productList", searchResult);
-
 //      保留輸入傳回前端
         model.addAttribute("searchName", searchName);
         model.addAttribute("minPrice", minPrice);
@@ -202,11 +212,7 @@ public class ProductController {
 
     @GetMapping("/dashboard")
     public String sellerDashboard(@RequestParam(value = "tab", defaultValue = "dashboard") String tab, ModelMap model) {
-        Integer sellerNo = 101;
-
-        List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
-
-        model.addAttribute("productList", productList);
+        prepareSellerDashboardData(model);
         model.addAttribute("activeTab", tab);
 
         return "back-end/seller/seller_index";
@@ -226,7 +232,8 @@ public class ProductController {
         model.addAttribute("productCategoryNo", productCategoryNo);
         model.addAttribute("keyword", keyword);
 
-
+        List<ProductCategoryVO> categoryList = productCategoryService.getAll();
+        model.addAttribute("categoryList", categoryList);
 
         return "front-end/index2";
     }
@@ -237,16 +244,16 @@ public class ProductController {
         ProductVO productVO = productService.getOneProduct(prodNo);
         model.addAttribute("productVO", productVO);
 
+        List<ProductCategoryVO> categoryList = productCategoryService.getAll();
+        model.addAttribute("categoryList", categoryList);
+
         return "front-end/product/productDetail";
     }
 
 
-
-    @ModelAttribute
-    public void populateCommonData(ModelMap model) {
+    private void prepareSellerDashboardData(ModelMap model) {
         Integer sellerNo = 101;
         List<OrdVO> ordList = ordService.getOrdBySeller(sellerNo);
-
         int pendingOrder = 0;
         int allOrder = 0;
 
@@ -265,19 +272,20 @@ public class ProductController {
         model.addAttribute("ordList", ordList);
 
         List<ProductVO> productList = productService.getProductsBySellerNo(sellerNo);
-
+        model.addAttribute("productList", productList);
         int activeProductCount = 0;
         for(ProductVO productVO : productList){
             if(productVO.getProdStatus().equals("上架中")){
                 activeProductCount++;
             }
         }
-
         model.addAttribute("activeProductCount", activeProductCount);
-
         //   側邊攔、下拉選單
         List<ProductCategoryVO> categoryList = productCategoryService.getAll();
         model.addAttribute("categoryList", categoryList);
+
+//        List<Integer> ratedOrderNo = ratingService.getRatedOrderNoBySeller(sellerNo);
+//        model.addAttribute("ratedOrderNo", ratedOrderNo);
 
     }
 

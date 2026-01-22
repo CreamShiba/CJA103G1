@@ -323,6 +323,60 @@
                                     查看詳情
                                 </a>
 
+                                <div style="margin-top: 8px;">
+
+                                    <button type="button"
+                                            th:if="${ord.ordStatus == '已完成' and ord.sellerRating == null}"
+                                            th:onclick="'openRatingModal(' + ${ord.ordNo} + ',' + ${ord.memberNo} + ')'"
+                                            class="btn-rate-add">
+                                        <i class="fas fa-star"></i> 評價買家
+                                    </button>
+
+                                    <button type="button"
+                                            th:if="${ord.ordStatus == '已完成' and ord.sellerRating != null}"
+                                            th:onclick="'viewMyRating(' + ${ord.ordNo} + ')'"
+                                            class="btn-rate-view">
+                                        <i class="fas fa-check-circle"></i> 查看我的評價
+                                    </button>
+
+                                    <div th:if="${ord.sellerRating != null}"
+                                         th:id="'my-rating-' + ${ord.ordNo}"
+                                         th:data-score="${ord.sellerRating.ratingScore}"
+                                         th:data-comment="${ord.sellerRating.ratingComment}"
+                                         style="display:none;"></div>
+                                </div>
+
+                                <div style="margin-top: 6px; border-top: 1px dashed #444; padding-top: 4px;">
+
+                                    <button type="button"
+                                            th:if="${ord.buyerRating != null}"
+                                            th:onclick="'viewBuyerRating(' + ${ord.ordNo} + ')'"
+                                            class="btn-view-buyer">
+                                        <i class="fas fa-comment-dots"></i> 查看買家評價
+                                    </button>
+
+                                    <div th:if="${ord.buyerRating != null}"
+                                         th:id="'buyer-rating-' + ${ord.ordNo}"
+                                         th:data-score="${ord.buyerRating.score}"
+                                         th:data-comment="${ord.buyerRating.comment}"
+                                         style="display:none;"></div>
+
+                                    <div th:if="${ord.ordStatus == '已完成' and ord.buyerRating == null}"
+                                         style="
+                                            color: #999;
+                                            border: 1px dashed #555;
+                                            border-radius: 4px;
+                                            padding: 8px;
+                                            font-size: 12px;
+                                            text-align: center;
+                                            margin-top: 5px;
+                                            background: rgba(255, 255, 255, 0.02);
+                                         ">
+                                        <i class="far fa-clock" style="margin-right: 4px;"></i> 買家尚未評價
+                                    </div>
+
+                                </div>
+
                             </div>
                         </td>
                     </tr>
@@ -415,6 +469,42 @@
                 <button type="submit"
                         style="padding: 8px 16px; background: #ff5252; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: bold;">
                     確認取消
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="ratingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background: #1e1e1e; width: 400px; padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+
+        <h3 id="modal-title" style="color: #fff; margin-bottom: 15px;">評價買家</h3>
+
+        <form th:action="@{/rating/add}" method="post">
+            <input type="hidden" name="ordNo" id="ratingOrdNo">
+            <input type="hidden" name="memberNo" id="ratingMemberNo">
+
+            <div style="margin-bottom: 15px; display: flex; gap: 10px; justify-content: center;">
+                <div class="star-rating">
+                    <input type="radio" id="star5" name="score" value="5" checked /><label for="star5" title="5 stars">★</label>
+                    <input type="radio" id="star4" name="score" value="4" /><label for="star4" title="4 stars">★</label>
+                    <input type="radio" id="star3" name="score" value="3" /><label for="star3" title="3 stars">★</label>
+                    <input type="radio" id="star2" name="score" value="2" /><label for="star2" title="2 stars">★</label>
+                    <input type="radio" id="star1" name="score" value="1" /><label for="star1" title="1 star">★</label>
+                </div>
+            </div>
+
+            <textarea id="ratingCommentArea" name="comment" required placeholder="請輸入對買家的評價..." rows="3"
+                      style="width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: #fff; border-radius: 4px; resize: none; margin-bottom: 20px;"></textarea>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" onclick="document.getElementById('ratingModal').style.display='none'"
+                        style="padding: 8px 16px; background: transparent; border: 1px solid #666; color: #ccc; border-radius: 6px; cursor: pointer;">
+                    取消
+                </button>
+                <button id="btn-submit-rating" type="submit"
+                        style="padding: 8px 16px; background: #00e676; border: none; color: #000; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    送出評價
                 </button>
             </div>
         </form>
