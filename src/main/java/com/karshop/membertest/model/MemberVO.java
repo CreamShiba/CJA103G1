@@ -1,5 +1,6 @@
 package com.karshop.membertest.model;
 
+import com.karshop.ord.model.OrdVO;
 import com.karshop.rating.model.RatingVO;
 import jakarta.persistence.*;
 import java.io.Serializable;
@@ -19,6 +20,8 @@ public class MemberVO implements Serializable {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
     private List<RatingVO> rating;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+    private List<OrdVO> order;
 
     // Getter / Setter
     public Integer getMemberNo() { return memberNo; }
@@ -32,5 +35,13 @@ public class MemberVO implements Serializable {
 
     public void setRating(List<RatingVO> rating) {
         this.rating = rating;
+    }
+
+    public List<OrdVO> getOrder() {
+        return order;
+    }
+
+    public void setOrder(List<OrdVO> order) {
+        this.order = order;
     }
 }
