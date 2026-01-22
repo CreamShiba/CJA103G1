@@ -5,12 +5,15 @@ import com.karshop.ord.model.OrdService;
 import com.karshop.ord.model.OrdVO;
 import com.karshop.product.model.ProductService;
 import com.karshop.product.model.ProductVO;
+import com.karshop.rating.model.RatingService;
+import org.hibernate.id.IntegralDataTypeHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -22,6 +25,9 @@ public class OrdController {
 
     @Autowired
     private ProductService productService;
+
+    @Autowired
+    private RatingService ratingService;
 
     @GetMapping("/getOneOrder")
     public String getOneOrder(@RequestParam(value = "ordNo") Integer ordNo, ModelMap model) {
@@ -72,6 +78,7 @@ public class OrdController {
                                @RequestParam(value = "ordStatus", required = false) String ordStatus,
                                @RequestParam(value = "startDate", required = false) LocalDate startDate,
                                @RequestParam(value = "endDate", required = false) LocalDate endDate, ModelMap model) {
+        prepareSellerDashboardData(model);
 
         Integer sellerNo = 101;
         List<OrdVO> searchResult = ordService.searchOrdersForSeller(sellerNo, keyword, ordStatus, startDate, endDate);
@@ -85,8 +92,8 @@ public class OrdController {
         return "back-end/seller/seller_index";
     }
 
-    @ModelAttribute
-    public void populateCommonData(ModelMap model) {
+
+    private void prepareSellerDashboardData(ModelMap model) {
         Integer sellerNo = 101;
 
         List<OrdVO> ordList = ordService.getOrdBySeller(sellerNo);
@@ -118,6 +125,8 @@ public class OrdController {
         model.addAttribute("productList", productList);
         model.addAttribute("activeProductCount", activeProductCount);
 
+//        List<Integer> ratedOrderNo = ratingService.getRatedOrderNoBySeller(sellerNo);
+//        model.addAttribute("ratedOrderNo", ratedOrderNo);
     }
 
 }

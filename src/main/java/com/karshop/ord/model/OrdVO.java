@@ -1,6 +1,8 @@
 package com.karshop.ord.model;
 
+import com.karshop.buyerrating.model.BuyerRatingVO;
 import com.karshop.orddetail.model.OrdDetailVO;
+import com.karshop.rating.model.RatingVO;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -66,6 +68,14 @@ public class OrdVO implements Serializable {
 
     @OneToMany(mappedBy ="order", cascade = CascadeType.ALL)
     private List<OrdDetailVO> orderDetail;
+
+//  賣家寫的評價
+    @OneToOne(mappedBy = "ord")
+    private RatingVO sellerRating;
+
+//  買家寫的評價
+    @OneToOne(mappedBy = "ord")
+    private BuyerRatingVO buyerRating;
 
 //  平台抽成5%
     private static final double commission = 0.05;
@@ -220,6 +230,22 @@ public class OrdVO implements Serializable {
 
     public void setCancelReason(String cancelReason) {
         this.cancelReason = cancelReason;
+    }
+
+    public RatingVO getSellerRating() {
+        return sellerRating;
+    }
+
+    public void setSellerRating(RatingVO sellerRating) {
+        this.sellerRating = sellerRating;
+    }
+
+    public BuyerRatingVO getBuyerRating() {
+        return buyerRating;
+    }
+
+    public void setBuyerRating(BuyerRatingVO buyerRating) {
+        this.buyerRating = buyerRating;
     }
 }
 

@@ -1,5 +1,8 @@
 package com.karshop.rating.model;
 
+import com.karshop.membertest.model.MemberVO;
+import com.karshop.ord.model.OrdVO;
+import com.karshop.sellertest.model.SellerVO;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -14,14 +17,17 @@ public class RatingVO implements Serializable {
     @Column(name = "rating_no")
     private Integer ratingNo;
 
-    @Column(name = "ord_no")
-    private Integer ordNo;
+    @OneToOne
+    @JoinColumn(name = "ord_no")
+    private OrdVO ord;
 
-    @Column(name = "seller_no")
-    private Integer sellerNo;
+    @ManyToOne
+    @JoinColumn(name = "seller_no")
+    private SellerVO seller;
 
-    @Column(name = "member_no")
-    private Integer memberNo;
+    @ManyToOne
+    @JoinColumn(name = "member_no")
+    private MemberVO member;
 
     @Column(name = "rating_score")
     private Integer ratingScore;
@@ -30,7 +36,7 @@ public class RatingVO implements Serializable {
     private String ratingComment;
 
     @Column(name = "rating_date")
-    private LocalDateTime ratingDate;
+    private LocalDateTime ratingDate = LocalDateTime.now();
 
     public Integer getRatingNo() {
         return ratingNo;
@@ -40,28 +46,28 @@ public class RatingVO implements Serializable {
         this.ratingNo = ratingNo;
     }
 
-    public Integer getOrdNo() {
-        return ordNo;
+    public OrdVO getOrd() {
+        return ord;
     }
 
-    public void setOrdNo(Integer ordNo) {
-        this.ordNo = ordNo;
+    public void setOrd(OrdVO ord) {
+        this.ord = ord;
     }
 
-    public Integer getSellerNo() {
-        return sellerNo;
+    public SellerVO getSeller() {
+        return seller;
     }
 
-    public void setSellerNo(Integer sellerNo) {
-        this.sellerNo = sellerNo;
+    public void setSeller(SellerVO seller) {
+        this.seller = seller;
     }
 
-    public Integer getMemberNo() {
-        return memberNo;
+    public MemberVO getMember() {
+        return member;
     }
 
-    public void setMemberNo(Integer memberNo) {
-        this.memberNo = memberNo;
+    public void setMember(MemberVO member) {
+        this.member = member;
     }
 
     public Integer getRatingScore() {
