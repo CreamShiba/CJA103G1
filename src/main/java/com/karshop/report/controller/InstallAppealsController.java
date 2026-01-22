@@ -68,4 +68,34 @@ public class InstallAppealsController {
         // 這樣瀏覽器才會顯示 templates/appeal-success.html
         return "templates-report/appeal-success";
     }
+
+    //後台管理
+    //顯示「安裝申訴」管理列表頁面
+    //網址：http://localhost:8080/appeals/admin/list
+    @GetMapping("/admin/list")
+    public String showInstallAdminPage() {
+        return "templates-report/admin-install-list";
+    }
+    //提供 JSON 資料給後台表格 (供 fetch 使用)
+    //網址：http://localhost:8080/appeals/api/all
+    @GetMapping("/api/all")
+    @ResponseBody
+    public List<InstallAppeals> showAllInstallAppeals() {
+        return installAppealsService.getAllInstallAppeals();
+    }
+    //處理管理員結案更新
+    //網址：http://localhost:8080/appeals/api/handle
+    @PostMapping("api/handle")
+    @ResponseBody
+    public String handleInstallAppealByAdmin(@RequestParam Integer id,
+                                             @RequestParam String response,
+                                             @RequestParam String status,
+                                             @RequestParam Integer admNo) {
+        try {
+            installAppealsService.handleInstallAppeal(id, response, status, admNo);
+            return "success";
+        } catch (Exception e){
+            return "error: " + e.getMessage();
+        }
+    }
 }

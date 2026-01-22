@@ -41,5 +41,21 @@ public class InstallAppealsService {
     public List<InstallAppeals> getAllInstallAppeals() {
         return installAppealsRepository.findAll();
     }
+
+    // 處理管理員結案更新：更新狀態、回覆內容與處理時間
+    public void handleInstallAppeal(Integer id, String response, String status, Integer admNo) {
+        InstallAppeals appeal = installAppealsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("找不到編號為 " + id + " 的申訴紀錄"));
+
+        // 更新資料(對應SQL欄位
+        appeal.setResponse(response); //管理員回復的文字
+        appeal.setStatus(status); //狀態(ex:已結案
+        appeal.setAdmNo(admNo); //紀錄是哪個管理員處理的
+        appeal.setProcessDate(LocalDateTime.now()); //處理日期
+        appeal.setUpdatedDate(LocalDateTime.now()); //最後更新日期
+
+        //存回資料庫
+        installAppealsRepository.save(appeal);
+    }
 }
 
