@@ -77,6 +77,9 @@ public class OrdVO implements Serializable {
     @OneToOne(mappedBy = "ord")
     private RatingVO sellerRating;
 
+    @Column(name = "payout_status")
+    private String payoutStatus;
+
 //  買家寫的評價
     @OneToOne(mappedBy = "ord")
     private BuyerRatingVO buyerRating;
@@ -242,6 +245,14 @@ public class OrdVO implements Serializable {
 
     public void setSellerRating(RatingVO sellerRating) {
         this.sellerRating = sellerRating;
+    }
+
+    public String getPayoutStatus() {
+        return payoutStatus;
+    }
+
+    public void setPayoutStatus(String payoutStatus) {
+        this.payoutStatus = payoutStatus;
     }
 
     public BuyerRatingVO getBuyerRating() {
