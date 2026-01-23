@@ -1,0 +1,51 @@
+/* --- Footer 樣式 --- */
+footer {
+    margin-top: 100px;
+    padding: 60px 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    gap: 40px;
+    font-size: 14px;
+    color: #aaa;
+    /* 確保背景跟 index.css 的 body 背景一致，或設為透明 */
+    background-color: transparent;
+}
+
+.footer-logo {
+    font-size: 20px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+/* 簡單模擬 Logo 圖標 (來自原本的 index.css) */
+.footer-logo::before {
+    content: '';
+    display: inline-block;
+    width: 30px;
+    height: 15px;
+    background: white;
+    border-radius: 10px;
+    margin-right: 10px;
+}
+
+.footer-col h4 {
+    color: white;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-col ul li {
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.footer-col ul li:hover {
+    color: #ff3333;
+}
