@@ -6,6 +6,7 @@
     <title>賣家中心 | Karshop 卡爾夏</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/back-end/seller/seller_index.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
 
 </head>
 <body>
@@ -410,32 +411,7 @@
     </main>
 </div>
 
-<footer class="site-footer">
-    <div class="footer-brand">
-        <div class="toggle-icon"></div>
-        <span>卡爾夏</span>
-    </div>
-    <div class="footer-links">
-        <div class="footer-col">
-            <h4>Shop</h4>
-            <a href="#">Shop Parts</a>
-            <a href="#">Wholesale</a>
-        </div>
-        <div class="footer-col">
-            <h4>The Company</h4>
-            <a href="#">About Us</a>
-            <a href="#">FAQ</a>
-        </div>
-        <div class="footer-col">
-            <h4>Contact Us</h4>
-            <a href="#">info@mysite.com</a>
-        </div>
-        <div class="footer-col">
-            <h4>Follow Us</h4>
-            <a href="#">Instagram</a>
-        </div>
-    </div>
-</footer>
+<footer th:replace="~{fragments/footer :: Footer}"></footer>
 
 <div id="cancelModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
 

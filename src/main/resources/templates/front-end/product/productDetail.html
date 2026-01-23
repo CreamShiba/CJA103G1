@@ -6,6 +6,7 @@
     <title th:text="${productVO.prodName} + ' | Karshop 卡爾夏'"></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/front-end/product/productDetail.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
 </head>
 <body>
 
@@ -173,13 +174,7 @@
     </div>
 </div>
 
-<footer>
-    <div class="footer-col"><div class="footer-logo logo">卡爾夏</div></div>
-    <div class="footer-col"><h4>Shop</h4><ul><li>Shop Parts</li><li>Wholesale</li></ul></div>
-    <div class="footer-col"><h4>The Company</h4><ul><li>About Us</li><li>FAQ</li></ul></div>
-    <div class="footer-col"><h4>Contact Us</h4><ul><li>info@karshop.com</li></ul></div>
-    <div class="footer-col"><h4>Follow Us</h4><ul><li>Instagram</li></ul></div>
-</footer>
+<footer th:replace="~{fragments/footer :: Footer}"></footer>
 
 <!--檢舉商品 -->
 <div id="reportModal" class="modal-overlay">

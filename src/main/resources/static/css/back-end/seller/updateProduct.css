@@ -123,18 +123,4 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-purple
 }
 .btn-submit:hover { background: #6c4ce5; box-shadow: 0 0 20px rgba(125, 95, 255, 0.4); transform: translateY(-2px); }
 
-/* --- 6. Footer --- */
-.site-footer {
-    background: #080101; border-top: 1px solid var(--border-color); padding: 40px; margin-top: auto;
-    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 40px;
-}
-.footer-brand { display: flex; align-items: center; gap: 15px; font-size: 24px; font-weight: bold; color: #fff; min-width: 200px; }
-.toggle-icon { width: 40px; height: 20px; background: #fff; border-radius: 20px; position: relative; }
-/*.toggle-icon::after { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; background: #000; border-radius: 50%; }*/
-.footer-links { display: flex; gap: 80px; flex-wrap: wrap; }
-.footer-col { display: flex; flex-direction: column; gap: 15px; }
-.footer-col h4 { color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 5px; }
-.footer-col a { color: #a0a0a0; text-decoration: none; font-size: 14px; transition: color 0.2s; }
-.footer-col a:hover { color: #fff; text-decoration: underline; }
-
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
