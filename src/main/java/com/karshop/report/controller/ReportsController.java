@@ -1,5 +1,6 @@
 package com.karshop.report.controller;
 
+import com.karshop.report.model.InstallAppeals;
 import com.karshop.report.model.Reports;
 import com.karshop.report.service.ReportsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,10 +59,5 @@ public class ReportsController {
         }catch (Exception e){
             return "error" + e.getMessage();
         }
-    }
-
-    @GetMapping("/admin/list")
-    public String showAdminListPage(){
-        return "templates-report/admin-report-list";
     }
 }

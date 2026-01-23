@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*; //引入網頁標籤工具（�
 import org.springframework.ui.Model; //引入模型對象。它像是一個「傳送袋」，讓你把 Java 抓到的資料（如申訴編號）塞進去，傳給 HTML 顯示。
 import java.util.List; //引入 Java 標準的清單工具。當你要從資料庫抓「一整群」申訴單時，會用 List 來裝。
 import java.time.LocalDateTime;
+import org.springframework.ui.Model;
 
 @Controller //控制器,主要任務是「接聽請求」並「回傳網頁」。
 //當你 return "add-appeal" 時，它會去 templates 找 add-appeal.html 顯示出來。
@@ -76,6 +77,7 @@ public class InstallAppealsController {
     public String showInstallAdminPage() {
         return "templates-report/admin-install-list";
     }
+
     //提供 JSON 資料給後台表格 (供 fetch 使用)
     //網址：http://localhost:8080/appeals/api/all
     @GetMapping("/api/all")
@@ -83,6 +85,7 @@ public class InstallAppealsController {
     public List<InstallAppeals> showAllInstallAppeals() {
         return installAppealsService.getAllInstallAppeals();
     }
+
     //處理管理員結案更新
     //網址：http://localhost:8080/appeals/api/handle
     @PostMapping("api/handle")
@@ -94,8 +97,31 @@ public class InstallAppealsController {
         try {
             installAppealsService.handleInstallAppeal(id, response, status, admNo);
             return "success";
-        } catch (Exception e){
+        } catch (Exception e) {
             return "error: " + e.getMessage();
+        }
+    }
+
+    // 網址路徑：http://localhost:8080/appeals/admin/handle?id=1
+    @GetMapping("/admin/handle")
+    public String showHandlePage(@RequestParam("id") Integer id, Model model) {
+
+
+        //透過 Service 找出該筆申訴的詳細資料
+        InstallAppeals appeal = installAppealsService.getAppealById(id);
+        //將資料塞入 model，讓 HTML 可以用 ${appeal.xxx} 讀取
+        model.addAttribute("appeal", appeal);
+        //回傳新網頁的檔案名稱 (路徑：templates/templates-report/handle-appeal.html)
+        return "templates-report/handle-appeal";
+    }
+
+    @Controller
+    @RequestMapping("/reports")
+    public class ReportsController {
+
+        @GetMapping("/admin/list")
+        public String showReportList() {
+            return "templates-report/admin-report-list";
         }
     }
 }
