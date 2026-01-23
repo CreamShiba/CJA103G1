@@ -16,6 +16,7 @@ public interface OrdRepository extends JpaRepository<OrdVO, Integer> {
 //            "ORDER BY o.ordDate DESC")
 //    List<OrdVO> searchOrdersForSeller(@Param("sellerNo") Integer sellerNo, @Param("keyword") String keyword);
 
+//  賣家訂單的複合查詢
     @Query("SELECT o FROM OrdVO o WHERE o.seller.sellerNo = :sellerNo " +
             "AND (:keyword IS NULL OR CAST(o.ordNo AS string) LIKE %:keyword% OR o.ordRecipient LIKE %:keyword%) " +
             "AND (:ordStatus IS NULL OR o.ordStatus = :ordStatus) " +
@@ -27,4 +28,17 @@ public interface OrdRepository extends JpaRepository<OrdVO, Integer> {
                                @Param("ordStatus") String ordStatus,
                                @Param("startDate") LocalDateTime startDate,
                                @Param("endDate") LocalDateTime endDate);
+//  管理員訂單的複合查詢
+    @Query("SELECT o FROM OrdVO o WHERE " +
+            "(:keyword IS NULL OR CAST(o.ordNo AS string) LIKE %:keyword% OR o.seller.sellerName LIKE %:keyword%) " +
+            "AND (:ordStatus IS NULL OR o.ordStatus = :ordStatus) " +
+            "AND (:startDate IS NULL OR o.ordDate >= :startDate) " +
+            "AND (:endDate IS NULL OR o.ordDate <= :endDate) " +
+            "AND (:payoutStatus IS NULL OR o.payoutStatus = :payoutStatus) " +
+            "ORDER BY o.ordDate DESC")
+    List <OrdVO> searchOrders(@Param("keyword") String keyword,
+                              @Param("ordStatus") String ordStatus,
+                              @Param("startDate") LocalDateTime startDate,
+                              @Param("endDate") LocalDateTime endDate,
+                              @Param("payoutStatus") String payoutStatus);
 }
