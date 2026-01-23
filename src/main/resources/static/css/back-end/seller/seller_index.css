@@ -137,31 +137,6 @@ body {
 /* 如果是深色模式背景，灰色可能要深一點或亮一點，看你喜好 */
 .toggle-inactive .toggle-track { background-color: #444; }
 
-/* --- 8. Footer --- */
-.site-footer {
-    background: #080101;
-    border-top: 1px solid var(--border-color);
-    padding: 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 40px;
-    width: 100%;
-    z-index: 20;
-
-    /* 🔥 關鍵設定 */
-    flex-shrink: 0;   /* 防止 Footer 被擠壓 */
-    position: relative; /* 正常流動 */
-}
-.footer-brand { display: flex; align-items: center; gap: 15px; font-size: 24px; font-weight: bold; color: #fff; min-width: 200px; }
-.toggle-icon { width: 40px; height: 20px; background: #fff; border-radius: 20px; position: relative; }
-.footer-links { display: flex; gap: 80px; flex-wrap: wrap; }
-.footer-col { display: flex; flex-direction: column; gap: 15px; }
-.footer-col h4 { color: #fff; font-size: 16px; font-weight: 600; margin-bottom: 5px; }
-.footer-col a { color: #a0a0a0; text-decoration: none; font-size: 14px; transition: color 0.2s; }
-.footer-col a:hover { color: #fff; text-decoration: underline; }
-
 /* 星星評分 */
 .star-rating {
     display: flex;

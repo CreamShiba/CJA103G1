@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>商品詳情 | 賣家中心</title>
     <link rel="stylesheet" th:href="@{/css/back-end/seller/listOneProduct.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
     <style>
         /* 補強一點樣式，確保圖片排版不跑版 */
         .gallery {
@@ -86,6 +87,6 @@
         <a th:href="@{/product/dashboard(tab=products)}" class="btn btn-secondary">回列表</a>
     </div>
 </div>
-
+<footer th:replace="~{fragments/footer :: Footer}"></footer>
 </body>
 </html>

@@ -128,34 +128,6 @@ aside {
     text-decoration: underline;
 }
 
-/* --- Footer --- */
-footer {
-    margin-top: 100px;
-    padding: 60px 40px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    gap: 40px;
-    font-size: 14px;
-    color: #aaa;
-}
-
-.footer-logo {
-    font-size: 20px;
-    color: white;
-    margin-bottom: 20px;
-}
-
-.footer-col h4 {
-    color: white;
-    margin-bottom: 20px;
-    font-weight: bold;
-}
-
-.footer-col ul li {
-    margin-bottom: 10px;
-}
-
-
 /* --- 在 style.css 底部新增 --- */
 
 /* 下拉選單容器 */
