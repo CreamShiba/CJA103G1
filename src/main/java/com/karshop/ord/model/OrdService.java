@@ -34,6 +34,7 @@ public class OrdService {
         return ordRepository.findBySellerSellerNoOrderByOrdDateDesc(sellerNo);
     }
 
+    //  賣家訂單的複合查詢
     public List<OrdVO> searchOrdersForSeller(Integer sellerNo, String keyword, String ordStatus, LocalDate startDate, LocalDate endDate) {
         if(keyword != null && keyword.trim().isEmpty()) {
             keyword = null;
@@ -59,6 +60,41 @@ public class OrdService {
         return ordRepository.compositeQuery(sellerNo, keyword, ordStatus, startDateTime, endDateTime);
 
     }
+
+    public List<OrdVO> searchOrders(String keyword, String ordStatus, LocalDate startDate, LocalDate endDate, String payoutStatus) {
+        if(keyword != null && keyword.trim().isEmpty()) {
+            keyword = null;
+        }
+
+        if(ordStatus != null && ordStatus.trim().isEmpty()) {
+            ordStatus = null;
+        }
+
+        LocalDateTime startDateTime = null;
+        LocalDateTime endDateTime = null;
+        if(startDate != null) {
+            startDateTime = startDate.atStartOfDay();
+        }
+
+        if(endDate != null) {
+            endDateTime = endDate.atTime(LocalTime.MAX);
+        }
+
+        if(payoutStatus != null && payoutStatus.trim().isEmpty()) {
+            payoutStatus = null;
+        }
+
+       return ordRepository.searchOrders(keyword, ordStatus, startDateTime, endDateTime, payoutStatus);
+    }
+
+    public void updatePayoutStatus(Integer ordNo, String NewStatus) {
+        OrdVO ordVO = ordRepository.findById(ordNo).orElse(null);
+        if(ordVO != null) {
+            ordVO.setPayoutStatus(NewStatus);
+            ordRepository.save(ordVO);
+        }
+    }
+
 
 
 }

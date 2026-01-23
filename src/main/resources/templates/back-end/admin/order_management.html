@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商城訂單管理 - Karshop Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/back-end/admin/order_management.css}">
+
+</head>
+<body>
+
+<div class="app-container">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">會員帳號管理</a></li>
+                        <li><a href="#" th:href="@{/admin/sellers}">賣家帳號管理</a></li>
+                        <li><a href="#">管理員帳號管理</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu open">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-clipboard-list"></i> 商城訂單管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#" th:href="@{/admin/orders}" class="active">訂單列表 & 撥款</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-star"></i> 自訂</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-headset"></i> 自訂</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#">登出 (Logout)</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">商城訂單管理</h2>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar"><i class="fas fa-user"></i></div>
+            </div>
+        </header>
+
+        <div class="content-card">
+
+            <form th:action="@{/admin/orders}" method="get" class="search-area">
+
+                <input type="text" name="keyword" th:value="${keyword}" class="form-input"
+                       placeholder="訂單編號 / 賣家名稱" style="width: 200px;">
+
+                <select name="ordStatus" class="form-input">
+                    <option value="">-- 訂單狀態 --</option>
+                    <option value="已完成" th:selected="${ordStatus == '已完成'}">已完成</option>
+                    <option value="待出貨" th:selected="${ordStatus == '待出貨'}">待出貨</option>
+                    <option value="已出貨" th:selected="${ordStatus == '已出貨'}">已出貨</option>
+                    <option value="已取消" th:selected="${ordStatus == '已取消'}">已取消</option>
+                </select>
+
+                <select name="payoutStatus" class="form-input" style="border-color: #0066cc;">
+                    <option value="">-- 撥款狀態 --</option>
+                    <option value="未撥款" th:selected="${payoutStatus == '未撥款'}">🔴 未撥款</option>
+                    <option value="已撥款" th:selected="${payoutStatus == '已撥款'}">🟢 已撥款</option>
+                </select>
+
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <input type="date" name="startDate" th:value="${startDate}" class="form-input">
+                    <span>~</span>
+                    <input type="date" name="endDate" th:value="${endDate}" class="form-input">
+                </div>
+
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> 搜尋</button>
+                <a th:href="@{/admin/orders}" class="btn" style="background:#ddd; color:#333; text-decoration:none;">重置</a>
+            </form>
+
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>訂單 ID</th>
+                    <th>賣家 (商店名)</th>
+                    <th>買家</th>
+                    <th>訂單日期</th>
+                    <th>總金額</th>
+                    <th>訂單狀態</th>
+                    <th>撥款狀態</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="ord : ${ordList}">
+                    <td th:text="${ord.ordNo}">#1001</td>
+
+                    <td>
+                        <i class="fas fa-store" style="color:#aaa; margin-right:5px;"></i>
+                        <span th:text="${ord.seller.sellerName}" style="font-weight:500;">Karshop</span>
+                    </td>
+
+                    <td th:text="${ord.ordRecipient}">王小明</td>
+
+                    <td th:text="${#temporals.format(ord.ordDate, 'yyyy-MM-dd HH:mm')}">2023-12-01</td>
+
+                    <td class="price-tag" th:text="'$'+${#numbers.formatInteger(ord.ordPrice,1,'COMMA')}">$1,200</td>
+
+                    <td>
+                        <span th:text="${ord.ordStatus}"
+                              th:class="'status-badge ' +
+                              (${ord.ordStatus == '已完成'} ? 'st-ok' :
+                              (${ord.ordStatus == '已取消'} ? 'st-cancel' : 'st-wait'))">
+                        </span>
+                    </td>
+
+                    <td>
+                        <span th:if="${ord.payoutStatus == '已撥款'}" class="pay-yes">
+                            <i class="fas fa-check-circle"></i> 已撥款
+                        </span>
+                        <span th:if="${ord.payoutStatus == '未撥款'}" class="pay-no">
+                            <i class="fas fa-times-circle"></i> 未撥款
+                        </span>
+                    </td>
+
+                    <td>
+                        <button type="button"
+                                th:if="${ord.ordStatus == '已完成' and ord.payoutStatus == '未撥款'}"
+                                class="btn" style="background: #28a745; color: white; padding: 6px 12px; font-size: 13px;"
+                                th:data-ordno="${ord.ordNo}"
+                                th:data-seller="${ord.seller.sellerName}"
+                                th:data-bank="${ord.seller.bankAccount}"
+                                th:data-total="${ord.ordPrice}"
+                                th:data-commission="${ord.platformFee}"
+                                th:data-net="${ord.sellerNetIncome}"
+                                onclick="openPayoutModal(this)">
+                            <i class="fas fa-hand-holding-usd"></i> 撥款
+                        </button>
+
+                        <span th:if="${ord.payoutStatus == '已撥款'}" style="color: #aaa; font-size: 13px;">
+                            已完成結案
+                        </span>
+
+                        <span th:if="${ord.ordStatus != '已完成' and ord.ordStatus != '已取消'}" style="color: #999; font-size: 13px;">
+                            等待訂單完成
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div th:if="${#lists.isEmpty(ordList)}" style="text-align:center; padding: 40px; color: #999;">
+                <i class="fas fa-search" style="font-size: 30px; margin-bottom: 10px;"></i>
+                <p>找不到符合條件的訂單</p>
+            </div>
+        </div>
+
+        <div id="payoutModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content" style="width: 500px;">
+                <div class="modal-header" style="background: #f8f9fa; border-bottom: 2px solid #28a745;">
+                    <h3 style="color: #28a745;"><i class="fas fa-money-check-alt"></i> 撥款確認</h3>
+                    <span class="close-btn" onclick="closePayoutModal()">&times;</span>
+                </div>
+
+                <div class="modal-body">
+                    <p style="color: #666; margin-bottom: 20px;">請確認以下轉帳資訊是否正確：</p>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>訂單編號</label>
+                            <span id="p_ordNo" style="font-weight: bold;"></span>
+                        </div>
+                        <div class="info-item">
+                            <label>收款賣家</label>
+                            <span id="p_seller"></span>
+                        </div>
+
+                        <div class="info-item full-width" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 10px;">
+                            <label style="margin-bottom: 10px; display:block; font-weight:bold; color:#555;">撥款金額試算：</label>
+
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px;">
+                                <span>訂單總額</span>
+                                <span id="p_total" style="font-family: monospace;"></span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; color: #dc3545;">
+                                <span>平台抽成 (5%)</span>
+                                <span id="p_commission" style="font-family: monospace;"></span>
+                            </div>
+                            <div style="border-top: 1px solid #ddd; margin: 5px 0;"></div>
+                            <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold; color: #28a745;">
+                                <span>實際撥款</span>
+                                <span id="p_net" style="font-family: monospace;"></span>
+                            </div>
+                        </div>
+
+                        <div class="info-item full-width" style="margin-top: 15px;">
+                            <label>匯入銀行帳號</label>
+                            <span id="p_bank" style="font-family: monospace; font-size: 16px; color: #0066cc;"></span>
+                        </div>
+                    </div>
+
+                    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+                    <div class="action-area" style="text-align: right;">
+                        <button type="button" class="btn" onclick="closePayoutModal()" style="background: #eee; color: #555; margin-right: 10px;">取消</button>
+
+                        <form id="realPayoutForm" th:action="@{/admin/orders/updatePayout}" method="post" style="display: inline-block;">
+                            <input type="hidden" name="ordNo" id="input_payout_ordNo">
+                            <input type="hidden" name="payoutStatus" value="已撥款">
+                            <button type="submit" class="btn" style="background: #28a745; color: white; padding: 10px 20px;">
+                                <i class="fas fa-check"></i> 確認撥款
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script th:src="@{/js/back-end/admin/order_management.js}"></script>
+
+</body>
+</html>
