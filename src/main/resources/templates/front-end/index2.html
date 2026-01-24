@@ -6,54 +6,12 @@
     <title>卡爾夏汽車百貨</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/front-end/index2.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/front_header.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
+
 </head>
 <body>
-
-<header>
-    <div class="top-bar">
-        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
-        <div class="top-icons">
-            <div class="search-box">
-                <form th:action="@{/product/shop}" method="get" style="display: flex; width: 100%; align-items: center;">
-                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Search..."
-                           style="background: transparent; border: none; color: white; width: 100%; outline: none;">
-                    <button type="submit" style="background: transparent; border: none; cursor: pointer; padding: 0;">
-                        <span style="font-size: 16px;">🔍</span>
-                    </button>
-                </form>
-            </div>
-            <div class="user-dropdown-container">
-                <span id="user-icon" style="cursor: pointer;">👤</span>
-                <div id="user-dropdown" class="dropdown-menu">
-                    <a href="#">登入</a> <a href="#">註冊</a>
-                </div>
-            </div>
-            <span id="cart">🛒</span>
-        </div>
-    </div>
-
-    <div class="main-header">
-        <a th:href="@{/product/shop}" class="logo">卡爾夏</a>
-        <nav class="nav-links">
-            <a th:href="@{/product/shop}">商城</a>
-            <a href="#">安裝區</a>
-            <a href="#">論壇</a>
-            <a href="#">公告</a>
-            <a href="#">常見問題</a>
-
-            <!-- 會員中心下拉選單 -->
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
-                <div id="member-dropdown" class="dropdown-menu">
-                    <a href="#" onclick="navigateTo('coupons')">我的優惠券</a>
-                    <a href="#" onclick="navigateTo('favorite')">我的收藏</a>
-                    <a href="#" onclick="navigateTo('orderInfo')">訂單查詢</a>
-                </div>
-            </div>
-        </nav>
-    </div>
-</header>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
 
 <div class="container">
 
@@ -153,37 +111,6 @@
     </main>
 </div>
 
-<!--<footer>-->
-<!--    <div class="footer-col">-->
-<!--        <div class="footer-logo logo">卡爾夏</div>-->
-<!--    </div>-->
-<!--    <div class="footer-col">-->
-<!--        <h4>Shop</h4>-->
-<!--        <ul>-->
-<!--            <li>Shop Parts</li>-->
-<!--            <li>Wholesale</li>-->
-<!--        </ul>-->
-<!--    </div>-->
-<!--    <div class="footer-col">-->
-<!--        <h4>The Company</h4>-->
-<!--        <ul>-->
-<!--            <li>About Us</li>-->
-<!--            <li>FAQ</li>-->
-<!--        </ul>-->
-<!--    </div>-->
-<!--    <div class="footer-col">-->
-<!--        <h4>Contact Us</h4>-->
-<!--        <ul>-->
-<!--            <li>info@mysite.com</li>-->
-<!--        </ul>-->
-<!--    </div>-->
-<!--    <div class="footer-col">-->
-<!--        <h4>Follow Us</h4>-->
-<!--        <ul>-->
-<!--            <li>Instagram</li>-->
-<!--        </ul>-->
-<!--    </div>-->
-<!--</footer>-->
 <footer th:replace="~{/fragments/footer :: Footer}"></footer>
 
 <div class="chat-btn"></div>
