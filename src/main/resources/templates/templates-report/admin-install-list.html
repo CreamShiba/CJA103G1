@@ -9,21 +9,16 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100%; }
-
-        /* --- 左側側邊欄 --- */
         .sidebar { width: 260px; background-color: #ffffff; border-right: 1px solid #e1e4e8; display: flex; flex-direction: column; z-index: 10; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; }
         .logo-icon { width: 24px; height: 12px; background-color: #0066cc; border-radius: 4px; }
         .sidebar-header h2 { font-size: 18px; font-weight: bold; color: #1a1a1a; }
         .badge { font-size: 10px; background: #e6f0ff; color: #0066cc; padding: 2px 6px; border-radius: 4px; }
         .sidebar-nav { flex-grow: 1; overflow-y: auto; padding-top: 20px; }
-
         .menu-item { list-style: none; }
         .menu-item a { display: flex; align-items: center; padding: 12px 24px; color: #555; text-decoration: none; font-size: 15px; transition: 0.2s; justify-content: space-between; cursor: pointer; }
         .menu-item a i { margin-right: 10px; width: 20px; text-align: center; }
         .menu-item a:hover { background-color: #f0f7ff; color: #0066cc; }
-
-        /* 三層選單結構 */
         .submenu, .sub-submenu { list-style: none; background-color: #fafafa; display: none; }
         .has-submenu.open > .submenu, .has-sub-item.open > .sub-submenu { display: block; }
         .submenu a { padding-left: 58px; font-size: 14px; }
@@ -31,30 +26,24 @@
         .arrow { transition: 0.3s; font-size: 12px; }
         .open > a > .arrow { transform: rotate(180deg); }
         .active { background-color: #e0f2f1 !important; color: #00796b !important; font-weight: bold; border-right: 3px solid #00796b; }
-
-        /* --- 右側主內容 --- */
         .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .top-bar { background-color: white; padding: 15px 40px; border-bottom: 1px solid #e1e4e8; display: flex; justify-content: space-between; align-items: center; }
         .page-title { font-size: 20px; color: #00796b; font-weight: bold; }
         .user-profile { display: flex; align-items: center; gap: 10px; }
         .avatar { width: 36px; height: 36px; background-color: #333; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-
         .content-area { flex-grow: 1; overflow-y: auto; padding: 30px 40px; }
         .table-container { background-color: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); overflow: hidden; }
         .appeal-table { width: 100%; border-collapse: collapse; }
         .appeal-table th { padding: 16px; text-align: left; font-weight: 600; color: #00796b; font-size: 15px; border-bottom: 2px solid #e0f2f1; background-color: #f8f9fa; }
         .appeal-table td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-
         .status-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; background-color: #e0f2f1; color: #00796b; }
         .btn-action { background-color: #00796b; color: white; border: none; padding: 8px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s; }
         .btn-action:hover { background-color: #00695c; }
-
         .sidebar-footer { padding: 20px; border-top: 1px solid #eee; }
         .sidebar-footer a { color: #d9534f; text-decoration: none; font-size: 14px; }
     </style>
 </head>
 <body>
-
 <div class="app-container">
     <aside class="sidebar">
         <div class="sidebar-header">
@@ -66,15 +55,14 @@
                 <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 A</a></li></ul></li>
                 <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 B</a></li></ul></li>
                 <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-user-shield"></i> 帳號管理</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">會員帳號管理</a></li><li><a href="#">管理員帳號管理</a></li></ul></li>
-
                 <li class="menu-item has-submenu open">
                     <a class="submenu-toggle"><span><i class="fas fa-exclamation-circle"></i> 申訴/檢舉管理</span><i class="fas fa-chevron-down arrow"></i></a>
                     <ul class="submenu">
                         <li class="menu-item has-sub-item open">
                             <a class="sub-toggle"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <li><a href="#" class="active">尚未處理</a></li>
-                                <li><a href="#">已結案</a></li>
+                                <li><a href="/appeals/admin/list?status=PENDING" id="nav-pending">尚未處理</a></li>
+                                <li><a href="/appeals/admin/list?status=已結案" id="nav-closed">已結案</a></li>
                             </ul>
                         </li>
                         <li class="menu-item has-sub-item">
@@ -86,7 +74,6 @@
                         </li>
                     </ul>
                 </li>
-
                 <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-tools"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 C</a></li></ul></li>
                 <li class="menu-item"><a href="#"><i class="fas fa-star"></i> 自訂</a></li>
                 <li class="menu-item"><a href="#"><i class="fas fa-headset"></i> 自訂</a></li>
@@ -94,13 +81,11 @@
         </nav>
         <div class="sidebar-footer"><a href="#">登出 (Logout)</a></div>
     </aside>
-
     <main class="main-content">
         <header class="top-bar">
             <h2 class="page-title">安裝申訴管理</h2>
             <div class="user-profile"><span>Admin</span><div class="avatar"><i class="fas fa-user"></i></div></div>
         </header>
-
         <div class="content-area">
             <div class="table-container">
                 <table class="appeal-table">
@@ -113,41 +98,60 @@
                         <th>申訴時間</th>
                         <th>案件管理</th> </tr>
                     </thead>
-                    <tbody id="appealTableBody">
-                    </tbody>
+                    <tbody id="appealTableBody"></tbody>
                 </table>
             </div>
         </div>
     </main>
 </div>
-
 <script>
-    // 選單開關功能
     document.querySelectorAll('.submenu-toggle, .sub-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            this.parentElement.classList.toggle('open');
-        });
+        toggle.addEventListener('click', function(e) { e.preventDefault(); this.parentElement.classList.toggle('open'); });
     });
+    document.addEventListener('DOMContentLoaded', function() {
+        const params = new URLSearchParams(window.location.search);
+        const currentStatus = params.get('status') || 'PENDING';
+        const navPending = document.getElementById('nav-pending');
+        const navClosed = document.getElementById('nav-closed');
+        if (currentStatus === '已結案') {
+            navClosed.classList.add('active');
+            navPending.classList.remove('active');
+        } else {
+            navPending.classList.add('active');
+            navClosed.classList.remove('active');
+        }
+        fetch('/appeals/api/all')
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('appealTableBody');
+                tbody.innerHTML = '';
+                data.forEach(item => {
+                    if (item.status === currentStatus) {
+                        const formattedDate = item.applyDate ? item.applyDate.replace('T', ' ').substring(0, 16) : 'N/A';
+                        let displayTitle = item.categories || '';
+                        if (displayTitle.includes(',')) {
+                            const titleArray = displayTitle.split(',');
+                            if (titleArray.length > 2) { displayTitle = titleArray.slice(0, 2).join(',') + '...'; }
+                        }
+                        const displayStatus = (item.status === 'PENDING') ? '尚未處理' : item.status;
+                        // 修正處：將「已結案」下的按鈕改為「查看」且顏色設為與標題一致 (#00796b)
+                        const actionColumn = (item.status === '已結案') ?
+                            `<a href="/appeals/admin/handle?id=${item.appealsNo}" class="btn-action" style="background-color: #00796b;">查看</a>` :
+                            `<a href="/appeals/admin/handle?id=${item.appealsNo}" class="btn-action">處理案件</a>`;
 
-    // 抓取後端資料
-    fetch('/appeals/api/all')
-        .then(res => res.json())
-        .then(data => {
-            const tbody = document.getElementById('appealTableBody');
-            tbody.innerHTML = '';
-            data.forEach(item => {
-                const formattedDate = item.applyDate ? item.applyDate.replace('T', ' ').substring(0, 16) : 'N/A';
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${item.appealsNo}</td>
-                        <td>#${item.installOrderNo}</td>
-                        <td>${item.categories}</td>
-                        <td><span class="status-badge">尚未處理</span></td>
-                        <td>${formattedDate}</td>
-                        <td><a href="/appeals/admin/handle?id=${item.appealsNo}" class="btn-action">處理案件</a></td> </tr>`;
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${item.appealsNo}</td>
+                                <td>#${item.installOrderNo}</td>
+                                <td>${displayTitle}</td>
+                                <td><span class="status-badge">${displayStatus}</span></td>
+                                <td>${formattedDate}</td>
+                                <td>${actionColumn}</td>
+                            </tr>`;
+                    }
+                });
             });
-        });
+    });
 </script>
 </body>
 </html>
