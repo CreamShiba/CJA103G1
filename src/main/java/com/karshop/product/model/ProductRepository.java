@@ -21,6 +21,7 @@ public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
 //  首頁關鍵字搜尋
     Page<ProductVO> findByProdNameContainingAndProdStatus(String prodName, String prodStatus, Pageable pageable);
 
+//  賣家中心複合查詢
     @Query("SELECT p FROM ProductVO p WHERE p.seller.sellerNo = :sellerNo " +
             "AND (:prodName IS NULL OR p.prodName LIKE %:prodName%) " +
             "AND (:minPrice IS NULL OR p.prodPrice >= :minPrice) " +

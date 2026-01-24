@@ -1,0 +1,114 @@
+/* --- Header 專用樣式 --- */
+
+/* 1. 頂部黑條 */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 40px;
+    font-size: 12px;
+    color: #ccc;
+    border-bottom: 1px solid #333;
+    background-color: #050000; /* 確保背景色 */
+}
+
+.top-icons {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* 2. 搜尋框 */
+.search-box {
+    border: 1px solid #555;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    width: 200px; /* 稍微加寬一點 */
+    justify-content: space-between;
+    border-radius: 4px;
+}
+
+/* 3. 主要導航列 (Main Header) */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: transparent; /* 配合背景漸層 */
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    text-decoration: none;
+}
+
+/* 簡單模擬 Logo 圖標 */
+.logo::before {
+    content: '';
+    display: inline-block;
+    width: 30px;
+    height: 15px;
+    background: white;
+    border-radius: 10px;
+}
+
+/* 4. 導航連結 */
+.nav-links {
+    display: flex;
+    gap: 30px;
+    font-size: 14px;
+    align-items: center;
+}
+
+.nav-links a {
+    color: #fff;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.nav-links a:hover {
+    color: #ff3333;
+}
+
+/* 5. 下拉選單樣式 (複製自原本的 index.css 底部) */
+.user-dropdown-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    display: none; /* 預設隱藏 */
+    position: absolute;
+    right: 0;
+    top: 30px;
+    background-color: #1a1a1a;
+    min-width: 120px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+    z-index: 1000; /* 提高層級，避免被蓋住 */
+    border: 1px solid #333;
+    border-radius: 4px;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-menu a {
+    color: #ccc;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    font-size: 13px;
+    transition: 0.2s;
+}
+
+.dropdown-menu a:hover {
+    background-color: #333;
+    color: #ff3333;
+}
