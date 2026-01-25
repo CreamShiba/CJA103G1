@@ -12,14 +12,14 @@
         <ul class="category-list">
 
             <li>
-                <a th:href="@{/shop(sellerNo=${sellerNo})}"
+                <a th:href="@{/product/shop(sellerNo=${sellerNo})}"
                    th:style="${productCategoryNo == null && keyword == null} ? 'color: #ff3333; font-weight: bold;' : ''">
                     所有商品
                 </a>
             </li>
 
             <li th:each="cat : ${categoryList}">
-                <a th:href="@{/shop(productCategoryNo=${cat.productCategoryNo}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sellerNo=${sellerNo})}"
+                <a th:href="@{/product/shop(productCategoryNo=${cat.productCategoryNo}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sellerNo=${sellerNo})}"
                    th:text="${cat.productCategoryName}"
                    th:style="${productCategoryNo == cat.productCategoryNo} ? 'color: #ff3333; font-weight: bold;' : ''">
                     分類名稱
@@ -31,7 +31,7 @@
     <div class="sidebar-section">
         <h3 class="sidebar-title">Price Range</h3>
 
-        <form th:action="@{/shop}" method="get">
+        <form th:action="@{/product/shop}" method="get">
 
             <input type="hidden" name="keyword" th:value="${keyword}" th:if="${keyword != null}">
             <input type="hidden" name="productCategoryNo" th:value="${productCategoryNo}" th:if="${productCategoryNo != null}">
