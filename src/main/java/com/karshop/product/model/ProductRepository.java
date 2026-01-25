@@ -16,10 +16,10 @@ public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
     Page<ProductVO> findByProdStatus(String prodStatus, Pageable pageable);
 
 //  首頁分類搜尋
-    Page<ProductVO> findByProductCategory_ProductCategoryNoAndProdStatus(Integer productCategoryNo, String productStatus, Pageable pageable);
-
-//  首頁關鍵字搜尋
-    Page<ProductVO> findByProdNameContainingAndProdStatus(String prodName, String prodStatus, Pageable pageable);
+//    Page<ProductVO> findByProductCategory_ProductCategoryNoAndProdStatus(Integer productCategoryNo, String productStatus, Pageable pageable);
+//
+////  首頁關鍵字搜尋
+//    Page<ProductVO> findByProdNameContainingAndProdStatus(String prodName, String prodStatus, Pageable pageable);
 
 //  賣家中心複合查詢
     @Query("SELECT p FROM ProductVO p WHERE p.seller.sellerNo = :sellerNo " +
@@ -33,4 +33,18 @@ public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
                                     @Param("minPrice") Integer minPrice,
                                     @Param("maxPrice") Integer maxPrice,
                                     @Param("prodStatus") String prodStatus);
+
+//  商城複合查詢
+    @Query("SELECT p FROM ProductVO p WHERE p.prodStatus = '上架中' " +
+            "AND (:keyword IS NULL OR p.prodName LIKE %:keyword% OR p.seller.sellerName LIKE %:keyword%) " +
+            "AND (:categoryNo IS NULL OR p.productCategory.productCategoryNo = :categoryNo) " +
+            "AND (:sellerNo IS NULL OR p.seller.sellerNo = :sellerNo) " +
+            "AND (:minPrice IS NULL OR p.prodPrice >= :minPrice) " +
+            "AND (:maxPrice IS NULL OR p.prodPrice <= :maxPrice) " +
+            "ORDER BY p.prodNo DESC ")
+    Page<ProductVO> findAllForBuyer(@Param("keyword") String keyword,
+                                    @Param("categoryNo") Integer categoryNo,
+                                    @Param("sellerNo") Integer sellerNo,
+                                    @Param("minPrice") Integer minPrice,
+                                    @Param("maxPrice") Integer maxPrice, Pageable pageable);
 }

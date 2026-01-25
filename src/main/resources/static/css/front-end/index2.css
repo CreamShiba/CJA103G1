@@ -28,68 +28,6 @@ ul {
     list-style: none;
 }
 
-/* --- 頂部導航 (Header) --- */
-/*.top-bar {*/
-/*    display: flex;*/
-/*    justify-content: space-between;*/
-/*    align-items: center;*/
-/*    padding: 10px 40px;*/
-/*    font-size: 12px;*/
-/*    color: #ccc;*/
-/*    border-bottom: 1px solid #333;*/
-/*}*/
-
-/*.top-icons {*/
-/*    display: flex;*/
-/*    gap: 20px;*/
-/*    align-items: center;*/
-/*}*/
-
-/*!* 模擬搜尋框 *!*/
-/*.search-box {*/
-/*    border: 1px solid #555;*/
-/*    padding: 5px 10px;*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    width: 150px;*/
-/*    justify-content: space-between;*/
-/*}*/
-
-/*.main-header {*/
-/*    display: flex;*/
-/*    justify-content: space-between;*/
-/*    align-items: center;*/
-/*    padding: 20px 40px;*/
-/*}*/
-
-/*.logo {*/
-/*    font-size: 24px;*/
-/*    font-weight: bold;*/
-/*    display: flex;*/
-/*    align-items: center;*/
-/*    gap: 10px;*/
-/*}*/
-
-/*!* 簡單模擬 Logo 圖標 *!*/
-/*.logo::before {*/
-/*    content: '';*/
-/*    display: inline-block;*/
-/*    width: 30px;*/
-/*    height: 15px;*/
-/*    background: white;*/
-/*    border-radius: 10px;*/
-/*}*/
-
-/*.nav-links {*/
-/*    display: flex;*/
-/*    gap: 30px;*/
-/*    font-size: 14px;*/
-/*}*/
-
-/*.nav-links a.active {*/
-/*    color: #ff3333;*/
-/*}*/
-
 /* --- 主要內容區 (Layout) --- */
 .container {
     display: flex;
@@ -127,48 +65,6 @@ aside {
     font-weight: bold;
     text-decoration: underline;
 }
-
-/* --- 在 style.css 底部新增 --- */
-
-/* 下拉選單容器 */
-/*.user-dropdown-container {*/
-/*    position: relative;*/
-/*    display: inline-block;*/
-/*}*/
-
-/* 下拉選單本體 (預設隱藏) */
-/*.dropdown-menu {*/
-/*    display: none; !* 預設隱藏 *!*/
-/*    position: absolute;*/
-/*    right: 0;*/
-/*    top: 30px;*/
-/*    background-color: #1a1a1a;*/
-/*    min-width: 120px;*/
-/*    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);*/
-/*    z-index: 100;*/
-/*    border: 1px solid #333;*/
-/*    border-radius: 4px;*/
-/*}*/
-
-/*!* 顯示狀態 (透過 JS 切換) *!*/
-/*.dropdown-menu.show {*/
-/*    display: block;*/
-/*}*/
-
-/*!* 選單連結樣式 *!*/
-/*.dropdown-menu a {*/
-/*    color: #ccc;*/
-/*    padding: 12px 16px;*/
-/*    text-decoration: none;*/
-/*    display: block;*/
-/*    font-size: 13px;*/
-/*    transition: 0.2s;*/
-/*}*/
-
-/*.dropdown-menu a:hover {*/
-/*    background-color: #333;*/
-/*    color: #ff3333;*/
-/*}*/
 
 /*以下為Eagan增加的*/
 .product-card-link:hover .product-card {
