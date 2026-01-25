@@ -15,45 +15,7 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 a:hover { color: #ff3333; }
 ul { list-style: none; }
 
-/* --- 2. Header (同步首頁) --- */
-.top-bar {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 40px; font-size: 12px; color: #ccc; border-bottom: 1px solid #333;
-    background: rgba(0,0,0,0.8);
-}
-.top-icons { display: flex; gap: 20px; align-items: center; }
-.search-box {
-    border: 1px solid #555; padding: 5px 10px; display: flex;
-    align-items: center; width: 200px; justify-content: space-between;
-    border-radius: 4px; background: #000;
-}
-.main-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 20px 40px; background: rgba(0,0,0,0.6);
-}
-.logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 10px; color: #fff; }
-.logo::before {
-    content: ''; display: inline-block; width: 30px; height: 15px;
-    background: white; border-radius: 10px;
-}
-.nav-links { display: flex; gap: 30px; font-size: 14px; font-weight: bold; letter-spacing: 1px; }
-
-/* 下拉選單 */
-.user-dropdown-container { position: relative; display: inline-block; }
-.dropdown-menu {
-    display: none; position: absolute; right: 0; top: 30px;
-    background-color: #1a1a1a; min-width: 120px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5); z-index: 100;
-    border: 1px solid #333; border-radius: 4px;
-}
-.dropdown-menu.show { display: block; }
-.dropdown-menu a {
-    color: #ccc; padding: 12px 16px; text-decoration: none; display: block;
-    font-size: 13px; transition: 0.2s;
-}
-.dropdown-menu a:hover { background-color: #333; color: #ff3333; }
-
-/* --- 3. 佈局容器 (Container) --- */
+/* --- 2. 佈局容器 (Container) --- */
 /* 加寬到 1400px 以容納側邊欄 */
 .container {
     max-width: 1400px; width: 100%; margin: 40px auto; padding: 0 40px;
@@ -64,25 +26,17 @@ ul { list-style: none; }
 /* 手機版適配：螢幕太小自動換行 */
 @media (max-width: 1024px) {
     .container { flex-wrap: wrap; }
+    /* 注意：aside 的樣式現在由 sidebar.css 控制，但這裡保留 layout 相關的調整 */
     aside { width: 100%; padding-right: 0; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
 }
 
-/* --- 側邊欄 (Sidebar) --- */
-aside {
-    width: 250px; flex-shrink: 0; padding-right: 40px;
-    /* 若需要分隔線可加: border-right: 1px solid #222; */
-}
-.sidebar-title { font-size: 18px; margin-bottom: 20px; color: #ddd; font-weight: bold; }
-.category-list li { margin-bottom: 12px; font-size: 14px; color: #aaa; cursor: pointer; transition: 0.3s; }
-.category-list li:hover { color: #ff3333; text-decoration: underline; }
-
-/* --- 主要內容區塊 (Main Content Wrapper) --- */
+/* --- 3. 主要內容區塊 (Main Content Wrapper) --- */
 /* 包住圖片和資訊，讓它們在右側自成一區 */
 .main-content-wrapper {
     flex: 1; display: flex; flex-wrap: wrap; gap: 50px; width: 100%;
 }
 
-/* 左側圖片區 */
+/* --- 左側圖片區 --- */
 .product-image-section { flex: 1.2; min-width: 400px; }
 .main-image-box {
     width: 100%; height: 450px;
@@ -103,7 +57,7 @@ aside {
 .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
 .thumb-box:hover, .thumb-box.active { border-color: #ff3333; opacity: 1; }
 
-/* 右側資訊區 */
+/* --- 右側資訊區 --- */
 .product-info-section { flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 15px; }
 .breadcrumb { color: #888; font-size: 14px; margin-bottom: 10px; }
 .product-title { font-size: 2rem; font-weight: bold; }
@@ -111,28 +65,22 @@ aside {
 .divider { height: 1px; background: #333; margin: 15px 0; }
 .product-desc { color: #ccc; line-height: 1.8; white-space: pre-line; min-height: 100px; }
 
+/* --- 購物車與數量按鈕 --- */
 .qty-selector { display: inline-flex; border: 1px solid #444; border-radius: 5px; overflow: hidden; margin-right: 15px; }
 .qty-btn { background: #222; color: #fff; border: none; padding: 10px 15px; cursor: pointer; }
 .qty-input { width: 50px; text-align: center; border: none; background: #111; color: #fff; }
+
 .add-cart-btn {
     background: #ff3333; color: white; border: none; padding: 12px 30px;
     font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s;
 }
 .add-cart-btn:hover { background: #d62828; }
 .add-cart-btn:disabled { background: #555; cursor: not-allowed; }
+
+/* --- 功能按鈕 (檢舉/收藏) --- */
 .report-btn { margin-top: 20px; background: transparent; border: none; color: #666; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
 .report-btn:hover { color: #ff3333; text-decoration: underline; }
 
-/* Modal */
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
-.modal-box { background: #1a1a1a; padding: 25px; border-radius: 10px; width: 400px; border: 1px solid #333; }
-.modal-title { font-size: 18px; margin-bottom: 15px; color: #fff; }
-.modal-textarea { width: 100%; height: 100px; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 5px; resize: none; margin-bottom: 15px; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
-.modal-close { background: transparent; border: 1px solid #444; color: #ccc; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
-.modal-submit { background: #ff3333; border: none; color: #fff; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
-
-/* 收藏按鈕樣式 */
 .fav-btn {
     background: transparent;
     border: 1px solid #444;
@@ -144,43 +92,63 @@ aside {
     display: flex; align-items: center; justify-content: center;
     transition: 0.2s;
 }
-
-/* 滑鼠移入 */
 .fav-btn:hover {
-    border-color: #ff3333;
-    color: #ff3333;
-    background: rgba(255, 51, 51, 0.1);
+    border-color: #ff3333; color: #ff3333; background: rgba(255, 51, 51, 0.1);
 }
-
-/* 按鈕被按下的瞬間 (Active 偽類) */
-.fav-btn:active {
-    transform: scale(0.95);
-}
-
-/* 已收藏狀態 (後端控制) */
+.fav-btn:active { transform: scale(0.95); }
 .fav-btn.active {
-    color: #ff3333;
-    border-color: #ff3333;
-    background: rgba(255, 51, 51, 0.1);
+    color: #ff3333; border-color: #ff3333; background: rgba(255, 51, 51, 0.1);
 }
+
 /* --- 詳情頁專用評價樣式 --- */
 .product-rating-detail {
-    display: flex;
-    align-items: center;
-    font-size: 16px;       /* 比首頁大一點 */
-    color: #ffc107;        /* 金黃色 */
-    margin-bottom: 15px;   /* 跟下方價格保持距離 */
-    gap: 3px;              /* 星星之間的間距 */
+    display: flex; align-items: center;
+    font-size: 16px; color: #ffc107;
+    margin-bottom: 15px; gap: 3px;
 }
-
 .rating-count-detail {
-    color: #888;
-    font-size: 13px;
-    margin-left: 8px;
-    text-decoration: underline; /* 加底線看起來像可點擊(雖然目前沒功能) */
-    cursor: pointer;
+    color: #888; font-size: 13px; margin-left: 8px;
+    text-decoration: underline; cursor: pointer;
+}
+.rating-count-detail:hover { color: #ccc; }
+
+/* --- 賣家資訊區塊 (優化版) --- */
+.seller-info-box {
+    display: flex; align-items: center; gap: 15px;
+    margin-bottom: 20px; padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.rating-count-detail:hover {
-    color: #ccc;
+.seller-avatar {
+    width: 50px; height: 50px; border-radius: 50%; object-fit: cover;
+    border: 2px solid #333; transition: 0.3s;
 }
+.seller-avatar-link:hover .seller-avatar {
+    border-color: #ff3333; transform: scale(1.05);
+}
+
+.seller-details { display: flex; flex-direction: column; flex-grow: 1; }
+.seller-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+
+.seller-name-link { font-size: 15px; font-weight: bold; color: #fff; text-decoration: none; transition: 0.2s; }
+.seller-name-link:hover { color: #ff3333; }
+
+.visit-shop-btn {
+    font-size: 13px; color: #fff; background: #333;
+    padding: 8px 15px; border-radius: 20px;
+    text-decoration: none; transition: 0.3s; white-space: nowrap;
+}
+.visit-shop-btn:hover {
+    background: #ff3333; transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 51, 51, 0.3);
+}
+
+/* --- Modal (檢舉彈窗) --- */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; }
+.modal-box { background: #1a1a1a; padding: 25px; border-radius: 10px; width: 400px; border: 1px solid #333; }
+.modal-title { font-size: 18px; margin-bottom: 15px; color: #fff; }
+.modal-textarea { width: 100%; height: 100px; background: #111; border: 1px solid #333; color: #fff; padding: 10px; border-radius: 5px; resize: none; margin-bottom: 15px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.modal-close { background: transparent; border: 1px solid #444; color: #ccc; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+.modal-submit { background: #ff3333; border: none; color: #fff; padding: 8px 15px; border-radius: 4px; cursor: pointer; }

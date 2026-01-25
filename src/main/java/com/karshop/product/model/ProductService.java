@@ -41,23 +41,26 @@ public class ProductService {
         return productRepository.findBySellerSellerNo(sellerNo);
     }
 
-    public Page<ProductVO> getAllForBuyer(int pageNumber, String keyword, Integer productCategoryNo){
+    //  商城複合查詢
+    public Page<ProductVO> getAllForBuyer(int pageNumber, String keyword, Integer productCategoryNo, Integer sellerNo, Integer minPrice, Integer maxPrice){
         // 設定分頁：
         // pageNumber - 1 : 因為 Spring 的頁數是從 0 開始算，但網址我們通常傳 1
         // 9 : 每頁顯示 9 筆
         // Sort : 按照商品編號 (prodNo) 降序排列 (最新的在最前面)
         Pageable pageable = PageRequest.of(pageNumber - 1, 9, Sort.by("prodNo").descending());
 
-//      關鍵字搜尋
-        if(keyword != null && !keyword.trim().isEmpty()){
-            return productRepository.findByProdNameContainingAndProdStatus(keyword, "上架中",  pageable);
+        if(keyword != null && keyword.trim().isEmpty()){
+            keyword = null;
         }
-//      商品類別搜尋
-        if(productCategoryNo != null){
-            return productRepository.findByProductCategory_ProductCategoryNoAndProdStatus(productCategoryNo, "上架中", pageable);
+
+        if(minPrice != null && maxPrice != null && minPrice > maxPrice){
+            Integer maxPriceTemp = minPrice;
+            minPrice = maxPrice;
+            maxPrice = maxPriceTemp;
         }
-//      首頁
-        return productRepository.findByProdStatus("上架中",  pageable);
+
+        return productRepository.findAllForBuyer(keyword, productCategoryNo, sellerNo, minPrice, maxPrice, pageable);
+
     }
 
 

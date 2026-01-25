@@ -1,0 +1,86 @@
+/* --- 側邊欄 (Sidebar) --- */
+aside {
+    width: 250px;
+    flex-shrink: 0;
+    padding-right: 40px;
+    /* 如果希望在手機版自動隱藏或變形，可以在這裡加 Media Query */
+}
+
+.sidebar-section {
+    margin-bottom: 40px;
+}
+
+.sidebar-title {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #ddd;
+    font-weight: bold;
+    /*border-bottom: 1px solid #333; !* 增加一點裝飾 *!*/
+    /*padding-bottom: 10px;*/
+}
+
+/* 分類列表 */
+.category-list {
+    list-style: none;
+    padding: 0;
+}
+
+.category-list li {
+    margin-bottom: 12px;
+}
+
+.category-list li a {
+    font-size: 14px;
+    color: #aaa;
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    display: block; /* 讓整個區域可點擊 */
+}
+
+.category-list li a:hover {
+    color: #ff3333;
+    padding-left: 5px; /* 滑鼠移過去稍微右移的效果 */
+}
+
+/* 價格篩選區塊 */
+.price-input-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.price-input {
+    width: 100%;
+    padding: 8px;
+    background: #111;
+    border: 1px solid #333;
+    color: white;
+    border-radius: 4px;
+    outline: none;
+    font-size: 13px;
+    transition: 0.3s;
+}
+
+.price-input:focus {
+    border-color: #ff3333;
+}
+
+.btn-apply {
+    width: 100%;
+    background: #333;
+    color: white;
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.btn-apply:hover {
+    background: #ff3333;
+    color: white;
+}
