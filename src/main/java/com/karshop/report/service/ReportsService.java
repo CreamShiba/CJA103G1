@@ -32,4 +32,8 @@ public class ReportsService {
         report.setHandled(LocalDateTime.now());
         reportsRepository.save(report);
     }
+
+    public Reports getOneReport(Integer id) {
+        return reportsRepository.findById(id).orElse(null);
+    }
 }
