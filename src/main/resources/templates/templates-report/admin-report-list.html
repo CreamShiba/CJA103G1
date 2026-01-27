@@ -154,19 +154,27 @@
 
         // 設定側邊欄高亮
         if (currentStatus === '已結案') {
-            document.getElementById('nav-closed').classList.add('active');
+            const closedNav = document.getElementById('nav-closed');
+            if(closedNav) closedNav.classList.add('active');
         } else {
-            document.getElementById('nav-pending').classList.add('active');
+            const pendingNav = document.getElementById('nav-pending');
+            if(pendingNav) pendingNav.classList.add('active');
         }
 
-        fetch(`/reports/api/all?status=${currentStatus}`)
+        // 💡 獲取資料
+        fetch(`/reports/api/all`)
             .then(res => res.json())
             .then(data => {
                 const tbody = document.getElementById('reportTableBody');
                 tbody.innerHTML = '';
 
-                // 💡 擋掉邏輯：僅顯示與當前分頁狀態相符的案件
-                const filteredData = data.filter(item => item.status === currentStatus);
+                // 💡 關鍵修正 1：讓篩選同時相容 "PENDING" 與 "待處理"
+                const filteredData = data.filter(item => {
+                    if (currentStatus === 'PENDING') {
+                        return item.status === 'PENDING' || item.status === '待處理';
+                    }
+                    return item.status === currentStatus;
+                });
 
                 if (filteredData.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #999;">目前沒有檢舉資料</td></tr>';
@@ -174,13 +182,16 @@
                 }
 
                 filteredData.forEach(item => {
-                    // 💡 關鍵修正：解決編號 undefined 問題，相容多種 JSON 欄位名稱
-                    const id = item.reportNo || item.reportsNo || item.id || item.reportsId || 'N/A';
-                    const type = item.reportType || item.reportsType || item.type || '未分類';
-                    const reasonRaw = item.reason || item.reportsReason || '';
+                    // 💡 關鍵修正 2：確保能正確對應到後端的 reportsNo
+                    const id = item.reportsNo || item.reportNo || item.id || 'N/A';
+                    const type = item.reportsType || item.reportType || '未分類';
+                    const reasonRaw = item.reportsReason || item.reason || '';
                     const displayReason = formatReasons(reasonRaw);
-                    const statusText = (item.status === 'PENDING') ? '尚未處理' : item.status;
 
+                    // 顯示文字處理
+                    const statusText = (item.status === 'PENDING' || item.status === '待處理') ? '尚未處理' : item.status;
+
+                    // 按鈕處理
                     const actionBtn = (item.status === '已結案') ?
                         `<a href="/reports/admin/handle?id=${id}" class="btn-action" style="background-color: #6c757d;">查看</a>` :
                         `<a href="/reports/admin/handle?id=${id}" class="btn-action">處理案件</a>`;
@@ -195,7 +206,11 @@
                         </tr>`;
                 });
             })
-            .catch(err => console.error("資料載入失敗:", err));
+            .catch(err => {
+                console.error("資料載入失敗:", err);
+                const tbody = document.getElementById('reportTableBody');
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: red;">資料載入失敗，請確認後端伺服器狀態</td></tr>';
+            });
     });
 </script>
 </body>

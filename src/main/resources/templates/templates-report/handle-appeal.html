@@ -199,7 +199,7 @@
     function sendReply() {
         const reply = document.getElementById('replyMsg').value;
         if (!reply.trim()) { showModal('卡爾夏Karshop', '請輸入回覆內容'); return; }
-        const id = [[${appeal.appealsNo}]];
+        const id = /*[[${appeal.appealsNo}]]*/ 0;
         const params = new URLSearchParams({ id: id, response: reply, status: '已結案', admNo: 1 });
         fetch('/appeals/api/handle', { method: 'POST', body: params })
             .then(res => res.text())

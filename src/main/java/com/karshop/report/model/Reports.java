@@ -44,4 +44,7 @@ public class Reports {
 
     @Column(name = "adm_no", nullable = false)
     private Integer admNo; // 管理員編號
+
+    @Column(name = "reports_response")
+    private String response; // 管理員回覆
 }

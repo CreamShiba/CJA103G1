@@ -59,17 +59,17 @@
                     <a class="submenu-toggle"><span><i class="fas fa-exclamation-circle"></i> 申訴/檢舉管理</span><i class="fas fa-chevron-down arrow"></i></a>
                     <ul class="submenu">
                         <li class="menu-item has-sub-item open">
-                            <a class="sub-toggle"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
+                            <a class="sub-toggle-btn"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
                                 <li><a href="/appeals/admin/list?status=PENDING" id="nav-pending">尚未處理</a></li>
                                 <li><a href="/appeals/admin/list?status=已結案" id="nav-closed">已結案</a></li>
                             </ul>
                         </li>
                         <li class="menu-item has-sub-item">
-                            <a class="sub-toggle"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
+                            <a class="sub-toggle-btn"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <li><a href="#">尚未處理</a></li>
-                                <li><a href="#">已結案</a></li>
+                                <li><a href="/reports/admin/list?status=PENDING">尚未處理</a></li>
+                                <li><a href="/reports/admin/list?status=已結案">已結案</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -105,9 +105,22 @@
     </main>
 </div>
 <script>
-    document.querySelectorAll('.submenu-toggle, .sub-toggle').forEach(toggle => {
-        toggle.addEventListener('click', function(e) { e.preventDefault(); this.parentElement.classList.toggle('open'); });
+    // 只對第一層選單綁定摺疊功能
+    document.querySelectorAll('.submenu-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            this.parentElement.classList.toggle('open');
+        });
     });
+
+    // 對第二層選單綁定摺疊功能
+    document.querySelectorAll('.sub-toggle-btn').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            this.parentElement.classList.toggle('open');
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const params = new URLSearchParams(window.location.search);
         const currentStatus = params.get('status') || 'PENDING';
@@ -134,7 +147,6 @@
                             if (titleArray.length > 2) { displayTitle = titleArray.slice(0, 2).join(',') + '...'; }
                         }
                         const displayStatus = (item.status === 'PENDING') ? '尚未處理' : item.status;
-                        // 修正處：將「已結案」下的按鈕改為「查看」且顏色設為與標題一致 (#00796b)
                         const actionColumn = (item.status === '已結案') ?
                             `<a href="/appeals/admin/handle?id=${item.appealsNo}" class="btn-action" style="background-color: #00796b;">查看</a>` :
                             `<a href="/appeals/admin/handle?id=${item.appealsNo}" class="btn-action">處理案件</a>`;
