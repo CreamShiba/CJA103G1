@@ -52,12 +52,27 @@ public class ReportsController {
     @ResponseBody
     public String handleReportByAdmin(@RequestParam Integer id,
                                       @RequestParam String status,
-                                      @RequestParam Integer admNo){
+                                      @RequestParam Integer admNo,
+                                      @RequestParam String response){
         try{
-            reportsService.handleReport(id, status, admNo);
+            reportsService.handleReport(id, status, admNo, response);
             return "success";
         }catch (Exception e){
             return "error" + e.getMessage();
+        }
+    }
+
+    // 顯示「處理案件」的詳細頁面
+    @GetMapping("/admin/handle")
+    public String showHandlePage(@RequestParam("id") Integer id, Model model) {
+        // 透過 Service 找尋該筆檢舉資料
+        Reports report = reportsService.getReportById(id);
+
+        if (report != null) {
+            model.addAttribute("report", report);
+            return "templates-report/handle-report"; // ⚠️ 請確保這名稱與你的 HTML 檔名一致
+        } else {
+            return "redirect:/reports/admin/list"; // 找不到資料就導回清單
         }
     }
 }
