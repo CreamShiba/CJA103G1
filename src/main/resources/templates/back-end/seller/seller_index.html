@@ -94,6 +94,7 @@
                                 <option value="">所有狀態</option>
                                 <option value="上架中" th:selected="${searchStatus == '上架中'}">上架中</option>
                                 <option value="下架中" th:selected="${searchStatus == '下架中'}">下架中</option>
+                                <option value="下架中" th:selected="${searchStatus == '違規下架'}">違規下架</option>
                             </select>
                         </div>
 
@@ -129,7 +130,7 @@
                             <span class="toggle-thumb"></span>
                         </a>
 
-                        <a th:unless="${product.prodStatus == '上架中'}"
+                        <a th:if="${product.prodStatus == '下架中'}"
                            th:href="@{/product/updateStatus(prodNo=${product.prodNo}, prodStatus='上架中')}"
                            class="toggle-switch toggle-inactive"
                            title="點擊上架">
@@ -137,8 +138,23 @@
                             <span class="toggle-thumb"></span>
                         </a>
 
-                        <span style="margin-left: 8px; font-size: 13px; color: #aaa;"
-                              th:text="${product.prodStatus}">狀態</span>
+                        <div th:if="${product.prodStatus == '違規下架'}"
+                             style="display: inline-block; width: 44px; text-align: center; color: #ff5252;">
+                            <i class="fas fa-ban" title="禁止操作"></i>
+                        </div>
+
+                        <div th:if="${product.prodStatus == '審核中'}"
+                             style="display: inline-block; width: 44px; text-align: center; color: #ffa726;">
+                            <i class="fas fa-hourglass-half" title="審核中"></i>
+                        </div>
+
+                        <span style="margin-left: 8px; font-size: 13px;"
+                              th:text="${product.prodStatus}"
+                              th:class="${product.prodStatus == '上架中' ? 'status-badge status-Active' :
+                             (product.prodStatus == '違規下架' ? 'status-badge status-Violation' :
+                             (product.prodStatus == '審核中' ? 'status-badge status-New' : 'status-badge status-Cancel'))}">
+                            狀態
+                        </span>
                     </td>
                     <td th:text="${'$' + #numbers.formatInteger(product.prodPrice, 1, 'COMMA')}"></td>
                     <td th:text="${product.prodQty}"></td>

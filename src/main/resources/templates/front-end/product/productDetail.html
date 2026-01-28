@@ -148,13 +148,48 @@
 <!--檢舉商品 -->
 <div id="reportModal" class="modal-overlay">
     <div class="modal-box">
-        <h3 class="modal-title">檢舉商品</h3>
-        <p style="color: #aaa; font-size: 14px; margin-bottom: 10px;">請告訴我們檢舉的原因：</p>
-        <textarea class="modal-textarea" placeholder="例如：商品資訊不實、仿冒品..."></textarea>
-        <div class="modal-actions">
-            <button class="modal-close" onclick="closeReportModal()">取消</button>
-            <button class="modal-submit" onclick="submitReport()">送出檢舉</button>
+        <div class="modal-header" style="margin-bottom: 20px;">
+            <h3 class="modal-title" style="margin: 0;">檢舉商品</h3>
+            <span style="font-size: 13px; color: #666;">請協助我們維護商城環境</span>
         </div>
+
+        <form th:action="@{/reports/submit}" method="post" id="reportForm">
+
+            <input type="hidden" name="prodNo" th:value="${productVO.prodNo}">
+            <input type="hidden" name="sellerNo" th:value="${productVO.seller.sellerNo}">
+            <input type="hidden" name="source" value="productDetail">
+
+            <div class="form-group">
+                <label class="form-label">檢舉類別</label>
+                <input type="hidden" name="reportsType" value="商品">
+                <input type="text" class="form-input" value="商品" disabled
+                       style="background: #222; color: #888; cursor: not-allowed;">
+            </div>
+
+            <div class="form-group">
+                <label for="reportsReason" class="form-label">檢舉原因 <span style="color: #ff3333;">*</span></label>
+                <select id="reportsReason" name="reportsReason" class="form-input" required>
+                    <option value="">-- 請選擇原因 --</option>
+                    <option value="廣告不實">廣告不實</option>
+                    <option value="分類錯誤">分類錯誤</option>
+                    <option value="重覆刊登">重覆刊登</option>
+                    <option value="山寨品/高仿">山寨品/高仿</option>
+                    <option value="商品敘述與實物不符">商品敘述與實物不符</option>
+                    <option value="商品有瑕疵">商品有瑕疵</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="reportsDescription" class="form-label">詳細描述</label>
+                <textarea id="reportsDescription" name="reportsDescription" class="modal-textarea"
+                          placeholder="請補充說明具體細節 (選填)..."></textarea>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="modal-close" onclick="closeReportModal()">取消</button>
+                <button type="button" class="modal-submit" onclick="submitReportForm()">送出檢舉</button>
+            </div>
+        </form>
     </div>
 </div>
 

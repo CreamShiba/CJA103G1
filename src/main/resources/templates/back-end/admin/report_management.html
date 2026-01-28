@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>商品檢舉審核 | Karshop Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/fragments/admin_sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/back-end/admin/report_management.css}">
+
+</head>
+<body>
+
+<div class="app-container">
+
+    <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='reports')}"></aside>
+
+    <main class="main-content">
+
+        <div class="page-header">
+            <div class="page-title">
+                <i class="fas fa-gavel"></i> 檢舉審核列表
+            </div>
+
+            <form th:action="@{/admin/reports}" method="get" class="filter-form">
+                <label style="margin-right: 8px; font-weight: bold; color: #666;">篩選狀態：</label>
+                <select name="status" onchange="this.form.submit()">
+                    <option value="待處理" th:selected="${currentStatus == '待處理'}">待處理 (Pending)</option>
+                    <option value="已處理" th:selected="${currentStatus == '已處理'}">已處理 (Approved)</option>
+                    <option value="駁回" th:selected="${currentStatus == '駁回'}">已駁回 (Rejected)</option>
+                    <option value="all" th:selected="${currentStatus == 'all'}">全部顯示 (All)</option>
+                </select>
+            </form>
+        </div>
+
+        <div class="card">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width: 60px;">單號</th>
+                    <th style="width: 220px;">被檢舉商品 / 賣家</th>
+                    <th style="width: 120px;">檢舉原因</th>
+
+                    <th>詳細描述</th>
+
+                    <th style="width: 100px;">狀態</th>
+                    <th style="width: 120px;">時間</th>
+                    <th style="width: 180px;">操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(reportList)}">
+                    <td colspan="6" class="empty-state">
+                        <i class="fas fa-clipboard-check"></i>
+                        <p>沒有找到符合條件的檢舉案件。</p>
+                    </td>
+                </tr>
+
+                <tr th:each="rpt : ${reportList}">
+                    <td th:text="'#' + ${rpt.reportNo}">#101</td>
+
+                    <td>
+                        <a th:href="@{/product/detail(prodNo=${rpt.product.prodNo})}"
+                           target="_blank"
+                           class="prod-link"
+                           title="點擊前往前台查看商品">
+                            <i class="fas fa-external-link-alt" style="font-size:12px;"></i>
+                            <span th:text="${rpt.product.prodName}">真皮方向盤套</span>
+                        </a>
+                        <div class="seller-name">
+                            <i class="fas fa-store"></i>
+                            <span th:text="${rpt.product.seller.sellerName}">Karshop 官方店</span>
+                        </div>
+                    </td>
+
+                    <td>
+                            <span class="reason-badge"
+                                  th:classappend="${rpt.reportReason == '仿冒品' || rpt.reportReason == '詐騙'} ? 'severe' : ''"
+                                  th:text="${rpt.reportReason}">
+                                廣告不實
+                            </span>
+                    </td>
+
+                    <td>
+                        <div class="desc-text" th:text="${rpt.reportDescription}">
+                            收到的東西跟照片完全不一樣...
+                        </div>
+                    </td>
+
+                    <td>
+                            <span class="status-badge"
+                                  th:classappend="${rpt.status == '待處理' ? 'status-pending' :
+                                                   (rpt.status == '已處理' ? 'status-resolved' : 'status-rejected')}"
+                                  th:text="${rpt.status}">
+                                待處理
+                            </span>
+                    </td>
+
+                    <td style="color: #888; font-size: 13px;">
+                        <div th:text="${#temporals.format(rpt.reportTime, 'yyyy-MM-dd')}">2023-10-20</div>
+                        <div th:text="${#temporals.format(rpt.reportTime, 'HH:mm')}">14:30</div>
+                    </td>
+
+                    <td>
+                        <div class="action-btns" th:if="${rpt.status == '待處理'}">
+                            <form th:action="@{/admin/reports/approve}" method="post">
+                                <input type="hidden" name="reportNo" th:value="${rpt.reportNo}">
+                                <input type="hidden" name="prodNo" th:value="${rpt.product.prodNo}">
+                                <button type="submit" class="btn btn-approve" onclick="return confirm('確定下架？')">
+                                    <i class="fas fa-ban"></i> 下架
+                                </button>
+                            </form>
+
+                            <form th:action="@{/admin/reports/reject}" method="post">
+                                <input type="hidden" name="reportNo" th:value="${rpt.reportNo}">
+                                <button type="submit" class="btn btn-reject" onclick="return confirm('確定駁回？')">
+                                    <i class="fas fa-check"></i> 駁回
+                                </button>
+                            </form>
+                        </div>
+
+                        <div th:unless="${rpt.status == '待處理'}" style="color: #888; font-size: 13px;">
+                            <i class="fas fa-user-check"></i>
+                            <span th:text="${rpt.admNo != null ? '管理員 #' + rpt.admNo : '系統自動'}">Admin</span>
+                            <br>
+                            <span th:text="${#temporals.format(rpt.handledTime, 'MM-dd HH:mm')}"></span>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<script th:src="@{/js/back-end/admin/report_management.js}"></script>
+
+</body>
+</html>
