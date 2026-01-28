@@ -1,7 +1,6 @@
 package com.karshop.product.model;
 
-import com.karshop.productimage.model.ProductImageVO;
-import org.hibernate.SessionFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,16 +24,12 @@ public class ProductService {
         productRepository.save(prodVO);
     }
 
-    public void deleteProduct(Integer prodNo){
-        productRepository.deleteById(prodNo);
-    }
-
     public ProductVO getOneProduct(Integer prodNo){
         return productRepository.findById(prodNo).orElse(null);
     }
 
-    public List<ProductVO> getAllProducts(){
-        return productRepository.findAll();
+    public List<ProductVO> getProductsByProdStatus(String prodStatus){
+        return productRepository.findByProdStatus(prodStatus);
     }
 
     public List<ProductVO> getProductsBySellerNo(Integer sellerNo){
@@ -63,7 +58,7 @@ public class ProductService {
 
     }
 
-
+    //  賣家中心複合查詢
     public List<ProductVO> getProductBySearchForSeller(Integer sellerNo, String prodName, Integer minPrice, Integer maxPrice, String prodStatus){
         if(prodName != null && prodName.trim().isEmpty()){
             prodName = null;

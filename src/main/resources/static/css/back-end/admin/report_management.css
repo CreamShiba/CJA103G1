@@ -1,0 +1,185 @@
+/* --- 基本版面設定 --- */
+body {
+    margin: 0;
+    background-color: #f4f6f9; /* 淺灰背景，降低眼睛疲勞 */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+/* --- 標題區塊 --- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- 表格卡片樣式 --- */
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden; /* 讓圓角生效 */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th {
+    background-color: #f8f9fa;
+    color: #666;
+    font-weight: 600;
+    padding: 15px;
+    border-bottom: 2px solid #eee;
+    font-size: 14px;
+    /* 強制文字不換行，這樣就算空間不夠，它也會撐開格子，不會變成直的 */
+    white-space: nowrap;
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+tr:hover {
+    background-color: #fcfcfc;
+}
+
+/* --- 欄位特色樣式 --- */
+
+/* 商品資訊 */
+.prod-link {
+    font-weight: bold;
+    color: #2c3e50;
+    text-decoration: none;
+    transition: 0.2s;
+}
+.prod-link:hover {
+    color: #3498db;
+    text-decoration: underline;
+}
+.seller-name {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* 檢舉原因標籤 */
+.reason-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* 如果是嚴重違規，換個顏色 */
+.reason-badge.severe {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* 描述文字限制寬度 */
+.desc-text {
+    min-width: 300px;  /* 設定最小寬度，避免視窗變小時被擠太扁 */
+    max-width: 100%;   /* 讓它盡量利用表格剩下的空間 */
+    color: #555;
+    line-height: 1.5;  /* 行距稍微加大一點比較好讀 */
+    font-size: 14px;
+    white-space: pre-wrap; /* 保留使用者的換行格式 */
+}
+
+/* 按鈕區 */
+.action-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: 0.2s;
+    color: white;
+}
+
+.btn-approve {
+    background-color: #e74c3c; /* 紅色：下架 */
+}
+.btn-approve:hover {
+    background-color: #c0392b;
+}
+
+.btn-reject {
+    background-color: #27ae60; /* 綠色：駁回(沒事) */
+}
+.btn-reject:hover {
+    background-color: #219150;
+}
+
+/* 空狀態 */
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    color: #999;
+}
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 10px;
+    color: #ddd;
+}
+/* 🔥 新增：篩選器樣式 */
+.filter-form select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #555;
+    cursor: pointer;
+    background-color: white;
+}
+
+/* 🔥 新增：狀態標籤樣式 */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    /* 強制文字不換行，這樣就算空間不夠，它也會撐開格子，不會變成直的 */
+    white-space: nowrap;
+}
+.status-pending { background-color: #fff3cd; color: #856404; } /* 黃色 */
+.status-resolved { background-color: #d4edda; color: #155724; } /* 綠色 */
+.status-rejected { background-color: #e2e3e5; color: #383d41; } /* 灰色 */
