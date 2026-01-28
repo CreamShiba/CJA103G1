@@ -176,6 +176,7 @@
         }
 
         .form-group input[type="text"],
+        .form-group input[type="email"],
         .form-group select {
             background-color: #1a1a1a;
             border: 1px solid #333;
@@ -187,13 +188,15 @@
         }
 
         .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
         .form-group select:focus {
             border-color: #ff3333;
             box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
             background-color: #222;
         }
 
-        .form-group input[type="text"]::placeholder {
+        .form-group input[type="text"]::placeholder,
+        .form-group input[type="email"]::placeholder {
             color: #555;
         }
 
@@ -571,7 +574,7 @@
 
 <header>
     <div class="top-bar">
-        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div>卡爾夏汽車百貨 - 專業誠信服務</div>
         <div class="top-icons">
             <div class="search-box">
                 <input type="text" id="search-input" placeholder="Search..."
@@ -613,7 +616,7 @@
     <div class="report-container">
         <div class="report-card">
             <h1 class="report-title">REPORT CENTER</h1>
-            <p class="report-subtitle">維護社群秩序,檢舉違規行為。</p>
+            <p class="report-subtitle">維護社群秩序，檢舉違規行為。</p>
 
             <form th:action="@{/reports/submit}" method="post" id="reportForm">
                 <div class="form-section">
@@ -630,7 +633,7 @@
                             <option value="商品">商品</option>
                             <option value="賣家">賣家</option>
                             <option value="評論">評論</option>
-                            <option value="聊天">聊天</option>
+                            <option value="文章">文章</option>
                             <option value="其他">其他</option>
                         </select>
                     </div>
@@ -652,6 +655,12 @@
                         <label for="otherReasonInput">自定義檢舉原因</label>
                         <input type="text" id="otherReasonInput"
                                placeholder="請手動輸入檢舉原因">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">聯絡信箱</label>
+                        <input type="email" id="email" name="email"
+                               placeholder="請輸入您的 E-mail，以便接收處理結果">
                     </div>
 
                     <div class="textarea-group">
@@ -725,7 +734,7 @@
         "商品": ["廣告不實", "分類錯誤", "重覆刊登", "山寨品/高仿", "商品敘述與實物不符", "商品有瑕疵"],
         "賣家": ["態度不佳", "出貨速度慢", "疑似詐騙行為"],
         "評論": ["謾罵/人身攻擊", "評論不實", "惡意洗版", "侵害個人隱私"],
-        "聊天": ["騷擾行為", "言語汙辱", "傳送惡意連結", "詐騙", "洗版"]
+        "文章": ["廣告洗版 / 商業廣告", "惡意攻擊 / 謾罵", "不實資訊 / 惡意誤導", "內容與標題不符", "侵害隱私 / 版權", "違禁品討論"]
     };
 
     // 多選選單狀態
@@ -882,7 +891,11 @@
         const target = document.getElementById('reportsTarget').value.trim();
         const type = document.getElementById('reportsType').value;
         const otherReason = document.getElementById('otherReasonInput').value.trim();
+        const email = document.getElementById('email').value.trim();
         const description = document.getElementById('reportsDescription').value.trim();
+
+        // Email 驗證正則表達式
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         // 1. 檢查檢舉對象
         if (!target) {
@@ -908,9 +921,21 @@
             return;
         }
 
-        // 5. 檢查問題描述
+        // 5. 檢查 Email
+        if (!email) {
+            showModal('請輸入聯絡信箱!');
+            return;
+        }
+
+        // 6. 驗證 Email 格式
+        if (!emailRegex.test(email)) {
+            showModal('請輸入正確的 Email 格式!');
+            return;
+        }
+
+        // 7. 檢查問題描述
         if (!description) {
-            showModal('請填寫問題描述!');
+            showModal('請填寫問題詳細描述!');
             return;
         }
 
