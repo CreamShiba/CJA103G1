@@ -38,15 +38,7 @@ public class FavoriteProductService {
         favoriteProductRepository.save(favoriteProduct);
     }
 
-    /*
-    // 取得某人的收藏清單並包含商品詳細資訊
-    public List<Product> getMemberFavoriteDetails(Integer memberNo) {
-        // 1. 先找該會員的所有收藏記錄
-        // 2. 根據 prodNo 去 product 表撈詳細資料
-        // (這部分若使用實體關聯 @ManyToOne 會更簡單，目前先以邏輯處理為例)
-        return null;
-    }
-    */
+
 
 
 }
