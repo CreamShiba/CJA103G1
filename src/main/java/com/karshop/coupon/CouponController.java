@@ -92,24 +92,30 @@ public class CouponController {
             BindingResult result,
             Model model) {
 
-        // 1. 檢查後端校驗結果
+        // 1. 檢查校驗結果
         if (result.hasErrors()) {
+            // 發生錯誤，除了回傳列表資料，還要傳遞「顯示新增區塊」的訊號
+            List<Coupon> coupons = couponService.getAll();
+            model.addAttribute("coupons", coupons);
+            model.addAttribute("showAddSection", true); // 關鍵：告訴前端要打開新增表單
             return "coupon/adminCoupon";
         }
 
-        // 2. 邏輯驗證：結束時間不可早於開始時間
+        // 2. 邏輯驗證
         if (coupon.getCouponEnd() != null && coupon.getCouponStart() != null) {
             if (coupon.getCouponEnd().isBefore(coupon.getCouponStart())) {
+                List<Coupon> coupons = couponService.getAll();
+                model.addAttribute("coupons", coupons);
                 model.addAttribute("errorMessage", "結束時間不可早於開始時間");
+                model.addAttribute("showAddSection", true); // 關鍵訊號
                 return "coupon/adminCoupon";
             }
         }
 
-        // 新增時確保狀態為 1 (有效)
+        // 新增成功
         coupon.setCouponStatus(1);
         couponService.insert(coupon);
-
-        return "redirect:/coupon/admin"; // 重導至主頁面
+        return "redirect:/coupon/admin";
     }
 
     // ========== 修改相關 ==========

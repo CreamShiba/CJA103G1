@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>會員管理系統 - 卡爾夏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+
+        /* 搜尋框樣式 */
+        .search-area { margin-bottom: 20px; }
+        .search-form { display: flex; gap: 10px; }
+        .search-input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-search { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #333; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+        .status-active { background: #e8f5e9; color: #2e7d32; }
+        .status-locked { background: #ffebee; color: #c62828; }
+        .btn-edit { color: #3498db; text-decoration: none; font-weight: bold; }
+        .btn-edit:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h2><i class="fas fa-users-cog"></i> 會員帳號管理</h2>
+    </div>
+
+    <div class="search-area">
+        <form th:action="@{/templates/memberInfo/list}" method="get" class="search-form" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+
+            <div class="form-group">
+                <label style="display:block; font-size:12px; margin-bottom:5px;">帳號/姓名</label>
+                <input type="text" name="keyword" th:value="${keyword}" class="search-input" placeholder="關鍵字...">
+            </div>
+
+            <div class="form-group">
+                <label style="display:block; font-size:12px; margin-bottom:5px;">帳號狀態</label>
+                <select name="status" class="search-input" style="width:120px;">
+                    <option value="-1" th:selected="${status == -1}">全部</option>
+                    <option value="1" th:selected="${status == 1}">啟用</option>
+                    <option value="0" th:selected="${status == 0}">停權</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label style="display:block; font-size:12px; margin-bottom:5px;">賣家身份</label>
+                <select name="isSeller" class="search-input" style="width:120px;">
+                    <option value="-1" th:selected="${isSeller == -1}">全部</option>
+                    <option value="1" th:selected="${isSeller == 1}">是</option>
+                    <option value="0" th:selected="${isSeller == 0}">否</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn-search">查詢</button>
+                <a th:href="@{/templates/memberInfo/list}" class="btn-clear" style="margin-left:5px; color:#888; text-decoration:none; font-size:14px;">重置</a>
+            </div>
+        </form>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>編號</th>
+            <th>帳號</th>
+            <th>姓名</th>
+            <th>狀態</th>
+            <th>註冊時間</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="m : ${memberList}">
+            <td th:text="${m.memberNo}"></td>
+            <td th:text="${m.memberAccount}"></td>
+            <td th:text="${m.memberName}"></td>
+            <td>
+                    <span th:class="${m.accountStatus == 1 ? 'status-badge status-active' : 'status-badge status-locked'}"
+                          th:text="${m.accountStatus == 1 ? '啟用' : '停權'}"></span>
+            </td>
+            <td th:text="${#dates.format(m.registrationTime, 'yyyy-MM-dd')}"></td>
+            <td>
+                <a th:href="@{'/member/edit/' + ${m.memberNo}}" class="btn-edit">
+                    <i class="fas fa-edit"></i> 修改
+                </a>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(memberList)}">
+            <td colspan="6" style="text-align: center; color: #999; padding: 40px;">找不到符合搜尋條件的會員</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

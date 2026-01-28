@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>會員帳號管理 - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/back-end/admin_index.css}">
+    <link rel="stylesheet" th:href="@{/css/memberInfoStyle.css}">
+</head>
+<body>
+<div class="app-container">
+
+    <!-- 側邊欄 -->
+    <aside class="sidebar scrollbar-styled">
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu  open">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a th:href="@{/member/manage}" class="active">會員帳號管理</a></li>
+                        <li><a href="#">管理員帳號管理</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-ticket-alt"></i> 優惠券管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="http://localhost:8080/coupon/admin" >優惠券列表</a></li>
+                        <li><a href="http://localhost:8080/coupon/admin#coupon-query">查詢優惠券</a></li>
+                        <li><a href="http://localhost:8080/coupon/admin#coupon-add">新增優惠券</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-star"></i> 自訂</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-headset"></i> 自訂</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#">登出 (Logout)</a>
+        </div>
+    </aside>
+
+    <!-- 主內容區 -->
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">👤 會員帳號管理系統</h2>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar"><i class="fas fa-user"></i></div>
+            </div>
+        </header>
+
+        <!-- 內容區域 -->
+        <div class="content-area scrollbar-styled">
+
+            <!-- 查詢區域 - 非編輯模式下顯示 -->
+            <section id="member-query" class="page-section" th:if="${showEdit == null or !showEdit}">
+                <h1><i class="fas fa-search"></i> 查詢會員</h1>
+                <div class="search-box">
+                    <form id="compositeQueryForm">
+                        <div class="row-group" style="display: flex; flex-wrap: wrap; gap: 20px;">
+
+                            <div class="row" style="flex: 0.5; min-width: 100px;">
+                                <label>會員編號:</label>
+                                <input type="number" id="queryMemberNo" name="memberNo" placeholder="編號">
+                            </div>
+
+                            <div class="row" style="flex: 1; min-width: 250px;">
+                                <label>會員查詢(會員姓名/會員帳號/Email):</label>
+                                <input type="text" id="queryKeyword" name="keyword" placeholder="請輸入關鍵字...">
+                            </div>
+
+                            <div class="row" style="flex: 1; min-width: 150px;">
+                                <label>帳號狀態:</label>
+                                <select id="queryStatus" name="status">
+                                    <option value="-1">全部</option>
+                                    <option value="1">正常</option>
+                                    <option value="0">停權</option>
+                                </select>
+                            </div>
+
+                            <div class="row" style="flex: 1; min-width: 150px;">
+                                <label>技師權限:</label>
+                                <select id="queryIsEngineer" name="isEngineer">
+                                    <option value="-1">全部</option>
+                                    <option value="1">是 (已認證)</option>
+                                    <option value="0">否 (一般)</option>
+                                </select>
+                            </div>
+
+                            <div class="row" style="flex: 1; min-width: 150px;">
+                                <label>賣家權限:</label>
+                                <select id="queryIsSeller" name="isSeller">
+                                    <option value="-1">全部</option>
+                                    <option value="1">是 (已認證)</option>
+                                    <option value="0">否 (一般)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="btn-row" style="margin-top: 15px; text-align: right;">
+                            <button type="button" onclick="performQuery()" class="btn-add">
+                                <i class="fas fa-filter"></i> 開始篩選
+                            </button>
+                            <button type="reset" class="btn-secondary">重置</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 列表區域 - 非編輯模式下顯示 -->
+            <section id="member-list" class="page-section" th:if="${showEdit == null or !showEdit}">
+                <h3><i class="fas fa-list"></i> 會員列表清單</h3>
+                <table id="memberTable">
+                    <thead>
+                    <tr>
+                        <th>會員編號</th>
+                        <th>會員帳號</th>
+                        <th>會員姓名</th>
+                        <th>會員信箱</th>
+                        <th>帳號狀態</th>
+                        <th>賣家權限</th>
+                        <th>技師權限</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody id="memberTableBody">
+                    <tr th:each="m : ${memberList}">
+                        <td th:text="${m.memberNo}"></td>
+                        <td th:text="${m.memberAccount}"></td>
+                        <td th:text="${m.memberName}"></td>
+                        <td th:text="${m.memberEmail}"></td>
+                        <td>
+                            <span th:class="${m.accountStatus == 1 ? 'status-badge status-on' : 'status-badge status-off'}"
+                                  th:text="${m.accountStatus == 1 ? '正常' : '停權'}"></span>
+                        </td>
+                        <td>
+                            <span th:text="${m.sellerStatus == 1 ? '✅' : '❌'}"></span>
+                        </td>
+                        <td>
+                            <span th:text="${m.engineerStatus == 1 ? '✅' : '❌'}"></span>
+                        </td>
+                        <td>
+                            <a th:href="@{/member/edit/{id}(id=${m.memberNo})}" class="btn-edit">
+                                <i class="fas fa-edit"></i> 修改
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 編輯區域 - 編輯模式下顯示 -->
+            <section id="member-edit" class="page-section" th:if="${showEdit}">
+                <h3><i class="fas fa-edit"></i> 修改會員完整資訊</h3>
+                <div class="form-container">
+                    <form th:action="@{/member/update}" th:object="${member}" method="post" enctype="multipart/form-data">
+
+                        <input type="hidden" th:field="*{memberNo}">
+
+                        <div class="row-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+                            <!-- 左側欄位 -->
+                            <div class="column">
+                                <div class="row">
+                                    <label>會員編號 (不可修改):</label>
+                                    <input type="text" th:field="*{memberNo}" readonly class="readonly-input" style="background-color: #f0f0f0;">
+                                </div>
+
+                                <div class="row">
+                                    <label>會員帳號:</label>
+                                    <input type="text" th:field="*{memberAccount}" required>
+                                </div>
+
+                                <div class="row">
+                                    <label>會員密碼:</label>
+                                    <input type="password" th:field="*{memberPassword}" placeholder="若不修改請留空">
+                                    <small style="color: gray;">* 更新時若填寫將覆蓋舊密碼</small>
+                                </div>
+
+                                <div class="row">
+                                    <label>會員姓名:</label>
+                                    <input type="text" th:field="*{memberName}" required>
+                                </div>
+
+                                <div class="row">
+                                    <label>會員信箱:</label>
+                                    <input type="email" th:field="*{memberEmail}" required>
+                                </div>
+
+                                <div class="row">
+                                    <label>聯絡電話:</label>
+                                    <input type="text" th:field="*{memberPhone}">
+                                </div>
+                            </div>
+
+                            <!-- 右側欄位 -->
+                            <div class="column">
+                                <div class="row">
+                                    <label>會員頭像:</label>
+                                    <div class="avatar-edit-box">
+                                        <img th:src="@{/member/image/{no}(no=*{memberNo})}" id="editImagePreview" class="avatar-preview"
+                                             style="width:100px; height:100px; object-fit: cover; border-radius: 50%; border: 1px solid #ddd; margin-bottom: 10px;">
+                                        <input type="file" name="imageFile" accept="image/*" onchange="previewImage(this)">
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <label>註冊時間:</label>
+                                    <span th:text="${#dates.format(member.registrationTime, 'yyyy-MM-dd HH:mm:ss')}"
+                                          style="padding: 10px; display: block; background: #f9f9f9;"></span>
+                                </div>
+
+                                <div class="row">
+                                    <label>帳號狀態:</label>
+                                    <select th:field="*{accountStatus}">
+                                        <option value="1">正常</option>
+                                        <option value="0">停權</option>
+                                    </select>
+                                </div>
+
+                                <div class="row">
+                                    <label>技師權限:</label>
+                                    <select th:field="*{engineerStatus}">
+                                        <option value="0">一般會員</option>
+                                        <option value="1">認證技師</option>
+                                    </select>
+                                </div>
+
+                                <div class="row">
+                                    <label>賣家權限:</label>
+                                    <select th:field="*{sellerStatus}">
+                                        <option value="0">否</option>
+                                        <option value="1">是</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 地址欄 - 全寬 -->
+                        <div class="row" style="margin-top: 20px;">
+                            <label>住家地址:</label>
+                            <input type="text" th:field="*{address}" style="width: 100%;">
+                        </div>
+
+                        <!-- 評價信息 -->
+                        <div class="row-group" style="display: flex; gap: 30px; margin-top: 20px; padding: 15px; background: #f4f7f6; border-radius: 8px;">
+                            <div>
+                                <label>評價總人數:</label>
+                                <strong th:text="*{ratingAmount}">0</strong> 人
+                            </div>
+                            <div>
+                                <label>評價總星數:</label>
+                                <strong th:text="*{ratingStar}">0</strong> ⭐️
+                            </div>
+                            <div>
+                                <label>平均評分:</label>
+                                <strong th:text="${averageRating}">0.0</strong>
+                            </div>
+                        </div>
+
+                        <!-- 按鈕 -->
+                        <div class="btn-row" style="margin-top: 30px; text-align: center;">
+                            <button type="submit" class="btn-submit">確認儲存變更</button>
+                            <a th:href="@{/member/manage}" class="btn btn-cancel">返回列表</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+        </div>
+    </main>
+</div>
+
+<script>
+    // 側邊欄子選單切換
+    document.querySelectorAll('.submenu-toggle').forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const parent = this.parentElement;
+            parent.classList.toggle('open');
+
+            // (選用) 如果希望點開一個時關閉其他，可以加入以下這段：
+
+            document.querySelectorAll('.menu-item.has-submenu').forEach(item => {
+                if (item !== parent) item.classList.remove('open');
+            });
+        });
+
+
+    });
+
+    // 複合查詢邏輯
+    async function performQuery() {
+        const memberNo = document.getElementById('queryMemberNo').value;
+        const keyword = document.getElementById('queryKeyword').value;
+        const status = document.getElementById('queryStatus').value;
+        const isEngineer = document.getElementById('queryIsEngineer').value;
+        const isSeller = document.getElementById('queryIsSeller').value;
+
+        const url = `/member/api/search?memberNo=${memberNo}` +
+            `&keyword=${encodeURIComponent(keyword)}` +
+            `&status=${status}` +
+            `&isEngineer=${isEngineer}` +
+            `&isSeller=${isSeller}`;
+
+        try {
+            const resp = await fetch(url);
+            const data = await resp.json();
+            const tbody = document.getElementById('memberTableBody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#999;">查無符合條件的會員</td></tr>';
+                return;
+            }
+
+            data.forEach(m => {
+                const statusText = m.accountStatus === 1 ? '正常' : '停權';
+                const statusClass = m.accountStatus === 1 ? 'status-on' : 'status-off';
+                const sellerIcon = m.sellerStatus === 1 ? '✅' : '❌';
+                const engineerIcon = m.engineerStatus === 1 ? '✅' : '❌';
+
+                tbody.innerHTML += `
+                <tr>
+                    <td>${m.memberNo}</td>
+                    <td>${m.memberAccount}</td>
+                    <td>${m.memberName}</td>
+                    <td>${m.memberEmail}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td>${sellerIcon}</td>
+                    <td>${engineerIcon}</td>
+                    <td>
+                        <a href="/member/edit/${m.memberNo}" class="btn-edit">
+                            <i class="fas fa-edit"></i> 修改
+                        </a>
+                    </td>
+                </tr>`;
+            });
+        } catch (error) {
+            console.error("查詢失敗:", error);
+            alert("查詢失敗，請稍後重試");
+        }
+    }
+
+    // 圖片預覽
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('editImagePreview').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+</body>
+</html>
