@@ -54,6 +54,24 @@
             </li>
 
             <li class="menu-item has-submenu"
+                th:classappend="${activePage == 'productAudit'} ? 'open' : ''">
+
+                <a class="submenu-toggle">
+                    <span><i class="fas fa-boxes"></i> 商品管理</span>
+                    <i class="fas fa-chevron-down arrow"></i>
+                </a>
+
+                <ul class="submenu">
+                    <li>
+                        <a th:href="@{/admin/products/audit}"
+                           th:classappend="${activePage == 'productAudit'} ? 'active' : ''">
+                            重新上架審核
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="menu-item has-submenu"
                 th:classappend="${activePage == 'orders'} ? 'open' : ''">
                 <a class="submenu-toggle">
                     <span><i class="fas fa-clipboard-list"></i> 商城訂單管理</span>
@@ -67,14 +85,21 @@
                 </ul>
             </li>
 
-            <li class="menu-item has-submenu">
+            <li class="menu-item has-submenu"
+                th:classappend="${activePage == 'reports'} ? 'open' : ''">
+
                 <a class="submenu-toggle">
-                    <span><i class="fas fa-users-cog"></i> 自訂</span>
+                    <span><i class="fas fa-exclamation-triangle"></i> 檢舉審核</span>
                     <i class="fas fa-chevron-down arrow"></i>
                 </a>
+
                 <ul class="submenu">
-                    <li><a href="#">自訂</a></li>
-                    <li><a href="#">自訂</a></li>
+                    <li>
+                        <a th:href="@{/admin/reports}"
+                           th:classappend="${activePage == 'reports'} ? 'active' : ''">
+                            商品檢舉管理
+                        </a>
+                    </li>
                 </ul>
             </li>
 

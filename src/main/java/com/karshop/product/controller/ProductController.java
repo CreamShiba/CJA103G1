@@ -9,7 +9,8 @@ import com.karshop.productcategorytest.model.ProductCategoryService;
 import com.karshop.productcategorytest.model.ProductCategoryVO;
 import com.karshop.productimage.model.ProductImageService;
 import com.karshop.productimage.model.ProductImageVO;
-import com.karshop.rating.model.RatingService;
+import com.karshop.reporttest.model.ReportRepository;
+import com.karshop.reporttest.model.ReportVO;
 import com.karshop.sellertest.model.SellerVO;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -44,7 +45,7 @@ public class ProductController {
     private ProductCategoryService productCategoryService;
 
     @Autowired
-    private RatingService ratingService;
+    private ReportRepository reportRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -73,10 +74,6 @@ public class ProductController {
         SellerVO sellerVO = new SellerVO();
         sellerVO.setSellerNo(101);
         productVO.setSeller(sellerVO);
-//        productVO.getProductCategory().setProductCategoryNo(3)
-//        productVO.setProdStatus("上架中");
-//        productVO.setRatingStar(0);  //評分總星數初始為0
-//        productVO.setRatingAmount(0); //評分總人數初始為0
 
         productService.addProduct(productVO);
 
@@ -97,6 +94,13 @@ public class ProductController {
     public String getOne_For_Update(@RequestParam Integer prodNo, ModelMap model){
         ProductVO productVO = productService.getOneProduct(prodNo);
         model.addAttribute("productVO",productVO);
+
+        if("違規下架".equals(productVO.getProdStatus())){
+            ReportVO violationReport = reportRepository.findTopByProductProdNoOrderByReportTimeDesc(prodNo);
+            if(violationReport != null){
+                model.addAttribute("violationReport",violationReport);
+            }
+        }
 
         List<ProductCategoryVO> categoryList = productCategoryService.getAll();
         model.addAttribute("categoryList", categoryList);
@@ -127,6 +131,10 @@ public class ProductController {
             model.addAttribute("errorMessage", "請至少保留一張圖片");
             model.addAttribute("productVO", originalProductVO);
             return "back-end/seller/updateProduct";
+        }
+
+        if("違規下架".equals(productVO.getProdStatus())){
+            productVO.setProdStatus("審核中");
         }
 
         // 2. 更新商品文字資料
@@ -316,14 +324,5 @@ public class ProductController {
         model.addAttribute("categoryList", categoryList);
 
     }
-
-//
-//    public List<ProductVO> getProductsByProdStatus(String prodStatus) {
-//        return productService.getProductsByProdStatus(prodStatus);
-//    }
-//
-//    public List<ProductVO> getProductsByNameContainingAndProdStatus(String prodName,String prodStatus){
-//        return productService.getProductsByNameContainingAndProdStatus(prodName,prodStatus);
-//    }
 
 }

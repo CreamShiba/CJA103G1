@@ -1,4 +1,10 @@
-/* --- 左側側邊欄 --- */
+/* --- admin_sidebar.css --- */
+
+/* 🔥 1. 新增全域設定，確保 Padding 不會撐大寬度 */
+* {
+    box-sizing: border-box;
+}
+
 .sidebar {
     width: 260px;
     background-color: #ffffff;
@@ -6,6 +12,8 @@
     display: flex;
     flex-direction: column;
     z-index: 10;
+    /* 如果側邊欄是固定的，建議加上 height: 100vh; */
+    min-height: 100vh;
 }
 
 .sidebar-header {
@@ -19,7 +27,7 @@
 .logo-icon {
     width: 24px;
     height: 12px;
-    background-color: #0066cc; /* Logo 藍色 */
+    background-color: #0066cc;
     border-radius: 4px;
 }
 
@@ -27,6 +35,7 @@
     font-size: 18px;
     font-weight: bold;
     color: #1a1a1a;
+    margin: 0; /* 確保沒有額外邊距 */
 }
 
 .badge {
@@ -38,25 +47,35 @@
     vertical-align: middle;
 }
 
+/* 確保側邊欄內容可捲動 */
 .sidebar-nav {
     flex-grow: 1;
     overflow-y: auto;
     padding-top: 20px;
 }
 
+/* 消除 ul 預設黑點與內縮 */
+.sidebar-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* --- 選單項目連結 --- */
 .menu-item a {
     display: flex;
     align-items: center;
-    padding: 12px 24px;
+    /* 🔥 2. 調整 Padding：原本 24px 改為 20px，讓文字靠左一點 */
+    padding: 12px 20px;
     color: #555;
     text-decoration: none;
     font-size: 15px;
     transition: 0.2s;
-    justify-content: space-between;
+    /* 移除 justify-content: space-between，改用 margin 推開箭頭 */
 }
 
 .menu-item a i {
-    margin-right: 10px;
+    margin-right: 12px; /* 圖示與文字的間距 */
     width: 20px;
     text-align: center;
 }
@@ -66,15 +85,22 @@
     color: #0066cc;
 }
 
-/* 子選單樣式 */
+/* 讓箭頭自動靠最右邊 */
+.menu-item a .arrow {
+    margin-left: auto;
+    font-size: 12px;
+}
+
+/* --- 子選單樣式 --- */
 .submenu {
     list-style: none;
     background-color: #fafafa;
-    display: none; /* 預設隱藏 */
+    padding: 0; /* 確保 ul 沒有 padding */
+    display: none;
 }
 
 .has-submenu.open .submenu {
-    display: block; /* 開啟時顯示 */
+    display: block;
 }
 
 .has-submenu.open .arrow {
@@ -82,14 +108,19 @@
 }
 
 .submenu a {
-    padding-left: 58px; /* 縮排 */
+    /* 🔥 3. 調整子選單縮排 */
+    /* 計算公式：父層Padding(20) + 圖示寬(20) + 間距(12) = 52px */
+    padding-left: 52px;
     font-size: 14px;
+    display: block; /* 確保佔滿整行 */
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
-/* 當前激活的頁面 - 模仿圖片中的淡青色/藍色塊 */
+/* 當前激活的頁面 */
 .submenu a.active {
-    background-color: #e0f2f1; /* 類似圖中的淡青色 */
-    color: #00796b; /* 深青色文字 */
+    background-color: #e0f2f1;
+    color: #00796b;
     font-weight: bold;
     border-right: 3px solid #00796b;
 }

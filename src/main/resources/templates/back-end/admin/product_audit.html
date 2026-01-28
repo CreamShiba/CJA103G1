@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>商品上架審核 | Karshop Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/fragments/admin_sidebar.css}">
+  <link rel="stylesheet" th:href="@{/css/back-end/admin/product_audit.css}">
+
+</head>
+<body>
+
+<aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='productAudit')}"></aside>
+
+<main class="main-content">
+  <h2><i class="fas fa-clipboard-check"></i> 商品上架審核</h2>
+
+  <div th:if="${successMessage}" style="color: green; margin-bottom: 10px;" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" style="color: red; margin-bottom: 10px;" th:text="${errorMessage}"></div>
+
+  <div class="card">
+    <table>
+      <thead>
+      <tr>
+        <th>商品 ID</th>
+        <th>圖片</th>
+        <th>商品名稱</th>
+        <th>價格</th>
+        <th>賣家</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:if="${#lists.isEmpty(productList)}">
+        <td colspan="6" class="empty-state">目前沒有等待審核的商品</td>
+      </tr>
+
+      <tr th:each="prod : ${productList}">
+        <td th:text="'#' + ${prod.prodNo}">#101</td>
+        <td>
+          <img th:src="@{/product/displayMain(prodNo=${prod.prodNo})}"
+               style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+        </td>
+        <td>
+          <a th:href="@{/product/detail(prodNo=${prod.prodNo})}" target="_blank" th:text="${prod.prodName}" style="font-weight: bold; color: #333;">商品名</a>
+          <div style="font-size: 12px; color: #888;">(點擊查看前台頁面)</div>
+        </td>
+        <td th:text="${prod.prodPrice}">1000</td>
+        <td th:text="${prod.seller.sellerName}">賣家名</td>
+        <td>
+          <div style="display: flex; gap: 5px;">
+            <form th:action="@{/admin/products/approve}" method="post">
+              <input type="hidden" name="prodNo" th:value="${prod.prodNo}">
+              <button type="submit" class="btn btn-pass" onclick="return confirm('確定通過審核並上架？')">
+                <i class="fas fa-check"></i> 通過
+              </button>
+            </form>
+
+            <form th:action="@{/admin/products/reject}" method="post">
+              <input type="hidden" name="prodNo" th:value="${prod.prodNo}">
+              <button type="submit" class="btn btn-fail" onclick="return confirm('確定駁回？商品將退回違規下架狀態。')">
+                <i class="fas fa-times"></i> 駁回
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script th:src="@{/js/back-end/admin/product_audit.js}"></script>
+</body>
+</html>
