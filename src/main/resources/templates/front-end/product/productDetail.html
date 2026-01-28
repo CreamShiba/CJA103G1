@@ -65,7 +65,7 @@
 
             <div class="seller-info-box">
 
-                <a th:href="@{/product/shop(sellerNo=${productVO.seller.sellerNo})}" class="seller-avatar-link">
+                <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}" class="seller-avatar-link">
                     <img th:src="@{/seller/reader(sellerNo=${productVO.seller.sellerNo})}"
                          onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Seller&background=random&color=fff';"
                          class="seller-avatar"
@@ -74,14 +74,14 @@
 
                 <div class="seller-details">
                     <span class="seller-label">Seller</span>
-                    <a th:href="@{/product/shop(sellerNo=${productVO.seller.sellerNo})}"
+                    <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}"
                        class="seller-name-link"
                        th:text="${productVO.seller.sellerName}">
                         Karshop 官方旗艦店
                     </a>
                 </div>
 
-                <a th:href="@{/product/shop(sellerNo=${productVO.seller.sellerNo})}"
+                <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}"
                    class="visit-shop-btn">
                     逛逛 <i class="fas fa-arrow-right"></i>
                 </a>

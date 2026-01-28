@@ -11,7 +11,7 @@
         <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
         <div class="top-icons">
             <div class="search-box">
-                <form th:action="@{/product/shop}" method="get" style="display: flex; width: 100%; align-items: center;">
+                <form th:action="@{/shop}" method="get" style="display: flex; width: 100%; align-items: center;">
                     <input type="text" name="keyword" th:value="${keyword}" placeholder="Search..."
                            style="background: transparent; border: none; color: white; width: 100%; outline: none;">
                     <button type="submit" style="background: transparent; border: none; cursor: pointer; padding: 0;">
@@ -33,9 +33,9 @@
     </div>
 
     <div class="main-header">
-        <a th:href="@{/product/shop}" class="logo">卡爾夏</a>
+        <a th:href="@{/shop}" class="logo">卡爾夏</a>
         <nav class="nav-links">
-            <a th:href="@{/product/shop}">商城</a>
+            <a th:href="@{/shop}">商城</a>
             <a href="#">安裝區</a>
             <a href="#">論壇</a>
             <a href="#">公告</a>
