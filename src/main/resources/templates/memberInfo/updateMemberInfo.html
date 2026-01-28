@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>修改會員資料 | 卡爾夏管理系統</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary-dark: #2c3e50; --accent-blue: #3498db; --bg-gray: #f8f9fa; }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 40px; }
+        .edit-card { max-width: 900px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        .card-header { background: var(--primary-dark); color: white; padding: 20px 30px; display: flex; align-items: center; gap: 10px; }
+        .card-body { padding: 30px; }
+
+        /* 佈局佈置 */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: span 2; }
+
+        /* 表單元素 */
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; }
+        input[type="text"], input[type="email"], select {
+            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent-blue); outline: none; box-shadow: 0 0 5px rgba(52,152,219,0.3); }
+
+        /* 唯讀樣式 */
+        .readonly-field { background: #eee; cursor: not-allowed; color: #777; }
+        .info-text { padding: 12px; color: #666; font-size: 0.95em; border-left: 4px solid #ddd; background: #fdfdfd; }
+
+        /* 頭像上傳區 */
+        .avatar-section { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #fcfcfc; border-radius: 10px; border: 1px dashed #ccc; }
+        .avatar-preview { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 15px; }
+
+        /* 按鈕 */
+        .btn-group { margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px; border-top: 1px solid #eee; padding-top: 25px; }
+        .btn { padding: 12px 30px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; text-decoration: none; }
+        .btn-save { background: var(--accent-blue); color: white; }
+        .btn-cancel { background: #95a5a6; color: white; }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+<div class="edit-card">
+    <div class="card-header">
+        <i class="fas fa-id-card fa-lg"></i>
+        <h2 style="margin:0;">編輯會員資料</h2>
+    </div>
+
+    <form th:action="@{/member/update}" th:object="${member}" method="post" enctype="multipart/form-data" class="card-body">
+        <input type="hidden" th:field="*{memberNo}" />
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>會員帳號 (不可修改)</label>
+                <input type="text" th:field="*{memberAccount}" class="readonly-field" readonly />
+            </div>
+
+            <div class="form-group">
+                <label>會員姓名</label>
+                <input type="text" th:field="*{memberName}" required placeholder="請輸入姓名" />
+            </div>
+
+            <div class="form-group">
+                <label>電子信箱</label>
+                <input type="email" th:field="*{memberEmail}" required />
+            </div>
+
+            <div class="form-group">
+                <label>電話號碼</label>
+                <input type="text" th:field="*{memberPhone}" maxlength="10" />
+            </div>
+
+            <div class="form-group full-width">
+                <div class="avatar-section">
+                    <img id="preview" class="avatar-preview"
+                         th:src="*{memberImage != null and memberImage != ''} ? @{'/member/image/' + *{memberNo}} : 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22%3E%3Crect fill=%22%23ddd%22 width=%22150%22 height=%22150%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2240%22 fill=%22%23999%22 text-anchor=%22middle%22 dy=%22.3em%22%3E%3C/text%3E%3C/svg%3E'"
+                         alt="Member Avatar"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22150%22 height=%22150%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2230%22 fill=%22%23999%22 text-anchor=%22middle%22 dy=%22.3em%22%3E無圖片%3C/text%3E%3C/svg%3E'" />
+                    <label for="imageUpload" class="btn" style="background:#f1f1f1; color:#333; font-size:14px;">
+                        <i class="fas fa-camera"></i> 更換會員頭像
+                    </label>
+                    <input type="file" id="imageUpload" name="imageFile" style="display: none;" accept="image/*" onchange="previewImage(this)">
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label>聯絡地址</label>
+                <input type="text" th:field="*{address}" />
+            </div>
+
+            <div class="form-group">
+                <label>帳號狀態</label>
+                <select th:field="*{accountStatus}">
+                    <option value="1">🟢 啟用 (Normal)</option>
+                    <option value="0">🔴 停權 (Suspended)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>賣家權限</label>
+                <select th:field="*{sellerStatus}">
+                    <option value="0">一般會員</option>
+                    <option value="1">已認證賣家</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>技師權限狀態</label>
+                <select th:field="*{engineerStatus}">
+                    <option value="0">一般會員</option>
+                    <option value="1">已認證技師</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>註冊時間</label>
+                <div class="info-text" th:text="${#dates.format(member.registrationTime, 'yyyy-MM-dd HH:mm:ss')}"></div>
+            </div>
+
+            <div class="form-group">
+                <label>評價紀錄</label>
+                <div class="info-text">
+                    ⭐ <span th:text="${member.ratingStar}">0</span> 分
+                    (共 <span th:text="${member.ratingAmount}">0</span> 次評價)
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <a th:href="@{/member/list}" class="btn btn-cancel">取消返回</a>
+            <button type="submit" class="btn btn-save">
+                <i class="fas fa-save"></i> 儲存所有修改
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // 圖片即時預覽邏輯
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            // 檢查檔案大小 (例如限制 5MB)
+            if (input.files[0].size > 5 * 1024 * 1024) {
+                alert('檔案大小不能超過 5MB');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview').src = e.target.result;
+            }
+            reader.onerror = function() {
+                alert('檔案讀取失敗');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+
+</body>
+</html>

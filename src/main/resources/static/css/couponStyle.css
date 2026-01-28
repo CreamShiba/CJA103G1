@@ -5,11 +5,7 @@
 }
 
 body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #f5f7fa;
-    color: #333;
-    height: 100vh;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .app-container {
@@ -281,7 +277,6 @@ tbody tr:hover {
 .btn-add {
     background-color: #28a745;
     color: white;
-    margin-bottom: 20px;
 }
 
 .btn-add:hover {
@@ -466,7 +461,6 @@ body {
     background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
     color: #333;
     min-height: 100vh;
-    padding: 40px 20px;
 }
 
 .container {
@@ -648,7 +642,7 @@ textarea {
 
 button,
 .btn {
-    padding: 12px 40px;
+    padding: 12px 20px;
     border: none;
     border-radius: 6px;
     font-size: 15px;
@@ -658,7 +652,6 @@ button,
     text-decoration: none;
     display: inline-block;
     text-align: center;
-    min-width: 120px;
 }
 
 .btn-submit {
@@ -726,6 +719,10 @@ button,
 
     button,
     .btn {
+        width: 100%;
+    }
+
+    .btn-edit{
         width: 100%;
     }
 }

@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的訂單 | 卡爾夏汽車百貨</title>
+    <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
+    <style>
+        .order-container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .order-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .order-table th, .order-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        /* 綠色：進行中 */
+        .status-paid { background-color: #28a745; }
+
+        /* 灰色：已結案 (完成或取消) */
+        .status-completed, .status-cancel { background-color: #6c757d; }
+
+        /* 黃色：待處理 */
+        .status-pending { background-color: #ffc107; color: #000; }
+        .btn-complete {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-complete:hover {
+            background-color: #218838;
+        }
+        .btn-detail {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-rate {
+            background-color: #007bff; /* 藍色 */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-rate:hover {
+            background-color: #0056b3;
+        }
+        /* 彈窗背景 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        /* 彈窗內容 */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 60%;
+            max-width: 800px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .detail-table img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .prod-name {
+            font-weight: 500;
+            color: #333;
+        }
+        .prod-name-cell {
+            text-align: left !important;
+            max-width: 200px;
+        }
+        .detail-table { width: 100%; border-collapse: collapse; margin-top: 15px; color: #333; }
+        .detail-table th { background-color: #f8f9fa; }
+        .detail-table th, .detail-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <div class="top-bar">
+        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search..."
+                       style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+                    <a href="#">登入</a>
+                    <a href="#">註冊</a>
+                </div>
+            </div>
+            <span id="cart" style="cursor: pointer;">🛒</span>
+        </div>
+    </div>
+
+    <div class="main-header">
+        <div class="logo" onclick="navigateTo('home')" style="cursor: pointer;">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#" onclick="navigateTo('shop')">商城</a>
+            <a href="#" onclick="navigateTo('installation')">安裝區</a>
+            <a href="#" onclick="navigateTo('forum')">論壇</a>
+            <a href="#" onclick="navigateTo('notice')">公告</a>
+            <a href="#" onclick="navigateTo('faq')">常見問題</a>
+
+            <!-- 會員中心下拉選單 -->
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a>
+                    <a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a>
+                    <a href="http://localhost:8080/pages/my-orders" onclick="navigateTo('orderInfo')">訂單查詢</a>
+                    <a href="#" onclick="navigateTo('')">申訴/檢舉</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- 主要內容 -->
+<div class="container">
+    <!-- 側邊欄 -->
+    <aside>
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">會員中心</h3>
+            <ul class="category-list" id="category-list">
+                <li><a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a></li>
+                <li><a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a></li>
+                <li><a href="http://localhost:8080/pages/my-orders">訂單查詢</a></li>
+                <li><a href="#" onclick="navigateTo('')">申訴/檢舉</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- 主要內容區 -->
+    <main class="content-area">
+        <div class="order-container">
+            <h2>我的訂單紀錄</h2>
+            <table class="order-table">
+                <thead>
+                <tr>
+                    <th>訂單編號</th>
+                    <th>下單日期</th>
+                    <th>付款方式</th>
+                    <th>付款狀態</th>
+                    <th>實付金額</th>
+                    <th>訂單狀態</th>
+                    <th>物流方式</th>
+                    <th>評價</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="orderBody">
+                </tbody>
+            </table>
+            <div id="noOrder" style="display:none; text-align:center; padding: 20px;">目前尚無訂單紀錄。</div>
+        </div>
+
+        <div id="detailModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h3>訂單明細 - <span id="modalOrdNo"></span></h3>
+                <hr>
+                <table class="detail-table">
+                    <thead>
+                    <tr>
+                        <th>商品名稱</th>
+                        <th>單價</th>
+                        <th>數量</th>
+                        <th>小計</th>
+                    </tr>
+                    </thead>
+                    <tbody id="detailBody">
+                    </tbody>
+                </table>
+                <hr>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 5px; font-size: 14px;color: #333;">
+                    <div><strong>收件人：</strong><span id="modalRecipient"></span></div>
+                    <div><strong>物流方式：</strong><span id="modalShipMethod"></span></div>
+                    <div><strong>收件地址：</strong><span id="modalAddress"></span></div>
+                    <div><strong>物流單號：</strong><span id="modalShipNo"></span></div>
+                </div>
+                <div style="text-align: right; margin-top: 15px; color:#333;">
+                    <h4>總金額：$<span id="modalTotal"></span></h4>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-col">
+        <div class="footer-logo logo">卡爾夏</div>
+    </div>
+    <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+            <li>Shop Parts</li>
+            <li>Wholesale</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>The Company</h4>
+        <ul>
+            <li>About Us</li>
+            <li>FAQ</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul>
+            <li>info@mysite.com</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Follow Us</h4>
+        <ul>
+            <li>Instagram</li>
+        </ul>
+    </div>
+</footer>
+
+<!--<script th:src="@{/js/front-end/index.js}"></script>-->
+<script>
+    // 獲取當前會員編號
+    const currentMemberNo = 1;
+
+    // 頁面載入完成後
+    window.onload = function() {
+        fetchOrders();
+        initUserDropdown();
+    };
+
+    // 初始化下拉選單
+    function initUserDropdown() {
+        // 處理右上角使用者圖示
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+        const memberTrigger = document.getElementById('member-center-trigger');
+        const memberDropdown = document.getElementById('member-dropdown');
+
+        if (userIcon && userDropdown) {
+            userIcon.onclick = function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+                memberDropdown.classList.remove('show');
+            };
+        }
+
+        // 處理導航列中的「會員中心」
+        if (memberTrigger && memberDropdown) {
+            memberTrigger.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                memberDropdown.classList.toggle('show');
+                userDropdown.classList.remove('show');
+            };
+        }
+
+        // 全域點擊監聽:點擊選單以外區域時關閉
+        document.addEventListener('click', function(event) {
+            const isUserIcon = event.target.closest('#user-icon');
+            const isMemberTrigger = event.target.closest('#member-center-trigger');
+            const isUserDropdown = event.target.closest('#user-dropdown');
+            const isMemberDropdown = event.target.closest('#member-dropdown');
+
+            if (!isUserIcon && !isUserDropdown) {
+                userDropdown.classList.remove('show');
+            }
+
+            if (!isMemberTrigger && !isMemberDropdown) {
+                memberDropdown.classList.remove('show');
+            }
+        });
+    }
+
+    // 導航功能
+    function navigateTo(page) {
+        const routes = {
+            'home': '/pages/front-end/index',
+            'shop': '/shop',
+            'installation': '/installation',
+            'forum': '/forum',
+            'notice': '/notice',
+            'faq': '/faq',
+            'category1': '/category/category1',
+            'category2': '/category/category2',
+            'category3': '/category/category3',
+            'category4': '/category/category4',
+            'category5': '/category/category5',
+            'coupons': '/pages/my-coupons',
+            'favorite':'/favorite/list-page'
+        };
+
+        if (routes[page]) {
+            window.location.href = routes[page];
+        }
+    }
+
+    async function fetchOrders() {
+        try {
+            // ✅ 修正: 使用正確的 API 端點
+            const orderResponse = await fetch(`/member/orders/${currentMemberNo}`);
+            const rateResponse = await fetch(`/prodRate/all`); // ✅ 新增的 API 端點
+
+            const noOrderDiv = document.getElementById('noOrder');
+            const body = document.getElementById('orderBody');
+
+            // 處理訂單查詢結果
+            if (orderResponse.status === 204 || !orderResponse.ok) {
+                noOrderDiv.style.display = 'block';
+                console.log('沒有訂單資料或API錯誤');
+                return;
+            }
+
+            const orders = await orderResponse.json();
+
+            // 處理評價查詢結果
+            let allRates = [];
+            if (rateResponse.ok) {
+                allRates = await rateResponse.json();
+            } else {
+                console.warn('無法獲取評價資料,評價功能可能無法正常顯示');
+            }
+
+            body.innerHTML = '';
+
+            // ✅ 建立評價狀態對照表
+            const rateStatusMap = new Map(); // key: ordNo, value: { hasRated: bool, canEdit: bool, allLocked: bool }
+
+            orders.forEach(ord => {
+                // 找出此訂單對應的評價
+                const ordRates = allRates.filter(r => r.ordNo === ord.ordNo && r.memberNo === currentMemberNo);
+
+                let hasRated = ordRates.length > 0; // 是否有評價記錄
+                let canEdit = ordRates.some(r => r.rateStatus === 1); // 是否有可編輯的評價(狀態1)
+                let allLocked = ordRates.length > 0 && ordRates.every(r => r.rateStatus === 2); // 所有評價都鎖定(狀態2)
+
+                rateStatusMap.set(ord.ordNo, { hasRated, canEdit, allLocked });
+            });
+
+            orders.forEach(ord => {
+                const rateStatus = rateStatusMap.get(ord.ordNo);
+
+                let statusClass = 'status-pending';
+                if (ord.ordStatus === '已完成' || ord.ordStatus === '已取消') {
+                    statusClass = 'status-completed';
+                } else if (ord.ordStatus !== '待付款') {
+                    statusClass = 'status-paid';
+                }
+
+                let actionButtons = `<button class="btn-detail" onclick="viewDetail(${ord.ordNo})">詳情</button>`;
+                let ratingContent = `<span style="color: #ccc;">--</span>`;
+
+                // ✅ 根據訂單狀態和評價狀態決定顯示內容
+                if (ord.ordStatus === '已完成') {
+                    if (!rateStatus.hasRated) {
+                        // 尚未評價
+                        ratingContent = `<button class="btn-rate" onclick="window.location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
+                    } else if (rateStatus.canEdit) {
+                        // 狀態 1:可修改一次
+                        ratingContent = `<button class="btn-rate-edit" onclick="window.location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
+                    } else if (rateStatus.allLocked) {
+                        // 狀態 2:已評價二次,鎖定
+                        ratingContent = `
+                        <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
+                            <span style="color: #28a745; font-size: 11px; font-weight: bold;">✅ 已評價</span>
+                            <button class="btn-detail" style="padding: 2px 8px; font-size: 11px;" onclick="window.location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">查看內容</button>
+                        </div>`;
+                    }
+                } else if (ord.ordStatus === '已發貨') {
+                    actionButtons = `
+                    <button class="btn-complete" onclick="confirmReceipt(${ord.ordNo})">確認收貨</button>
+                    <button class="btn-detail" onclick="viewDetail(${ord.ordNo})" style="margin-left:5px">詳情</button>`;
+                }
+
+                body.innerHTML += `
+                <tr>
+                    <td>#${ord.ordNo}</td>
+                    <td>${formatDate(ord.ordDate)}</td>
+                    <td>${ord.ordPaymentMethod || '--'}</td>
+                    <td>${ord.ordPaymentStatus || '--'}</td>
+                    <td><strong style="color:red;">$${ord.ordPrice || 0}</strong></td>
+                    <td><span class="status-badge ${statusClass}">${ord.ordStatus}</span></td>
+                    <td>${ord.ordShipMethod || '--'}</td>
+                    <td>${ratingContent}</td>
+                    <td>${actionButtons}</td>
+                </tr>`;
+            });
+
+            noOrderDiv.style.display = (orders.length === 0) ? 'block' : 'none';
+
+        } catch (error) {
+            console.error('無法讀取資料:', error);
+            document.getElementById('noOrder').innerHTML = '<p style="color: red;">載入訂單失敗,請稍後再試</p>';
+            document.getElementById('noOrder').style.display = 'block';
+        }
+    }
+
+    async function viewDetail(ordNo) {
+        try {
+            const response = await fetch(`/member/orders/detail/${ordNo}`);
+            if (!response.ok) throw new Error('無法取得訂單明細');
+
+            const order = await response.json();
+
+            // 填入訂單基本資訊
+            document.getElementById('modalOrdNo').innerText = '#' + order.ordNo;
+
+            // 填入物流與收件資訊 (對應 Order.java 欄位)
+            document.getElementById('modalRecipient').innerText = order.ordRecipient || '未填寫';
+            document.getElementById('modalAddress').innerText = order.ordAddress || '未填寫';
+            document.getElementById('modalShipMethod').innerText = order.ordShipMethod || '未指定';
+            document.getElementById('modalShipNo').innerText = order.ordShipNo || '尚未發貨';
+
+            // 渲染商品明細表格
+            const detailBody = document.getElementById('detailBody');
+            detailBody.innerHTML = '';
+
+            if (order.ordDetails && order.ordDetails.length > 0) {
+                order.ordDetails.forEach(item => {
+                    const subtotal = item.price * item.qty;
+
+                    // 商品名稱與圖片處理
+                    const prodName = item.product ? item.product.productName : `商品編號: ${item.prodNo}`;
+                    const imgUrl = `/product/display?prodNo=${item.prodNo}`;
+
+                    detailBody.innerHTML += `
+                    <tr>
+
+                        <td style="text-align:left;">${prodName}</td>
+                        <td>$${item.price}</td>
+                        <td>${item.qty}</td>
+                        <td>$${subtotal}</td>
+                    </tr>
+                `;
+                });
+            } else {
+                detailBody.innerHTML = '<tr><td colspan="5">查無明細資料</td></tr>';
+            }
+
+            // 填入總金額
+            document.getElementById('modalTotal').innerText = order.ordPrice;
+
+            // 顯示彈窗
+            document.getElementById('detailModal').style.display = 'block';
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('讀取明細失敗，請稍後再試');
+        }
+    }
+
+    // 關閉彈窗
+    function closeModal() {
+        document.getElementById('detailModal').style.display = 'none';
+    }
+
+    // 點擊彈窗外部也可關閉
+    window.onclick = function(event) {
+        const modal = document.getElementById('detailModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    function formatDate(dateStr) {
+        if (!dateStr) return "";
+        return dateStr.replace('T', ' ').substring(0, 19);
+    }
+
+    async function confirmReceipt(ordNo) {
+        if (!confirm('確認已收到商品並完成訂單嗎?')) return;
+
+        try {
+            const response = await fetch(`/member/orders/${ordNo}/complete`, {
+                method: 'PATCH'
+            });
+
+            if (response.ok) {
+                alert('感謝您的購買,訂單已完成!');
+                location.reload(); // 重新整理頁面更新狀態
+            } else {
+                alert('操作失敗,請稍後再試');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('網路錯誤,請稍後再試');
+        }
+    }
+
+
+</script>
+</body>
+</html>
