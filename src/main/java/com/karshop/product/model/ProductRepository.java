@@ -13,7 +13,7 @@ public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
     List<ProductVO> findBySellerSellerNo(Integer sellerNo);
 
 //   首頁
-    Page<ProductVO> findByProdStatus(String prodStatus, Pageable pageable);
+    List<ProductVO> findByProdStatus(String prodStatus);
 
 //  首頁分類搜尋
 //    Page<ProductVO> findByProductCategory_ProductCategoryNoAndProdStatus(Integer productCategoryNo, String productStatus, Pageable pageable);

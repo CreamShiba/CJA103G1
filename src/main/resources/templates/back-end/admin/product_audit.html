@@ -15,6 +15,9 @@
 <main class="main-content">
   <h2><i class="fas fa-clipboard-check"></i> 商品上架審核</h2>
 
+  <div th:if="${successMessage}" style="color: green; margin-bottom: 10px;" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" style="color: red; margin-bottom: 10px;" th:text="${errorMessage}"></div>
+
   <div class="card">
     <table>
       <thead>
@@ -66,16 +69,6 @@
     </table>
   </div>
 </main>
-
-<div th:if="${successMessage}" id="toast-success" class="admin-toast toast-success">
-  <i class="fas fa-check-circle"></i>
-  <span th:text="${successMessage}"></span>
-</div>
-
-<div th:if="${errorMessage}" id="toast-error" class="admin-toast toast-error">
-  <i class="fas fa-times-circle"></i>
-  <span th:text="${errorMessage}"></span>
-</div>
 
 <script th:src="@{/js/back-end/admin/product_audit.js}"></script>
 </body>

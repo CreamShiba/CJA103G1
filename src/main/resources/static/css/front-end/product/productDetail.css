@@ -152,3 +152,65 @@ ul { list-style: none; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
 .modal-close { background: transparent; border: 1px solid #444; color: #ccc; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
 .modal-submit { background: #ff3333; border: none; color: #fff; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+
+/* --- 檢舉 Modal 優化樣式 --- */
+
+/* 表單群組間距 */
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+/* 標籤文字 */
+.form-label {
+    display: block;
+    font-size: 13px;
+    color: #ccc;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+/* 輸入框與下拉選單通用樣式 */
+.form-input {
+    width: 100%;
+    padding: 10px;
+    background: #111;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 5px;
+    outline: none;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+/* 下拉選單箭頭顏色修正 (部分瀏覽器支援) */
+select.form-input {
+    appearance: none; /* 移除預設樣式 */
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+    cursor: pointer;
+}
+
+/* Focus 狀態 (紅色邊框) */
+.form-input:focus,
+.modal-textarea:focus {
+    border-color: #ff3333;
+    box-shadow: 0 0 5px rgba(255, 51, 51, 0.3);
+}
+
+/* 錯誤狀態 (驗證用) */
+.form-input.error {
+    border-color: #ff3333;
+    animation: shake 0.3s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}

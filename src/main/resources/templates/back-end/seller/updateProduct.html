@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新增商品 | 賣家中心</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/back-end/seller/updateProduct.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
 </head>
@@ -25,6 +26,32 @@
         <div class="form-header">
             <h2>修改商品 Edit Product</h2>
             <a th:href="@{/product/dashboard(tab=products)}" class="btn-back">← 返回列表</a>
+        </div>
+
+        <div th:if="${violationReport != null}" class="violation-alert">
+            <h3>
+                <i class="fas fa-exclamation-triangle"></i>
+                此商品因違規已被強制下架
+            </h3>
+
+            <div class="alert-content">
+                <p>
+                    <strong>違規原因：</strong>
+                    <span th:text="${violationReport.reportReason}"
+                          style="background: #dc3545; padding: 2px 8px; border-radius: 4px; font-size: 12px; color: white;">
+                          仿冒品
+                    </span>
+                </p>
+                <p>
+                    <strong>詳細說明：</strong>
+                    <span th:text="${violationReport.reportDescription}">這看起來像是假貨...</span>
+                </p>
+            </div>
+
+            <div class="alert-footer">
+                <i class="fas fa-info-circle"></i>
+                請修正上述問題後重新儲存，商品將進入審核狀態，待管理員確認後即可重新上架。
+            </div>
         </div>
 
         <form th:action="@{/product/update}" th:object="${productVO}" method="post" enctype="multipart/form-data">
@@ -91,6 +118,7 @@
                 <div id="preview-container"></div>
             </div>
 
+            <input type="hidden" th:field="*{prodStatus}" />
             <input type="hidden" th:field="*{ratingStar}" />
             <input type="hidden" th:field="*{ratingAmount}" />
 
