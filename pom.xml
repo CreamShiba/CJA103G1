@@ -34,6 +34,10 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-security</artifactId>-->
+<!--		</dependency>-->
 
 		<!-- 用途說明5: Starter for using Spring Data JPA with Hibernate -->
 		<dependency>
@@ -84,7 +88,11 @@
 			<artifactId>hibernate-proxool</artifactId>
 			<version>6.6.4.Final</version>
 		</dependency>
-
+		<!-- 添加 Redis  -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
 
 		<!-- ========================================================================================== -->
 		<!-- ●以下為 Web App 預備使用● -->
@@ -217,12 +225,12 @@
 		<!-- ●以下為 lombok 預備使用● -->
 
 		<!-- lombok -->  <!-- spring-boot 已內建依賴，但預設未下載 -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<!-- <version>1.18.36</version> -->
-			<scope>provided</scope>      <!-- ※provided只提供編譯，jar檔不匯出 -->
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.projectlombok</groupId>-->
+<!--			<artifactId>lombok</artifactId>-->
+<!--			&lt;!&ndash; <version>1.18.36</version> &ndash;&gt;-->
+<!--			<scope>provided</scope>      &lt;!&ndash; ※provided只提供編譯，jar檔不匯出 &ndash;&gt;-->
+<!--		</dependency>-->
 		
 		
 		<!-- ========================================================================================== -->

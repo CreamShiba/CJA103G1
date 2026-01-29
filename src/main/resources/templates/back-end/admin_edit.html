@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編輯管理者 - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/back-end/admin_add.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>Autopile <span class="badge">ADMIN</span></h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item has-submenu open">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">會員帳號管理</a></li>
+                        <li><a th:href="@{/admins/listAll}" class="active">管理員帳號管理</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <form th:action="@{/admins/logout}" method="post" id="logoutForm">
+                <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                    <i class="fas fa-sign-out-alt"></i> 登出 (Logout)
+                </a>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">編輯管理員</h2>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-body">
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>編輯管理員資料</h3>
+                </div>
+
+                <div th:if="${errorMsgs}" class="error-messages-container">
+                    <p th:each="msg : ${errorMsgs}" th:text="${msg}"></p>
+                </div>
+
+                <div class="form-container">
+                    <form id="edit-admin-form" th:action="@{/admins/edit}" th:object="${form}" method="post">
+
+                        <input type="hidden" th:field="*{adminId}">
+
+                        <div class="form-row">
+                            <label>姓名 (Name)</label>
+                            <input type="text" id="adminName" th:field="*{adminName}" placeholder="輸入姓名" required>
+                        </div>
+
+                        <div class="form-row">
+                            <label>帳號 (Account)</label>
+                            <input type="text" id="adminAcc" th:field="*{adminAcc}" placeholder="若不修改請保留原值" required>
+                        </div>
+
+                        <div class="form-row">
+                            <label>密碼 (Password)</label>
+                            <input type="text" id="adminPwd" th:field="*{adminPwd}" placeholder="若不修改請保留原值" required>
+                        </div>
+
+                        <div class="form-row">
+                            <label>信箱 (Email)</label>
+                            <input type="email" id="adminEmail" th:field="*{adminEmail}" required>
+                        </div>
+
+                        <div class="form-row">
+                            <label>帳號狀態 (Status)</label>
+                            <select th:field="*{adminStatus}" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; background-color: #fff;">
+                                <option value="1">正常啟用</option>
+                                <option value="0">停權</option>
+                            </select>
+                        </div>
+
+                        <fieldset class="form-group" style="margin-top: 20px;">
+                            <legend style="font-weight: bold; margin-bottom: 10px;">功能權限分配</legend>
+                            <ul style="list-style: none; padding-left: 0;">
+                                <li th:each="func : ${allFunctions}" style="margin-bottom: 5px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                        <input type="checkbox" th:field="*{manageFuncIds}" th:value="${func.authNo}" />
+                                        <span th:text="${func.authName}">功能名稱</span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </fieldset>
+
+                        <div class="form-actions">
+                            <a th:href="@{/admins/listAll}" class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">取消</a>
+                            <button type="submit" class="btn-primary">儲存變更</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script th:src="@{/js/back-end/admin_index.js}"></script>
+</body>
+</html>

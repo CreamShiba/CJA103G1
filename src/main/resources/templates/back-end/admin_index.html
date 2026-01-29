@@ -40,14 +40,14 @@
                         </ul>
                     </li>
                     
-                    <li class="menu-item has-submenu open">
+                    <li class="menu-item has-submenu">
                         <a class="submenu-toggle">
                             <span><i class="fas fa-users-cog"></i> 帳號管理</span>
                             <i class="fas fa-chevron-down arrow"></i>
                         </a>
                         <ul class="submenu">
                             <li><a href="#">會員帳號管理</a></li><!--a標籤加class="active"表示已選擇-->
-                            <li><a href="#">管理員帳號管理</a></li>
+                            <li><a th:href="@{/admins/listAll}">管理員帳號管理</a></li>
                         </ul>
                     </li>
 
@@ -72,16 +72,20 @@
                         </ul>
                     </li>
                     <li class="menu-item">
-                        <a href="#"><i class="fas fa-star"></i> 自訂</a>
+                        <a href="#"><i class="fas fa-star"></i> 評論管理</a>
                     </li>
                     <li class="menu-item">
-                        <a href="#"><i class="fas fa-headset"></i> 自訂</a>
+                        <a href="#"><i class="fas fa-headset"></i> 客服管理</a>
                     </li>
                 </ul>
             </nav>
 
             <div class="sidebar-footer">
-                <a href="#">登出 (Logout)</a>
+                <form th:action="@{/admins/logout}" method="post" id="logoutForm">
+                    <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                        <i class="fas fa-sign-out-alt"></i> 登出 (Logout)
+                    </a>
+                </form>
             </div>
         </aside>
 
@@ -98,6 +102,6 @@
         </main>
     </div>
 
-    <script src="../../static/js/back-end/admin_index.js" th:src="@{/js/back-end/admin_index.js}"></script>
+    <script th:src="@{/js/back-end/admin_index.js}"></script>
 </body>
 </html>
