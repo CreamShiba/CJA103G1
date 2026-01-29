@@ -16,6 +16,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -45,6 +46,9 @@ public class ProductController {
 
     @Autowired
     private ReportRepository reportRepository;
+
+    @Autowired
+    private RedisTemplate<String, byte[]> imageRedisTemplate;
 
     @Autowired
     private EntityManager entityManager;
@@ -144,6 +148,9 @@ public class ProductController {
             String[] ids = deleteImageNos.split(",");
             for (String id : ids) {
                 productImageService.deleteImage(Integer.valueOf(id));
+
+                String redisKey = "product:img:" + id;
+                imageRedisTemplate.delete(redisKey);
             }
         }
 
@@ -171,6 +178,11 @@ public class ProductController {
             if (productVO.getProductImage() == null) {
                 productVO.setProductImage(new ArrayList<>());
             }
+        }
+
+        if(deleteAmount > 0 || newAmount > 0){
+            String redisKey = "product:main:" + productVO.getProdNo();
+            imageRedisTemplate.delete(redisKey);
         }
 
         entityManager.flush(); // 強制讓剛剛的刪除和新增生效
