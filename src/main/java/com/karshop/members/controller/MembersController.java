@@ -76,11 +76,11 @@ public class MembersController {
     boolean ok = membersService.verifyAndActivateMember(token);
     if (ok) {
       // 啟用成功
-      return "front-end/members/emailVerificationSuccess";
+      return "front-end/members/emailVerifySuccess";
     } else {
       // 啟用失敗（token 無效、過期或找不到會員）
       model.addAttribute("errorMsg", "驗證失敗，連結已失效或不正確。");
-      return "front-end/members/emailVerificationFailed";
+      return "front-end/members/emailVerifyFailed";
     }
   }
 
