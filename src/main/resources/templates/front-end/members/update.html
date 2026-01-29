@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Autopile</title>
+
+    <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
+    <link rel="stylesheet" th:href="@{/css/front-end/members/update.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+
+<header>
+    <div class="top-bar">
+        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" placeholder="Search..." style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+                    <th:block th:if="${session.member != null}">
+                        <span style="display:block; padding: 12px 16px; color: #888; font-size: 12px;">Hello, <span th:text="${session.member.memName}">User</span></span>
+                        <a th:href="@{/members/profile}">個人資料</a>
+                        <a href="#">訂單查詢</a>
+                        <a th:href="@{/members/logout}">登出</a>
+                    </th:block>
+                </div>
+            </div>
+            <span id="cart">🛒</span>
+        </div>
+    </div>
+    <div class="main-header">
+        <div class="logo">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#">商城</a> <a href="#">安裝區</a> <a href="#">論壇</a> <a href="#">公告</a><a href="#">常見問題</a>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+
+    <aside>
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">會員中心</h3>
+            <ul class="category-list">
+                <li class="active">個人資料</li>
+                <li><a href="#">我的訂單</a></li>
+                <li><a href="#">預約紀錄</a></li>
+                <li><a href="#">帳號安全</a></li>
+                <li>
+                    <form th:action="@{/members/logout}" method="post" id="logoutForm" style="display: inline;">
+                        <a href="javascript:void(0);" onclick="document.getElementById('logoutForm').submit();">登出</a>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+    </aside>
+
+    <main class="main-section">
+        <div class="profile-container">
+
+            <div class="profile-header">
+                <h2 class="title">編輯個人資料</h2>
+                <p class="subtitle">Update your personal details</p>
+            </div>
+
+            <div th:if="${errorMsgs}" class="error-box">
+                <ul>
+                    <li th:each="msg : ${errorMsgs}" th:text="${msg}">Error Message</li>
+                </ul>
+            </div>
+
+            <form th:action="@{/members/update}" method="post" enctype="multipart/form-data" th:object="${membersVO}">
+
+                <input type="hidden" th:field="*{memId}">
+
+                <div class="avatar-section">
+                    <div class="avatar-wrapper">
+                        <img id="avatarPreview"
+                             th:src="${membersVO.memAvatar != null and not #lists.isEmpty(membersVO.memAvatar)} ? @{/members/DBGifReader(memId=${membersVO.memId},type='memAvatar')} : @{/images/user.png}"
+                             onerror="this.src='/images/user.png'"
+                             alt="Avatar Preview" />
+
+                        <input type="file" id="imageUpload" name="memAvatarFile" accept="image/*" onchange="previewImage(this)">
+
+                        <label for="imageUpload" class="upload-icon">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                    </div>
+                    <p class="hint-text">點擊相機圖示更換頭像</p>
+                </div>
+
+                <div class="info-grid">
+
+                    <div class="form-group">
+                        <label>會員帳號 (不可修改)</label>
+                        <input type="text" th:field="*{memAcc}" class="form-control readonly" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>會員密碼</label>
+                        <input type="text" th:field="*{memPwd}" class="form-control" placeholder="請輸入密碼">
+                    </div>
+
+                    <div class="form-group">
+                        <label>顯示暱稱</label>
+                        <input type="text" th:field="*{memUsername}" class="form-control" placeholder="請輸入暱稱">
+                    </div>
+
+                    <div class="form-group">
+                        <label>真實姓名</label>
+                        <input type="text" th:field="*{memName}" class="form-control" placeholder="請輸入姓名">
+                    </div>
+
+                    <div class="form-group">
+                        <label>手機號碼</label>
+                        <input type="text" th:field="*{memMobile}" class="form-control" placeholder="09xxxxxxxx">
+                    </div>
+
+                    <div class="form-group">
+                        <label>電子信箱</label>
+                        <input type="email" th:field="*{memEmail}" class="form-control" placeholder="name@example.com">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>聯絡地址</label>
+                        <input type="text" th:field="*{memAddr}" class="form-control" placeholder="請輸入完整地址">
+                    </div>
+
+                </div>
+
+                <div class="action-footer">
+                    <button type="submit" class="save-btn">
+                        <i class="fas fa-save"></i> 儲存變更
+                    </button>
+                    <a th:href="@{/members/view}" class="cancel-btn">取消</a>
+                </div>
+
+            </form>
+        </div>
+    </main>
+</div>
+
+<footer>
+    <div class="footer-col"><div class="footer-logo logo">卡爾夏</div></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li>Shop Parts</li><li>Wheels & Tires</li></ul></div>
+    <div class="footer-col"><h4>Support</h4><ul><li>Installation</li><li>FAQ</li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li>About Us</li><li>Contact</li></ul></div>
+    <div class="footer-col"><h4>Newsletter</h4><input type="text" placeholder="Enter email" style="width:100%; padding:8px;"></div>
+</footer>
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+</body>
+</html>

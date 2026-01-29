@@ -1,0 +1,206 @@
+/* profile.css */
+/* --- 強制調整佈局 (Override index.css) --- */
+
+/* 1. 放寬容器的最大寬度，讓內容往右延伸 */
+.container {
+    max-width: 95% !important; /* 原本可能是 1200px，改成 95% 或 1600px */
+    padding-right: 20px;       /* 稍微保留一點右邊呼吸空間 */
+}
+
+/* 2. 確保右側主區塊 (Main) 佔滿剩餘空間 */
+.main-section {
+    width: 100%;
+    display: flex;             /* 確保內部的卡片可以撐開 */
+    flex-direction: column;
+}
+
+/* --- Profile 卡片調整 --- */
+.profile-container {
+    /* ...原有樣式保持不變... */
+
+    width: 100%;       /* 確保卡片寬度佔滿 main-section */
+    max-width: none;   /* 移除任何寬度限制 */
+
+    /* 為了讓視覺不那麼空，可以增加卡片內部的高度或間距 */
+    min-height: 80vh;  /* 讓卡片高度至少佔螢幕 80%，看起來更有份量 */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* 內容靠上 */
+}
+
+/* --- 優化大螢幕顯示 (選用) --- */
+/* 當螢幕非常寬時 (例如大於 1600px)，可以考慮變成三欄排版，才不會太扁長 */
+@media (min-width: 1600px) {
+    .info-grid {
+        grid-template-columns: 1fr 1fr 1fr; /* 變為三欄 */
+    }
+
+    /* 讓某些長欄位 (如地址/Email) 跨越 3 欄 */
+    .form-group.full-width {
+        grid-column: span 3;
+    }
+}
+/* 注意：這裡不再設定 body, header, footer, container */
+/* 這些都由 index.css 統一管理 */
+
+/* --- Profile 卡片專屬樣式 --- */
+.profile-container {
+    background-color: rgba(20, 20, 20, 0.9); /* 保持半透明黑底 */
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 40px;
+    width: 100%;
+    /* 移除 max-width，讓它自然填滿右側欄位 */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 標題區 */
+.profile-header {
+    margin-bottom: 30px;
+    text-align: center;
+    border-bottom: 1px solid #333;
+    padding-bottom: 20px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: normal;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #777;
+}
+
+/* --- 大頭貼區域 --- */
+.avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.avatar-wrapper {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #ff3333; /* 主題紅 */
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+    margin-bottom: 15px;
+    background-color: #000;
+    display: flex;           /* 確保圖片置中 */
+    justify-content: center;
+    align-items: center;
+}
+
+.avatar-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-username {
+    font-size: 22px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.profile-role {
+    font-size: 14px;
+    color: #ff3333;
+    background: rgba(255, 51, 51, 0.1);
+    padding: 4px 12px;
+    border-radius: 15px;
+}
+
+/* --- 資料欄位 Grid 排版 --- */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 內部保持兩欄 */
+    gap: 25px;
+}
+
+/* 如果螢幕變小，內部欄位變單欄 */
+@media (max-width: 900px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+@media (max-width: 900px) {
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+}
+
+.form-group label {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 唯讀欄位樣式 */
+.readonly-field {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 12px 15px;
+    border-radius: 5px;
+    border-left: 3px solid #ff3333;
+    color: #fff;
+    font-size: 16px;
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    word-break: break-all; /* 防止長Email撐破版面 */
+}
+
+/* --- 底部按鈕 --- */
+.action-footer {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 40px;
+    background-color: transparent;
+    color: #ff3333;
+    border: 1px solid #ff3333;
+    border-radius: 5px;
+    font-size: 16px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.edit-btn:hover {
+    background-color: #ff3333;
+    color: white;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+    transform: translateY(-2px);
+}

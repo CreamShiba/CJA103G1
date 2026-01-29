@@ -1,0 +1,165 @@
+/* emailVerificationSent.css */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #050000;
+    /* 延續紅黑漸層背景 */
+    background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.verify-container {
+    background-color: rgba(20, 20, 20, 0.9); /* 半透明黑底 */
+    padding: 50px 40px;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    text-align: center;
+}
+
+/* Logo 樣式 */
+.verify-header {
+    margin-bottom: 20px;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #fff;
+}
+
+.logo::before {
+    content: '';
+    display: inline-block;
+    width: 25px;
+    height: 12px;
+    background: white;
+    border-radius: 10px;
+}
+
+/* 信封圖示區域 */
+.icon-wrapper {
+    margin-bottom: 20px;
+}
+
+.mail-icon {
+    width: 64px;
+    height: 64px;
+    color: #ff3333; /* 主題紅色 */
+    opacity: 0.9;
+}
+
+/* 文字排版 */
+.title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: normal;
+}
+
+.content-text p {
+    color: #ccc;
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+/* Email 高亮顯示 */
+.email-highlight {
+    color: #fff !important;
+    font-weight: bold;
+    font-size: 18px;
+    margin: 15px 0 !important;
+    padding: 5px;
+    border-bottom: 1px dashed #555;
+    display: inline-block;
+}
+
+/* 提示小字 */
+.sub-text {
+    font-size: 13px !important;
+    color: #777 !important;
+    margin-top: 15px;
+}
+
+/* 訊息回饋框 (Flash Message) */
+.message-box {
+    background-color: rgba(255, 51, 51, 0.15);
+    border: 1px solid #ff3333;
+    color: #ffcccc;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 20px 0;
+    font-size: 14px;
+}
+
+/* 按鈕樣式 */
+.resend-form {
+    margin-top: 30px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    background-color: transparent;
+    color: #ff3333;
+    border: 1px solid #ff3333;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background-color: #ff3333;
+    color: white;
+}
+
+/* 底部連結 */
+.footer-link {
+    margin-top: 20px;
+}
+
+.footer-link a {
+    color: #888;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.footer-link a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+/* 響應式 */
+@media (max-width: 600px) {
+    .verify-container {
+        width: 100%;
+        height: 100vh;
+        border: none;
+        border-radius: 0;
+        background-color: #000; /* 手機版全黑 */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}

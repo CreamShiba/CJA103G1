@@ -1,0 +1,151 @@
+/* admin_login.css */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    /* 背景改為淺灰藍色，營造明亮、乾淨的商務感 */
+    background-color: #eef2f5;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333333; /* 文字改為深色 */
+}
+
+.login-container {
+    /* 卡片改為純白底色 */
+    background-color: #ffffff;
+    padding: 50px;
+    width: 100%;
+    max-width: 420px;
+    border-radius: 12px;
+    border: 1px solid #dde1e7; /* 淺色邊框 */
+    /* 柔和的陰影，讓卡片浮起來 */
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.login-header {
+    margin-bottom: 40px;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #111; /* Logo 深黑色 */
+}
+
+/* Logo 前面的圖標改為深藍色 */
+.logo::before {
+    content: '';
+    display: inline-block;
+    width: 30px;
+    height: 15px;
+    background: #0066cc;
+    border-radius: 10px;
+}
+
+/* ADMIN 小標籤樣式 */
+.badge {
+    font-size: 12px;
+    background-color: #e0e8f0;
+    color: #0066cc;
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
+.login-header p {
+    color: #666; /* 次要文字淺灰 */
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+/* 表單樣式 */
+.form-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444; /* 標籤顏色加深 */
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    background: #f9fbfd; /* 輸入框微淺藍底 */
+    border: 1px solid #d1d9e6; /* 完整的邊框 */
+    border-radius: 6px;
+    color: #333;
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s;
+}
+
+/* 輸入框 Focus 狀態：變成藍色邊框 */
+.form-group input:focus {
+    border-color: #0066cc;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+/* 按鈕樣式：專業藍色 */
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: #0066cc; /* 科技藍 */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+    margin-top: 15px;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+}
+
+.submit-btn:hover {
+    background-color: #0052a3; /* 深藍色 */
+    transform: translateY(-1px);
+}
+
+/* 底部連結 */
+.form-footer {
+    margin-top: 25px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.form-footer a {
+    color: #666;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.form-footer a:hover {
+    color: #0066cc;
+}
+
+.back-link {
+    font-weight: 500;
+}

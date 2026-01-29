@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - Autopile</title>
+    <link rel="stylesheet" th:href="@{/css/front-end/members/emailVerificationSent.css}">
+</head>
+<body>
+
+<div class="verify-container">
+    <div class="verify-header">
+        <h1 class="logo">卡爾夏</h1>
+    </div>
+
+    <div class="icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mail-icon">
+            <path d="M1.5 8.67v8.58a3 3 0 003 3h15a3 3 0 003-3V8.67l-8.928 5.493a3 3 0 01-3.144 0L1.5 8.67z" />
+            <path d="M22.5 6.908V6.75a3 3 0 00-3-3h-15a3 3 0 00-3 3v.158l9.714 5.978a1.5 1.5 0 001.572 0L22.5 6.908z" />
+        </svg>
+    </div>
+
+    <h2 class="title">請驗證您的電子郵件</h2>
+
+    <div class="content-text">
+        <p>我們已發送一封驗證郵件到您的信箱：</p>
+        <p class="email-highlight" th:text="${email}">user@example.com</p>
+        <p>請點擊郵件中的連結以完成註冊並啟用您的帳號。</p>
+
+        <p class="sub-text">如果沒有在收件箱中找到郵件，請檢查您的垃圾郵件。</p>
+    </div>
+
+    <div th:if="${msg}" class="message-box">
+        <span th:text="${msg}"></span>
+    </div>
+
+    <form th:action="@{/members/resendVerification}" method="post" class="resend-form">
+        <input type="hidden" name="email" th:value="${email}" />
+        <button type="submit" class="action-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="margin-right: 5px;">
+                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+            </svg>
+            重新發送驗證信
+        </button>
+    </form>
+
+    <div class="footer-link">
+        <a th:href="@{/members/login}">返回登入頁面</a>
+    </div>
+</div>
+
+</body>
+</html>

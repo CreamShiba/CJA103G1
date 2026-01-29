@@ -1,0 +1,247 @@
+/* register.css - 基於 login.css 擴充 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #050000;
+    /* 延續主頁的紅黑漸層背景 */
+    background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
+    /* 改為 min-height 並增加 padding，防止註冊表單過長時被切掉 */
+    min-height: 100vh;
+    padding: 40px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.register-container {
+    background-color: rgba(20, 20, 20, 0.9); /* 半透明黑底 */
+    padding: 40px 50px;
+    width: 90%;
+    max-width: 500px; /* 比登入頁稍微寬一點 */
+    border-radius: 10px;
+    border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    text-align: center;
+}
+
+.register-header {
+    margin-bottom: 30px;
+}
+
+.logo {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.logo::before {
+    content: '';
+    display: inline-block;
+    width: 30px;
+    height: 15px;
+    background: white;
+    border-radius: 10px;
+}
+
+.register-header p {
+    color: #888;
+    font-size: 14px;
+}
+
+/* 錯誤訊息區塊 */
+.error-box {
+    background-color: rgba(255, 51, 51, 0.1);
+    border: 1px solid #ff3333;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.error-box ul {
+    list-style-position: inside;
+    padding-left: 10px;
+}
+
+.error-box li {
+    color: #ff6666;
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+
+/* 表單佈局 */
+.form-row {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+    width: 100%;
+}
+
+/* 讓同一行的兩個欄位各佔一半 */
+.form-group.half {
+    width: calc(50% - 10px);
+}
+
+.form-group label {
+    display: block;
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px 0;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #555;
+    color: white;
+    font-size: 15px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.form-group input:focus {
+    border-bottom-color: #ff3333;
+}
+
+/* 檔案上傳欄位特別樣式 */
+.form-group input[type="file"] {
+    border-bottom: none;
+    padding: 5px 0;
+    font-size: 12px;
+    color: #888;
+}
+
+.form-group input[type="file"]::file-selector-button {
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: 0.3s;
+}
+
+.form-group input[type="file"]::file-selector-button:hover {
+    background-color: #444;
+    border-color: #777;
+}
+
+/* 按鈕樣式 */
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: #ff3333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.submit-btn:hover {
+    background-color: #cc0000;
+}
+
+/* 底部連結 */
+.form-footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #888;
+}
+
+.form-footer a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+    color: #ff3333;
+}
+
+/* 手機版響應式調整 */
+@media (max-width: 600px) {
+    .register-container {
+        width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+        background-color: transparent;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .form-group.half {
+        width: 100%;
+    }
+}
+/* 預覽容器 - 上方置中 */
+.avatar-preview-container.top-center {
+    margin: 0 auto 30px auto; /* 上0, 左右自動(置中), 下30px(與表單拉開距離) */
+    width: 130px;      /* 稍微加大一點點 */
+    height: 130px;
+    position: relative;
+    /* 增加一個陰影讓它跳脫出來 */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    border-radius: 50%;
+}
+
+/* 預覽圖片本體 (保持不變) */
+#avatarPreview {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #2a2a2a; /* 邊框稍微加粗，顏色改深一點 */
+    background-color: #1a1a1a;
+    padding: 8px;
+    transition: all 0.3s ease;
+}
+
+/* 上傳成功後的樣式 (保持不變) */
+#avatarPreview.preview-loaded {
+    border-color: #ff3333;
+    padding: 0;
+    background-color: transparent;
+}
+
+/* 輔助說明文字 (簡化樣式，跟隨預設靠左) */
+.help-text {
+    display: block;
+    font-size: 11px;
+    color: #777;
+    margin-top: 8px;
+}
+
+/* 確保檔案輸入框上方有點距離 */
+.file-input {
+    margin-top: 5px;
+}
