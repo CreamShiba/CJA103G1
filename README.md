@@ -61,7 +61,7 @@
 #Java package 命名建議
 
 - 使用 `com.karshop.<功能>`，例如：
-    - `com.karshop.admin`
+    - `com.karshop.admins`
     - `com.karshop.member`
     - `com.karshop.cart`
 

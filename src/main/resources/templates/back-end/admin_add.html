@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增管理者 - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<!--    <link rel="stylesheet" th:href="@{/css/back-end/admin_listAll.css}">-->
+    <link rel="stylesheet" th:href="@{/css/back-end/admin_add.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item has-submenu"><!-- 改下拉選單加"has-submenu" -->
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">會員帳號管理</a></li><!--a標籤加class="active"表示已選擇-->
+                        <li><a th:href="@{/admins/listAll}">管理員帳號管理</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-star"></i> 評論管理</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-headset"></i> 客服管理</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <form th:action="@{/admins/logout}" method="post" id="logoutForm">
+                <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                    <i class="fas fa-sign-out-alt"></i> 登出 (Logout)
+                </a>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">新增管理員</h2>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-body">
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>填寫管理員資料</h3>
+                </div>
+
+                <div th:if="${errorMsgs}" class="error-messages-container">
+                    <p th:each="msg : ${errorMsgs}" th:text="${msg}"></p>
+                </div>
+
+                <div class="form-container">
+                    <form id="add-admin-form" th:action="@{/admins/add}" th:object="${form}" method="post">
+<!--                        <div class="form-row avatar-row">-->
+<!--                            <div class="avatar-upload-box" onclick="document.getElementById('avatar-input').click()">-->
+<!--                                <img id="avatar-preview" src="" style="display:none;">-->
+<!--                                <span id="avatar-placeholder">+<br>Upload</span>-->
+<!--                            </div>-->
+<!--                            <input type="file" id="avatar-input" accept="image/*" style="display: none;">-->
+<!--                            <p class="hint-text">點擊上傳頭像 (選填)</p>-->
+<!--                        </div>-->
+
+                        <div class="form-row">
+                            <label>姓名 (Name)</label>
+                            <input type="text" id="new-name" th:field="*{adminName}"placeholder="輸入姓名" required>
+                        </div>
+                        <div class="form-row">
+                            <label>帳號 (Account)</label>
+                            <input type="text" id="new-account" th:field="*{adminAcc}"placeholder="設定登入帳號" required>
+                        </div>
+
+                        <div class="form-row">
+                            <label>密碼 (Password)</label>
+                            <input type="password" id="new-password" th:field="*{adminPwd}"placeholder="設定密碼" required>
+                        </div>
+
+                        <div class="form-row">
+                            <label>信箱 (Email)</label>
+                            <input type="email" id="new-email" th:field="*{adminEmail}"placeholder="example@autopile.com" required>
+                        </div>
+                        <fieldset class="form-group">
+                            <legend>功能分配</legend>
+                            <ul>
+                                <li th:each="func : ${allFunctions}"><label> <input
+                                        type="checkbox" th:field="*{manageFuncIds}"
+                                        th:value="${func.authNo}" /> <span
+                                        th:text="${func.authName}">功能名稱</span>
+                                </label></li>
+                            </ul>
+                        </fieldset>
+                        <div class="form-actions">
+                            <button type="button" onclick="history.back()"class="btn-secondary" style="text-decoration:none; display:inline-block; text-align:center;">取消</button>
+                            <button type="submit" class="btn-primary">確認新增</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script th:src="@{/js/back-end/admin_index.js}"></script>
+</body>
+</html>

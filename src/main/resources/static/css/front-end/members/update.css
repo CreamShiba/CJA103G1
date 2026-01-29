@@ -1,0 +1,211 @@
+/* update.css - 繼承自 profile.css 並擴充表單功能 */
+
+/* --- 1. 佈局修正 (跟 Profile 一樣往右佔滿) --- */
+.container {
+    max-width: 95% !important;
+    padding-right: 20px;
+}
+
+.main-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- 2. 卡片容器 --- */
+.profile-container {
+    background-color: rgba(20, 20, 20, 0.9);
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 40px;
+    width: 100%;
+    min-height: 80vh;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.profile-header {
+    margin-bottom: 30px;
+    text-align: center;
+    border-bottom: 1px solid #333;
+    padding-bottom: 20px;
+}
+
+.title { font-size: 28px; color: #fff; margin-bottom: 5px; }
+.subtitle { font-size: 14px; color: #777; }
+
+/* --- 3. 頭像上傳區 --- */
+.avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.avatar-wrapper {
+    position: relative; /* 為了放相機 icon */
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #555; /* 編輯模式邊框改灰色 */
+    margin-bottom: 10px;
+    background-color: #000;
+}
+
+.avatar-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    opacity: 0.8; /* 稍微變暗暗示可編輯 */
+    transition: 0.3s;
+}
+
+/* 隱藏原生 file input */
+#imageUpload { display: none; }
+
+/* 相機 Icon 按鈕 */
+.upload-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #ff3333;
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    transition: 0.2s;
+}
+
+.upload-icon:hover { transform: scale(1.1); background: #ff5555; }
+.hint-text { font-size: 12px; color: #666; }
+
+/* --- 4. 表單輸入框樣式 --- */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+@media (max-width: 900px) { .info-grid { grid-template-columns: 1fr; } }
+
+.form-group { display: flex; flex-direction: column; }
+.form-group.full-width { grid-column: span 2; }
+@media (max-width: 900px) { .form-group.full-width { grid-column: span 1; } }
+
+.form-group label {
+    font-size: 12px;
+    color: #ff3333; /* 編輯模式 Label 用紅色凸顯 */
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+}
+
+/* 輸入框設計 */
+.form-control {
+    background-color: rgba(255, 255, 255, 0.08); /* 比唯讀稍微亮一點 */
+    border: 1px solid #444;
+    padding: 12px 15px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.form-control:focus {
+    border-color: #ff3333;
+    box-shadow: 0 0 8px rgba(255, 51, 51, 0.3);
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* 唯讀輸入框樣式 */
+.form-control.readonly {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: #333;
+    color: #888;
+    cursor: not-allowed;
+}
+
+/* 讓 Select 選單也是深色 */
+select.form-control {
+    appearance: none; /* 移除原生箭頭 */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 10px auto;
+}
+
+select.form-control option {
+    background-color: #222;
+    color: white;
+}
+
+/* --- 5. 按鈕區 --- */
+.action-footer {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.save-btn {
+    padding: 12px 40px;
+    background-color: #ff3333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.save-btn:hover {
+    background-color: #cc0000;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
+}
+
+.cancel-btn {
+    padding: 12px 40px;
+    background-color: transparent;
+    color: #ccc;
+    border: 1px solid #555;
+    border-radius: 5px;
+    font-size: 16px;
+    text-decoration: none;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.cancel-btn:hover {
+    border-color: #fff;
+    color: #fff;
+}
+
+/* 錯誤訊息框 */
+.error-box {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid red;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    color: #ffcccc;
+    font-size: 14px;
+}
