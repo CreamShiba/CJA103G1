@@ -148,4 +148,13 @@ public class InstallAppealsController {
             return "templates-report/admin-report-list";
         }
     }
+
+    //這裡是我要弄申訴紀錄先寫死會員資料為1
+    @GetMapping("/history")
+    public String showAppealHistory(Model model) {
+        Integer memberNo = 1; // 💡 開發階段寫死為 1
+        List<InstallAppeals> list = installAppealsService.getAppealsByMember(memberNo);
+        model.addAttribute("appeals", list);
+        return "templates-report/appeal-history";
+    }
 }

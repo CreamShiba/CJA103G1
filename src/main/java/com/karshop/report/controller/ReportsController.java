@@ -75,4 +75,13 @@ public class ReportsController {
             return "redirect:/reports/admin/list"; // 找不到資料就導回清單
         }
     }
+
+    @GetMapping("/history")
+    public String showReportHistory(Model model) {
+        Integer memberNo = 1; // 💡 寫死為 1
+        // 呼叫 Service 取得該會員的檢舉清單
+        List<Reports> list = reportsService.getReportsByMember(memberNo);
+        model.addAttribute("reports", list);
+        return "templates-report/report-history";
+    }
 }

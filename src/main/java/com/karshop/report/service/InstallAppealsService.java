@@ -91,4 +91,9 @@ public class InstallAppealsService {
         // 這裡我們等一下要在 Repository 補上一行查詢指令
         return installAppealImageRepository.findByAppealsNo(appealsNo);
     }
+
+    //這裡跟申訴紀錄有關 讓會員編號=1
+    public List<InstallAppeals> getAppealsByMember(Integer memberNo) {
+        return installAppealsRepository.findByMemberNo(memberNo);
+    }
 }
