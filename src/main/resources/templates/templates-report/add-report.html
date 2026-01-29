@@ -125,6 +125,11 @@
             font-size: 14px;
             color: #aaa;
             cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .category-list li:hover {
+            color: #ff3333;
         }
 
         .category-list li.active {
@@ -570,9 +575,10 @@
             <div class="user-dropdown-container">
                 <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
                 <div id="member-dropdown" class="dropdown-menu">
-                    <a href="#">我的優惠券</a>
-                    <a href="#">我的收藏</a>
-                    <a href="#">訂單查詢</a>
+                    <a href="#" onclick="navigateTo('coupons')">我的優惠券</a>
+                    <a href="#" onclick="navigateTo('favorite')">我的收藏</a>
+                    <a href="#" onclick="navigateTo('orderInfo')">訂單查詢</a>
+                    <a href="/appeals/add">申訴/檢舉</a>
                 </div>
             </div>
         </nav>
@@ -585,9 +591,10 @@
         <div class="sidebar-section">
             <h3 class="sidebar-title">Browse by</h3>
             <ul class="category-list">
-                <li class="active">檢舉中心</li>
-                <li>檢舉紀錄</li>
-                <li>申訴管理</li>
+                <li onclick="location.href='/appeals/add'">提交申訴</li>
+                <li class="active" onclick="location.href='/reports/add'">提交檢舉</li>
+                <li onclick="location.href='/appeals/history'">申訴紀錄</li>
+                <li onclick="location.href='/reports/history'">檢舉紀錄</li>
             </ul>
         </div>
     </aside>
@@ -698,7 +705,7 @@
 </footer>
 
 <script>
-    // 💡 修改後的下拉選單邏輯
+    // 💡 下拉選單邏輯
     window.onload = function() {
         const userIcon = document.getElementById('user-icon');
         const userDropdown = document.getElementById('user-dropdown');
@@ -709,7 +716,7 @@
             userIcon.onclick = function(e) {
                 e.stopPropagation();
                 userDropdown.classList.toggle('show');
-                memberDropdown.classList.remove('show');
+                if (memberDropdown) memberDropdown.classList.remove('show');
             };
         }
 
@@ -717,7 +724,7 @@
             memberTrigger.onclick = function(e) {
                 e.stopPropagation();
                 memberDropdown.classList.toggle('show');
-                userDropdown.classList.remove('show');
+                if (userDropdown) userDropdown.classList.remove('show');
             };
         }
 

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>申訴紀錄 - 卡爾夏汽車百貨</title>
+    <style>
+        /* 直接引用 add-appeal.html 的基礎 Style */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #050000; background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%); color: #ffffff; line-height: 1.5; min-height: 100vh; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        a:hover { color: #ff3333; }
+
+        /* 導航與側邊欄樣式 (同 add-appeal.html) */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 40px; font-size: 12px; color: #ccc; border-bottom: 1px solid #333; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; }
+        .logo { font-size: 24px; font-weight: bold; }
+        .nav-links { display: flex; gap: 30px; font-size: 14px; align-items: center; }
+        .user-dropdown-container { position: relative; display: inline-block; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; background-color: #1a1a1a; min-width: 150px; border: 1px solid #333; border-radius: 4px; z-index: 100; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a { color: #ccc; padding: 12px 16px; display: block; font-size: 13px; }
+
+        .container { display: flex; padding: 40px; max-width: 1400px; margin: 0 auto; }
+        aside { width: 250px; flex-shrink: 0; padding-right: 40px; }
+        .category-list li { margin-bottom: 12px; font-size: 14px; color: #aaa; cursor: pointer; transition: 0.3s; }
+        .category-list li.active { color: #ff3333; font-weight: bold; }
+
+        /* 💡 歷史紀錄表格樣式 */
+        .history-card { background: rgba(10, 10, 10, 0.6); border: 1px solid rgba(255, 51, 51, 0.3); border-radius: 8px; padding: 40px; flex: 1; backdrop-filter: blur(10px); }
+        .history-title { font-size: 32px; font-weight: bold; color: #ff3333; margin-bottom: 30px; }
+        .history-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .history-table th { border-bottom: 2px solid #ff3333; padding: 15px; color: #ff3333; font-size: 16px; }
+        .history-table td { padding: 15px; border-bottom: 1px solid #333; font-size: 14px; color: #ddd; vertical-align: top; }
+
+        .status-badge { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .status-pending { background: #444; color: #aaa; }
+        .status-closed { background: #008000; color: #fff; }
+        .reply-text { color: #ffcc00; font-style: italic; white-space: pre-wrap; max-width: 300px; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="top-bar"><div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div></div>
+    <div class="main-header">
+        <div class="logo">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#">商城</a> <a href="#" class="active">安裝區</a> <a href="#">論壇</a>
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="#">我的優惠券</a> <a href="#">我的收藏</a> <a href="#">訂單查詢</a> <a href="/appeals/add">申訴/檢舉</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <aside>
+        <ul class="category-list">
+            <li onclick="location.href='/appeals/add'">提交申訴</li>
+            <li onclick="location.href='/reports/add'">提交檢舉</li>
+            <li class="active" onclick="location.href='/appeals/history'">申訴紀錄</li>
+            <li onclick="location.href='/reports/history'">檢舉紀錄</li>
+        </ul>
+    </aside>
+
+    <div class="history-card">
+        <h1 class="history-title">APPEAL HISTORY</h1>
+        <table class="history-table">
+            <thead>
+            <tr>
+                <th>編號</th>
+                <th>類別</th>
+                <th>時間</th>
+                <th>狀態</th>
+                <th>管理員回覆</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="appeal : ${appeals}">
+                <td th:text="${appeal.appealsNo}">1</td>
+                <td th:text="${appeal.categories}">技師態度不佳</td>
+                <td th:text="${#temporals.format(appeal.applyDate, 'yyyy-MM-dd HH:mm')}">2026-01-29</td>
+                <td>
+                        <span th:class="${appeal.status == '已結案'} ? 'status-badge status-closed' : 'status-badge status-pending'"
+                              th:text="${appeal.status == 'PENDING' ? '待處理' : appeal.status}">待處理</span>
+                </td>
+                <td class="reply-text" th:text="${appeal.response}">尚未回覆</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(appeals)}"><td colspan="5" style="text-align:center;">目前無申訴紀錄</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const trigger = document.getElementById('member-center-trigger');
+    const menu = document.getElementById('member-dropdown');
+    trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); };
+    document.onclick = () => menu.classList.remove('show');
+</script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>檢舉紀錄 - 卡爾夏汽車百貨</title>
+    <style>
+        /* --- 基礎設定 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #050000; background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%); color: #ffffff; line-height: 1.5; min-height: 100vh; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        a:hover { color: #ff3333; }
+        ul { list-style: none; }
+
+        /* --- 頂部導航 --- */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 40px; font-size: 12px; color: #ccc; border-bottom: 1px solid #333; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; }
+        .logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .logo::before { content: ''; display: inline-block; width: 30px; height: 15px; background: white; border-radius: 10px; }
+        .nav-links { display: flex; gap: 30px; font-size: 14px; align-items: center; }
+
+        /* --- 用戶下拉選單 --- */
+        .user-dropdown-container { position: relative; display: inline-block; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; background-color: #1a1a1a; min-width: 150px; border: 1px solid #333; border-radius: 4px; z-index: 100; box-shadow: 0px 8px 16px rgba(0,0,0,0.5); }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a { color: #ccc; padding: 12px 16px; display: block; font-size: 13px; text-align: left; }
+        .dropdown-menu a:hover { background-color: #333; color: #ff3333; }
+
+        /* --- 主要內容區 --- */
+        .container { display: flex; padding: 40px; max-width: 1400px; margin: 0 auto; }
+        aside { width: 250px; flex-shrink: 0; padding-right: 40px; }
+        .sidebar-title { font-size: 18px; margin-bottom: 20px; color: #ddd; }
+        .category-list li { margin-bottom: 12px; font-size: 14px; color: #aaa; cursor: pointer; transition: 0.3s; }
+        .category-list li:hover { color: #ff3333; }
+        .category-list li.active { color: #ff3333; font-weight: bold; }
+
+        /* --- 表格區域樣式 --- */
+        .history-card { background: rgba(10, 10, 10, 0.6); border: 1px solid rgba(255, 51, 51, 0.3); border-radius: 8px; padding: 40px; flex: 1; backdrop-filter: blur(10px); box-shadow: 0 0 30px rgba(255, 51, 51, 0.15); }
+        .history-title { font-size: 48px; font-weight: bold; color: #ff3333; margin-bottom: 15px; letter-spacing: 2px; }
+        .history-subtitle { font-size: 14px; color: #aaa; margin-bottom: 40px; }
+
+        .history-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .history-table th { border-bottom: 2px solid #ff3333; padding: 15px; color: #ff3333; font-size: 16px; font-weight: bold; }
+        .history-table td { padding: 15px; border-bottom: 1px solid #333; font-size: 14px; color: #ddd; }
+
+        .status-badge { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; }
+        .status-pending { background: #444; color: #aaa; }
+        .status-closed { background: #008000; color: #fff; }
+
+        /* --- Footer --- */
+        footer { margin-top: 100px; padding: 60px 40px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 40px; font-size: 14px; color: #aaa; background-color: rgba(0,0,0,0.5); border-top: 1px solid #333; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="top-bar"><div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div></div>
+    <div class="main-header">
+        <div class="logo">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#">商城</a> <a href="#">安裝區</a> <a href="#">論壇</a>
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="#">我的優惠券</a> <a href="#">我的收藏</a> <a href="#">訂單查詢</a> <a href="/appeals/add">申訴/檢舉</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <aside>
+        <h3 class="sidebar-title">Browse by</h3>
+        <ul class="category-list">
+            <li onclick="location.href='/appeals/add'">提交申訴</li>
+            <li onclick="location.href='/reports/add'">提交檢舉</li>
+            <li onclick="location.href='/appeals/history'">申訴紀錄</li>
+            <li class="active" onclick="location.href='/reports/history'">檢舉紀錄</li>
+        </ul>
+    </aside>
+
+    <div class="history-card">
+        <h1 class="history-title">REPORT HISTORY</h1>
+        <p class="history-subtitle">註：檢舉案詳細處理結果將透過電子郵件發送至您的信箱。</p>
+
+        <table class="history-table">
+            <thead>
+            <tr>
+                <th>編號</th>
+                <th>檢舉對象</th>
+                <th>檢舉類型</th>
+                <th>時間</th>
+                <th>狀態</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="report : ${reports}">
+                <td th:text="${report.reportsNo}">1</td>
+                <td th:text="${report.reportsTarget}">123</td>
+                <td th:text="${report.reportsType}">商品</td>
+                <td th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}">2026-01-29 12:00</td>
+                <td>
+                        <span th:class="${report.status == '已結案'} ? 'status-badge status-closed' : 'status-badge status-pending'"
+                              th:text="${report.status == 'PENDING' ? '待處理' : report.status}">待處理</span>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(reports)}">
+                <td colspan="5" style="text-align:center; padding: 50px;">目前無任何檢舉紀錄</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-col"><div class="logo">卡爾夏</div></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li>Parts</li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li>About Us</li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul><li>Email Us</li></ul></div>
+    <div class="footer-col"><h4>Follow</h4><ul><li>Instagram</li></ul></div>
+</footer>
+
+<script>
+    // 下拉選單邏輯
+    const trigger = document.getElementById('member-center-trigger');
+    const menu = document.getElementById('member-dropdown');
+    trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); };
+    document.onclick = () => menu.classList.remove('show');
+</script>
+</body>
+</html>
