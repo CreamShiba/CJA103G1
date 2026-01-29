@@ -88,6 +88,7 @@
             display: flex;
             gap: 30px;
             font-size: 14px;
+            align-items: center;
         }
 
         .nav-links a.active {
@@ -274,10 +275,6 @@
             box-shadow: 0 6px 20px rgba(255, 51, 51, 0.4);
         }
 
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-
         /* --- Footer --- */
         footer {
             margin-top: 100px;
@@ -315,13 +312,14 @@
             display: none;
             position: absolute;
             right: 0;
-            top: 30px;
+            top: 100%;
             background-color: #1a1a1a;
-            min-width: 120px;
+            min-width: 150px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
             z-index: 100;
             border: 1px solid #333;
             border-radius: 4px;
+            margin-top: 10px;
         }
 
         .dropdown-menu.show {
@@ -335,6 +333,7 @@
             display: block;
             font-size: 13px;
             transition: 0.2s;
+            text-align: left;
         }
 
         .dropdown-menu a:hover {
@@ -408,15 +407,6 @@
             transition: background-color 0.3s;
         }
 
-        .modal-btn:hover {
-            background-color: #cc0000;
-        }
-
-        /* 隱藏元素 */
-        .hidden {
-            display: none;
-        }
-
         /* --- 多選下拉選單樣式 --- */
         .multi-select-wrapper {
             position: relative;
@@ -470,10 +460,6 @@
             font-weight: bold;
             font-size: 16px;
             line-height: 1;
-        }
-
-        .multi-select-tag-remove:hover {
-            color: #ffcccc;
         }
 
         .multi-select-arrow {
@@ -551,30 +537,14 @@
             display: block;
         }
 
-        /* 滾動條樣式 */
-        .multi-select-dropdown::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .multi-select-dropdown::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-
-        .multi-select-dropdown::-webkit-scrollbar-thumb {
-            background: #555;
-            border-radius: 4px;
-        }
-
-        .multi-select-dropdown::-webkit-scrollbar-thumb:hover {
-            background: #777;
-        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="top-bar">
-        <div>卡爾夏汽車百貨 - 專業誠信服務</div>
+        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
         <div class="top-icons">
             <div class="search-box">
                 <input type="text" id="search-input" placeholder="Search..."
@@ -596,6 +566,15 @@
         <nav class="nav-links">
             <a href="#">商城</a> <a href="#">安裝區</a>
             <a href="#">論壇</a> <a href="#">公告</a><a href="#">常見問題</a>
+
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="#">我的優惠券</a>
+                    <a href="#">我的收藏</a>
+                    <a href="#">訂單查詢</a>
+                </div>
+            </div>
         </nav>
     </div>
 </header>
@@ -719,15 +698,34 @@
 </footer>
 
 <script>
-    // 用戶下拉選單
-    document.getElementById('user-icon').addEventListener('click', function(e) {
-        e.stopPropagation();
-        document.getElementById('user-dropdown').classList.toggle('show');
-    });
+    // 💡 修改後的下拉選單邏輯
+    window.onload = function() {
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+        const memberTrigger = document.getElementById('member-center-trigger');
+        const memberDropdown = document.getElementById('member-dropdown');
 
-    document.addEventListener('click', function() {
-        document.getElementById('user-dropdown').classList.remove('show');
-    });
+        if (userIcon) {
+            userIcon.onclick = function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+                memberDropdown.classList.remove('show');
+            };
+        }
+
+        if (memberTrigger) {
+            memberTrigger.onclick = function(e) {
+                e.stopPropagation();
+                memberDropdown.classList.toggle('show');
+                userDropdown.classList.remove('show');
+            };
+        }
+
+        document.onclick = function() {
+            if(userDropdown) userDropdown.classList.remove('show');
+            if(memberDropdown) memberDropdown.classList.remove('show');
+        };
+    };
 
     // 檢舉原因資料
     const reasonData = {
@@ -737,27 +735,20 @@
         "文章": ["廣告洗版 / 商業廣告", "惡意攻擊 / 謾罵", "不實資訊 / 惡意誤導", "內容與標題不符", "侵害隱私 / 版權", "違禁品討論"]
     };
 
-    // 多選選單狀態
     let selectedReasons = [];
-
-    // 多選選單元素
     const multiSelectDisplay = document.getElementById('multiSelectDisplay');
     const multiSelectDropdown = document.getElementById('multiSelectDropdown');
     const multiSelectArrow = document.getElementById('multiSelectArrow');
     const selectedTags = document.getElementById('selectedTags');
     const hiddenInput = document.getElementById('reportsReason');
 
-    // 切換下拉選單
     multiSelectDisplay.addEventListener('click', function(e) {
-        if (e.target.classList.contains('multi-select-tag-remove')) {
-            return;
-        }
+        if (e.target.classList.contains('multi-select-tag-remove')) return;
         multiSelectDropdown.classList.toggle('show');
         multiSelectArrow.classList.toggle('open');
         multiSelectDisplay.classList.toggle('active');
     });
 
-    // 點擊外部關閉下拉選單
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.multi-select-wrapper')) {
             multiSelectDropdown.classList.remove('show');
@@ -766,11 +757,9 @@
         }
     });
 
-    // 更新選中的標籤顯示
     function updateSelectedTags() {
         selectedTags.innerHTML = '';
         const placeholder = multiSelectDisplay.querySelector('.multi-select-placeholder');
-
         if (selectedReasons.length === 0) {
             placeholder.style.display = 'block';
         } else {
@@ -778,19 +767,13 @@
             selectedReasons.forEach(reason => {
                 const tag = document.createElement('div');
                 tag.className = 'multi-select-tag';
-                tag.innerHTML = `
-                    ${reason}
-                    <span class="multi-select-tag-remove" data-reason="${reason}">×</span>
-                `;
+                tag.innerHTML = `${reason}<span class="multi-select-tag-remove" data-reason="${reason}">×</span>`;
                 selectedTags.appendChild(tag);
             });
         }
-
-        // 更新隱藏輸入框的值
         hiddenInput.value = selectedReasons.join(',');
     }
 
-    // 移除標籤事件委託
     selectedTags.addEventListener('click', function(e) {
         if (e.target.classList.contains('multi-select-tag-remove')) {
             const reason = e.target.getAttribute('data-reason');
@@ -800,56 +783,35 @@
         }
     });
 
-    // 更新下拉選單選項
     function updateDropdownOptions() {
         const options = multiSelectDropdown.querySelectorAll('.multi-select-option');
         options.forEach(option => {
             const value = option.getAttribute('data-value');
-            if (selectedReasons.includes(value)) {
-                option.classList.add('selected');
-            } else {
-                option.classList.remove('selected');
-            }
+            option.classList.toggle('selected', selectedReasons.includes(value));
         });
     }
 
-    // 選項點擊事件
     function handleOptionClick(e) {
-        const option = e.currentTarget;
-        const value = option.getAttribute('data-value');
-
+        const value = e.currentTarget.getAttribute('data-value');
         if (selectedReasons.includes(value)) {
             selectedReasons = selectedReasons.filter(r => r !== value);
         } else {
             selectedReasons.push(value);
         }
-
         updateSelectedTags();
         updateDropdownOptions();
     }
 
-    // 檢舉類別選擇器
     const reportsTypeSelect = document.getElementById('reportsType');
-
-    // 檢舉類別變更時更新檢舉原因
     reportsTypeSelect.addEventListener('change', function() {
         const type = this.value;
-        const reasonField = document.getElementById('reasonSelectField');
-        const otherField = document.getElementById('otherReasonField');
-
-        // 更新 select 的 class 以改變顏色
-        if (type) {
-            this.classList.add('has-value');
-        } else {
-            this.classList.remove('has-value');
-        }
-
-        // 重置選中的原因
+        this.classList.toggle('has-value', type !== "");
         selectedReasons = [];
         updateSelectedTags();
-
-        // 清空下拉選單
         multiSelectDropdown.innerHTML = '';
+
+        const reasonField = document.getElementById('reasonSelectField');
+        const otherField = document.getElementById('otherReasonField');
 
         if (type === "其他") {
             reasonField.classList.add('hidden');
@@ -857,115 +819,48 @@
         } else if (type && reasonData[type]) {
             reasonField.classList.remove('hidden');
             otherField.classList.add('hidden');
-
-            // 更新顯示文字
             const placeholder = multiSelectDisplay.querySelector('.multi-select-placeholder');
             placeholder.textContent = '-- 請選擇檢舉原因 --';
-            placeholder.style.display = 'block';
-
-            // 創建選項
             reasonData[type].forEach(reason => {
                 const option = document.createElement('div');
                 option.className = 'multi-select-option';
                 option.setAttribute('data-value', reason);
-                option.innerHTML = `
-                    <div class="multi-select-checkbox"></div>
-                    <span>${reason}</span>
-                `;
+                option.innerHTML = `<div class="multi-select-checkbox"></div><span>${reason}</span>`;
                 option.addEventListener('click', handleOptionClick);
                 multiSelectDropdown.appendChild(option);
             });
         } else {
             reasonField.classList.remove('hidden');
             otherField.classList.add('hidden');
-            const placeholder = multiSelectDisplay.querySelector('.multi-select-placeholder');
-            placeholder.textContent = '-- 請先選擇類別 --';
-            placeholder.style.display = 'block';
+            multiSelectDisplay.querySelector('.multi-select-placeholder').textContent = '-- 請先選擇類別 --';
         }
     });
 
-    // 表單驗證
     document.getElementById('submitBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-
         const target = document.getElementById('reportsTarget').value.trim();
         const type = document.getElementById('reportsType').value;
         const otherReason = document.getElementById('otherReasonInput').value.trim();
         const email = document.getElementById('email').value.trim();
         const description = document.getElementById('reportsDescription').value.trim();
-
-        // Email 驗證正則表達式
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        // 1. 檢查檢舉對象
-        if (!target) {
-            showModal('請輸入檢舉對象!');
-            return;
-        }
+        if (!target) { showModal('請輸入檢舉對象!'); return; }
+        if (!type) { showModal('請選擇檢舉類別!'); return; }
+        if (type !== "其他" && selectedReasons.length === 0) { showModal('請至少選擇一個檢舉原因!'); return; }
+        if (type === "其他" && !otherReason) { showModal('請填寫自定義檢舉原因!'); return; }
+        if (!email) { showModal('請輸入聯絡信箱!'); return; }
+        if (!emailRegex.test(email)) { showModal('請輸入正確的 Email 格式!'); return; }
+        if (!description) { showModal('請填寫問題詳細描述!'); return; }
 
-        // 2. 檢查檢舉類別
-        if (!type) {
-            showModal('請選擇檢舉類別!');
-            return;
-        }
-
-        // 3. 檢查檢舉原因
-        if (type !== "其他" && selectedReasons.length === 0) {
-            showModal('請至少選擇一個檢舉原因!');
-            return;
-        }
-
-        // 4. 檢查自定義原因(如果選擇"其他")
-        if (type === "其他" && !otherReason) {
-            showModal('請填寫自定義檢舉原因!');
-            return;
-        }
-
-        // 5. 檢查 Email
-        if (!email) {
-            showModal('請輸入聯絡信箱!');
-            return;
-        }
-
-        // 6. 驗證 Email 格式
-        if (!emailRegex.test(email)) {
-            showModal('請輸入正確的 Email 格式!');
-            return;
-        }
-
-        // 7. 檢查問題描述
-        if (!description) {
-            showModal('請填寫問題詳細描述!');
-            return;
-        }
-
-        // 如果選擇"其他",將自定義原因填入隱藏欄位
-        if (type === "其他") {
-            hiddenInput.value = otherReason;
-        }
-
-        // 所有驗證通過,提交表單
+        if (type === "其他") hiddenInput.value = otherReason;
         document.getElementById('reportForm').submit();
     });
 
-    // 顯示彈窗
     function showModal(message) {
         document.getElementById('modalMessage').textContent = message;
         document.getElementById('modalOverlay').classList.add('show');
     }
-
-    // 關閉彈窗
-    function closeModal() {
-        document.getElementById('modalOverlay').classList.remove('show');
-    }
-
-    // 點擊彈窗外部關閉
-    document.getElementById('modalOverlay').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModal();
-        }
-    });
+    function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 </script>
-
 </body>
 </html>
