@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/back-end/admin_index.css}">
     <link rel="stylesheet" th:href="@{/css/memberInfoStyle.css}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <div class="app-container">
@@ -47,7 +48,7 @@
                         <i class="fas fa-chevron-down arrow"></i>
                     </a>
                     <ul class="submenu">
-                        <li><a th:href="@{/member/manage}" class="active">會員帳號管理</a></li>
+                        <li><a th:href="@{/memberInfo/manage}" class="active">會員帳號管理</a></li>
                         <li><a href="#">管理員帳號管理</a></li>
                     </ul>
                 </li>
@@ -129,6 +130,15 @@
                             </div>
 
                             <div class="row" style="flex: 1; min-width: 150px;">
+                                <label>賣家權限:</label>
+                                <select id="queryIsSeller" name="isSeller">
+                                    <option value="-1">全部</option>
+                                    <option value="1">是 (已認證)</option>
+                                    <option value="0">否 (一般)</option>
+                                </select>
+                            </div>
+
+                            <div class="row" style="flex: 1; min-width: 150px;">
                                 <label>技師權限:</label>
                                 <select id="queryIsEngineer" name="isEngineer">
                                     <option value="-1">全部</option>
@@ -137,14 +147,6 @@
                                 </select>
                             </div>
 
-                            <div class="row" style="flex: 1; min-width: 150px;">
-                                <label>賣家權限:</label>
-                                <select id="queryIsSeller" name="isSeller">
-                                    <option value="-1">全部</option>
-                                    <option value="1">是 (已認證)</option>
-                                    <option value="0">否 (一般)</option>
-                                </select>
-                            </div>
                         </div>
 
                         <div class="btn-row" style="margin-top: 15px; text-align: right;">
@@ -190,7 +192,7 @@
                             <span th:text="${m.engineerStatus == 1 ? '✅' : '❌'}"></span>
                         </td>
                         <td>
-                            <a th:href="@{/member/edit/{id}(id=${m.memberNo})}" class="btn-edit">
+                            <a th:href="@{/memberInfo/edit/{id}(id=${m.memberNo})}" class="btn-edit">
                                 <i class="fas fa-edit"></i> 修改
                             </a>
                         </td>
@@ -201,15 +203,12 @@
 
             <!-- 編輯區域 - 編輯模式下顯示 -->
             <section id="member-edit" class="page-section" th:if="${showEdit}">
-                <h3><i class="fas fa-edit"></i> 修改會員完整資訊</h3>
+                <h3><i class="fas fa-edit"></i> 編輯會員資訊</h3>
                 <div class="form-container">
-                    <form th:action="@{/member/update}" th:object="${member}" method="post" enctype="multipart/form-data">
-
-                        <input type="hidden" th:field="*{memberNo}">
+                    <form th:action="@{/memberInfo/update}" th:object="${memberInfo}" method="post" enctype="multipart/form-data">
 
                         <div class="row-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
 
-                            <!-- 左側欄位 -->
                             <div class="column">
                                 <div class="row">
                                     <label>會員編號 (不可修改):</label>
@@ -243,12 +242,11 @@
                                 </div>
                             </div>
 
-                            <!-- 右側欄位 -->
                             <div class="column">
                                 <div class="row">
                                     <label>會員頭像:</label>
                                     <div class="avatar-edit-box">
-                                        <img th:src="@{/member/image/{no}(no=*{memberNo})}" id="editImagePreview" class="avatar-preview"
+                                        <img th:src="@{/memberInfo/image/{no}(no=*{memberNo})}" id="editImagePreview" class="avatar-preview"
                                              style="width:100px; height:100px; object-fit: cover; border-radius: 50%; border: 1px solid #ddd; margin-bottom: 10px;">
                                         <input type="file" name="imageFile" accept="image/*" onchange="previewImage(this)">
                                     </div>
@@ -256,7 +254,7 @@
 
                                 <div class="row">
                                     <label>註冊時間:</label>
-                                    <span th:text="${#dates.format(member.registrationTime, 'yyyy-MM-dd HH:mm:ss')}"
+                                    <span th:text="${#dates.format(memberInfo.registrationTime, 'yyyy-MM-dd HH:mm:ss')}"
                                           style="padding: 10px; display: block; background: #f9f9f9;"></span>
                                 </div>
 
@@ -286,13 +284,11 @@
                             </div>
                         </div>
 
-                        <!-- 地址欄 - 全寬 -->
                         <div class="row" style="margin-top: 20px;">
                             <label>住家地址:</label>
                             <input type="text" th:field="*{address}" style="width: 100%;">
                         </div>
 
-                        <!-- 評價信息 -->
                         <div class="row-group" style="display: flex; gap: 30px; margin-top: 20px; padding: 15px; background: #f4f7f6; border-radius: 8px;">
                             <div>
                                 <label>評價總人數:</label>
@@ -308,10 +304,9 @@
                             </div>
                         </div>
 
-                        <!-- 按鈕 -->
                         <div class="btn-row" style="margin-top: 30px; text-align: center;">
                             <button type="submit" class="btn-submit">確認儲存變更</button>
-                            <a th:href="@{/member/manage}" class="btn btn-cancel">返回列表</a>
+                            <a th:href="@{/memberInfo/manage}" class="btn btn-cancel">返回列表</a>
                         </div>
                     </form>
                 </div>
@@ -321,7 +316,36 @@
     </main>
 </div>
 
-<script>
+<script th:inline="javascript">
+    // 使用 DOMContentLoaded 確保 DOM 載入後執行
+    document.addEventListener('DOMContentLoaded', function() {
+        const successMsg = [[${successMessage}]];
+        const errorMsg = [[${errorMessage}]];
+
+        console.log("Success Message:", successMsg);
+        console.log("Error Message:", errorMsg);
+
+        if (successMsg) {
+            Swal.fire({
+                icon: 'success',
+                title: '更新成功！',
+                text: successMsg,
+                timer: 2000,
+                showConfirmButton: false,
+                timerProgressBar: true
+            });
+        }
+
+        if (errorMsg) {
+            Swal.fire({
+                icon: 'error',
+                title: '操作失敗',
+                text: errorMsg
+            });
+        }
+    });
+
+
     // 側邊欄子選單切換
     document.querySelectorAll('.submenu-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
@@ -348,11 +372,9 @@
         const isEngineer = document.getElementById('queryIsEngineer').value;
         const isSeller = document.getElementById('queryIsSeller').value;
 
-        const url = `/member/api/search?memberNo=${memberNo}` +
+        const url = `/memberInfo/api/search?memberNo=${memberNo}` +
             `&keyword=${encodeURIComponent(keyword)}` +
-            `&status=${status}` +
-            `&isEngineer=${isEngineer}` +
-            `&isSeller=${isSeller}`;
+            `&status=${status}&isEngineer=${isEngineer}&isSeller=${isSeller}`;
 
         try {
             const resp = await fetch(url);
@@ -381,7 +403,7 @@
                     <td>${sellerIcon}</td>
                     <td>${engineerIcon}</td>
                     <td>
-                        <a href="/member/edit/${m.memberNo}" class="btn-edit">
+                        <a href="/memberInfo/edit/${m.memberNo}" class="btn-edit">
                             <i class="fas fa-edit"></i> 修改
                         </a>
                     </td>
