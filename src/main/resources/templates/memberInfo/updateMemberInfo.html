@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>修改會員資料 | 卡爾夏管理系統</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
         :root { --primary-dark: #2c3e50; --accent-blue: #3498db; --bg-gray: #f8f9fa; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background-color: var(--bg-gray); margin: 0; padding: 40px; }
@@ -18,7 +19,7 @@
         /* 表單元素 */
         .form-group { margin-bottom: 20px; }
         label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; }
-        input[type="text"], input[type="email"], select {
+        input[type="text"], input[type="email"], input[type="password"], select {
             width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; transition: 0.3s;
         }
         input:focus { border-color: var(--accent-blue); outline: none; box-shadow: 0 0 5px rgba(52,152,219,0.3); }
@@ -47,8 +48,12 @@
         <h2 style="margin:0;">編輯會員資料</h2>
     </div>
 
-    <form th:action="@{/member/update}" th:object="${member}" method="post" enctype="multipart/form-data" class="card-body">
+    <form th:action="@{/memberInfo/update}" th:object="${member}" method="post" enctype="multipart/form-data" class="card-body">
         <input type="hidden" th:field="*{memberNo}" />
+
+        <input type="hidden" th:field="*{ratingAmount}" />
+        <input type="hidden" th:field="*{ratingStar}" />
+        <input type="hidden" th:field="*{registrationTime}" />
 
         <div class="form-grid">
             <div class="form-group">
@@ -57,27 +62,44 @@
             </div>
 
             <div class="form-group">
-                <label>會員姓名</label>
-                <input type="text" th:field="*{memberName}" required placeholder="請輸入姓名" />
+                <label>會員暱稱</label>
+                <input type="text" th:field="*{memberUsername}" class="form-control"  />
+                <div class="error-msg" th:if="${#fields.hasErrors('memberUsername')}" th:errors="*{memberUsername}" style="color: red; font-size: 0.8em;"></div>
             </div>
 
             <div class="form-group">
-                <label>電子信箱</label>
-                <input type="email" th:field="*{memberEmail}" required />
+                <label>會員姓名</label>
+                <input type="text" th:field="*{memberName}" class="form-control">
+                <div class="error-msg" th:if="${#fields.hasErrors('memberName')}" th:errors="*{memberName}" style="color: red; font-size: 0.8em;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>修改密碼 (若不修改請留空)：</label>
+                <input type="password" name="memberPassword" placeholder="4-10位英數字" autocomplete="new-password">
+                <div class="error-msg" th:if="${#fields.hasErrors('memberPassword')}"
+                     th:errors="*{memberPassword}" style="color: red; font-size: 0.8em;"></div>
+            </div>
+
+            <div class="form-group">
+                <label>電子郵件</label>
+                <input type="email" th:field="*{memberEmail}">
+                <div class="error-msg" th:if="${#fields.hasErrors('memberEmail')}" th:errors="*{memberEmail}" style="color: red; font-size: 0.8em;"></div>
             </div>
 
             <div class="form-group">
                 <label>電話號碼</label>
-                <input type="text" th:field="*{memberPhone}" maxlength="10" />
+                <input type="text" th:field="*{memberPhone}" placeholder="0912345678">
+                <div class="error-msg" th:if="${#fields.hasErrors('memberPhone')}" th:errors="*{memberPhone}" style="color: red; font-size: 0.8em;"></div>
             </div>
 
             <div class="form-group full-width">
                 <div class="avatar-section">
-                    <img id="preview" class="avatar-preview"
-                         th:src="*{memberImage != null and memberImage != ''} ? @{'/member/image/' + *{memberNo}} : 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22%3E%3Crect fill=%22%23ddd%22 width=%22150%22 height=%22150%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2240%22 fill=%22%23999%22 text-anchor=%22middle%22 dy=%22.3em%22%3E%3C/text%3E%3C/svg%3E'"
+                    <img id="editImagePreview" class="avatar-preview"
+                         th:src="*{memberImage != null} ? @{'/memberInfo/image/' + *{memberNo}} : 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22%3E%3Crect fill=%22%23ddd%22 width=%22150%22 height=%22150%22/%3E%3C/svg%3E'"
                          alt="Member Avatar"
                          onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22150%22 height=%22150%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2230%22 fill=%22%23999%22 text-anchor=%22middle%22 dy=%22.3em%22%3E無圖片%3C/text%3E%3C/svg%3E'" />
-                    <label for="imageUpload" class="btn" style="background:#f1f1f1; color:#333; font-size:14px;">
+
+                    <label for="imageUpload" class="btn" style="background:#f1f1f1; color:#333; font-size:14px; cursor:pointer;">
                         <i class="fas fa-camera"></i> 更換會員頭像
                     </label>
                     <input type="file" id="imageUpload" name="imageFile" style="display: none;" accept="image/*" onchange="previewImage(this)">
@@ -86,7 +108,8 @@
 
             <div class="form-group full-width">
                 <label>聯絡地址</label>
-                <input type="text" th:field="*{address}" />
+                <input type="text" th:field="*{address}" style="width: 100%;">
+                <div class="error-msg" th:if="${#fields.hasErrors('address')}" th:errors="*{address}" style="color: red; font-size: 0.8em;"></div>
             </div>
 
             <div class="form-group">
@@ -125,10 +148,11 @@
                     (共 <span th:text="${member.ratingAmount}">0</span> 次評價)
                 </div>
             </div>
+
         </div>
 
         <div class="btn-group">
-            <a th:href="@{/member/list}" class="btn btn-cancel">取消返回</a>
+            <a th:href="@{/memberInfo/manage}" class="btn btn-cancel">取消返回</a>
             <button type="submit" class="btn btn-save">
                 <i class="fas fa-save"></i> 儲存所有修改
             </button>
@@ -157,6 +181,7 @@
         }
     }
 </script>
+
 
 </body>
 </html>

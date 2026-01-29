@@ -41,13 +41,15 @@
                     </ul>
                 </li>
 
+
+
                 <li class="menu-item has-submenu">
                     <a class="submenu-toggle">
                         <span><i class="fas fa-users-cog"></i> 帳號管理</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </a>
                     <ul class="submenu">
-                        <li><a href="#">會員帳號管理</a></li>
+                        <li><a href="http://localhost:8080/memberInfo/manage">會員帳號管理</a></li>
                         <li><a href="#">管理員帳號管理</a></li>
                     </ul>
                 </li>
@@ -65,12 +67,12 @@
 
                 <li class="menu-item has-submenu open">
                     <a class="submenu-toggle">
-                        <span><i class="fas fa-ticket-alt"></i> 優惠券管理</span>
+                        <span><i class="fas fa-ticket-alt"></i>優惠券管理</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </a>
                     <ul class="submenu">
-                        <li><a href="#coupon-list" class="active">優惠券列表</a></li>
-                        <li><a href="#coupon-query">複合查詢</a></li>
+                        <li><a th:href="@{/coupon/admin}" id="all-coupons-link">優惠券列表</a></li>
+                        <li><a href="#coupon-query">查詢優惠券</a></li>
                         <li><a href="#coupon-add">新增優惠券</a></li>
                     </ul>
                 </li>
@@ -108,7 +110,7 @@
                 <h1><i class="fas fa-list"></i> 優惠券列表</h1>
 
                 <div class="page-actions">
-                    <a href="#coupon-query" class="btn btn-query">🔍 複合查詢優惠券</a>
+                    <a href="#coupon-query" class="btn btn-query">🔍 查詢優惠券</a>
                     <a href="#coupon-add" class="btn btn-add">➕ 新增優惠券</a>
                 </div>
 
@@ -149,7 +151,7 @@
 
             <!-- 複合查詢 -->
             <section id="coupon-query" class="page-section" style="display:none;">
-                <h1><i class="fas fa-search"></i> 複合查詢優惠券</h1>
+                <h1><i class="fas fa-search"></i>查詢優惠券</h1>
 
                 <div class="search-box">
                     <h2>查詢條件</h2>
@@ -179,8 +181,9 @@
                 </div>
 
                 <div class="back-link">
-                    <a href="#coupon-list">回優惠券列表</a>
+                    <a th:href="@{/coupon/admin}" class="nav-link">回優惠券列表</a>
                 </div>
+
             </section>
 
             <!-- 新增優惠券 -->
@@ -196,21 +199,6 @@
                             <label>管理員編號</label>
                             <input type="number" th:field="*{admNo}" placeholder="請輸入管理員編號">
 
-
-                            <!--            <select th:field="*{admNo}">-->
-                            <!--                <option value="">&#45;&#45; 請選擇管理員 &#45;&#45;</option>-->
-                            <!--                <option th:each="no : ${adminNoList}"-->
-                            <!--                        th:value="${no}"-->
-                            <!--                        th:text="'管理員編號: ' + ${no}">-->
-                            <!--                </option>-->
-                            <!--            </select>-->
-                            <!--            <select th:field="*{admNo}">-->
-                            <!--                <option value="">&#45;&#45; 請選擇管理員 &#45;&#45;</option>-->
-                            <!--                <option th:each="admin : ${adminList}"-->
-                            <!--                        th:value="${admin.admNo}"-->
-                            <!--                        th:text="${admin.admName} + ' (' + ${admin.admNo} + ')'">-->
-                            <!--                </option>-->
-                            <!--            </select>-->
                             <span th:if="${#fields.hasErrors('admNo')}" th:errors="*{admNo}" class="error"></span>
                         </div>
                         <div class="row">
@@ -246,111 +234,128 @@
                         <div class="btn-row">
                             <button type="submit" class="btn-submit">確認新增</button>
                             <button type="reset" class="btn-reset">重設</button>
-                            <a th:href="@{/coupon/list-page}" class="btn btn-cancel">取消</a>
+                            <a href="#coupon-list" class="btn btn-cancel">取消</a>
                         </div>
                     </form>
                 </div>
             </section>
 
             <!-- 修改優惠券 -->
-            <section id="coupon-edit" class="page-section" style="display:none;">
-                <h1><i class="fas fa-edit"></i> 修改優惠券資訊</h1>
+<!--            <section id="coupon-edit" class="page-section" style="display:none;">-->
+<!--                <h1><i class="fas fa-edit"></i> 修改優惠券資訊</h1>-->
 
-                <div class="form-container">
-                    <form>
-                        <div class="row">
-                            <label>優惠券編號:</label>
-                            <input type="text" value="COUP001" readonly>
-                        </div>
+<!--                <div class="form-container">-->
+<!--                    <form>-->
+<!--                        <div class="row">-->
+<!--                            <label>優惠券編號:</label>-->
+<!--                            <input type="text" value="COUP001" readonly>-->
+<!--                        </div>-->
 
-                        <div class="row">
-                            <label>管理員編號:</label>
-                            <input type="text" value="ADM001" readonly style="background-color: #f5f5f5;">
-                        </div>
+<!--                        <div class="row">-->
+<!--                            <label>管理員編號:</label>-->
+<!--                            <input type="text" value="ADM001" readonly style="background-color: #f5f5f5;">-->
+<!--                        </div>-->
 
-                        <div class="row">
-                            <label>標題 <span style="color: red;">*</span></label>
-                            <input type="text" name="couponTitle" value="新春大放送" required>
-                        </div>
+<!--                        <div class="row">-->
+<!--                            <label>標題 <span style="color: red;">*</span></label>-->
+<!--                            <input type="text" name="couponTitle" value="新春大放送" required>-->
+<!--                        </div>-->
 
-                        <div class="row">
-                            <label>內容 <span style="color: red;">*</span></label>
-                            <textarea name="couponContent" rows="4" required>新年優惠，滿額折扣</textarea>
-                        </div>
+<!--                        <div class="row">-->
+<!--                            <label>內容 <span style="color: red;">*</span></label>-->
+<!--                            <textarea name="couponContent" rows="4" required>新年優惠，滿額折扣</textarea>-->
+<!--                        </div>-->
 
-                        <div class="row">
-                            <label>折價金額 <span style="color: red;">*</span></label>
-                            <input type="number" name="discountValue" value="500" required>
-                        </div>
+<!--                        <div class="row">-->
+<!--                            <label>折價金額 <span style="color: red;">*</span></label>-->
+<!--                            <input type="number" name="discountValue" value="500" required>-->
+<!--                        </div>-->
 
-                        <div class="row">
-                            <label>開始時間 <span style="color: red;">*</span></label>
-                            <input type="datetime-local" name="couponStart" value="2025-01-01T00:00" required>
-                        </div>
+<!--                        <div class="row">-->
+<!--                            <label>開始時間 <span style="color: red;">*</span></label>-->
+<!--                            <input type="datetime-local" name="couponStart" value="2025-01-01T00:00" required>-->
+<!--                        </div>-->
 
-                        <div class="row">
-                            <label>結束時間 <span style="color: red;">*</span></label>
-                            <input type="datetime-local" name="couponEnd" value="2025-02-28T23:59" required>
-                        </div>
+<!--                        <div class="row">-->
+<!--                            <label>結束時間 <span style="color: red;">*</span></label>-->
+<!--                            <input type="datetime-local" name="couponEnd" value="2025-02-28T23:59" required>-->
+<!--                        </div>-->
 
-                        <div class="btn-row">
-                            <button type="submit" class="btn btn-submit">確認儲存</button>
-                            <a href="#coupon-list" class="btn btn-cancel">取消返回</a>
-                        </div>
-                    </form>
-                </div>
-            </section>
+<!--                        <div class="btn-row">-->
+<!--                            <button type="submit" class="btn btn-submit">確認儲存</button>-->
+<!--                            <a href="#coupon-list" class="btn btn-cancel">取消返回</a>-->
+<!--                        </div>-->
+<!--                    </form>-->
+<!--                </div>-->
+<!--            </section>-->
 
         </div>
     </main>
 </div>
 
-<script>
-    // 側邊欄子選單切換
+<script th:inline="javascript">
+    // 側邊欄子選單切換邏輯
     document.querySelectorAll('.submenu-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             const parent = this.parentElement;
+
+            // 切換 open 類別
             parent.classList.toggle('open');
+
+            // (選用) 如果希望點開一個時關閉其他，可以加入以下這段：
+
+            document.querySelectorAll('.menu-item.has-submenu').forEach(item => {
+                if (item !== parent) item.classList.remove('open');
+            });
+
         });
     });
+    // 頁面載入時的邏輯
+    window.onload = function() {
+        // 取得 Thymeleaf 傳來的訊號，若無則預設為 false
+        const showAddSection = [[${showAddSection ?: false}]];
 
-    // 頁面切換
-    document.querySelectorAll('.submenu a, .page-actions a').forEach(link => {
+        if (showAddSection) {
+            // 如果後端說要顯示新增區塊
+            switchToSection('#coupon-add');
+            // 同時把網址 Hash 改掉，避免使用者重新整理又跑回列表
+            window.location.hash = '#coupon-add';
+        } else {
+            // 一般情況：讀取 URL hash 或預設顯示列表
+            const hash = window.location.hash || '#coupon-list';
+            switchToSection(hash);
+        }
+    };
+
+    // 頁面切換函數 (保持你原本的邏輯)
+    function switchToSection(targetId) {
+        document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
+        const target = document.querySelector(targetId);
+        if (target) {
+            target.style.display = 'block';
+        }
+
+        // 更新側邊欄 active 狀態
+        document.querySelectorAll('.submenu a').forEach(a => a.classList.remove('active'));
+        // 這裡建議用包含選擇器，因為 href 可能是 #coupon-list
+        const activeLink = document.querySelector(`.submenu a[href*="${targetId}"]`);
+        if (activeLink) activeLink.classList.add('active');
+    }
+
+    // 點擊事件監聽 (確保取消按鈕也被處理)
+    document.querySelectorAll('.submenu a, .page-actions a, .btn-cancel, .back-link a').forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
-            if (href.startsWith('#')) {
+            if (href && href.startsWith('#')) {
                 e.preventDefault();
-
-                // 隱藏所有頁面
-                document.querySelectorAll('.page-section').forEach(section => {
-                    section.style.display = 'none';
-                });
-
-                // 移除所有active狀態
-                document.querySelectorAll('.submenu a').forEach(a => {
-                    a.classList.remove('active');
-                });
-
-                // 顯示選中的頁面
-                const target = document.querySelector(href);
-                if (target) {
-                    target.style.display = 'block';
-                    this.classList.add('active');
-                }
+                switchToSection(href);
+                window.location.hash = href;
             }
         });
     });
 
-    // 表單提交確認
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', function(e) {
-            if (this.querySelector('button[type="submit"]').textContent.includes('刪除')) {
-                return true;
-            }
-            // 可在此添加表單驗證邏輯
-        });
-    });
 </script>
 </body>
 </html>
