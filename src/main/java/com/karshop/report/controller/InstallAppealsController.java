@@ -1,22 +1,19 @@
 package com.karshop.report.controller;
 
 import com.karshop.report.model.InstallAppeals; //引用model裡的InstallAppeals
+import com.karshop.report.model.InstallAppealImage; //引用圖片model
 import com.karshop.report.service.InstallAppealsService; //引用service裡的InstallAppealsService
-import org.springframework.beans.factory.annotation.Autowired; //引入自動注入工具。它可以自動幫我把寫好的 Service 實體「裝」進這個 Controller 裡。
-import org.springframework.stereotype.Controller; //標記這是一個「控制器」。主要負責接收網址請求，並導向（跳轉）到 templates 裡的 HTML 網頁。
-import org.springframework.web.bind.annotation.*; //引入網頁標籤工具（例如 @GetMapping, @PostMapping, @RequestParam 等）。
-// 用來定義這段程式是要處理「瀏覽器輸入網址」還是「按下表單送出」。
-import org.springframework.ui.Model; //引入模型對象。它像是一個「傳送袋」，讓你把 Java 抓到的資料（如申訴編號）塞進去，傳給 HTML 顯示。
-import java.util.List; //引入 Java 標準的清單工具。當你要從資料庫抓「一整群」申訴單時，會用 List 來裝。
+import org.springframework.beans.factory.annotation.Autowired; //引入自動注入工具
+import org.springframework.stereotype.Controller; //標記這是一個「控制器」
+import org.springframework.web.bind.annotation.*; //引入網頁標籤工具
+import org.springframework.web.multipart.MultipartFile; // 💡 接收上傳檔案必備
+import org.springframework.ui.Model; //引入模型對象
+import java.util.List; //引入 Java 標準的清單工具
 import java.time.LocalDateTime;
-import org.springframework.ui.Model;
+import java.io.IOException;
 
 @Controller //控制器,主要任務是「接聽請求」並「回傳網頁」。
-//當你 return "add-appeal" 時，它會去 templates 找 add-appeal.html 顯示出來。
-//如果要回傳 HTML 頁面，建議使用 @Controller 而非 @RestController
 @RequestMapping("/appeals") //定義這個控制器的「大門口網址」。
-//作用：這就像是給這組功能設定一個「分類目錄」。
-//所有跟申訴功能有關的網址，開頭都必須是 /appeals。
 public class InstallAppealsController {
 
     @Autowired //自動注入
@@ -30,7 +27,6 @@ public class InstallAppealsController {
     }
 
     // 2. 顯示新增申訴的 HTML 頁面
-    // 網址：http://localhost:8080/appeals/add
     @GetMapping("/add")
     public String showAddPage() {
         return "templates-report/add-appeal"; // 這會去 templates 資料夾找 add-appeal.html
@@ -40,6 +36,7 @@ public class InstallAppealsController {
     @PostMapping("/submit")
     public String handleForm(@ModelAttribute InstallAppeals appeal,
                              @RequestParam(value = "type", required = false) String[] types,
+                             @RequestParam(value = "images", required = false) MultipartFile[] images, // 💡 新增：接收多張圖片
                              Model model) {
 
         // 補上處理多選類別邏輯
@@ -59,35 +56,45 @@ public class InstallAppealsController {
         appeal.setTargetMemberNo(999);
         appeal.setAdmNo(1);
 
-        // 呼叫 Service 存入資料庫
+        // 呼叫 Service 存入資料庫主表
+        // 💡 存完後 appeal.getAppealsNo() 會自動拿到資料庫生成的 ID
         installAppealsService.submitInstallAppeal(appeal);
+
+        // 💡 處理多張圖片存檔：跑迴圈將每一張圖片存進 install_appeal_images 表
+        if (images != null && images.length > 0) {
+            for (MultipartFile file : images) {
+                if (!file.isEmpty()) {
+                    try {
+                        // 呼叫 Service 存入圖片表，並帶入主表的 ID (appealsNo)
+                        installAppealsService.saveAppealImage(appeal.getAppealsNo(), file.getBytes());
+                    } catch (IOException e) {
+                        System.err.println("圖片讀取失敗: " + e.getMessage());
+                    }
+                }
+            }
+        }
 
         // 關鍵修改：把訂單編號傳給下一頁 (成功頁面)
         model.addAttribute("orderNo", appeal.getInstallOrderNo());
 
         // 這裡不要用 redirect，直接 return "appeal-success"
-        // 這樣瀏覽器才會顯示 templates/appeal-success.html
         return "templates-report/appeal-success";
     }
 
-    //後台管理
-    //顯示「安裝申訴」管理列表頁面
-    //網址：http://localhost:8080/appeals/admin/list
+    // 後台管理：顯示「安裝申訴」管理列表頁面
     @GetMapping("/admin/list")
     public String showInstallAdminPage() {
         return "templates-report/admin-install-list";
     }
 
-    //提供 JSON 資料給後台表格 (供 fetch 使用)
-    //網址：http://localhost:8080/appeals/api/all
+    // 提供 JSON 資料給後台表格 (供 fetch 使用)
     @GetMapping("/api/all")
     @ResponseBody
     public List<InstallAppeals> showAllInstallAppeals() {
         return installAppealsService.getAllInstallAppeals();
     }
 
-    //處理管理員結案更新
-    //網址：http://localhost:8080/appeals/api/handle
+    // 處理管理員結案更新
     @PostMapping("api/handle")
     @ResponseBody
     public String handleInstallAppealByAdmin(@RequestParam Integer id,
@@ -102,23 +109,40 @@ public class InstallAppealsController {
         }
     }
 
-    // 網址路徑：http://localhost:8080/appeals/admin/handle?id=1
+    // 網址路徑：顯示案件處理詳細頁面 (包含圖片顯示邏輯)
     @GetMapping("/admin/handle")
     public String showHandlePage(@RequestParam("id") Integer id, Model model) {
-
-
-        //透過 Service 找出該筆申訴的詳細資料
+        // 透過 Service 找出該筆申訴的詳細資料
         InstallAppeals appeal = installAppealsService.getAppealById(id);
-        //將資料塞入 model，讓 HTML 可以用 ${appeal.xxx} 讀取
+
+        // 💡 找出該筆案件關聯的所有圖片清單，讓前端可以用 th:each 跑出來
+        List<InstallAppealImage> images = installAppealsService.getImagesByAppealsNo(id);
+
+        // 將資料塞入 model，讓 HTML 可以讀取
         model.addAttribute("appeal", appeal);
-        //回傳新網頁的檔案名稱 (路徑：templates/templates-report/handle-appeal.html)
+        model.addAttribute("images", images);
+
         return "templates-report/handle-appeal";
+    }
+
+    // 💡 圖片顯示 API：讓瀏覽器可以透過網址讀取資料庫的 LONGBLOB 圖片
+    @GetMapping("/image/{id}")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<byte[]> getAppealImage(@PathVariable Integer id) {
+        // 透過圖片編號 (img_no) 從資料庫撈出圖片二進位檔
+        byte[] imageBytes = installAppealsService.getAppealsImageById(id);
+
+        if (imageBytes != null) {
+            return org.springframework.http.ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.IMAGE_JPEG)
+                    .body(imageBytes);
+        }
+        return org.springframework.http.ResponseEntity.notFound().build();
     }
 
     @Controller
     @RequestMapping("/reports")
     public class ReportsController {
-
         @GetMapping("/admin/list")
         public String showReportList() {
             return "templates-report/admin-report-list";

@@ -91,7 +91,6 @@
             align-items: center;
         }
 
-        /* 頂部導航列不再設定紅色亮起 */
         .nav-links a.active {
             color: #ffffff;
         }
@@ -104,7 +103,6 @@
             margin: 0 auto;
         }
 
-        /* 左側側邊欄 */
         aside {
             width: 250px;
             flex-shrink: 0;
@@ -128,7 +126,6 @@
             cursor: pointer;
         }
 
-        /* 修正：側邊欄「提交申訴」維持紅色 */
         .category-list li.active {
             color: #ff3333;
             font-weight: bold;
@@ -269,6 +266,61 @@
             outline: none;
         }
 
+        /* 💡 圖片上傳區塊樣式 - 膠囊造型按鈕 */
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .upload-title {
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .upload-align-row {
+            display: flex;
+            align-items: flex-end; /* 關鍵：底部對齊，確保按鈕底部跟右側 checkbox 底部切齊 */
+            gap: 30px;
+        }
+
+        .custom-upload-btn {
+            background-color: #ff3333;
+            color: white;
+            padding: 10px 30px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-block;
+            transition: 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.5); /* 增加邊框質感 */
+            border-radius: 50px; /* 膠囊形狀 */
+            box-shadow: 0 4px 15px rgba(255, 51, 51, 0.4);
+            line-height: 1.2;
+            text-align: center;
+        }
+
+        .custom-upload-btn:hover {
+            background-color: #cc0000;
+            border-color: #ffffff;
+            transform: scale(1.05); /* 輕微放大效果 */
+        }
+
+        #imagePreview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .preview-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border: 2px solid #ff3333;
+            border-radius: 8px;
+        }
+
         .textarea-group {
             margin-bottom: 30px;
         }
@@ -321,110 +373,37 @@
             box-shadow: 0 6px 20px rgba(255, 51, 51, 0.4);
         }
 
-        /* 用戶下拉選單容器 */
-        .user-dropdown-container {
-            position: relative;
-            display: inline-block;
+        /* --- Footer --- */
+        footer {
+            margin-top: 100px;
+            padding: 60px 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 40px;
+            font-size: 14px;
+            color: #aaa;
+            background-color: rgba(0,0,0,0.8);
+            border-top: 1px solid #333;
         }
 
-        .dropdown-menu {
-            display: none;
-            position: absolute;
-            right: 0;
-            top: 100%;
-            background-color: #1a1a1a;
-            min-width: 150px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
-            z-index: 100;
-            border: 1px solid #333;
-            border-radius: 4px;
-            margin-top: 10px;
-        }
+        .footer-logo { font-size: 20px; color: white; margin-bottom: 20px; }
+        .footer-col h4 { color: white; margin-bottom: 20px; font-weight: bold; }
+        .footer-col ul li { margin-bottom: 10px; }
 
-        .dropdown-menu.show {
-            display: block;
-        }
+        /* 用戶下拉選單 */
+        .user-dropdown-container { position: relative; display: inline-block; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; background-color: #1a1a1a; min-width: 150px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5); z-index: 100; border: 1px solid #333; border-radius: 4px; margin-top: 10px; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a { color: #ccc; padding: 12px 16px; text-decoration: none; display: block; font-size: 13px; transition: 0.2s; text-align: left; }
+        .dropdown-menu a:hover { background-color: #333; color: #ff3333; }
 
-        .dropdown-menu a {
-            color: #ccc;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            font-size: 13px;
-            transition: 0.2s;
-            text-align: left;
-        }
-
-        .dropdown-menu a:hover {
-            background-color: #333;
-            color: #ff3333;
-        }
-
-        /* 彈窗樣式 */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: #1a1a1a;
-            border: 2px solid #333;
-            border-radius: 8px;
-            padding: 40px;
-            max-width: 500px;
-            text-align: center;
-        }
-
-        .modal-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            border: 3px solid #ff9933;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: #ff9933;
-            font-weight: bold;
-        }
-
-        .modal-title {
-            color: #ff3333;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        .modal-message {
-            color: #fff;
-            font-size: 16px;
-            margin-bottom: 30px;
-        }
-
-        .modal-btn {
-            background-color: #ff3333;
-            color: white;
-            border: none;
-            padding: 12px 40px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.show { display: flex; }
+        .modal-content { background-color: #1a1a1a; border: 2px solid #333; border-radius: 8px; padding: 40px; max-width: 500px; text-align: center; }
+        .modal-icon { width: 80px; height: 80px; margin: 0 auto 20px; border: 3px solid #ff9933; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 48px; color: #ff9933; font-weight: bold; }
+        .modal-title { color: #ff3333; font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+        .modal-message { color: #fff; font-size: 16px; margin-bottom: 30px; }
+        .modal-btn { background-color: #ff3333; color: white; border: none; padding: 12px 40px; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 4px; transition: background-color 0.3s; }
     </style>
 </head>
 <body>
@@ -485,12 +464,21 @@
             <h1 class="appeal-title">INSTALLATION APPEAL SERVICE</h1>
             <p class="appeal-subtitle">如果您在安裝服務中有任何問題,請填寫下方表單。</p>
 
-            <form th:action="@{/appeals/submit}" method="post" id="appealForm">
+            <form th:action="@{/appeals/submit}" method="post" id="appealForm" enctype="multipart/form-data">
                 <div class="form-section">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="installOrderNo">安裝訂單編號</label>
                             <input type="text" id="installOrderNo" name="installOrderNo" placeholder="請輸入編號">
+
+                            <div class="upload-section" style="margin-top: 30px;">
+                                <span class="upload-title">上傳圖片</span>
+                                <div class="upload-align-row">
+                                    <label for="imageFiles" class="custom-upload-btn">選擇檔案</label>
+                                    <input type="file" id="imageFiles" name="images" multiple accept="image/*" style="display: none;">
+                                </div>
+                                <div id="imagePreview"></div>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -534,6 +522,38 @@
     </div>
 </div>
 
+<footer>
+    <div class="footer-col">
+        <div class="footer-logo logo">卡爾夏</div>
+    </div>
+    <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+            <li>Shop Parts</li>
+            <li>Wholesale</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>The Company</h4>
+        <ul>
+            <li>About Us</li>
+            <li>FAQ</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul>
+            <li>info@mysite.com</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Follow Us</h4>
+        <ul>
+            <li>Instagram</li>
+        </ul>
+    </div>
+</footer>
+
 <script>
     window.onload = function() {
         initUserDropdown();
@@ -571,6 +591,24 @@
     function navigateTo(page) {
         console.log("Navigating to: " + page);
     }
+
+    // 圖片預覽邏輯
+    document.getElementById('imageFiles').addEventListener('change', function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        const files = e.target.files;
+
+        for (let i = 0; i < files.length; i++) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                img.classList.add('preview-img');
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(files[i]);
+        }
+    });
 
     document.getElementById('type10').addEventListener('change', function() {
         const otherContainer = document.getElementById('otherInputContainer');

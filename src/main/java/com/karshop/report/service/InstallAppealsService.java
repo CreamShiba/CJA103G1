@@ -1,13 +1,11 @@
 package com.karshop.report.service;
 
 import com.karshop.report.model.InstallAppeals; //引用model裡的InstallAppeals
+import com.karshop.report.model.InstallAppealImage; //引用圖片model
 import com.karshop.report.repository.InstallAppealsRepository; //引用repository裡的InstallAppeals
+import com.karshop.report.repository.InstallAppealImageRepository; //引用圖片專用repository
 import org.springframework.beans.factory.annotation.Autowired; //引入自動注入，用來將 Repository 自動裝配進這個 Service 中。
 import org.springframework.stereotype.Service; //標記這是一個服務層。讓 Spring Boot 知道這個類別是用來寫邏輯、算資料的地方。
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import java.time.LocalDateTime; //引入時間工具，用來在存檔時紀錄當下的日期與時間。
 import java.util.List; //引入清單工具，用來裝載從資料庫抓回來的多筆申訴紀錄。
 
@@ -15,6 +13,9 @@ import java.util.List; //引入清單工具，用來裝載從資料庫抓回來�
 public class InstallAppealsService {
     @Autowired
     private InstallAppealsRepository installAppealsRepository;
+
+    @Autowired // 💡 注入圖片專用的 Repository 才能執行存檔動作
+    private InstallAppealImageRepository installAppealImageRepository;
 
     public void submitInstallAppeal(InstallAppeals appeal) {
 
@@ -65,6 +66,29 @@ public class InstallAppealsService {
         return installAppealsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("找不到編號為 " + id + " 的申訴案件"));
     }
- }
 
+    // 💡 儲存圖片的方法
+    public void saveAppealImage(Integer appealsNo, byte[] imageBytes) {
+        InstallAppealImage img = new InstallAppealImage();
+        img.setAppealsNo(appealsNo);
+        img.setImage(imageBytes);
 
+        // 💡 執行存檔：把圖片物件存進 install_appeal_images 表
+        installAppealImageRepository.save(img);
+    }
+
+    // 💡 透過 img_no 取得圖片二進位資料
+    public byte[] getAppealsImageById(Integer imgNo) {
+        return installAppealImageRepository.findById(imgNo)
+                .map(img -> img.getImage())
+                .orElse(null);
+    }
+
+    //需要一個方法「找出某個申訴案件的所有圖片編號」
+// 這要在 install_appeal_images 表找 appeals_no = ? 的所有紀錄
+// 假設你在 Repository 已經寫好 findByAppealsNo 方法
+    public List<InstallAppealImage> getImagesByAppealsNo(Integer appealsNo) {
+        // 這裡我們等一下要在 Repository 補上一行查詢指令
+        return installAppealImageRepository.findByAppealsNo(appealsNo);
+    }
+}
