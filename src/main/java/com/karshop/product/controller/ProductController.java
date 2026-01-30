@@ -72,6 +72,8 @@ public class ProductController {
             if(upFile[0].isEmpty()) {
                 model.addAttribute("errorMessage", "請上傳商品圖片");
             }
+            List<ProductCategoryVO> categoryList = productCategoryService.getAll();
+            model.addAttribute("categoryList", categoryList);
             return  "back-end/seller/addProduct";
         }
         SellerVO sellerVO = new SellerVO();
@@ -121,6 +123,8 @@ public class ProductController {
         productVO.setSeller(sellerVO);
 
         if (result.hasErrors()) {
+            List<ProductCategoryVO> categoryList = productCategoryService.getAll();
+            model.addAttribute("categoryList", categoryList);
             return "back-end/seller/updateProduct";
         }
 
@@ -133,6 +137,8 @@ public class ProductController {
         if (currentAmount - deleteAmount + newAmount == 0) {
             model.addAttribute("errorMessage", "請至少保留一張圖片");
             model.addAttribute("productVO", originalProductVO);
+            List<ProductCategoryVO> categoryList = productCategoryService.getAll();
+            model.addAttribute("categoryList", categoryList);
             return "back-end/seller/updateProduct";
         }
 

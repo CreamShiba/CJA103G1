@@ -177,3 +177,31 @@ function viewBuyerRating(ordNo) {
 
     modal.style.display = 'flex';
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    const startDateInput = document.getElementById('startDateInput');
+    const endDateInput = document.getElementById('endDateInput');
+
+    function updateConstraints() {
+        // 設定結束日期的最小值 (不能早於開始日期)
+        if (startDateInput.value) {
+            endDateInput.min = startDateInput.value;
+        } else {
+            endDateInput.min = '';
+        }
+
+        // 設定開始日期的最大值 (不能晚於結束日期)
+        if (endDateInput.value) {
+            startDateInput.max = endDateInput.value;
+        } else {
+            startDateInput.max = '';
+        }
+    }
+
+    // 兩個欄位變動時都檢查
+    startDateInput.addEventListener('change', updateConstraints);
+    endDateInput.addEventListener('change', updateConstraints);
+
+    // 初始化
+    updateConstraints();
+});
