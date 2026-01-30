@@ -20,6 +20,13 @@
         <div class="nav-item" id="nav-dashboard" onclick="switchTab('dashboard')">儀表板 Dashboard</div>
         <div class="nav-item" id="nav-products" onclick="switchTab('products')">商品列表 Products</div>
         <div class="nav-item" id="nav-orders" onclick="switchTab('orders')">訂單列表 Orders</div>
+        <div class="nav-title" style="margin-top: 30px;">外部連結</div>
+
+        <a th:href="@{/shop(sellerNo=${sellerNo})}" target="_blank"
+           style="margin: 20px; padding: 12px; background: #333; border: 1px solid #555; border-radius: 8px; color: white; text-align: center; text-decoration: none; display: block; transition: 0.3s;">
+            <i class="fas fa-store" style="margin-right: 8px; color: #ff3333;"></i>
+            我的賣場
+        </a>
     </aside>
 
     <main class="main-content">
@@ -94,6 +101,7 @@
                                 <option value="">所有狀態</option>
                                 <option value="上架中" th:selected="${searchStatus == '上架中'}">上架中</option>
                                 <option value="下架中" th:selected="${searchStatus == '下架中'}">下架中</option>
+                                <option value="下架中" th:selected="${searchStatus == '審核中'}">審核中</option>
                                 <option value="下架中" th:selected="${searchStatus == '違規下架'}">違規下架</option>
                             </select>
                         </div>
@@ -277,18 +285,18 @@
 
                         <td>
                             <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
-                    <span th:if="${ord.ordPaymentMethod == '貨到付款'}"
-                          style="font-size: 11px; color: #ffa726; border: 1px solid #ffa726; padding: 1px 5px; border-radius: 4px;">
-                        貨到付款
-                    </span>
-                                <span th:if="${ord.ordPaymentMethod != '貨到付款' and ord.ordPaymentStatus == '已付款'}"
-                                      style="font-size: 11px; color: #00e676; background: rgba(0,230,118,0.1); padding: 1px 6px; border-radius: 4px;">
-                        ✔ 已付款
-                    </span>
-                                <span th:if="${ord.ordPaymentMethod != '貨到付款' and ord.ordPaymentStatus != '已付款'}"
-                                      style="font-size: 11px; color: #ff5252; background: rgba(255,82,82,0.1); padding: 1px 6px; border-radius: 4px;">
-                        ✘ 未付款
-                    </span>
+                                <span th:text="${ord.ordPaymentMethod}"
+                                                          th:style="${ord.ordPaymentMethod == '貨到付款' ?
+                                      'font-size: 11px; color: #ffa726; border: 1px solid #ffa726; padding: 1px 5px; border-radius: 4px;' :
+                                      'font-size: 11px; color: #ccc; border: 1px solid #555; padding: 1px 5px; border-radius: 4px;'}">
+                                </span>
+
+                                <span th:if="${ord.ordPaymentMethod != '貨到付款'}"
+                                      th:text="${ord.ordPaymentStatus == '已付款' ? '✔ 已付款' : '✘ 未付款'}"
+                                                                      th:style="${ord.ordPaymentStatus == '已付款' ?
+                                          'font-size: 11px; color: #00e676; background: rgba(0,230,118,0.1); padding: 1px 6px; border-radius: 4px;' :
+                                          'font-size: 11px; color: #ff5252; background: rgba(255,82,82,0.1); padding: 1px 6px; border-radius: 4px;'}">
+                                </span>
                                 <span th:class="${
                         ord.ordStatus == '待出貨' ? 'status-badge status-Processing' :
                         (ord.ordStatus == '已出貨' ? 'status-badge status-Active' :

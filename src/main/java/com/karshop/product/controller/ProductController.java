@@ -251,6 +251,7 @@ public class ProductController {
 
     private void prepareSellerDashboardData(ModelMap model) {
         Integer sellerNo = 101;
+        model.addAttribute("sellerNo", sellerNo);
         List<OrdVO> ordList = ordService.getOrdBySeller(sellerNo);
         int pendingOrder = 0;
         int allOrder = 0;
