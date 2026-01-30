@@ -74,7 +74,7 @@ function submitReportForm() {
 
     // 3. 或者直接使用傳統表單提交 (會換頁):
     // 這裡我們模擬 Alert 讓你知道成功了，實際上你可以直接 form.submit()
-    alert(`檢舉已送出！\n原因：${reasonSelect.value}`);
+    // alert(`檢舉已送出！\n原因：${reasonSelect.value}`);
     form.submit(); // 這行會真的把資料送去後端 @{/reports/submit}
 }
 
@@ -118,3 +118,17 @@ function initUserDropdown() {
         };
     }
 }
+
+// 檢查是否有 flash message，有的話 3 秒後自動淡出
+document.addEventListener("DOMContentLoaded", function() {
+    var flashMsg = document.getElementById('flashMessage');
+    if (flashMsg) {
+        setTimeout(function() {
+            flashMsg.style.transition = "opacity 0.5s ease";
+            flashMsg.style.opacity = "0";
+            setTimeout(function() {
+                flashMsg.remove();
+            }, 500); // 等待淡出動畫結束後移除
+        }, 3000); // 3秒後消失
+    }
+});

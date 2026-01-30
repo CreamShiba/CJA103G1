@@ -193,6 +193,12 @@
     </div>
 </div>
 
+<div th:if="${message}" id="flashMessage" class="flash-toast">
+    <i class="fas fa-check-circle"></i>
+    <span th:text="${message}"></span>
+    <button onclick="this.parentElement.style.display='none'" class="flash-close">&times;</button>
+</div>
+
 <script th:src="@{/js/front-end/product/productDetail.js}"></script>
 </body>
 </html>

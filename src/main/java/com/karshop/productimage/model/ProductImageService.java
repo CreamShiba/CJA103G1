@@ -1,6 +1,7 @@
 package com.karshop.productimage.model;
 
 import com.karshop.product.model.ProductVO;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,7 @@ public class ProductImageService {
     @Autowired
     ProductImageRepository productImageRepository;
 
+    @Transactional
     public void addImages(ProductImageVO piVO){
         piVO.setUploadDate(LocalDate.now());
         productImageRepository.save(piVO);

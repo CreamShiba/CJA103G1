@@ -157,7 +157,21 @@
                         </span>
                     </td>
                     <td th:text="${'$' + #numbers.formatInteger(product.prodPrice, 1, 'COMMA')}"></td>
-                    <td th:text="${product.prodQty}"></td>
+                    <td>
+                        <span th:text="${product.prodQty}"
+                              th:style="${product.prodQty < 10 ? 'color: #ff5252; font-weight: bold; font-size: 15px;' : ''}">
+                        </span>
+
+                        <div th:if="${product.prodQty < 10}"
+                             style="color: #ff5252; font-size: 11px; margin-top: 2px;">
+                            <i class="fas fa-exclamation-circle"></i> 請補貨
+                        </div>
+
+                        <div th:if="${product.prodQty == 0}"
+                             style="color: #aaa; font-size: 11px; background: rgba(255, 82, 82, 0.1); border-radius: 4px; padding: 2px 4px; display: inline-block; margin-top: 4px;">
+                            已售完
+                        </div>
+                    </td>
                     <td><a th:href="@{/product/getOne_For_Update(prodNo=${product.prodNo})}" class="btn-edit">編輯</a></td>
                 </tr>
                 </tbody>

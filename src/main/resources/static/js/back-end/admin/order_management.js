@@ -44,3 +44,36 @@ window.addEventListener('click', function(event) {
         modal.style.display = "none";
     }
 });
+
+// ==========================================
+// 🔥 新增：日期動態限制 (Admin 端)
+// ==========================================
+document.addEventListener("DOMContentLoaded", function() {
+    const startDateInput = document.getElementById('startDateInput');
+    const endDateInput = document.getElementById('endDateInput');
+
+    // 確保這兩個欄位存在才執行 (避免報錯)
+    if (startDateInput && endDateInput) {
+
+        function updateDateConstraints() {
+            if (startDateInput.value) {
+                // 設定結束日期的最小值 = 開始日期的值
+                endDateInput.min = startDateInput.value;
+
+                // 如果目前選的結束日期 已經早於 新的開始日期，把結束日期設為開始日期
+                if (endDateInput.value && endDateInput.value < startDateInput.value) {
+                    endDateInput.value = startDateInput.value;
+                }
+            } else {
+                // 如果開始日期被清空，就移除限制
+                endDateInput.removeAttribute('min');
+            }
+        }
+
+        // 監聽變動
+        startDateInput.addEventListener('change', updateDateConstraints);
+
+        // 網頁載入時先執行一次 (因為搜尋後會回填舊資料)
+        updateDateConstraints();
+    }
+});

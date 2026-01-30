@@ -46,9 +46,9 @@
                 </select>
 
                 <div style="display: flex; align-items: center; gap: 5px;">
-                    <input type="date" name="startDate" th:value="${startDate}" class="form-input">
+                    <input type="date" id="startDateInput" name="startDate" th:value="${startDate}" class="form-input">
                     <span>~</span>
-                    <input type="date" name="endDate" th:value="${endDate}" class="form-input">
+                    <input type="date" id="endDateInput" name="endDate" th:value="${endDate}" class="form-input">
                 </div>
 
                 <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> 搜尋</button>
