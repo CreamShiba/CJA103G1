@@ -39,7 +39,7 @@ public class ProductVO implements Serializable {
 
     @Column(name = "prod_price")
     @NotNull(message = "請填寫商品價格")
-    @Min(value = 1, message = "商品價格不可小於${value}")
+    @Min(value = 10, message = "商品價格不可小於${value}")
     Integer prodPrice;
 
     @Column(name = "prod_status")
@@ -53,8 +53,8 @@ public class ProductVO implements Serializable {
 
     @Column(name = "prod_qty")
     @NotNull(message = "請填寫庫存數量")
-    @Min(value = 0, message = "庫存數量不可小於0")
-    Integer prodQty = 0;
+    @Min(value = 1, message = "庫存數量不可小於0")
+    Integer prodQty;
 
     @OneToMany(mappedBy ="product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProductImageVO> productImage;
