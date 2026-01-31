@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡爾夏 - 尋找技師</title>
+    <link rel="stylesheet" th:href="@{/install/front-end/css/index.css}">
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div>卡爾夏 Installation Platform</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search..."
+                    style="background: transparent; border: none; color: white; width: 100%; outline: none;" disabled>
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+
+                    <th:block th:if="${session.member == null}">
+                        <a th:href="@{/members/login}">登入</a>
+                        <a th:href="@{/members/register}">註冊</a>
+                    </th:block>
+
+                    <th:block th:if="${session.member != null}">
+                        <span
+                            style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
+                            th:text="'Hi, ' + ${session.member.memName}">
+                            Hi, 會員
+                        </span>
+
+                        <a th:href="@{/members/view}">編輯個人資料</a>
+                        <a th:href="@{/member/orders}">我的訂單</a>
+                        <form th:action="@{/members/logout}" method="post" id="logoutForm">
+                            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                登出 (Logout)
+                            </a>
+                        </form>
+                    </th:block>
+                </div>
+            </div>
+            <span id="cart" style="cursor: not-allowed; opacity: 0.5;">🛒</span>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <a href="#" class="logo">卡爾夏 Install</a>
+        <nav class="nav-links">
+            <a th:href="@{/installation/home}" class="active">尋找技師</a>
+            <a th:href="@{/member/orders}">我的訂單</a>
+            <a th:href="@{/installation/entry}">成為技師</a>
+            <a th:href="@{/technician/orders}" th:if="${isTechnician}">技師後台</a>
+            <a th:href="@{/admin/dashboard}" th:if="${isAdmin}" style="color: #ffcc00; font-weight: bold;">後台管理</a>
+            <a href="javascript:void(0)">回到商城</a>
+            <form th:action="@{/members/logout}" method="post" style="display:inline;"
+                th:if="${session.member != null}">
+                <button type="submit"
+                    style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出</button>
+            </form>
+        </nav>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="container">
+        <!-- Sidebar -->
+        <aside>
+            <!-- Region Filter -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">地區篩選</h3>
+                <ul class="category-list">
+                    <li th:class="${currentRegion == null} ? 'active' : ''">
+                        <a th:href="@{/installation/home}">全部地區</a>
+                    </li>
+                    <li th:class="${currentRegion == 1} ? 'active' : ''">
+                        <a th:href="@{/installation/home(region=1)}">北部 (North)</a>
+                    </li>
+                    <li th:class="${currentRegion == 2} ? 'active' : ''">
+                        <a th:href="@{/installation/home(region=2)}">中部 (Central)</a>
+                    </li>
+                    <li th:class="${currentRegion == 3} ? 'active' : ''">
+                        <a th:href="@{/installation/home(region=3)}">南部 (South)</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Service Search -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">依服務搜尋</h3>
+                <form id="serviceFilterForm" th:action="@{/installation/home}" method="get">
+                    <input type="hidden" name="region" th:value="${currentRegion}">
+
+                    <!-- Search Input -->
+                    <input type="text" id="serviceSearchInput" class="custom-input" placeholder="輸入關鍵字篩選..."
+                        onkeyup="filterServices()" style="margin-bottom: 12px;">
+
+                    <div id="serviceListContainer" class="scrollable-list">
+                        <div th:each="svc : ${allServiceItems}" class="service-checkbox-item">
+                            <label>
+                                <input type="checkbox" name="serviceIds" th:value="${svc.serviceNo}"
+                                    th:checked="${currentServiceIds != null && #lists.contains(currentServiceIds, svc.serviceNo)}">
+                                <span class="service-name-text" th:text="${svc.serviceName}">Service Name</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">搜尋</button>
+                    <a th:href="@{/installation/home(region=${currentRegion})}" class="clear-filter-link">清除篩選</a>
+                </form>
+
+                <script>
+                    // Check for URL parameters
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('error') === 'pending') {
+                        alert("請等待管理員審核");
+                        // Optional: Clear the parameter from URL without reloading
+                        const newUrl = window.location.pathname + window.location.search.replace(/[\?&]error=pending/, '');
+                        history.replaceState({}, document.title, newUrl);
+                    }
+
+                    function filterServices() {
+                        var input = document.getElementById("serviceSearchInput");
+                        var filter = input.value.toUpperCase();
+                        var container = document.getElementById("serviceListContainer");
+                        var items = container.getElementsByClassName("service-checkbox-item");
+
+                        for (var i = 0; i < items.length; i++) {
+                            var span = items[i].getElementsByClassName("service-name-text")[0];
+                            var txtValue = span.textContent || span.innerText;
+                            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                                items[i].style.display = "";
+                            } else {
+                                items[i].style.display = "none";
+                            }
+                        }
+                    }
+                </script>
+
+                <script>
+                    // User Dropdown Toggle
+                    const userIcon = document.getElementById('user-icon');
+                    const userDropdown = document.getElementById('user-dropdown');
+
+                    if (userIcon && userDropdown) {
+                        userIcon.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            userDropdown.classList.toggle('show');
+                        });
+
+                        window.addEventListener('click', () => {
+                            if (userDropdown.classList.contains('show')) {
+                                userDropdown.classList.remove('show');
+                            }
+                        });
+                    }
+                </script>
+            </div>
+
+            <!-- Top Services -->
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">熱門服務</h3>
+                <ul class="category-list">
+                    <li th:class="${currentServiceIds == null || currentServiceIds.isEmpty()} ? 'active' : ''">
+                        <a th:href="@{/installation/home}">全部服務</a>
+                    </li>
+                    <li th:each="svc : ${serviceItems}">
+                        <!-- Note: Clicking top services creates a single-item filter -->
+                        <a th:href="@{/installation/home(serviceIds=${svc.serviceNo}, region=${currentRegion})}"
+                            th:text="${svc.serviceName}"></a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main style="flex: 1;">
+            <div style="margin-bottom: 30px;">
+                <h1 style="font-size: 28px; margin-bottom: 10px; color: white;">專業且安心的安裝服務</h1>
+                <p style="color: #aaa;">超過 500 位認證技師為您服務，透明價格，安心保固。</p>
+            </div>
+
+            <!-- Card Grid -->
+            <div class="card-grid">
+                <div class="card" th:each="tech : ${technicians}">
+                    <img th:src="${tech.profilePhotoBase64 != null ? tech.profilePhotoBase64 : 'https://placehold.co/400x300/333/999?text=卡爾夏'}"
+                        class="card-img" alt="Technician">
+                    <div class="card-body">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <h3 class="card-title" th:text="${tech.realName}">技師名稱</h3>
+                            <span class="badge" th:text="${tech.serviceArea}">地區</span>
+                        </div>
+
+                        <div style="margin-bottom: 1rem; color: #ff3333; font-weight: bold;">
+                            ★ <span th:text="${#numbers.formatDecimal(tech.avgRating, 1, 1)}">4.5</span>
+                            <span
+                                style="color: #666; font-size: 12px; font-weight: normal; margin-left: 5px;">(推薦)</span>
+                        </div>
+
+
+
+                        <a th:href="@{'/installation/technician/' + ${tech.techNo}}" class="btn btn-primary"
+                            style="width: 100%; text-align: center;">
+                            立即預約
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-col">
+            <div class="footer-logo">卡爾夏</div>
+            <p>Professional Auto Service Platform.</p>
+        </div>
+        <div class="footer-col">
+            <h4>關於我們</h4>
+            <ul>
+                <li>平台介紹</li>
+                <li>聯絡我們</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>服務中心</h4>
+            <ul>
+                <li>常見問題</li>
+                <li>服務條款</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>社群</h4>
+            <ul>
+                <li>Facebook</li>
+                <li>Instagram</li>
+            </ul>
+        </div>
+    </footer>
+
+</body>
+
+</html>

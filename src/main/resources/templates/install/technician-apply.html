@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>申請成為技師 - 卡爾夏</title>
+    <link rel="stylesheet" th:href="@{/install/front-end/css/index.css}">
+    <style>
+        /* Local styles to replace missing global form styles and match Dark Theme */
+        .form-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background-color: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ff3333;
+            box-shadow: 0 0 5px rgba(255, 51, 51, 0.3);
+        }
+
+        /* File input styling */
+        input[type="file"]::file-selector-button {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background-color: #444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div>卡爾夏 Installation Platform</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search..."
+                    style="background: transparent; border: none; color: white; width: 100%; outline: none;" disabled>
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+
+                    <th:block th:if="${session.member == null}">
+                        <a th:href="@{/members/login}">登入</a>
+                        <a th:href="@{/members/register}">註冊</a>
+                    </th:block>
+
+                    <th:block th:if="${session.member != null}">
+                        <span
+                            style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
+                            th:text="'Hi, ' + ${session.member.memName}">
+                            Hi, 會員
+                        </span>
+
+                        <a th:href="@{/members/view}">編輯個人資料</a>
+                        <a th:href="@{/member/orders}">我的訂單</a>
+                        <form th:action="@{/members/logout}" method="post" id="logoutForm">
+                            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                登出 (Logout)
+                            </a>
+                        </form>
+                    </th:block>
+                </div>
+            </div>
+            <span id="cart" style="cursor: not-allowed; opacity: 0.5;">🛒</span>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <a th:href="@{/installation/home}" class="logo">卡爾夏 Install</a>
+        <nav class="nav-links">
+            <a th:href="@{/installation/home}">尋找技師</a>
+            <a th:href="@{/member/orders}">我的訂單</a>
+            <a th:href="@{/installation/entry}" class="active">成為技師</a>
+            <form th:action="@{/members/logout}" method="post" style="display:inline;">
+                <button type="submit"
+                    style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出</button>
+            </form>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="form-container">
+        <div class="card" style="padding: 40px;">
+            <h2 style="text-align: center; margin-bottom: 30px; font-size: 24px; color: white;">申請成為專業技師</h2>
+
+            <form th:action="@{/installation/apply-technician}" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="form-label">真實姓名</label>
+                    <input type="text" name="realName" class="form-control" th:value="${member.memName}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">聯絡電話</label>
+                    <input type="text" name="phone" class="form-control" th:value="${member.memMobile}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">電子信箱</label>
+                    <input type="email" name="email" class="form-control" th:value="${member.memEmail}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">服務地區</label>
+                    <input type="text" name="serviceArea" class="form-control" placeholder="e.g. 台北市信義區" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">區域</label>
+                    <select name="regionCode" class="form-control">
+                        <option value="1">北部 (North)</option>
+                        <option value="2">中部 (Central)</option>
+                        <option value="3">南部 (South)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">銀行代碼</label>
+                    <input type="text" name="bankCode" class="form-control" placeholder="e.g. 822" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">銀行帳號</label>
+                    <input type="text" name="bankAccount" class="form-control" placeholder="請輸入帳號" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">個人頭像 (證件照)</label>
+                    <input type="file" name="profilePhoto" class="form-control" accept="image/*">
+                </div>
+
+                <button type="submit" class="btn btn-primary"
+                    style="width: 100%; margin-top: 20px; font-size: 16px; padding: 12px;">
+                    送出申請
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-col">
+            <div class="footer-logo">卡爾夏</div>
+        </div>
+    </footer>
+
+    <script>
+        // User Dropdown Toggle
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+
+        if (userIcon && userDropdown) {
+            userIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+
+            window.addEventListener('click', () => {
+                if (userDropdown.classList.contains('show')) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
