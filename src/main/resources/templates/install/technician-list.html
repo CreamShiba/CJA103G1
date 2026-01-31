@@ -58,7 +58,7 @@
             <a th:href="@{/member/orders}">我的訂單</a>
             <a th:href="@{/installation/entry}">成為技師</a>
             <a th:href="@{/technician/orders}" th:if="${isTechnician}">技師後台</a>
-            <a th:href="@{/admin/dashboard}" th:if="${isAdmin}" style="color: #ffcc00; font-weight: bold;">後台管理</a>
+
             <a href="javascript:void(0)">回到商城</a>
             <form th:action="@{/members/logout}" method="post" style="display:inline;"
                 th:if="${session.member != null}">
