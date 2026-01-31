@@ -1,8 +1,8 @@
 package com.karshop.memberCoupon;
 
 
-import com.karshop.coupon.CouponRepository;
-//import com.karshop.memberCoupon.MemberCouponRepository;
+import com.coupon.CouponRepository;
+import com.memberCoupon.MemberCouponRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,7 +68,7 @@ public class MemberCouponService {
             return "找不到該名稱的有效優惠券或優惠券已失效";
         }
 
-        com.karshop.coupon.Coupon coupon = couponOpt.get();
+        com.coupon.Coupon coupon = couponOpt.get();
 
         // 額外檢查：如果當前時間已超過結束時間，也不允許領取
         if (coupon.getCouponEnd().isBefore(java.time.LocalDateTime.now())) {
