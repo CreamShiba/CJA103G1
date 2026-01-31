@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技師後台 - 卡爾夏</title>
+    <link rel="stylesheet" th:href="@{/install/back-end/css/index.css}">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon"></span>
+                <h2>卡爾夏 Tech</h2>
+            </div>
+
+            <div class="sidebar-nav">
+                <div class="menu-item">
+                    <a th:href="@{/technician/orders(tab='pending')}"
+                        th:class="${currentTab == 'pending'} ? 'active' : ''">
+                        <span>🔔 待確認訂單</span>
+                        <span class="badge" th:if="${pendingOrders.size() > 0}"
+                            th:text="${pendingOrders.size()}">3</span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a th:href="@{/technician/orders(tab='accepted')}"
+                        th:class="${currentTab == 'accepted'} ? 'active' : ''">
+                        <span>⏳ 待付款訂單</span>
+                        <span class="badge" th:if="${acceptedOrders.size() > 0}"
+                            th:text="${acceptedOrders.size()}">1</span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a th:href="@{/technician/orders(tab='active')}"
+                        th:class="${currentTab == 'active'} ? 'active' : ''">
+                        <span>🔧 進行中訂單</span>
+                        <span class="badge" th:if="${paidOrders.size() > 0}" th:text="${paidOrders.size()}">2</span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a th:href="@{/technician/orders(tab='completed')}"
+                        th:class="${currentTab == 'completed'} ? 'active' : ''">
+                        <span>📜 歷史訂單</span>
+                    </a>
+                </div>
+
+                <div class="menu-item">
+                    <a th:href="@{/technician/edit}">
+                        <span>✏️ 編輯技師資料</span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a th:href="@{/technician/services}">
+                        <span>🛠️ 服務項目管理</span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a th:href="@{/installation/home}">
+                        <span>🏠 回前台首頁</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <form th:action="@{/members/logout}" method="post" style="display:inline;">
+                    <button type="submit"
+                        style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出帳號</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <h2 class="page-title" th:switch="${currentTab}">
+                    <span th:case="'pending'">待確認訂單</span>
+                    <span th:case="'accepted'">待付款訂單</span>
+                    <span th:case="'active'">進行中訂單</span>
+                    <span th:case="'completed'">歷史訂單</span>
+                    <span th:case="*">訂單管理中心</span>
+                </h2>
+                <div class="user-profile">
+                    <span th:text="${session.member != null ? session.member.memberName : 'Tech'}">Technician</span>
+                    <div class="avatar"
+                        th:text="${session.member != null ? #strings.substring(session.member.memberName,0,1) : 'T'}">T
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div style="padding: 30px; overflow-y: auto;">
+
+                <!-- Pending Orders -->
+                <div class="table-container" th:if="${currentTab == 'pending'}">
+                    <div
+                        style="padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0; font-size: 16px; color: #d97706;">待確認訂單 (需要您的回應)</h3>
+                        <span class="status-pending">Pending Action</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>單號</th>
+                                <th>會員</th>
+                                <th>預約時段</th>
+                                <th>地點</th>
+                                <th>金額</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${pendingOrders}">
+                                <td th:text="'#' + ${order.installOrderNo}">#001</td>
+                                <td th:text="${order.memberName}">User</td>
+                                <td>
+                                    <div th:text="${order.appointDate}">Date</div>
+                                    <div th:text="${order.appointTime}" style="font-size: 12px; color: #888;">Time</div>
+                                </td>
+                                <td th:text="${order.locationName}">Loc</td>
+                                <td th:text="'$' + ${order.totalPrice}">$1000</td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <form th:action="@{'/technician/order/' + ${order.installOrderNo} + '/accept'}"
+                                            method="post">
+                                            <button type="submit" class="btn btn-primary">接受</button>
+                                        </form>
+                                        <form th:action="@{'/technician/order/' + ${order.installOrderNo} + '/reject'}"
+                                            method="post">
+                                            <button type="submit" class="btn btn-secondary">拒絕</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(pendingOrders)}">
+                                <td colspan="6" style="text-align: center; padding: 20px; color: #999;">目前沒有待確認的訂單</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Accepted Orders (Wait for Payment) -->
+                <div class="table-container" th:if="${currentTab == 'accepted'}">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+                        <h3 style="margin: 0; font-size: 16px; color: #0284c7;">已接受 / 待付款</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>單號</th>
+                                <th>會員</th>
+                                <th>預約時段</th>
+                                <th>地點</th>
+                                <th>狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${acceptedOrders}">
+                                <td th:text="'#' + ${order.installOrderNo}">#002</td>
+                                <td th:text="${order.memberName}">User</td>
+                                <td>
+                                    <div th:text="${order.appointDate}"></div>
+                                    <div th:text="${order.appointTime}"></div>
+                                </td>
+                                <td th:text="${order.locationName}">Loc</td>
+                                <td>
+                                    <span class="status-pending"
+                                        style="background: #e0f2fe; color: #0284c7;">等待買家付款</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(acceptedOrders)}">
+                                <td colspan="5" style="text-align: center; padding: 20px; color: #999;">沒有待付款的訂單</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Active / Paid Orders -->
+                <div class="table-container" th:if="${currentTab == 'active'}">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+                        <h3 style="margin: 0; font-size: 16px; color: #00796b;">進行中 / 已付款</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>單號</th>
+                                <th>會員</th>
+                                <th>預約時段</th>
+                                <th>地點</th>
+                                <th>狀態</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${paidOrders}">
+                                <td th:text="'#' + ${order.installOrderNo}">#002</td>
+                                <td th:text="${order.memberName}">User</td>
+                                <td>
+                                    <div th:text="${order.appointDate}"></div>
+                                    <div th:text="${order.appointTime}"></div>
+                                </td>
+                                <td th:text="${order.locationName}">Loc</td>
+                                <td>
+                                    <span class="status-success" th:text="${order.orderStatus}">Status</span>
+                                </td>
+                                <td>
+                                    <form th:if="${order.orderStatus == '已付款待安裝'}"
+                                        th:action="@{'/technician/order/' + ${order.installOrderNo} + '/complete'}"
+                                        method="post">
+                                        <button type="submit" class="btn btn-primary">完工回報</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(paidOrders)}">
+                                <td colspan="6" style="text-align: center; padding: 20px; color: #999;">目前沒有進行中的訂單</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Completed History -->
+                <div class="table-container" th:if="${currentTab == 'completed'}">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+                        <h3 style="margin: 0; font-size: 16px; color: #6b7280;">歷史訂單 (所有已完工)</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>單號</th>
+                                <th>會員</th>
+                                <th>預約時段</th>
+                                <th>地點</th>
+                                <th>總金額</th>
+                                <th>狀態</th>
+                                <th>撥款狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${completedOrders}">
+                                <td th:text="'#' + ${order.installOrderNo}">#003</td>
+                                <td th:text="${order.memberName}">User</td>
+                                <td>
+                                    <div th:text="${order.appointDate}"></div>
+                                    <div th:text="${order.appointTime}"></div>
+                                </td>
+                                <td th:text="${order.locationName}">Loc</td>
+                                <td th:text="'$' + ${order.totalPrice}">$1000</td>
+                                <td>
+                                    <span class="badge" style="background: #f3f4f6; color: #374151;">已完工</span>
+                                </td>
+                                <td>
+                                    <span class="badge"
+                                        th:classappend="${order.payoutStatus == '已撥款' ? 'status-success' : 'status-pending'}"
+                                        th:style="${order.payoutStatus == '已撥款' ? 'background: #dcfce7; color: #166534;' : 'background: #f3e8ff; color: #7e22ce;'}"
+                                        th:text="${order.payoutStatus}">待撥款</span>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(completedOrders)}">
+                                <td colspan="7" style="text-align: center; padding: 20px; color: #999;">尚無歷史訂單</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

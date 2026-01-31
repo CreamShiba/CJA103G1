@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編輯技師資料 - 卡爾夏 Install</title>
+    <link rel="stylesheet" th:href="@{/install/front-end/css/index.css}">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ff3333;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff3333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="main-header">
+        <a th:href="@{/installation/home}" class="logo">卡爾夏 Install</a>
+        <nav class="nav-links">
+            <a th:href="@{/technician/orders}">回到技師後台</a>
+            <form th:action="@{/members/logout}" method="post" style="display:inline;">
+                <button type="submit"
+                    style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出</button>
+            </form>
+        </nav>
+    </header>
+
+    <div class="form-container">
+        <h2 style="color: white; margin-bottom: 30px; text-align: center;">編輯技師資料</h2>
+
+        <form th:action="@{/technician/edit}" method="post" enctype="multipart/form-data" th:object="${dto}">
+
+            <div class="form-group">
+                <label class="form-label">真實姓名</label>
+                <input type="text" class="form-control" th:field="*{realName}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">聯絡電話</label>
+                <input type="tel" class="form-control" th:field="*{phone}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" th:field="*{email}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">服務地區 (縣市)</label>
+                <input type="text" class="form-control" th:field="*{serviceArea}" placeholder="例如：台北市、台中市..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">區域代碼</label>
+                <select class="form-control" th:field="*{regionCode}">
+                    <option value="1">北部 (North)</option>
+                    <option value="2">中部 (Central)</option>
+                    <option value="3">南部 (South)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">銀行代碼</label>
+                <input type="text" class="form-control" th:field="*{bankCode}" placeholder="例如：822">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">銀行帳號</label>
+                <input type="text" class="form-control" th:field="*{bankAccount}">
+            </div>
+
+            <label class="form-label">更新個人照 (若不修改請留空)</label>
+            <input type="file" class="form-control" name="photoFile" accept="image/*">
+    </div>
+
+    <button type="submit" class="btn-submit">儲存修改</button>
+    </form>
+    </div>
+</body>
+
+</html>
