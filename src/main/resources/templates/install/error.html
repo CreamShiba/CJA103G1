@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>錯誤 - 卡爾夏</title>
+    <link rel="stylesheet" th:href="@{/install/front-end/css/index.css}">
+</head>
+
+<body style="display: flex; align-items: center; justify-content: center; height: 100vh;">
+
+    <div class="card" style="padding: 3rem; text-align: center; max-width: 500px;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">⚠️</div>
+        <h2 style="margin-bottom: 1rem;">操作失敗</h2>
+        <p th:text="${errorMessage}" style="color: #dc3545; margin-bottom: 2rem; font-size: 1.1rem;">錯誤訊息</p>
+
+        <a href="javascript:history.back()" class="btn btn-primary">返回上一頁</a>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員後台 - 卡爾夏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/back-end/admin_index.css}">
+    <link rel="stylesheet" th:href="@{/install/back-end/css/index.css}">
+    <style>
+        /* Custom Overrides for this page */
+        .payout-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .payout-table th,
+        .payout-table td {
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .payout-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .bank-info {
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .amount-info {
+            font-weight: bold;
+            color: #d97706;
+        }
+
+        .btn-payout {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-payout:hover {
+            background-color: #059669;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar (Replicated from admin_index.html) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon"></div>
+                <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul>
+                    <!-- Replicated Menu Items -->
+                    <li class="menu-item has-submenu">
+                        <a class="submenu-toggle">
+                            <span><i class="fas fa-users-cog"></i> 自訂</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="#">自訂</a></li>
+                            <li><a href="#">自訂</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item has-submenu">
+                        <a class="submenu-toggle">
+                            <span><i class="fas fa-tools"></i> 安裝服務管理</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu" style="display: block;"> <!-- Keep open for this page -->
+                            <li><a th:href="@{/admin/dashboard(tab='audit')}"
+                                    th:classappend="${currentTab == 'audit' ? 'active' : ''}">技師審核</a></li>
+                            <li><a th:href="@{/admin/dashboard(tab='payout')}"
+                                    th:classappend="${currentTab == 'payout' ? 'active' : ''}">撥款管理</a></li>
+                            <li><a th:href="@{/admin/dashboard(tab='services')}"
+                                    th:classappend="${currentTab == 'services' ? 'active' : ''}">服務項目</a></li>
+                            <li><a th:href="@{/admin/dashboard(tab='locations')}"
+                                    th:classappend="${currentTab == 'locations' ? 'active' : ''}">場地管理</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item has-submenu">
+                        <a class="submenu-toggle">
+                            <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="#">會員帳號管理</a></li>
+                            <li><a th:href="@{/admins/listAll}">管理員帳號管理</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item has-submenu">
+                        <a class="submenu-toggle">
+                            <span><i class="fas fa-users-cog"></i> 自訂</span>
+                            <i class="fas fa-chevron-down arrow"></i>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="#">自訂</a></li>
+                            <li><a href="#">自訂</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <form th:action="@{/admins/logout}" method="post" id="logoutForm">
+                    <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                        <i class="fas fa-sign-out-alt"></i> 登出 (Logout)
+                    </a>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <h2 class="page-title" th:switch="${currentTab}">
+                    <span th:case="'audit'">技師資格審核</span>
+                    <span th:case="'payout'">平台撥款管理</span>
+                    <span th:case="'services'">服務項目管理</span>
+                    <span th:case="'locations'">安裝場地管理</span>
+                    <span th:case="*">管理員控制台</span>
+                </h2>
+                <div class="user-profile">
+                    <span th:text="${session.admin != null ? session.admin.adminName : 'Admin'}">Admin</span>
+                    <div class="avatar">A</div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div style="padding: 30px; overflow-y: auto;">
+
+                <!-- AUDIT SECTION -->
+                <div th:if="${currentTab == 'audit'}" class="table-container">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+                        <h3 style="margin: 0; font-size: 16px; color: #333;">待審核申請列表</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>申請地區</th>
+                                <th>銀行帳戶</th>
+                                <th>申請時間</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="tech : ${pendingTechs}">
+                                <td th:text="${tech.realName}">Name</td>
+                                <td>
+                                    <span class="badge" th:text="${tech.serviceArea}"
+                                        style="background-color: #eee; color: #333;">Area</span>
+                                </td>
+                                <td>
+                                    <div th:text="${tech.bankCode}">Code</div>
+                                    <div th:text="${tech.bankAccount}" style="font-size: 12px; color: #888;">Account
+                                    </div>
+                                </td>
+                                <td th:text="${#temporals.format(tech.createAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <form th:action="@{'/admin/audit/' + ${tech.techNo} + '/approve'}"
+                                            method="post">
+                                            <button type="submit" class="btn btn-primary">通過</button>
+                                        </form>
+                                        <form th:action="@{'/admin/audit/' + ${tech.techNo} + '/reject'}" method="post">
+                                            <button type="submit" class="btn btn-secondary"
+                                                style="color: #d9534f; border-color: #d9534f;">駁回</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(pendingTechs)}">
+                                <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                                    目前沒有待審核的申請
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PAYOUT SECTION -->
+                <div th:if="${currentTab == 'payout'}">
+
+                    <!-- Pending Section -->
+                    <h3
+                        style="margin-bottom: 15px; color: #d97706; border-left: 5px solid #d97706; padding-left: 10px;">
+                        待撥款清單</h3>
+                    <div class="table-container" style="margin-bottom: 40px;">
+                        <table class="payout-table">
+                            <thead>
+                                <tr>
+                                    <th>訂單編號</th>
+                                    <th>技師姓名</th>
+                                    <th>銀行帳戶資訊</th>
+                                    <th>完工日期</th>
+                                    <th>訂單總額</th>
+                                    <th>應付技師金額</th>
+                                    <th>平台營收</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="order : ${pendingPayouts}">
+                                    <td th:text="'#' + ${order.installOrderNo}">#001</td>
+                                    <td th:text="${order.technician.realName}">Tech Name</td>
+                                    <td>
+                                        <div class="bank-info">
+                                            <div th:text="'銀行代碼: ' + ${order.technician.bankCode}">822</div>
+                                            <div th:text="'帳號: ' + ${order.technician.bankAccount}">1234567890</div>
+                                        </div>
+                                    </td>
+                                    <td th:text="${order.appointDate}">2023-10-20</td>
+                                    <td th:text="'$' + ${order.totalPrice}">$1000</td>
+                                    <td class="amount-info" th:text="'$' + ${order.techPayout}">$950</td>
+                                    <td th:text="'$' + ${order.platformRevenue}">$50</td>
+                                    <td>
+                                        <form th:action="@{'/admin/payout/' + ${order.installOrderNo}}" method="post"
+                                            onsubmit="return confirm('確認已完成轉帳並撥款？');">
+                                            <button type="submit" class="btn-payout">確認撥款</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(pendingPayouts)}">
+                                    <td colspan="8" style="text-align: center; padding: 30px; color: #6b7280;">
+                                        目前沒有需要撥款的訂單
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Completed Section -->
+                    <h3
+                        style="margin-bottom: 15px; color: #10b981; border-left: 5px solid #10b981; padding-left: 10px;">
+                        已撥款記錄</h3>
+                    <div class="table-container">
+                        <table class="payout-table">
+                            <thead>
+                                <tr>
+                                    <th>訂單編號</th>
+                                    <th>技師姓名</th>
+                                    <th>銀行帳戶資訊</th>
+                                    <th>完工日期</th>
+                                    <th>訂單總額</th>
+                                    <th>已付技師金額</th>
+                                    <th>平台營收</th>
+                                    <th>狀態</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="order : ${completedPayouts}">
+                                    <td th:text="'#' + ${order.installOrderNo}">#001</td>
+                                    <td th:text="${order.technician.realName}">Tech Name</td>
+                                    <td>
+                                        <div class="bank-info">
+                                            <div th:text="'銀行代碼: ' + ${order.technician.bankCode}">822</div>
+                                            <div th:text="'帳號: ' + ${order.technician.bankAccount}">1234567890</div>
+                                        </div>
+                                    </td>
+                                    <td th:text="${order.appointDate}">2023-10-20</td>
+                                    <td th:text="'$' + ${order.totalPrice}">$1000</td>
+                                    <td class="amount-info" style="color: #059669;" th:text="'$' + ${order.techPayout}">
+                                        $950</td>
+                                    <td th:text="'$' + ${order.platformRevenue}">$50</td>
+                                    <td>
+                                        <span
+                                            style="background-color: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.9em;">已完成</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(completedPayouts)}">
+                                    <td colspan="8" style="text-align: center; padding: 30px; color: #6b7280;">尚無已撥款記錄
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- SERVICES SECTION -->
+                <div th:if="${currentTab == 'services'}" class="table-container">
+                    <div
+                        style="padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0; font-size: 16px; color: #333;">目前服務項目</h3>
+
+                        <form th:action="@{/admin/services}" method="post" style="display: flex; gap: 10px;">
+                            <input type="text" name="serviceName" placeholder="輸入新服務名稱" required
+                                style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px;">
+                            <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 14px;">+
+                                新增</button>
+                        </form>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 10%;">ID</th>
+                                <th>服務名稱</th>
+                                <th style="width: 20%;">建立時間</th>
+                                <th style="width: 25%;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="svc : ${services}">
+                                <td th:text="'#' + ${svc.serviceNo}">#1</td>
+                                <td>
+                                    <!-- Display Mode -->
+                                    <span th:id="'name-' + ${svc.serviceNo}" th:text="${svc.serviceName}">Service
+                                        Name</span>
+
+                                    <!-- Edit Mode (Hidden) -->
+                                    <form th:id="'edit-form-' + ${svc.serviceNo}"
+                                        th:action="@{'/admin/services/' + ${svc.serviceNo} + '/update'}" method="post"
+                                        style="display: none; align-items: center; gap: 5px;">
+                                        <input type="text" name="serviceName" th:value="${svc.serviceName}"
+                                            style="padding: 4px; border: 1px solid #ddd; border-radius: 3px;">
+                                        <button type="submit" class="btn btn-primary"
+                                            style="padding: 2px 8px; font-size: 12px;">儲存</button>
+                                        <button type="button" class="btn btn-secondary"
+                                            th:onclick="'cancelEdit(' + ${svc.serviceNo} + ')'"
+                                            style="padding: 2px 8px; font-size: 12px; border: 1px solid #ddd; background: white; color: #333;">取消</button>
+                                    </form>
+                                </td>
+                                <td th:text="${#temporals.format(svc.createdAt, 'yyyy-MM-dd')}">2023-01-01</td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <button type="button" class="btn btn-secondary"
+                                            th:onclick="'enableEdit(' + ${svc.serviceNo} + ')'"
+                                            style="padding: 4px 8px; font-size: 13px;">✏️ 修改</button>
+
+                                        <form th:action="@{'/admin/services/' + ${svc.serviceNo} + '/delete'}"
+                                            method="post" onsubmit="return confirm('確定要刪除此服務項目？這可能會影響已選擇此服務的技師。');">
+                                            <button type="submit" class="btn btn-secondary"
+                                                style="padding: 4px 8px; font-size: 13px; color: #d9534f; border-color: #d9534f;">🗑️
+                                                刪除</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- LOCATIONS SECTION -->
+                <div th:if="${currentTab == 'locations'}" class="table-container">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #333;">安裝場地管理</h3>
+                        <form th:action="@{/admin/locations}" method="post"
+                            style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <input type="text" name="locationName" placeholder="場地名稱" required
+                                style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; width: 150px;">
+                            <input type="text" name="address" placeholder="場地地址" required
+                                style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; width: 250px;">
+                            <input type="number" name="pricePer" placeholder="費用" required min="0" value="500"
+                                style="padding: 6px 10px; border: 1px solid #ddd; border-radius: 4px; width: 100px;">
+                            <button type="submit" class="btn btn-primary" style="padding: 6px 12px; font-size: 14px;">+
+                                新增場地</button>
+                        </form>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 20%;">名稱</th>
+                                <th style="width: 35%;">地址</th>
+                                <th style="width: 15%;">費用</th>
+                                <th style="width: 15%;">狀態</th>
+                                <th style="width: 15%;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="loc : ${locations}">
+                                <!-- DISPLAY MODE -->
+                                <td th:id="'loc-name-' + ${loc.locationNo}">
+                                    <span th:text="${loc.locationName}" style="font-weight: 600;">Location Name</span>
+                                </td>
+                                <td th:id="'loc-addr-' + ${loc.locationNo}" th:text="${loc.address}">Address</td>
+                                <td th:id="'loc-price-' + ${loc.locationNo}" th:text="'$' + ${loc.pricePer}">$500</td>
+                                <td>
+                                    <span class="badge" th:text="${loc.locationStatus == 1 ? '啟用' : '停用'}"
+                                        th:style="${loc.locationStatus == 1 ? 'background-color: #dcfce7; color: #166534;' : 'background-color: #fee2e2; color: #991b1b;'}">active</span>
+                                </td>
+
+                                <!-- EDIT FORM (HIDDEN) -->
+                                <td th:id="'loc-edit-' + ${loc.locationNo}" colspan="4" style="display: none;">
+                                    <form th:action="@{'/admin/locations/' + ${loc.locationNo} + '/update'}"
+                                        method="post"
+                                        style="display: flex; gap: 5px; width: 100%; align-items: center;">
+                                        <input type="text" name="locationName" th:value="${loc.locationName}" required
+                                            style="width: 120px; padding: 4px; border: 1px solid #ddd; border-radius: 3px;">
+                                        <input type="text" name="address" th:value="${loc.address}" required
+                                            style="flex-grow: 1; padding: 4px; border: 1px solid #ddd; border-radius: 3px;">
+                                        <input type="number" name="pricePer" th:value="${loc.pricePer}" required
+                                            style="width: 80px; padding: 4px; border: 1px solid #ddd; border-radius: 3px;">
+                                        <button type="submit" class="btn btn-primary"
+                                            style="padding: 4px 8px; font-size: 12px;">儲存</button>
+                                        <button type="button" class="btn btn-secondary"
+                                            th:onclick="'cancelLocEdit(' + ${loc.locationNo} + ')'"
+                                            style="padding: 4px 8px; font-size: 12px; border: 1px solid #ddd; background: white; color: #333;">取消</button>
+                                    </form>
+                                </td>
+
+                                <!-- ACTIONS -->
+                                <td th:id="'loc-actions-' + ${loc.locationNo}">
+                                    <div style="display: flex; gap: 5px;">
+                                        <button type="button" class="btn btn-secondary"
+                                            th:onclick="'enableLocEdit(' + ${loc.locationNo} + ')'"
+                                            style="padding: 4px 8px; font-size: 13px;">✏️</button>
+                                        <form th:action="@{'/admin/locations/' + ${loc.locationNo} + '/delete'}"
+                                            method="post" onsubmit="return confirm('確定要刪除出場地？');">
+                                            <button type="submit" class="btn btn-secondary"
+                                                style="padding: 4px 8px; font-size: 13px; color: #d9534f; border-color: #d9534f;">🗑️</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function enableEdit(id) {
+            document.getElementById('name-' + id).style.display = 'none';
+            document.getElementById('edit-form-' + id).style.display = 'flex';
+        }
+
+        function cancelEdit(id) {
+            document.getElementById('name-' + id).style.display = 'inline';
+            document.getElementById('edit-form-' + id).style.display = 'none';
+        }
+
+        // Location Edit Functions
+        function enableLocEdit(id) {
+            document.getElementById('loc-name-' + id).style.display = 'none';
+            document.getElementById('loc-addr-' + id).style.display = 'none';
+            document.getElementById('loc-price-' + id).style.display = 'none';
+            document.getElementById('loc-actions-' + id).style.display = 'none';
+            document.getElementById('loc-edit-' + id).style.display = 'table-cell';
+        }
+
+        function cancelLocEdit(id) {
+            document.getElementById('loc-name-' + id).style.display = 'table-cell';
+            document.getElementById('loc-addr-' + id).style.display = 'table-cell';
+            document.getElementById('loc-price-' + id).style.display = 'table-cell';
+            document.getElementById('loc-actions-' + id).style.display = 'table-cell';
+            document.getElementById('loc-edit-' + id).style.display = 'none';
+        }
+    </script>
+
+</body>
+
+</html>
