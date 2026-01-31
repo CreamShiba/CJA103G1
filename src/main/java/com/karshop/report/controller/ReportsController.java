@@ -1,6 +1,5 @@
 package com.karshop.report.controller;
 
-import com.karshop.report.model.InstallAppeals;
 import com.karshop.report.model.Reports;
 import com.karshop.report.service.ReportsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,37 +16,38 @@ public class ReportsController {
     @Autowired
     private ReportsService reportsService;
 
-    // 顯示檢舉頁面
+    // 顯示前台新增檢舉頁面
     @GetMapping("/add")
     public String showReportPage() {
-        return "templates-report/add-report"; // 請確認檔名是否為 add-report.html
+        return "templates-report/add-report";
     }
 
-    // 處理檢舉提交
+    // 處理前台檢舉提交表單
     @PostMapping("/submit")
     public String handleReport(@ModelAttribute Reports report, Model model) {
-
-        // 設定預設值
+        // 設定存檔預設值
         report.setReportsTimestamp(LocalDateTime.now());
         report.setStatus("待處理");
-        report.setMemberNo(1); // 預設目前登入者
+        report.setMemberNo(1); // 開發階段預設目前登入者為 1
         report.setAdmNo(1);
 
-        // 存入資料庫
+        // 呼叫 Service 執行存入資料庫動作
         reportsService.submitReport(report);
 
-        // 將檢舉對象或編號傳給成功頁面
+        // 將檢舉對象傳給成功頁面顯示
         model.addAttribute("target", report.getReportsTarget());
 
         return "templates-report/report-success";
     }
 
+    // 提供 JSON 格式的所有檢舉資料 (供管理後台使用)
     @GetMapping("/api/all")
-    @ResponseBody //加這個註解 才會回傳JSON資料而不是找HTML頁面
+    @ResponseBody
     public List<Reports> getAllReportsForAdmin(){
         return reportsService.getAllReports();
     }
 
+    // 處理管理員後台的審核結案動作
     @PostMapping("/api/handle")
     @ResponseBody
     public String handleReportByAdmin(@RequestParam Integer id,
@@ -62,26 +62,40 @@ public class ReportsController {
         }
     }
 
-    // 顯示「處理案件」的詳細頁面
+    // 顯示管理員後台的「處理案件」詳細頁面
     @GetMapping("/admin/handle")
     public String showHandlePage(@RequestParam("id") Integer id, Model model) {
-        // 透過 Service 找尋該筆檢舉資料
+        Reports report = reportsService.getReportById(id);
+        if (report != null) {
+            model.addAttribute("report", report);
+            return "templates-report/handle-report";
+        } else {
+            return "redirect:/reports/admin/list";
+        }
+    }
+
+    // --- 會員中心功能 ---
+
+    // 顯示該會員的所有檢舉紀錄列表
+    @GetMapping("/history")
+    public String showReportHistory(Model model) {
+        Integer memberNo = 1; // 開發階段寫死會員編號為 1
+        List<Reports> list = reportsService.getReportsByMember(memberNo);
+        model.addAttribute("reports", list);
+        return "templates-report/report-history";
+    }
+
+    // 💡 新增：顯示檢舉紀錄的詳細資訊頁面
+    @GetMapping("/history/detail")
+    public String showReportHistoryDetail(@RequestParam("id") Integer id, Model model) {
+        // 透過 ID 取得該筆檢舉的詳細資料
         Reports report = reportsService.getReportById(id);
 
         if (report != null) {
             model.addAttribute("report", report);
-            return "templates-report/handle-report"; // ⚠️ 請確保這名稱與你的 HTML 檔名一致
+            return "templates-report/report-detail"; // 指向詳細內容頁面
         } else {
-            return "redirect:/reports/admin/list"; // 找不到資料就導回清單
+            return "redirect:/reports/history"; // 找不到資料則導回列表
         }
-    }
-
-    @GetMapping("/history")
-    public String showReportHistory(Model model) {
-        Integer memberNo = 1; // 💡 寫死為 1
-        // 呼叫 Service 取得該會員的檢舉清單
-        List<Reports> list = reportsService.getReportsByMember(memberNo);
-        model.addAttribute("reports", list);
-        return "templates-report/report-history";
     }
 }
