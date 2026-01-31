@@ -14,5 +14,5 @@ public interface TechnicianRepository extends JpaRepository<Technician, Integer>
 
     List<Technician> findByIsActiveAndRegionCodeValue(Integer isActive, Integer regionCode);
 
-    Optional<Technician> findByMemberMemNo(Integer memberNo);
+    Optional<Technician> findByMemberMemId(Integer memberNo);
 }

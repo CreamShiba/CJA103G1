@@ -44,7 +44,7 @@ public class InstallationController {
         MembersVO member = (MembersVO) session.getAttribute("member");
         boolean isTechnician = false;
         if (member != null) {
-            isTechnician = technicianRepository.findByMemberMemNo(member.getMemberNo())
+            isTechnician = technicianRepository.findByMemberMemId(member.getMemberNo())
                     .map(t -> t.getIsActive() == 1) // Assuming 1 means active/approved
                     .orElse(false);
         }
@@ -125,7 +125,7 @@ public class InstallationController {
         }
 
         // Check if user is already a technician
-        java.util.Optional<Technician> techOpt = technicianRepository.findByMemberMemNo(member.getMemberNo());
+        java.util.Optional<Technician> techOpt = technicianRepository.findByMemberMemId(member.getMemberNo());
         if (techOpt.isPresent()) {
             Technician tech = techOpt.get();
             if (tech.getIsActive() == 1) {

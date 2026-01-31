@@ -26,7 +26,6 @@ public class TechnicianManagementService {
     private final com.karshop.install.repository.ServiceItemRepository serviceItemRepository;
     private final com.karshop.install.repository.TechnicianReviewRepository technicianReviewRepository;
     private final com.karshop.install.repository.InstallLocationRepository installLocationRepository;
-    private final com.karshop.install.repository.InstallOrderRepository orderRepository;
 
     /**
      * 📋 取得所有可用服務項目
@@ -58,7 +57,7 @@ public class TechnicianManagementService {
                 .orElseThrow(() -> new IllegalArgumentException("會員不存在"));
 
         // 檢查是否重複申請
-        if (technicianRepository.findByMemberMemNo(dto.getMemberNo()).isPresent()) {
+        if (technicianRepository.findByMemberMemId(dto.getMemberNo()).isPresent()) {
             throw new IllegalStateException("您已經申請過技師資格");
         }
 
@@ -87,7 +86,7 @@ public class TechnicianManagementService {
      */
     @Transactional
     public void updateTechnicianProfile(TechnicianOnboardingDTO dto, Integer memberNo) throws IOException {
-        Technician technician = technicianRepository.findByMemberMemNo(memberNo)
+        Technician technician = technicianRepository.findByMemberMemId(memberNo)
                 .orElseThrow(() -> new IllegalStateException("技師不存在"));
 
         technician.setRealName(dto.getRealName());
@@ -117,7 +116,7 @@ public class TechnicianManagementService {
     @Transactional
     public void updateTechnicianServices(Integer memberNo, List<Integer> selectedServiceIds,
             java.util.Map<Integer, Integer> prices) {
-        Technician technician = technicianRepository.findByMemberMemNo(memberNo)
+        Technician technician = technicianRepository.findByMemberMemId(memberNo)
                 .orElseThrow(() -> new IllegalStateException("技師不存在"));
 
         if (selectedServiceIds != null) {
@@ -332,37 +331,6 @@ public class TechnicianManagementService {
      */
     public List<Technician> getPendingApplications() {
         return technicianRepository.findByIsActive(0);
-    }
-
-    /**
-     * 📋 [Admin] 取得所有通過審核的技師
-     */
-    public List<Technician> getApprovedTechnicians() {
-        return technicianRepository.findByIsActive(1);
-    }
-
-    /**
-     * ⛔ [Admin] 暫時停權技師 (退回審核狀態)
-     */
-    @Transactional
-    public void suspendTechnician(Integer techNo) {
-        // 1. 檢查是否有未完成的訂單 (Pending, Awaiting Payment, Paid/Uninstalled)
-        long activeOrders = orderRepository.countActiveOrdersByTechnician(techNo); // Using field from AdminController,
-                                                                                   // need to ensure repo is injected
-                                                                                   // here.
-        // Wait, orderRepository is defined as 'installOrderRepository' in this service?
-        // No, let's check.
-        // This service has installOrderRepository? No. I need to add it.
-
-        Technician technician = technicianRepository.findById(techNo)
-                .orElseThrow(() -> new IllegalArgumentException("技師不存在"));
-
-        if (activeOrders > 0) {
-            throw new IllegalStateException("該技師尚有未完成的訂單，無法停權");
-        }
-
-        technician.setIsActive(0); // Set back to PENDING (Audit/Suspended status)
-        technicianRepository.save(technician);
     }
 
     /**

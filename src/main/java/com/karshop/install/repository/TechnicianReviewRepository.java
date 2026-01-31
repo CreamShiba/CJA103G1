@@ -12,7 +12,7 @@ public interface TechnicianReviewRepository extends JpaRepository<TechnicianRevi
     // Force recompile check
     List<TechnicianReview> findByTechnicianTechNo(Integer techNo);
 
-    List<TechnicianReview> findByMemberMemNo(Integer memberNo);
+    List<TechnicianReview> findByMemberMemId(Integer memberNo);
 
     boolean existsByInstallOrderInstallOrderNo(Integer installOrderNo);
 

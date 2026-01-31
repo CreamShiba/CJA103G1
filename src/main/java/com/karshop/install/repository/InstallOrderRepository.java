@@ -12,11 +12,11 @@ import java.util.List;
 @Repository
 public interface InstallOrderRepository extends JpaRepository<InstallOrder, Integer> {
 
-        List<InstallOrder> findByMemberMemNo(Integer memberNo);
+        List<InstallOrder> findByMemberMemId(Integer memberNo);
 
-        List<InstallOrder> findByMemberMemNoOrderByInstallOrderNoDesc(Integer memberNo);
+        List<InstallOrder> findByMemberMemIdOrderByInstallOrderNoDesc(Integer memberNo);
 
-        List<InstallOrder> findByMemberMemNoAndOrderStatusValueOrderByInstallOrderNoDesc(Integer memberNo,
+        List<InstallOrder> findByMemberMemIdAndOrderStatusValueOrderByInstallOrderNoDesc(Integer memberNo,
                         Integer orderStatusValue);
 
         List<InstallOrder> findByTechnicianTechNoAndOrderStatusValue(Integer techNo, Integer orderStatusValue);
@@ -55,7 +55,4 @@ public interface InstallOrderRepository extends JpaRepository<InstallOrder, Inte
 
         @Query("SELECT o FROM InstallOrder o JOIN FETCH o.technician JOIN FETCH o.location WHERE o.installOrderNo = :id")
         java.util.Optional<InstallOrder> findByIdWithDetails(@Param("id") Integer id);
-
-        @Query("SELECT COUNT(o) FROM InstallOrder o WHERE o.technician.techNo = :techNo AND o.orderStatusValue IN (0, 1, 2)")
-        long countActiveOrdersByTechnician(@Param("techNo") Integer techNo);
 }
