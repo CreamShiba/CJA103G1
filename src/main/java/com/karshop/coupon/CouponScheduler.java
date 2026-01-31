@@ -12,7 +12,7 @@ public class CouponScheduler {
     @Autowired
     private CouponRepository couponRepository;
 
-    // 每小時執行一次檢查
+    // 每20 min執行一次檢查
     @Scheduled(cron = "0 0/20 * * * *")
     public void checkExpiredCoupons() {
         LocalDateTime now = LocalDateTime.now();

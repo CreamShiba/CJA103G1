@@ -194,7 +194,7 @@
                 <table class="detail-table">
                     <thead>
                     <tr>
-                        <th>商品名稱</th>
+                        <th style="width: 100px;"></th> <th>商品名稱</th>
                         <th>單價</th>
                         <th>數量</th>
                         <th>小計</th>
@@ -455,11 +455,16 @@
 
                     // 商品名稱與圖片處理
                     const prodName = item.product ? item.product.productName : `商品編號: ${item.prodNo}`;
-                    const imgUrl = `/product/display?prodNo=${item.prodNo}`;
+                    const imgUrl = `/favorite/showImage?prodNo=${item.prodNo}`;
 
                     detailBody.innerHTML += `
                     <tr>
-
+                         <td>
+                            <img src="${imgUrl}"
+                                 alt="商品圖片"
+                                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;"
+                                 onerror="this.src='/images/no-image.png';">
+                            </td>
                         <td style="text-align:left;">${prodName}</td>
                         <td>$${item.price}</td>
                         <td>${item.qty}</td>

@@ -13,7 +13,6 @@ public class ProductProdService {
     /**
      * 根據商品編號取得單一商品
      * @param prodNo 商品編號
-     * @return ProductProd 物件
      */
     public ProductProd getOneProduct(Integer prodNo) {
         Optional<ProductProd> optional = repository.findById(prodNo);

@@ -1,6 +1,6 @@
 package com.karshop.memberCoupon;
 
-import com.coupon.Coupon;
+import com.karshop.coupon.Coupon;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "member_coupon")
-@IdClass(MemberCouponId.class) // 指定使用複合主鍵類別
+@IdClass(MemberCouponId.class) // 使用複合主鍵類別
 public class MemberCoupon {
     @Id
     @Column(name = "member_no")

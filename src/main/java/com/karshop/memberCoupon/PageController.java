@@ -11,7 +11,7 @@ public class PageController {
 
     /**
      * 提供優惠券頁面
-     * GET http://localhost:8080/pages/my-coupons
+     *  http://localhost:8080/pages/my-coupons
      */
     @GetMapping("/my-coupons")
     public String myCouponsPage() {
@@ -26,7 +26,7 @@ public class PageController {
 
     @GetMapping("/my-orders")
     public String myOrdersPage() {
-        // 指向 templates/order/MemberOrderQuery.html
+        //  templates/order/MemberOrderQuery.html
         return "order/MemberOrderQuery";
     }
 

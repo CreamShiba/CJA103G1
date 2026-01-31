@@ -20,7 +20,7 @@ public class OrderProdService {
         return orderProdRepository.findByMemberNoOrderByOrdDateDesc(memberNo);
     }
 
-    // 核心功能：確認收貨並更新狀態
+    // 確認收貨並更新狀態
     @Transactional
     public boolean completeOrder(Integer ordNo) {
         Optional<OrderProd> orderOpt = orderProdRepository.findById(ordNo);
@@ -28,7 +28,7 @@ public class OrderProdService {
         if (orderOpt.isPresent()) {
             OrderProd order = orderOpt.get();
 
-            // 檢查是否為已發貨狀態 (安全性檢查)
+            // 檢查是否為已發貨狀態
             if ("已發貨".equals(order.getOrdStatus())) {
                 order.setOrdStatus("已完成");
                 order.setOrdCompletedDate(LocalDateTime.now());
@@ -42,7 +42,6 @@ public class OrderProdService {
     /**
      * 根據訂單編號取得單一訂單物件
      * @param ordNo 訂單編號
-     * @return Order 訂單物件，若找不到則回傳 null 或丟出異常
      */
     public OrderProd getOneOrder(Integer ordNo) {
         // 使用 Optional 處理，如果找不到資料就回傳 null

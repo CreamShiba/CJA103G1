@@ -15,7 +15,7 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Memb
     // 根據會員編號查詢其擁有的所有優惠券明細
     List<MemberCoupon> findByMemberNo(Integer memberNo);
 
-    // 如果只想查詢「未使用」的券，可以增加此方法
+    // 只查詢「未使用」的券，可以增加此方法，尚未開發完成
     List<MemberCoupon> findByMemberNoAndCouponStatus(Integer memberNo, Integer couponStatus);
 
 

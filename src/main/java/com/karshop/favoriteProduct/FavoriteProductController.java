@@ -1,7 +1,7 @@
 package com.karshop.favoriteProduct;
 
 
-import com.productProd.ProductProd;
+import com.karshop.productProd.ProductProd;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ public class FavoriteProductController {
     private FavoriteProductService favoriteProductService;
 
     @Autowired
-    private com.productProd.ProductImgService productImgService;
+    private com.karshop.productProd.ProductImgService productImgService;
 
     //  查看個人收藏清單
     @GetMapping("/list-page")
@@ -101,7 +101,7 @@ public class FavoriteProductController {
     @ResponseBody
     public ResponseEntity<byte[]> showImage(@RequestParam("prodNo") Integer prodNo) {
         // 1. 根據商品編號取得該商品的所有圖片
-        List<com.productProd.ProductImg> list = productImgService.getByProdNo(prodNo);
+        List<com.karshop.productProd.ProductImg> list = productImgService.getByProdNo(prodNo);
 
         // 2. 檢查是否有圖片資料
         if (list != null && !list.isEmpty()) {
