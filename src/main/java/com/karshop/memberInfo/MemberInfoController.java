@@ -59,7 +59,7 @@ public class MemberInfoController {
                                RedirectAttributes ra) {
         // 檢查格式是否有誤
         if (result.hasErrors()) {
-            // 若格式不符停留在編輯頁面，Thymeleaf 會自動帶入 result 中的錯誤訊息
+            // 格式不符停留在編輯頁面
             result.getFieldErrors().forEach(error ->
                     System.out.println("錯誤欄位：" + error.getField() + " | 錯誤原因：" + error.getDefaultMessage())
             );
@@ -96,7 +96,7 @@ public class MemberInfoController {
 
     //查詢
     @GetMapping("/api/search")
-    @ResponseBody // 關鍵：回傳 JSON 格式數據
+    @ResponseBody // 回傳 JSON 格式數據
     public List<MemberInfo> searchMembers(
             @RequestParam(required = false) Integer memberNo,
             @RequestParam(required = false) String keyword,
@@ -110,7 +110,7 @@ public class MemberInfoController {
         Integer searchEngineer = (isEngineer != null && isEngineer == -1) ? null : isEngineer;
         String searchKw = (keyword != null && keyword.trim().isEmpty()) ? null : keyword;
 
-        // 呼叫 Repository 的複合查詢方法
+        //  Repository 的複合查詢方法
         return memberInfoService.findByCompositeQuery(memberNo, searchKw, searchStatus, searchSeller, searchEngineer);
     }
 }

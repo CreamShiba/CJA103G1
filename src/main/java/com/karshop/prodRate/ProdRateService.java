@@ -13,7 +13,7 @@ public class ProdRateService {
 
 
     public void submitRate(ProdRate prodRate) {
-        // ✅ 首次提交：直接設為 1（已評價一次，可再編輯一次）
+        // 首次提交：直接設為 1（已評價一次，可再編輯一次）
         prodRate.setRateStatus(1);
         repository.save(prodRate);
         System.out.println("✅ 首次提交評價 - 商品編號：" + prodRate.getProdNo() +

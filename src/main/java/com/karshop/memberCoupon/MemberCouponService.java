@@ -1,8 +1,8 @@
 package com.karshop.memberCoupon;
 
 
-import com.coupon.CouponRepository;
-import com.memberCoupon.MemberCouponRepository;
+import com.karshop.coupon.CouponRepository;
+import com.karshop.memberCoupon.MemberCouponRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,6 @@ public class MemberCouponService {
     /**
      * 獲取會員擁有的所有優惠券
      * @param memberNo 會員編號
-     * @return 優惠券清單
      */
     @Transactional(readOnly = true)
     public List<MemberCoupon> getAllByMember(Integer memberNo) {
@@ -35,7 +34,6 @@ public class MemberCouponService {
     /**
      * 獲取會員尚未使用的優惠券
      * @param memberNo 會員編號
-     * @return 未使用的優惠券清單
      */
     @Transactional(readOnly = true)
     public List<MemberCoupon> getUnusedByMember(Integer memberNo) {
@@ -61,23 +59,23 @@ public class MemberCouponService {
 
     @Transactional
     public String claimCouponByName(Integer memberNo, String couponTitle) {
-        // 1. 透過名稱尋找優惠券
+        // 透過名稱尋找優惠券
 
         var couponOpt = couponRepository.findByCouponTitle(couponTitle);
         if (couponOpt.isEmpty() || couponOpt.get().getCouponStatus() != 1) {
             return "找不到該名稱的有效優惠券或優惠券已失效";
         }
 
-        com.coupon.Coupon coupon = couponOpt.get();
+        com.karshop.coupon.Coupon coupon = couponOpt.get();
 
-        // 額外檢查：如果當前時間已超過結束時間，也不允許領取
+        // 當前時間已超過結束時間，也不允許領取
         if (coupon.getCouponEnd().isBefore(java.time.LocalDateTime.now())) {
             return "該優惠券已過期，無法領取";
         }
 
         Integer couponNo = coupon.getCouponNo();
 
-        // 2. 檢查會員是否已經領過
+        // 檢查會員是否已經領過
         MemberCouponId id = new MemberCouponId();
         id.setMemberNo(memberNo);
         id.setCouponNo(couponNo);
@@ -86,7 +84,7 @@ public class MemberCouponService {
             return "您已經領取過此優惠券了";
         }
 
-        // 3. 建立領取紀錄
+        // 建立領取紀錄
         MemberCoupon newRecord = new MemberCoupon();
         newRecord.setMemberNo(memberNo);
         newRecord.setCouponNo(couponNo);
@@ -99,7 +97,7 @@ public class MemberCouponService {
 
     public List<MemberCoupon> getExpiredCouponsByMember(Integer memberNo) {
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
-        // 使用注入後的變數「實例」來呼叫方法
+
         return memberCouponRepository.findExpiredCoupons(memberNo, now);
     }
 }

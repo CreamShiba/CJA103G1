@@ -11,10 +11,10 @@ import java.util.Optional;
 
 // 第一個參數是 Entity 類別，第二個是主鍵 (@Id) 的型別
 public interface CouponRepository extends JpaRepository<Coupon, Integer>, JpaSpecificationExecutor<Coupon> {
-    // Spring Data JPA 會自動提供 CRUD 方法
+
     Optional<Coupon> findByCouponTitle(String couponTitle);
 
-    // 將過期的優惠券狀態改為 0
+    // 過期的優惠券狀態改為 0
     @Transactional
     @Modifying
     @Query("UPDATE Coupon c SET c.couponStatus = 0 WHERE c.couponEnd < :now AND c.couponStatus = 1")

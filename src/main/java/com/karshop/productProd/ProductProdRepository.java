@@ -12,6 +12,6 @@ import java.util.List;
 @Repository
 public interface ProductProdRepository extends JpaRepository<ProductProd, Integer> {
 
-    // 如果未來需要根據商品名稱搜尋，可以額外定義：
+    // 需要根據商品名稱搜尋額外定義
      List<ProductProd> findByProductNameContaining(String name);
 }

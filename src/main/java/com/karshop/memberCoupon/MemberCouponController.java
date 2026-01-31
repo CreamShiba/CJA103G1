@@ -15,7 +15,6 @@ public class MemberCouponController {
 
     /**
      * 查詢指定會員擁有的所有折價券
-     * GET http://localhost:8080/member/coupons/{memberNo}
      */
     @GetMapping("/{memberNo}")
     public ResponseEntity<List<MemberCoupon>> getMemberCoupons(@PathVariable Integer memberNo) {
@@ -30,7 +29,6 @@ public class MemberCouponController {
 
     /**
      * 查詢當前會員的所有優惠券
-     * GET http://localhost:8080/member/coupons/my-coupons?memberNo=1
      */
     @GetMapping("/my-coupons")
     public ResponseEntity<List<MemberCoupon>> myCouponsPage(@RequestParam Integer memberNo) {
@@ -45,7 +43,7 @@ public class MemberCouponController {
 
     /**
      * 查詢指定會員「未使用」的折價券 (status = 0)
-     * GET http://localhost:8080/member/coupons/unused/{memberNo}
+
      */
     @GetMapping("/unused/{memberNo}")
     public ResponseEntity<List<MemberCoupon>> getUnusedCoupons(@PathVariable Integer memberNo) {

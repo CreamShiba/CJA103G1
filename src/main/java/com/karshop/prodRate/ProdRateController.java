@@ -1,12 +1,12 @@
 package com.karshop.prodRate;
 
 
-import com.orderProd.OrderProd;
-import com.orderProd.OrderProdService;
-import com.productProd.ProductImg;
-import com.productProd.ProductImgService;
-import com.productProd.ProductProd;
-import com.productProd.ProductProdService;
+import com.karshop.orderProd.OrderProd;
+import com.karshop.orderProd.OrderProdService;
+import com.karshop.productProd.ProductImg;
+import com.karshop.productProd.ProductImgService;
+import com.karshop.productProd.ProductProd;
+import com.karshop.productProd.ProductProdService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

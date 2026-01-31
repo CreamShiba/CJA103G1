@@ -1,6 +1,6 @@
 package com.karshop.orderProd;
 
-import com.product.Product;
+import com.karshop.productProd.ProductProd;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,13 +18,13 @@ public class OrderProdDetail {
     @Column(name = "prod_no")
     private Integer prodNo;
 
-    @Column(name = "qty")      // 對應資料庫的 qty 欄位
+    @Column(name = "qty")
     private Integer qty;
 
-    @Column(name = "price")    // 對應資料庫的 price 欄位
+    @Column(name = "price")
     private Integer price;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "prod_no", referencedColumnName = "prod_no", insertable = false, updatable = false)
-    private Product product;
+    private ProductProd productProd;
 }

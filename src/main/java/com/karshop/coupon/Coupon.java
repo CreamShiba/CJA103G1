@@ -9,7 +9,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Data  // 自動生成所有的 getter/setter/toString/equals/hashCode
+@Data
 @Entity
 @Table(name = "coupon")
 public class Coupon {
