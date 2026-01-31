@@ -1,6 +1,6 @@
 package com.karshop.memberCoupon;
 
-import com.karshop.coupon.Coupon;
+import com.coupon.Coupon;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
