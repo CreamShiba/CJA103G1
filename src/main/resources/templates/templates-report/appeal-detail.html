@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>案件詳情 - 卡爾夏汽車百貨</title>
+  <style>
+    /* --- 基礎設定 (完全對照檢舉頁面) --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #050000;
+      background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
+      color: #ffffff;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    a { text-decoration: none; color: inherit; transition: 0.3s; }
+    a:hover { color: #ff3333; }
+    ul { list-style: none; }
+
+    /* --- 頂部導航 (Header) --- */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 40px;
+      font-size: 12px;
+      color: #ccc;
+      border-bottom: 1px solid #333;
+    }
+    .top-icons { display: flex; gap: 20px; align-items: center; }
+    .search-box {
+      border: 1px solid #555;
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      width: 150px;
+      justify-content: space-between;
+    }
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo::before {
+      content: '';
+      display: inline-block;
+      width: 30px;
+      height: 15px;
+      background: white;
+      border-radius: 10px;
+    }
+    .nav-links { display: flex; gap: 30px; font-size: 14px; align-items: center; }
+
+    /* --- 主要內容區佈局 --- */
+    .container {
+      display: flex;
+      padding: 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    aside {
+      width: 250px;
+      flex-shrink: 0;
+      padding-right: 40px;
+    }
+    .sidebar-section { margin-bottom: 40px; }
+    .sidebar-title { font-size: 18px; margin-bottom: 20px; color: #ddd; }
+    .category-list li {
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #aaa;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .category-list li:hover { color: #ff3333; }
+    .category-list li.active { color: #ff3333; font-weight: bold; }
+
+    /* --- 💡 案件詳情卡片區域 --- */
+    .detail-container { flex: 1; max-width: 1000px; }
+    .detail-card {
+      background: rgba(10, 10, 10, 0.6);
+      border: 1px solid rgba(255, 51, 51, 0.3);
+      border-radius: 8px;
+      padding: 50px;
+      box-shadow: 0 0 30px rgba(255, 51, 51, 0.15);
+      backdrop-filter: blur(10px);
+    }
+    .detail-title {
+      font-size: 48px;
+      font-weight: bold;
+      color: #ff3333;
+      margin-bottom: 15px;
+      letter-spacing: 2px;
+      position: relative;
+      padding-bottom: 20px;
+    }
+    .detail-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 120px;
+      height: 3px;
+      background: linear-gradient(90deg, #ff3333, transparent);
+    }
+
+    .info-section { margin-top: 30px; }
+    .info-row { display: grid; grid-template-columns: 150px 1fr; margin-bottom: 20px; font-size: 16px; align-items: center; }
+    .info-label { color: #ff3333; font-weight: bold; }
+    .info-value { color: #ddd; }
+
+    .content-label { font-size: 14px; color: #ff3333; margin-bottom: 10px; font-weight: bold; }
+    .content-box {
+      background-color: #1a1a1a;
+      border: 1px solid #333;
+      padding: 20px;
+      color: #fff;
+      font-size: 14px;
+      min-height: 120px;
+      width: 100%;
+      white-space: pre-wrap;
+      margin-bottom: 30px;
+    }
+
+    /* 圖片顯示區 */
+    .image-gallery { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px; }
+    .appeal-img {
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border: 2px solid #ff3333;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .appeal-img:hover { transform: scale(1.05); }
+
+    /* 管理員回覆區 */
+    .response-card {
+      background: rgba(255, 204, 0, 0.05);
+      border: 1px dashed #ffcc00;
+      padding: 25px;
+      margin-top: 20px;
+    }
+    .response-title { color: #ffcc00; font-weight: bold; margin-bottom: 10px; font-size: 16px; }
+    .response-text { color: #ffcc00; font-style: italic; font-size: 15px; }
+
+    .back-btn {
+      background-color: #ff3333;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 200px;
+      transition: 0.3s;
+      margin-top: 30px;
+    }
+    .back-btn:hover { background-color: #cc0000; transform: translateY(-2px); }
+
+    /* --- 用戶下拉選單樣式 --- */
+    .user-dropdown-container { position: relative; display: inline-block; }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background-color: #1a1a1a;
+      min-width: 150px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+      z-index: 100;
+      border: 1px solid #333;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .dropdown-menu.show { display: block; }
+    .dropdown-menu a { color: #ccc; padding: 12px 16px; display: block; font-size: 13px; text-align: left; }
+
+    /* --- Footer --- */
+    footer {
+      margin-top: 100px;
+      padding: 60px 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+      gap: 40px;
+      font-size: 14px;
+      color: #aaa;
+      background-color: rgba(0,0,0,0.8);
+      border-top: 1px solid #333;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="top-bar">
+    <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+    <div class="top-icons">
+      <div class="search-box">
+        <input type="text" placeholder="Search..." style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+        <span>🔍</span>
+      </div>
+      <div class="user-dropdown-container">
+        <span id="user-icon" style="cursor: pointer;">👤</span>
+        <div id="user-dropdown" class="dropdown-menu">
+          <a href="#">登入</a> <a href="#">註冊</a>
+        </div>
+      </div>
+      <span id="cart">🛒</span>
+    </div>
+  </div>
+
+  <div class="main-header">
+    <div class="logo">卡爾夏</div>
+    <nav class="nav-links">
+      <a href="#">商城</a> <a href="#" class="active">安裝區</a>
+      <a href="#">論壇</a> <a href="#">公告</a><a href="#">常見問題</a>
+      <div class="user-dropdown-container">
+        <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+        <div id="member-dropdown" class="dropdown-menu">
+          <a href="#">我的優惠券</a> <a href="#">我的收藏</a> <a href="#">訂單查詢</a> <a href="/appeals/add">申訴/檢舉</a>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="container">
+  <aside>
+    <div class="sidebar-section">
+      <h3 class="sidebar-title">Browse by</h3>
+      <ul class="category-list">
+        <li onclick="location.href='/appeals/add'">提交申訴</li>
+        <li onclick="location.href='/reports/add'">提交檢舉</li>
+        <li class="active" onclick="location.href='/appeals/history'">申訴紀錄</li>
+        <li onclick="location.href='/reports/history'">檢舉紀錄</li>
+      </ul>
+    </div>
+  </aside>
+
+  <div class="detail-container">
+    <div class="detail-card">
+      <h1 class="detail-title">CASE DETAILS</h1>
+
+      <div class="info-section">
+        <div class="info-row">
+          <div class="info-label">案件編號</div>
+          <div class="info-value" th:text="${appeal.appealsNo}">#001</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">申訴類別</div>
+          <div class="info-value" th:text="${appeal.categories}">技師態度不佳</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">申請時間</div>
+          <div class="info-value" th:text="${#temporals.format(appeal.applyDate, 'yyyy-MM-dd HH:mm')}">2026-01-29</div>
+        </div>
+
+        <div class="content-label" style="margin-top: 30px;">申訴詳細描述</div>
+        <div class="content-box" th:text="${appeal.description}">這裡顯示詳細描述...</div>
+
+        <div th:if="${!#lists.isEmpty(images)}">
+          <div class="content-label">附圖附件</div>
+          <div class="image-gallery">
+            <img th:each="img : ${images}" th:src="@{/appeals/image/{id}(id=${img.imgNo})}" class="appeal-img">
+          </div>
+        </div>
+
+        <div class="response-card">
+          <div class="response-title">管理員處理回覆</div>
+          <div class="response-text" th:text="${appeal.response != null ? appeal.response : '案件處理中，請耐心等候。'}">尚未回覆</div>
+        </div>
+      </div>
+
+      <button class="back-btn" onclick="location.href='/appeals/history'">返回紀錄清單</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-col"><div class="logo">卡爾夏</div></div>
+  <div class="footer-col"><h4>Shop</h4><ul><li>Shop Parts</li><li>Wholesale</li></ul></div>
+  <div class="footer-col"><h4>The Company</h4><ul><li>About Us</li><li>FAQ</li></ul></div>
+  <div class="footer-col"><h4>Contact Us</h4><ul><li>info@karshop.com</li></ul></div>
+  <div class="footer-col"><h4>Follow Us</h4><ul><li>Instagram</li></ul></div>
+</footer>
+
+<script>
+  // 下拉選單邏輯
+  window.onload = function() {
+    const userIcon = document.getElementById('user-icon');
+    const userDropdown = document.getElementById('user-dropdown');
+    const memberTrigger = document.getElementById('member-center-trigger');
+    const memberDropdown = document.getElementById('member-dropdown');
+
+    userIcon.onclick = (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); memberDropdown.classList.remove('show'); };
+    memberTrigger.onclick = (e) => { e.stopPropagation(); memberDropdown.classList.toggle('show'); userDropdown.classList.remove('show'); };
+    document.onclick = () => { userDropdown.classList.remove('show'); memberDropdown.classList.remove('show'); };
+  };
+</script>
+</body>
+</html>

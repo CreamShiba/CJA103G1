@@ -57,15 +57,13 @@ public class InstallAppealsController {
         appeal.setAdmNo(1);
 
         // 呼叫 Service 存入資料庫主表
-        // 💡 存完後 appeal.getAppealsNo() 會自動拿到資料庫生成的 ID
         installAppealsService.submitInstallAppeal(appeal);
 
-        // 💡 處理多張圖片存檔：跑迴圈將每一張圖片存進 install_appeal_images 表
+        // 💡 處理多張圖片存檔
         if (images != null && images.length > 0) {
             for (MultipartFile file : images) {
                 if (!file.isEmpty()) {
                     try {
-                        // 呼叫 Service 存入圖片表，並帶入主表的 ID (appealsNo)
                         installAppealsService.saveAppealImage(appeal.getAppealsNo(), file.getBytes());
                     } catch (IOException e) {
                         System.err.println("圖片讀取失敗: " + e.getMessage());
@@ -74,27 +72,48 @@ public class InstallAppealsController {
             }
         }
 
-        // 關鍵修改：把訂單編號傳給下一頁 (成功頁面)
         model.addAttribute("orderNo", appeal.getInstallOrderNo());
-
-        // 這裡不要用 redirect，直接 return "appeal-success"
         return "templates-report/appeal-success";
     }
 
-    // 後台管理：顯示「安裝申訴」管理列表頁面
+    // --- 申訴紀錄區域 ---
+
+    // 顯示申訴紀錄列表
+    @GetMapping("/history")
+    public String showAppealHistory(Model model) {
+        Integer memberNo = 1; // 💡 開發階段寫死為 1
+        List<InstallAppeals> list = installAppealsService.getAppealsByMember(memberNo);
+        model.addAttribute("appeals", list);
+        return "templates-report/appeal-history";
+    }
+
+    // 💡 顯示案件詳細資訊頁面
+    @GetMapping("/history/detail")
+    public String showAppealDetail(@RequestParam("id") Integer id, Model model) {
+        // 透過 ID 找出該筆申訴的詳細資料
+        InstallAppeals appeal = installAppealsService.getAppealById(id);
+        // 找出該筆案件關聯的所有圖片清單
+        List<InstallAppealImage> images = installAppealsService.getImagesByAppealsNo(id);
+
+        model.addAttribute("appeal", appeal);
+        model.addAttribute("images", images);
+
+        return "templates-report/appeal-detail"; // 指向詳細內容頁面
+    }
+
+    // --- 管理後台與圖片 API ---
+
     @GetMapping("/admin/list")
     public String showInstallAdminPage() {
         return "templates-report/admin-install-list";
     }
 
-    // 提供 JSON 資料給後台表格 (供 fetch 使用)
     @GetMapping("/api/all")
     @ResponseBody
     public List<InstallAppeals> showAllInstallAppeals() {
         return installAppealsService.getAllInstallAppeals();
     }
 
-    // 處理管理員結案更新
     @PostMapping("api/handle")
     @ResponseBody
     public String handleInstallAppealByAdmin(@RequestParam Integer id,
@@ -109,52 +128,24 @@ public class InstallAppealsController {
         }
     }
 
-    // 網址路徑：顯示案件處理詳細頁面 (包含圖片顯示邏輯)
     @GetMapping("/admin/handle")
     public String showHandlePage(@RequestParam("id") Integer id, Model model) {
-        // 透過 Service 找出該筆申訴的詳細資料
         InstallAppeals appeal = installAppealsService.getAppealById(id);
-
-        // 💡 找出該筆案件關聯的所有圖片清單，讓前端可以用 th:each 跑出來
         List<InstallAppealImage> images = installAppealsService.getImagesByAppealsNo(id);
-
-        // 將資料塞入 model，讓 HTML 可以讀取
         model.addAttribute("appeal", appeal);
         model.addAttribute("images", images);
-
         return "templates-report/handle-appeal";
     }
 
-    // 💡 圖片顯示 API：讓瀏覽器可以透過網址讀取資料庫的 LONGBLOB 圖片
     @GetMapping("/image/{id}")
     @ResponseBody
     public org.springframework.http.ResponseEntity<byte[]> getAppealImage(@PathVariable Integer id) {
-        // 透過圖片編號 (img_no) 從資料庫撈出圖片二進位檔
         byte[] imageBytes = installAppealsService.getAppealsImageById(id);
-
         if (imageBytes != null) {
             return org.springframework.http.ResponseEntity.ok()
                     .contentType(org.springframework.http.MediaType.IMAGE_JPEG)
                     .body(imageBytes);
         }
         return org.springframework.http.ResponseEntity.notFound().build();
-    }
-
-    @Controller
-    @RequestMapping("/reports")
-    public class ReportsController {
-        @GetMapping("/admin/list")
-        public String showReportList() {
-            return "templates-report/admin-report-list";
-        }
-    }
-
-    //這裡是我要弄申訴紀錄先寫死會員資料為1
-    @GetMapping("/history")
-    public String showAppealHistory(Model model) {
-        Integer memberNo = 1; // 💡 開發階段寫死為 1
-        List<InstallAppeals> list = installAppealsService.getAppealsByMember(memberNo);
-        model.addAttribute("appeals", list);
-        return "templates-report/appeal-history";
     }
 }
