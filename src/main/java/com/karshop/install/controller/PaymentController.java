@@ -47,6 +47,16 @@ public class PaymentController {
 
         paymentService.handleCallback(params);
 
+        String rtnCode = params.get("RtnCode");
+        String rtnMsg = params.get("RtnMsg");
+
+        if (!"1".equals(rtnCode)) {
+            // Payment failed
+            return "redirect:/member/orders?error=" +
+                    java.net.URLEncoder.encode("Payment Failed (" + rtnCode + "): " + rtnMsg,
+                            java.nio.charset.StandardCharsets.UTF_8);
+        }
+
         // Redirect user back to their order list
         return "redirect:/member/orders";
     }
