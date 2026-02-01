@@ -26,6 +26,7 @@ public class MemberOrderController {
     private final InstallOrderRepository orderRepository;
     private final PaymentService paymentService;
     private final com.karshop.install.service.ReviewService reviewService;
+    private final com.karshop.install.repository.TechnicianRepository technicianRepository;
 
     @GetMapping("/orders")
     public String myOrders(@RequestParam(required = false) Integer status, HttpSession session, Model model) {
@@ -40,6 +41,11 @@ public class MemberOrderController {
         } else {
             orders = orderRepository.findByMemberMemIdOrderByInstallOrderNoDesc(member.getMemberNo());
         }
+
+        boolean isTechnician = technicianRepository.findByMemberMemId(member.getMemberNo())
+                .map(t -> t.getIsActive() == 1)
+                .orElse(false);
+        model.addAttribute("isTechnician", isTechnician);
 
         model.addAttribute("currentStatus", status);
         List<OrderVO> voList = orders.stream().map(o -> {

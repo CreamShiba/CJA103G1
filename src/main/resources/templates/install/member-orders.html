@@ -56,7 +56,8 @@
         <nav class="nav-links">
             <a th:href="@{/installation/home}">尋找技師</a>
             <a th:href="@{/member/orders}" class="active">我的訂單</a>
-            <a th:href="@{/installation/entry}">成為技師</a>
+            <a th:href="@{/installation/entry}" th:unless="${isTechnician}">成為技師</a>
+            <a th:href="@{/technician/orders}" th:if="${isTechnician}">技師後台</a>
             <form th:action="@{/members/logout}" method="post" style="display:inline;">
                 <button type="submit"
                     style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出</button>
@@ -141,10 +142,7 @@
                                     class="btn btn-primary">
                                     綠界付款
                                 </a>
-                                <a th:href="@{'/payment/simulate-success/' + ${order.installOrderNo}}" class="btn"
-                                    style="background-color: #d97706; color: white; border: none;">
-                                    (測試) 一鍵付款
-                                </a>
+
                             </div>
 
                             <div th:if="${order.orderStatus == '已完成' && !order.reviewed}" style="margin-top: 10px;">
@@ -199,6 +197,16 @@
     </footer>
 
     <script>
+        // Check for URL parameters for error messages
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMsg = urlParams.get('error');
+        if (errorMsg) {
+            alert(decodeURIComponent(errorMsg));
+            // Optional: Clean URL
+            const newUrl = window.location.pathname + window.location.search.replace(/[\?&]error=[^&]+/, '');
+            history.replaceState({}, document.title, newUrl);
+        }
+
         // User Dropdown Toggle
         const userIcon = document.getElementById('user-icon');
         const userDropdown = document.getElementById('user-dropdown');
