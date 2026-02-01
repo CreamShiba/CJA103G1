@@ -40,6 +40,9 @@ public class TechnicianBackendController {
                 Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
 
+                if (tech.getIsActive() != 1)
+                        return "redirect:/installation/home?error=pending";
+
                 model.addAttribute("currentTab", tab);
 
                 // 1. Pending Orders (待確認)
@@ -74,6 +77,8 @@ public class TechnicianBackendController {
                 MembersVO member = (MembersVO) session.getAttribute("member");
                 Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
+                if (tech.getIsActive() != 1)
+                        return "redirect:/installation/home?error=pending";
 
                 bookingService.confirmOrder(id, tech.getTechNo());
                 return "redirect:/technician/orders";
@@ -84,6 +89,8 @@ public class TechnicianBackendController {
                 MembersVO member = (MembersVO) session.getAttribute("member");
                 Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
+                if (tech.getIsActive() != 1)
+                        return "redirect:/installation/home?error=pending";
 
                 bookingService.rejectOrder(id, tech.getTechNo());
                 return "redirect:/technician/orders";
@@ -94,6 +101,8 @@ public class TechnicianBackendController {
                 MembersVO member = (MembersVO) session.getAttribute("member");
                 Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
+                if (tech.getIsActive() != 1)
+                        return "redirect:/installation/home?error=pending";
 
                 payoutService.completeOrder(id, tech.getTechNo());
                 return "redirect:/technician/orders";
@@ -120,6 +129,8 @@ public class TechnicianBackendController {
 
                 Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
+                if (tech.getIsActive() != 1)
+                        return "redirect:/installation/home?error=pending";
 
                 // Populate DTO for form
                 com.karshop.install.dto.TechnicianOnboardingDTO dto = new com.karshop.install.dto.TechnicianOnboardingDTO();
@@ -161,6 +172,8 @@ public class TechnicianBackendController {
 
                 Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
+                if (tech.getIsActive() != 1)
+                        return "redirect:/installation/home?error=pending";
 
                 com.karshop.install.dto.TechnicianServicesDTO dto = new com.karshop.install.dto.TechnicianServicesDTO();
 

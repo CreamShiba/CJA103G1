@@ -56,15 +56,10 @@
         <nav class="nav-links">
             <a th:href="@{/installation/home}" class="active">尋找技師</a>
             <a th:href="@{/member/orders}">我的訂單</a>
-            <a th:href="@{/installation/entry}">成為技師</a>
+            <a th:href="@{/installation/entry}" th:unless="${isTechnician}">成為技師</a>
             <a th:href="@{/technician/orders}" th:if="${isTechnician}">技師後台</a>
 
             <a href="javascript:void(0)">回到商城</a>
-            <form th:action="@{/members/logout}" method="post" style="display:inline;"
-                th:if="${session.member != null}">
-                <button type="submit"
-                    style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出</button>
-            </form>
         </nav>
     </header>
 
@@ -119,7 +114,7 @@
                     // Check for URL parameters
                     const urlParams = new URLSearchParams(window.location.search);
                     if (urlParams.get('error') === 'pending') {
-                        alert("請等待管理員審核");
+                        alert("(技師資格審核或暫時停權中)");
                         // Optional: Clear the parameter from URL without reloading
                         const newUrl = window.location.pathname + window.location.search.replace(/[\?&]error=pending/, '');
                         history.replaceState({}, document.title, newUrl);
