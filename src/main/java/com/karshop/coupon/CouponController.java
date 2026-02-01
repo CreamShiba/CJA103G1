@@ -135,17 +135,21 @@ public class CouponController {
      */
     @PostMapping("/update")
     public String update(@Valid @ModelAttribute("coupon") Coupon coupon,
-                         BindingResult result) {
+                         BindingResult result,
+                         Model model) { // 加上 Model 以防萬一需要補資料
 
-        if (result.hasErrors()) {
-            return "coupon/updateCoupon";
+        // 1. 邏輯驗證：結束時間不可早於開始時間
+        if (coupon.getCouponStart() != null && coupon.getCouponEnd() != null) {
+            if (coupon.getCouponEnd().isBefore(coupon.getCouponStart())) {
+                // 將自定義錯誤加入 BindingResult，對應 couponEnd 欄位
+                result.rejectValue("couponEnd", "error.couponEnd", "結束時間不可早於開始時間");
+            }
         }
 
-        // 邏輯驗證
-        if (coupon.getCouponEnd() != null && coupon.getCouponStart() != null) {
-            if (coupon.getCouponEnd().isBefore(coupon.getCouponStart())) {
-                return "coupon/updateCoupon";
-            }
+        // 2. 檢查所有錯誤（包含 @Valid 產生的與自定義的）
+        if (result.hasErrors()) {
+            // 不需要重新 getOne，因為 @ModelAttribute 會把使用者剛輸入的資料帶回頁面
+            return "coupon/updateCoupon";
         }
 
         couponService.update(coupon);
