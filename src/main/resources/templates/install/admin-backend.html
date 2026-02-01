@@ -90,6 +90,8 @@
                         <ul class="submenu" style="display: block;"> <!-- Keep open for this page -->
                             <li><a th:href="@{/admin/dashboard(tab='audit')}"
                                     th:classappend="${currentTab == 'audit' ? 'active' : ''}">技師審核</a></li>
+                            <li><a th:href="@{/admin/dashboard(tab='technicians')}"
+                                    th:classappend="${currentTab == 'technicians' ? 'active' : ''}">技師管理</a></li>
                             <li><a th:href="@{/admin/dashboard(tab='payout')}"
                                     th:classappend="${currentTab == 'payout' ? 'active' : ''}">撥款管理</a></li>
                             <li><a th:href="@{/admin/dashboard(tab='services')}"
@@ -138,6 +140,7 @@
             <div class="top-bar">
                 <h2 class="page-title" th:switch="${currentTab}">
                     <span th:case="'audit'">技師資格審核</span>
+                    <span th:case="'technicians'">技師管理列表</span>
                     <span th:case="'payout'">平台撥款管理</span>
                     <span th:case="'services'">服務項目管理</span>
                     <span th:case="'locations'">安裝場地管理</span>
@@ -196,6 +199,44 @@
                             <tr th:if="${#lists.isEmpty(pendingTechs)}">
                                 <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
                                     目前沒有待審核的申請
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- TECHNICIANS MANAGEMENT SECTION -->
+                <div th:if="${currentTab == 'technicians'}" class="table-container">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+                        <h3 style="margin: 0; font-size: 16px; color: #333;">已認證技師列表</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>地區</th>
+                                <th>電話</th>
+                                <th>信箱</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="tech : ${activeTechs}">
+                                <td th:text="${tech.realName}">Name</td>
+                                <td><span class="badge" th:text="${tech.serviceArea}">Area</span></td>
+                                <td th:text="${tech.phone}">Phone</td>
+                                <td th:text="${tech.email}">Email</td>
+                                <td>
+                                    <form th:action="@{'/admin/technician/' + ${tech.techNo} + '/suspend'}"
+                                        method="post" onsubmit="return confirm('確定要暫時停權此技師？(將退回審核狀態)');">
+                                        <button type="submit" class="btn btn-secondary"
+                                            style="color: #d9534f; border-color: #d9534f;">暫時停權</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(activeTechs)}">
+                                <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                                    目前沒有已認證的技師
                                 </td>
                             </tr>
                         </tbody>
@@ -445,6 +486,16 @@
     </div>
 
     <script>
+        // Check for URL parameters for error messages
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMsg = urlParams.get('error');
+        if (errorMsg) {
+            alert(decodeURIComponent(errorMsg));
+            // Optional: Clean URL
+            const newUrl = window.location.pathname + window.location.search.replace(/[\?&]error=[^&]+/, '');
+            history.replaceState({}, document.title, newUrl);
+        }
+
         function enableEdit(id) {
             document.getElementById('name-' + id).style.display = 'none';
             document.getElementById('edit-form-' + id).style.display = 'flex';
@@ -472,7 +523,6 @@
             document.getElementById('loc-edit-' + id).style.display = 'none';
         }
     </script>
-
 </body>
 
 </html>

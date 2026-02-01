@@ -27,7 +27,7 @@ public class AdminController {
 
     /**
      * ✅ 管理員儀表板 (Unified Dashboard)
-     * 處理所有後台管理分頁的顯示邏輯，包含：技師審核、撥款管理、服務項目、場地管理。
+     * 處理所有後台管理分頁的顯示邏輯，包含：技師審核、技師管理、撥款管理、服務項目、場地管理。
      *
      * @param tab     當前選中的分頁 (預設為 'audit')
      * @param session 用於驗證管理員是否登入
@@ -48,6 +48,10 @@ public class AdminController {
             // [技師審核] 取得所有狀態為 PENDING (0) 的技師申請
             List<Technician> pendingTechs = technicianService.getPendingApplications();
             model.addAttribute("pendingTechs", pendingTechs);
+        } else if ("technicians".equals(tab)) {
+            // [技師管理] 取得所有通過審核的技師 (Active)
+            List<Technician> activeTechs = technicianService.getApprovedTechnicians();
+            model.addAttribute("activeTechs", activeTechs);
         } else if ("payout".equals(tab)) {
             // [撥款管理]
             // 待撥款 (訂單完成但尚未轉帳)
@@ -114,6 +118,25 @@ public class AdminController {
 
         technicianService.rejectTechnician(id);
         return "redirect:/admin/dashboard?tab=audit";
+    }
+
+    /**
+     * ⛔ 暫時停權技師
+     * 將技師狀態退回審核狀態 (0)
+     */
+    @PostMapping("/technician/{id}/suspend")
+    public String suspendTechnician(@PathVariable Integer id, HttpSession session) {
+        AdminVO admin = (AdminVO) session.getAttribute("admin");
+        if (admin == null)
+            return "redirect:/admins/login";
+
+        try {
+            technicianService.suspendTechnician(id);
+        } catch (IllegalStateException e) {
+            return "redirect:/admin/dashboard?tab=technicians&error="
+                    + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+        return "redirect:/admin/dashboard?tab=technicians";
     }
 
     // --- 撥款管理功能 (Payout Actions) ---
