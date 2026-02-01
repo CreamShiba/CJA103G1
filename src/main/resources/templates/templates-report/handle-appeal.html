@@ -125,22 +125,39 @@
 
         <div class="content-area">
             <div class="case-card">
-                <div class="info-row"><div class="info-label">案件編號：</div><div class="info-text" th:text="${appeal.appealsNo}">5</div></div>
-                <div class="info-row"><div class="info-label">訂單編號：</div><div class="info-text" th:text="'#' + ${appeal.installOrderNo}">#123</div></div>
-
+                <!-- 案件編號（兩種申訴都有） -->
                 <div class="info-row">
+                    <div class="info-label">案件編號：</div>
+                    <div class="info-text" th:text="${appeal.appealsNo}">5</div>
+                </div>
+
+                <!-- 💡 訂單編號：根據類型顯示不同欄位 -->
+                <div class="info-row" th:if="${type == 'install'}">
+                    <div class="info-label">訂單編號：</div>
+                    <div class="info-text" th:text="'#' + ${appeal.installOrderNo}">#123</div>
+                </div>
+
+                <div class="info-row" th:if="${type == 'product'}">
+                    <div class="info-label">訂單編號：</div>
+                    <div class="info-text" th:text="'#' + ${appeal.ordNo}">#123</div>
+                </div>
+
+                <!-- 💡 申訴標題：僅安裝申訴才顯示 -->
+                <div class="info-row" th:if="${type == 'install'}">
                     <div class="info-label">申訴標題：</div>
                     <div class="info-text" id="categoriesBox">
                         <span id="categoryLabel" th:text="${appeal.categories}">技師態度不佳</span>
                     </div>
                 </div>
 
+                <!-- 詳細內容（兩種申訴都有） -->
                 <div class="info-row">
                     <div class="info-label">詳細內容：</div>
                     <div class="info-text" id="descriptionText" th:text="${appeal.description}">12345</div>
                 </div>
 
-                <div class="info-row" th:if="${images != null and !images.isEmpty()}">
+                <!-- 💡 附件圖片：安裝申訴顯示多張圖 -->
+                <div class="info-row" th:if="${type == 'install' && images != null and !images.isEmpty()}">
                     <div class="info-label">附件圖片：</div>
                     <div class="info-text">
                         <div class="image-gallery">
@@ -153,6 +170,21 @@
                     </div>
                 </div>
 
+                <!-- 💡 附件圖片：商品申訴也顯示多張圖 -->
+                <div class="info-row" th:if="${type == 'product' && images != null and !images.isEmpty()}">
+                    <div class="info-label">附件圖片：</div>
+                    <div class="info-text">
+                        <div class="image-gallery">
+                            <img th:each="img : ${images}"
+                                 th:src="@{/appeals/product/image/{id}(id=${img.imgNo})}"
+                                 class="case-img"
+                                 title="點擊放大查看"
+                                 onclick="window.open(this.src, '_blank')">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 管理員回覆（兩種申訴都有） -->
                 <div style="margin-top: 12px;">
                     <div class="info-label">管理員回覆：</div>
                     <textarea id="replyMsg"
@@ -161,6 +193,7 @@
                               th:placeholder="${appeal.status == '已結案'} ? '' : '請在此輸入對會員的回覆內容...'"></textarea>
                 </div>
 
+                <!-- 按鈕組 -->
                 <div class="btn-group">
                     <a th:href="@{/appeals/admin/list(status=${appeal.status == '已結案' ? '已結案' : 'PENDING'})}" class="btn-back">返回列表</a>
                     <button th:if="${appeal.status != '已結案'}" class="btn-send" onclick="sendReply()">送出</button>
@@ -179,6 +212,9 @@
 </div>
 
 <script th:inline="javascript">
+    // 💡 取得申訴類型
+    const appealType = /*[[${type}]]*/ 'install';
+
     document.querySelectorAll('.submenu-toggle, .sub-toggle').forEach(toggle => {
         toggle.addEventListener('click', e => {
             e.preventDefault();
@@ -187,18 +223,21 @@
     });
 
     document.addEventListener('DOMContentLoaded', function() {
-        const categoryLabel = document.getElementById('categoryLabel');
-        const descriptionText = document.getElementById('descriptionText');
-        const categoriesBox = document.getElementById('categoriesBox');
+        // 💡 僅安裝申訴才執行「其他」標籤邏輯
+        if (appealType === 'install') {
+            const categoryLabel = document.getElementById('categoryLabel');
+            const descriptionText = document.getElementById('descriptionText');
+            const categoriesBox = document.getElementById('categoriesBox');
 
-        if (categoryLabel && descriptionText) {
-            let labelText = categoryLabel.innerText;
-            if (labelText.includes('其他')) {
-                const detail = descriptionText.innerText;
-                const newSpan = document.createElement('span');
-                newSpan.className = 'other-tag';
-                newSpan.innerText = `內容：${detail}`;
-                categoriesBox.appendChild(newSpan);
+            if (categoryLabel && descriptionText) {
+                let labelText = categoryLabel.innerText;
+                if (labelText.includes('其他')) {
+                    const detail = descriptionText.innerText;
+                    const newSpan = document.createElement('span');
+                    newSpan.className = 'other-tag';
+                    newSpan.innerText = `內容：${detail}`;
+                    categoriesBox.appendChild(newSpan);
+                }
             }
         }
     });
@@ -209,20 +248,47 @@
         document.getElementById('customModal').classList.add('show');
     }
 
-    function closeModal() { document.getElementById('customModal').classList.remove('show'); }
+    function closeModal() {
+        document.getElementById('customModal').classList.remove('show');
+    }
 
     function sendReply() {
         const reply = document.getElementById('replyMsg').value;
-        if (!reply.trim()) { showModal('卡爾夏Karshop', '請輸入回覆內容'); return; }
+        if (!reply.trim()) {
+            showModal('卡爾夏Karshop', '請輸入回覆內容');
+            return;
+        }
+
         const id = /*[[${appeal.appealsNo}]]*/ 0;
-        const params = new URLSearchParams({ id: id, response: reply, status: '已結案', admNo: 1 });
-        fetch('/appeals/api/handle', { method: 'POST', body: params })
+        const params = new URLSearchParams({
+            id: id,
+            response: reply,
+            status: '已結案',
+            admNo: 10
+        });
+
+        // 💡 根據申訴類型呼叫不同的 API
+        const apiUrl = appealType === 'product'
+            ? '/appeals/api/product/handle'
+            : '/appeals/api/handle';
+
+        fetch(apiUrl, {
+            method: 'POST',
+            body: params
+        })
             .then(res => res.text())
             .then(msg => {
                 if (msg === 'success') {
                     showModal('卡爾夏Karshop', '處理成功！案件已移至「已結案」');
-                    setTimeout(() => { window.location.href = '/appeals/admin/list?status=已結案'; }, 1500);
+                    setTimeout(() => {
+                        window.location.href = '/appeals/admin/list?status=已結案';
+                    }, 1500);
+                } else {
+                    showModal('卡爾夏Karshop', '處理失敗：' + msg);
                 }
+            })
+            .catch(err => {
+                showModal('卡爾夏Karshop', '發生錯誤：' + err.message);
             });
     }
 </script>

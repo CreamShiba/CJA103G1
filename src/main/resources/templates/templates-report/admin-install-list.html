@@ -41,6 +41,23 @@
         .btn-action:hover { background-color: #00695c; }
         .sidebar-footer { padding: 20px; border-top: 1px solid #eee; }
         .sidebar-footer a { color: #d9534f; text-decoration: none; font-size: 14px; }
+        /* 💡 新增：類型標籤樣式 */
+        .type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .type-install {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        .type-product {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
     </style>
 </head>
 <body>
@@ -91,12 +108,14 @@
                 <table class="appeal-table">
                     <thead>
                     <tr>
+                        <th>類型</th>
                         <th>編號</th>
                         <th>訂單編號</th>
                         <th>申訴標題</th>
                         <th>狀態</th>
                         <th>申訴時間</th>
-                        <th>案件管理</th> </tr>
+                        <th>案件管理</th>
+                    </tr>
                     </thead>
                     <tbody id="appealTableBody"></tbody>
                 </table>
@@ -105,7 +124,6 @@
     </main>
 </div>
 <script>
-    // 只對第一層選單綁定摺疊功能
     document.querySelectorAll('.submenu-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
@@ -113,7 +131,6 @@
         });
     });
 
-    // 對第二層選單綁定摺疊功能
     document.querySelectorAll('.sub-toggle-btn').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
@@ -126,6 +143,7 @@
         const currentStatus = params.get('status') || 'PENDING';
         const navPending = document.getElementById('nav-pending');
         const navClosed = document.getElementById('nav-closed');
+
         if (currentStatus === '已結案') {
             navClosed.classList.add('active');
             navPending.classList.remove('active');
@@ -133,28 +151,43 @@
             navPending.classList.add('active');
             navClosed.classList.remove('active');
         }
+
+        // 💡 修改：取得包含安裝和商品申訴的資料
         fetch('/appeals/api/all')
             .then(res => res.json())
             .then(data => {
                 const tbody = document.getElementById('appealTableBody');
                 tbody.innerHTML = '';
+
                 data.forEach(item => {
                     if (item.status === currentStatus) {
                         const formattedDate = item.applyDate ? item.applyDate.replace('T', ' ').substring(0, 16) : 'N/A';
-                        let displayTitle = item.categories || '';
+
+                        let displayTitle = item.title || '';
                         if (displayTitle.includes(',')) {
                             const titleArray = displayTitle.split(',');
-                            if (titleArray.length > 2) { displayTitle = titleArray.slice(0, 2).join(',') + '...'; }
+                            if (titleArray.length > 2) {
+                                displayTitle = titleArray.slice(0, 2).join(',') + '...';
+                            }
                         }
+
                         const displayStatus = (item.status === 'PENDING') ? '尚未處理' : item.status;
-                        const actionColumn = (item.status === '已結案') ?
-                            `<a href="/appeals/admin/handle?id=${item.appealsNo}" class="btn-action" style="background-color: #00796b;">查看</a>` :
-                            `<a href="/appeals/admin/handle?id=${item.appealsNo}" class="btn-action">處理案件</a>`;
+
+                        // 💡 根據類型顯示不同標籤
+                        const typeBadge = item.type === 'install'
+                            ? '<span class="type-badge type-install">🔧 安裝</span>'
+                            : '<span class="type-badge type-product">📦 商品</span>';
+
+                        // 💡 處理案件連結要帶上 type 參數
+                        const actionColumn = (item.status === '已結案')
+                            ? `<a href="/appeals/admin/handle?id=${item.appealsNo}&type=${item.type}" class="btn-action" style="background-color: #00796b;">查看</a>`
+                            : `<a href="/appeals/admin/handle?id=${item.appealsNo}&type=${item.type}" class="btn-action">處理案件</a>`;
 
                         tbody.innerHTML += `
                             <tr>
+                                <td>${typeBadge}</td>
                                 <td>${item.appealsNo}</td>
-                                <td>#${item.installOrderNo}</td>
+                                <td>#${item.orderNo}</td>
                                 <td>${displayTitle}</td>
                                 <td><span class="status-badge">${displayStatus}</span></td>
                                 <td>${formattedDate}</td>

@@ -98,4 +98,11 @@ public class ReportsController {
             return "redirect:/reports/history"; // 找不到資料則導回列表
         }
     }
+
+    // 顯示後台檢舉管理列表頁面
+    @GetMapping("/admin/list")
+    public String showReportAdminPage() {
+        // 指向 templates/templates-report/ 目錄下的 admin-report-list.html
+        return "templates-report/admin-report-list";
+    }
 }

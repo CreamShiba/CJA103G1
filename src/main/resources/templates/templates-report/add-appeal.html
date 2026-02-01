@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>安裝申訴服務 - 卡爾夏汽車百貨</title>
+    <title>申訴服務 - 卡爾夏汽車百貨</title>
     <style>
         /* --- 基礎設定 --- */
         * {
@@ -200,7 +200,8 @@
             font-weight: normal;
         }
 
-        .form-group input[type="text"] {
+        /* 讓 Select 選單樣式與 Input 一致 */
+        .form-group input[type="text"], .form-group select {
             background-color: #1a1a1a;
             border: 1px solid #333;
             padding: 12px 16px;
@@ -210,7 +211,7 @@
             transition: all 0.3s ease;
         }
 
-        .form-group input[type="text"]:focus {
+        .form-group input[type="text"]:focus, .form-group select:focus {
             border-color: #ff3333;
             box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
             background-color: #222;
@@ -303,6 +304,8 @@
             box-shadow: 0 4px 15px rgba(255, 51, 51, 0.4);
             line-height: 1.2;
             text-align: center;
+            /* 往下調整按鈕位置 */
+            margin-top: 15px;
         }
 
         .custom-upload-btn:hover {
@@ -467,15 +470,24 @@
 
     <div class="appeal-container">
         <div class="appeal-card">
-            <h1 class="appeal-title">INSTALLATION APPEAL SERVICE</h1>
-            <p class="appeal-subtitle">如果您在安裝服務中有任何問題,請填寫下方表單。</p>
+            <h1 id="page-title" class="appeal-title">INSTALLATION APPEAL SERVICE</h1>
+            <p id="page-subtitle" class="appeal-subtitle">如果您在安裝服務中有任何問題,請填寫下方表單。</p>
 
             <form th:action="@{/appeals/submit}" method="post" id="appealForm" enctype="multipart/form-data">
                 <div class="form-section">
+
+                    <div class="form-group" style="margin-bottom: 25px;">
+                        <label>請選擇申訴類型</label>
+                        <select id="appealType" name="appealType">
+                            <option value="install">技師安裝服務 (Installation)</option>
+                            <option value="product">商城商品訂單 (Product Order)</option>
+                        </select>
+                    </div>
+
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="installOrderNo">安裝訂單編號</label>
-                            <input type="text" id="installOrderNo" name="installOrderNo" placeholder="請輸入編號">
+                            <label id="orderLabel" for="orderNo">安裝訂單編號</label>
+                            <input type="text" id="orderNo" name="orderNo" placeholder="請輸入編號">
 
                             <div class="upload-section" style="margin-top: 30px;">
                                 <span class="upload-title">上傳圖片</span>
@@ -489,20 +501,7 @@
 
                         <div class="form-group">
                             <label>申訴類別 (必選)</label>
-                            <div class="checkbox-group">
-                                <div class="checkbox-item"><input type="checkbox" id="type1" name="type" value="技師態度不佳"><label for="type1">技師態度不佳</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="type2" name="type" value="技師遲到/早退"><label for="type2">技師遲到 / 早退</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="type3" name="type" value="商品安裝未落實"><label for="type3">商品安裝未落實</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="type4" name="type" value="車體受損"><label for="type4">車體受損</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="type5" name="type" value="與預期功能不符"><label for="type5">與預期功能不符</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="type6" name="type" value="規格安裝錯誤"><label for="type6">規格安裝錯誤</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="type7" name="type" value="施工時程嚴重拖延"><label for="type7">施工時程嚴重拖延</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="type8" name="type" value="預約場地不符"><label for="type8">預約場地不符</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="type9" name="type" value="未經許可動用車輛"><label for="type9">未經許可動用車輛</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="type10" name="type" value="其他"><label for="type10">其他</label></div>
-                                <div class="other-input-container" id="otherInputContainer">
-                                    <input type="text" id="otherInput" name="otherDescription" placeholder="請描述其他問題...">
-                                </div>
+                            <div class="checkbox-group" id="category-container">
                             </div>
                         </div>
                     </div>
@@ -561,9 +560,73 @@
 </footer>
 
 <script>
+    // 定義申訴類別選項
+    const categories = {
+        install: [
+            "技師態度不佳", "技師遲到/早退", "商品安裝未落實", "車體受損", "與預期功能不符",
+            "規格安裝錯誤", "施工時程嚴重拖延", "預約場地不符", "未經許可動用車輛", "其他"
+        ],
+        product: [
+            "商品破損/瑕疵", "寄錯商品", "商品與描述不符", "零件缺少", "物流運送問題",
+            "保固期爭議", "仿冒品疑慮", "重複扣款", "商品效期問題", "其他"
+        ]
+    };
+
     window.onload = function() {
         initUserDropdown();
+        updateCategoryList('install'); // 預設載入安裝類別
     };
+
+    // 切換申訴類型邏輯
+    document.getElementById('appealType').addEventListener('change', function() {
+        const type = this.value;
+        const label = document.getElementById('orderLabel');
+        const title = document.getElementById('page-title');
+        const subtitle = document.getElementById('page-subtitle');
+
+        if (type === 'install') {
+            label.innerText = '安裝訂單編號';
+            title.innerText = 'INSTALLATION APPEAL SERVICE';
+            subtitle.innerText = '如果您在安裝服務中有任何問題,請填寫下方表單。';
+        } else {
+            label.innerText = '商品訂單編號';
+            title.innerText = 'PRODUCT APPEAL SERVICE';
+            subtitle.innerText = '如果您對購買的商品有任何疑問,請填寫下方表單。';
+        }
+        updateCategoryList(type);
+    });
+
+    function updateCategoryList(type) {
+        const container = document.getElementById('category-container');
+        container.innerHTML = '';
+        categories[type].forEach((item, index) => {
+            const isOther = item === "其他";
+            const id = `type${index}`;
+            const html = `
+                <div class="checkbox-item">
+                    <input type="checkbox" id="${id}" name="type" value="${item}" ${isOther ? 'onchange="toggleOtherInput(this)"' : ''}>
+                    <label for="${id}">${item}</label>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+        // 重新加入「其他」輸入框
+        container.insertAdjacentHTML('beforeend', `
+            <div class="other-input-container" id="otherInputContainer">
+                <input type="text" id="otherInput" name="otherDescription" placeholder="請描述其他問題...">
+            </div>
+        `);
+    }
+
+    function toggleOtherInput(checkbox) {
+        const otherContainer = document.getElementById('otherInputContainer');
+        if (checkbox.checked) {
+            otherContainer.classList.add('show');
+        } else {
+            otherContainer.classList.remove('show');
+            document.getElementById('otherInput').value = '';
+        }
+    }
 
     function initUserDropdown() {
         const userIcon = document.getElementById('user-icon');
@@ -616,25 +679,24 @@
         }
     });
 
-    document.getElementById('type10').addEventListener('change', function() {
-        const otherContainer = document.getElementById('otherInputContainer');
-        if (this.checked) {
-            otherContainer.classList.add('show');
-        } else {
-            otherContainer.classList.remove('show');
-            document.getElementById('otherInput').value = '';
-        }
-    });
-
     document.getElementById('submitBtn').addEventListener('click', function(e) {
         e.preventDefault();
-        const orderNo = document.getElementById('installOrderNo').value.trim();
+        const orderNo = document.getElementById('orderNo').value.trim();
         const checkboxes = document.querySelectorAll('input[name="type"]:checked');
         const description = document.getElementById('description').value.trim();
 
-        if (!orderNo) { showModal('請填寫安裝訂單編號！'); return; }
+        const typeLabel = document.getElementById('orderLabel').innerText;
+
+        if (!orderNo) { showModal(`請填寫${typeLabel}！`); return; }
         if (checkboxes.length === 0) { showModal('請至少選擇一個申訴類別！'); return; }
-        if (document.getElementById('type10').checked && !document.getElementById('otherInput').value.trim()) { showModal('請描述其他問題！'); return; }
+
+        // 檢查「其他」是否有勾選但未填寫
+        const otherChecked = Array.from(checkboxes).some(cb => cb.value === "其他");
+        if (otherChecked && !document.getElementById('otherInput').value.trim()) {
+            showModal('請描述其他問題！');
+            return;
+        }
+
         if (!description) { showModal('請填寫問題詳細描述！'); return; }
 
         document.getElementById('appealForm').submit();
