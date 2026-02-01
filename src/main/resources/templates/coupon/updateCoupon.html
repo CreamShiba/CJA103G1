@@ -5,85 +5,296 @@
     <link rel="stylesheet" th:href="@{/css/back-end/admin_index.css}">
     <link rel="stylesheet" th:href="@{/css/couponStyle.css}">
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --bg-color: #f4f7f6;
+            --error-color: #e74c3c;
+            --border-radius: 8px;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
         body {
-            /* 將 margin 改為 padding，避免邊界塌陷 */
-            padding: 5vh 20vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
-            /* 確保可以垂直滾動 */
-            overflow-y: auto;
-            background-color: #f4f7f6; /* 建議給個底色，看起來比較專業 */
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            display: block; /* 確保不是 flex 導致內容被壓縮 */
         }
 
-        /* 增加表單容器樣式，防止內容太散 */
-        form {
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .main-container {
+            width: 100%;
             max-width: 800px;
-            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        .row {
-            margin-bottom: 20px;
+        /* 標題區塊固定在上方 */
+        .card-header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            font-size: 1.1em;
+            flex-shrink: 0;
+        }
+
+        .card-header i { margin-right: 10px; }
+
+        /* 表單必須也是 flex 容器 */
+        form {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0; /* 重要：讓 flex 子元素可以縮小 */
+        }
+
+        /* 表單內容區可滾動 */
+        .form-content {
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex: 1;
+            min-height: 0; /* 重要：讓內容可以縮小並滾動 */
+            padding: 30px;
+        }
+
+        /* 自訂滾動條樣式 */
+        .form-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .form-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .form-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .form-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* 兩欄佈局網格 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="datetime-local"],
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
+        input[readonly] {
+            background-color: #f8f9fa;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* 錯誤訊息樣式 */
+        .error-msg {
+            color: var(--error-color);
+            font-size: 0.8em;
+            margin-top: 5px;
+            display: block;
+        }
+
+        /* 按鈕區塊固定在底部 */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 20px 30px;
+            background-color: #fdfdfd;
+            border-top: 1px solid #eee;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            padding: 10px 25px;
+            border-radius: 5px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-cancel {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .main-container {
+                max-height: 95vh;
+            }
+
+            .form-content {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+
+            .form-actions {
+                padding: 15px 20px;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-<h2 style="text-align: center">修改優惠券資訊</h2>
-<form th:action="@{/coupon/update}" method="post" th:object="${coupon}">
-    <input type="hidden" th:field="*{couponNo}" />
-    <input type="hidden" th:field="*{admNo}" />
-
-
-    <div class="row">
-        <label>優惠券編號:</label>
-        <input type="text" th:value="*{couponNo}" readonly style="background: lightgray">
+<div class="main-container">
+    <div class="card-header">
+        <i class="fa-solid fa-ticket"></i> 編輯優惠券資料
     </div>
 
-    <div class="row">
-        <label>管理員編號:</label>
-        <span th:text="*{admNo}" ></span>
-    </div>
+    <form th:action="@{/coupon/update}" method="post" th:object="${coupon}">
+        <div class="form-content">
+            <div class="form-grid">
 
-    <div class="row">
-        <label>標題:</label>
-        <input type="text" th:field="*{couponTitle}" required />
-    </div>
+                <input type="hidden" th:field="*{couponNo}" />
+                <input type="hidden" th:field="*{admNo}" />
 
-    <div class="row">
-        <label>內容:</label>
-        <textarea th:field="*{couponContent}" rows="4"></textarea>
-    </div>
+                <div class="form-group">
+                    <label>優惠券編號 (不可修改)</label>
+                    <input type="text" th:value="*{couponNo}" readonly>
+                </div>
 
-    <div class="row">
-        <label>折價金額:</label>
-        <input type="number" th:field="*{discountValue}" required placeholder="請輸入金額" />
-        <span th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}" class="error"></span>
-    </div>
+                <div class="form-group">
+                    <label>管理員編號</label>
+                    <input type="text" th:value="*{admNo}" readonly>
+                </div>
 
-    <div class="row">
-        <label>開始時間:</label>
-        <input type="datetime-local"
-               th:field="*{couponStart}"
-               step="60"
-               required />
-    </div>
+                <div class="form-group full-width">
+                    <label>優惠券標題</label>
+                    <input type="text" th:field="*{couponTitle}" placeholder="例如：新春大放送">
+                    <span class="error-msg" th:if="${#fields.hasErrors('couponTitle')}" th:errors="*{couponTitle}"></span>
+                </div>
 
-    <div class="row">
-        <label>結束時間:</label>
-        <input type="datetime-local"
-               th:field="*{couponEnd}"
-               step="60"
-               required />
-    </div>
+                <div class="form-group full-width">
+                    <label>優惠詳細內容</label>
+                    <textarea th:field="*{couponContent}" rows="4" placeholder="請輸入詳細優惠規則..."></textarea>
+                    <span class="error-msg" th:if="${#fields.hasErrors('couponContent')}" th:errors="*{couponContent}"></span>
+                </div>
 
-    <button type="submit">確認儲存</button>
-    <a th:href="@{/coupon/admin}" class="btn btn-cancel">
-        <i class="fas fa-times"></i> 取消返回
-    </a>
-</form>
+                <div class="form-group">
+                    <label>折價金額</label>
+                    <input type="number" th:field="*{discountValue}" placeholder="100">
+                    <span class="error-msg" th:if="${#fields.hasErrors('discountValue')}" th:errors="*{discountValue}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>當前狀態</label>
+                    <input type="text" th:value="${coupon.couponStatus == 1 ? '啟用 (Normal)' : '停用'}" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>開始時間</label>
+                    <input type="datetime-local"
+                           name="couponStart"
+                           th:value="${coupon.couponStart != null ? #temporals.format(coupon.couponStart, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                    <span class="error-msg" th:if="${#fields.hasErrors('couponStart')}" th:errors="*{couponStart}"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>結束時間</label>
+                    <input type="datetime-local"
+                           name="couponEnd"
+                           th:value="${coupon.couponEnd != null ? #temporals.format(coupon.couponEnd, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                    <span class="error-msg" th:if="${#fields.hasErrors('couponEnd')}" th:errors="*{couponEnd}"></span>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a th:href="@{/coupon/admin}" class="btn btn-cancel">
+                取消返回
+            </a>
+            <button type="submit" class="btn btn-submit">
+                <i class="fa-solid fa-floppy-disk"></i> 儲存所有修改
+            </button>
+        </div>
+    </form>
+</div>
+
 </body>
 </html>
