@@ -35,4 +35,8 @@ public class SellerService {
             sellerRepository.save(sellerVO);
         }
     }
+
+    public SellerVO findByMemberNo(Integer memberNo) {
+            return sellerRepository.findByMemberMemberNo(memberNo);
+    }
 }

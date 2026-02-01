@@ -1,6 +1,7 @@
 package com.karshop.product.controller;
 
 
+import com.karshop.membertest.model.MemberVO;
 import com.karshop.ord.model.OrdService;
 import com.karshop.ord.model.OrdVO;
 import com.karshop.product.model.ProductService;
@@ -11,8 +12,10 @@ import com.karshop.productimage.model.ProductImageService;
 import com.karshop.productimage.model.ProductImageVO;
 import com.karshop.reporttest.model.ReportRepository;
 import com.karshop.reporttest.model.ReportVO;
+import com.karshop.sellertest.model.SellerService;
 import com.karshop.sellertest.model.SellerVO;
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,33 +54,46 @@ public class ProductController {
     private RedisTemplate<String, byte[]> imageRedisTemplate;
 
     @Autowired
+    private SellerService sellerService;
+
+    @Autowired
     private EntityManager entityManager;
 
     @GetMapping("/addProduct")
-    public String addProduct(ModelMap model){
+    public String addProduct(ModelMap model,
+                             @SessionAttribute(value = "seller", required = false) SellerVO sellerVO){
+//      測試用
+        if(sellerVO == null){
+            sellerVO = new SellerVO();
+            sellerVO.setSellerNo(101);
+        }
+
         ProductVO productVO = new ProductVO();
         model.addAttribute("productVO",productVO);
 
-        List<ProductCategoryVO> categoryList = productCategoryService.getAll();
-        model.addAttribute("categoryList", categoryList);
         return "back-end/seller/addProduct";
     }
 
 
     @Transactional
     @PostMapping("/insert")
-    public String insert(@Valid ProductVO productVO, BindingResult result, ModelMap model, @RequestParam("upFile") MultipartFile[] upFile)throws IOException {
+    public String insert(@Valid ProductVO productVO, BindingResult result, ModelMap model,
+                         @RequestParam("upFile") MultipartFile[] upFile,
+                         @SessionAttribute(value = "seller", required = false) SellerVO sellerVO )throws IOException {
+
+        //      測試用
+        if(sellerVO == null){
+            sellerVO = new SellerVO();
+            sellerVO.setSellerNo(101);
+        }
 
         if (result.hasErrors() || upFile[0].isEmpty()) {
             if(upFile[0].isEmpty()) {
                 model.addAttribute("errorMessage", "請上傳商品圖片");
             }
-            List<ProductCategoryVO> categoryList = productCategoryService.getAll();
-            model.addAttribute("categoryList", categoryList);
             return  "back-end/seller/addProduct";
         }
-        SellerVO sellerVO = new SellerVO();
-        sellerVO.setSellerNo(101);
+
         productVO.setSeller(sellerVO);
 
         productService.addProduct(productVO);
@@ -96,7 +112,13 @@ public class ProductController {
     }
 
     @GetMapping("/getOne_For_Update")
-    public String getOne_For_Update(@RequestParam Integer prodNo, ModelMap model){
+    public String getOne_For_Update(@RequestParam Integer prodNo, ModelMap model,
+                                    @SessionAttribute(value = "seller", required = false) SellerVO sellerVO){
+//      測試用
+        if (sellerVO == null) {
+            sellerVO = new SellerVO();
+            sellerVO.setSellerNo(101);
+        }
         ProductVO productVO = productService.getOneProduct(prodNo);
         model.addAttribute("productVO",productVO);
 
@@ -106,9 +128,6 @@ public class ProductController {
                 model.addAttribute("violationReport",violationReport);
             }
         }
-
-        List<ProductCategoryVO> categoryList = productCategoryService.getAll();
-        model.addAttribute("categoryList", categoryList);
         return "back-end/seller/updateProduct";
     }
 
@@ -116,15 +135,17 @@ public class ProductController {
     @PostMapping("/update")
     public String update(@Valid ProductVO productVO, BindingResult result, ModelMap model,
                          @RequestParam(value = "deleteImageNos", required = false) String deleteImageNos,
-                         @RequestParam("upFile") MultipartFile[] upFile) throws IOException {
+                         @RequestParam("upFile") MultipartFile[] upFile,
+                         @SessionAttribute(value = "seller", required = false) SellerVO sellerVO) throws IOException {
 
-        SellerVO sellerVO = new SellerVO();
-        sellerVO.setSellerNo(101);
+//      測試用
+        if (sellerVO == null) {
+            sellerVO = new SellerVO();
+            sellerVO.setSellerNo(101);
+        }
         productVO.setSeller(sellerVO);
 
         if (result.hasErrors()) {
-            List<ProductCategoryVO> categoryList = productCategoryService.getAll();
-            model.addAttribute("categoryList", categoryList);
             return "back-end/seller/updateProduct";
         }
 
@@ -137,8 +158,6 @@ public class ProductController {
         if (currentAmount - deleteAmount + newAmount == 0) {
             model.addAttribute("errorMessage", "請至少保留一張圖片");
             model.addAttribute("productVO", originalProductVO);
-            List<ProductCategoryVO> categoryList = productCategoryService.getAll();
-            model.addAttribute("categoryList", categoryList);
             return "back-end/seller/updateProduct";
         }
 
@@ -222,11 +241,17 @@ public class ProductController {
                                   @RequestParam(value = "minPrice", required = false) Integer minPrice,
                                   @RequestParam(value = "maxPrice", required = false) Integer maxPrice,
                                   @RequestParam(value = "searchStatus", required = false) String searchStatus,
-                                  ModelMap model){
+                                  ModelMap model,
+                                  @SessionAttribute(value = "seller", required = false) SellerVO sellerVO){
 
-        prepareSellerDashboardData(model);
+        //      測試用
+        if (sellerVO == null) {
+            sellerVO = new SellerVO();
+            sellerVO.setSellerNo(101);
+        }
 
-        Integer sellerNo = 101;
+        Integer sellerNo = sellerVO.getSellerNo();
+        prepareSellerDashboardData(model, sellerNo);
         List<ProductVO> searchResult = productService.getProductBySearchForSeller(sellerNo, searchName, minPrice, maxPrice, searchStatus);
 
         model.addAttribute("activeTab", "products");
@@ -242,15 +267,22 @@ public class ProductController {
     }
 
     @GetMapping("/dashboard")
-    public String sellerDashboard(@RequestParam(value = "tab", defaultValue = "dashboard") String tab, ModelMap model) {
-        prepareSellerDashboardData(model);
+    public String sellerDashboard(@RequestParam(value = "tab", defaultValue = "dashboard") String tab, ModelMap model,
+                                  @SessionAttribute(value = "seller", required = false) SellerVO sellerVO) {
+
+        //      測試用
+        if (sellerVO == null) {
+            sellerVO = new SellerVO();
+            sellerVO.setSellerNo(101);
+        }
+
+        prepareSellerDashboardData(model, sellerVO.getSellerNo());
         model.addAttribute("activeTab", tab);
 
         return "back-end/seller/seller_index";
     }
 
-    private void prepareSellerDashboardData(ModelMap model) {
-        Integer sellerNo = 101;
+    private void prepareSellerDashboardData(ModelMap model, Integer sellerNo) {
         model.addAttribute("sellerNo", sellerNo);
         List<OrdVO> ordList = ordService.getOrdBySeller(sellerNo);
         int pendingOrder = 0;
@@ -279,10 +311,12 @@ public class ProductController {
             }
         }
         model.addAttribute("activeProductCount", activeProductCount);
-        //   側邊攔、下拉選單
-        List<ProductCategoryVO> categoryList = productCategoryService.getAll();
-        model.addAttribute("categoryList", categoryList);
+    }
 
+    @ModelAttribute("categoryList")
+    public List<ProductCategoryVO> populateProductCategories() {
+        //   側邊攔、下拉選單
+        return productCategoryService.getAll();
     }
 
 }
