@@ -38,6 +38,9 @@ public class PaymentService {
     @Value("${ecpay.return.url}")
     private String returnURL;
 
+    @Value("${ecpay.notify.url}")
+    private String notifyURL;
+
     @Value("${ecpay.action.url}")
     private String actionURL;
 
@@ -66,7 +69,14 @@ public class PaymentService {
         params.put("TotalAmount", String.valueOf(order.getTotalPrice()));
         params.put("TradeDesc", "Karshop Installation Service");
         params.put("ItemName", "Installation Service Order #" + orderNo);
-        params.put("ReturnURL", returnURL);
+        // ReturnURL: Server-side callback (Must be public IP, localhost won't work for
+        // this)
+        params.put("ReturnURL", notifyURL);
+        // OrderResultURL: Client-side redirect (Browser POSTs result to this URL)
+        // This ALLOWS localhost updates because the user's browser does the request!
+        params.put("OrderResultURL", returnURL);
+        params.put("ClientBackURL", returnURL);
+        params.put("NeedExtraPaidInfo", "N");
         params.put("ChoosePayment", "ALL");
         params.put("EncryptType", "1");
 
