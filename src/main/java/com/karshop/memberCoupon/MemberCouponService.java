@@ -15,7 +15,7 @@ public class MemberCouponService {
     @Autowired
     private MemberCouponRepository memberCouponRepository;
     @Autowired
-    private CouponRepository couponRepository; // 需注入 CouponRepository
+    private CouponRepository couponRepository;
 
     /**
      * 獲取會員擁有的所有優惠券

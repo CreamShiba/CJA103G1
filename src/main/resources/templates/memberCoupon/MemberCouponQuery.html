@@ -22,11 +22,29 @@
             <div class="user-dropdown-container">
                 <span id="user-icon" style="cursor: pointer;">👤</span>
                 <div id="user-dropdown" class="dropdown-menu">
-                    <a href="#">登入</a>
-                    <a href="#">註冊</a>
+
+                    <th:block th:if="${session.member == null}">
+                        <a th:href="@{/members/login}">登入</a>
+                        <a th:href="@{/members/register}">註冊</a>
+                    </th:block>
+
+                    <th:block th:if="${session.member != null}">
+							<span style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
+                                  th:text="'Hi, ' + ${session.member.memName}">
+								Hi, 會員
+							</span>
+
+                        <a th:href="@{/members/view}">編輯個人資料</a>
+                        <a th:href="@{/pages/my-orders}">我的訂單</a>
+                        <form th:action="@{/members/logout}" method="post" id="logoutForm">
+                            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                登出 (Logout)
+                            </a>
+                        </form>
+                    </th:block>
                 </div>
             </div>
-            <span id="cart" style="cursor: pointer;">🛒</span>
+            <span id="cart">🛒</span>
         </div>
     </div>
 
@@ -146,7 +164,7 @@
 <!--<script th:src="@{/js/front-end/index.js}"></script>-->
 <script>
     // 獲取當前會員編號
-    const currentMemberNo = 1;
+    // const currentMemberNo = 1;
 
     // 頁面載入完成後
     window.onload = function() {
@@ -232,12 +250,17 @@
         }
 
         try {
-            const response = await fetch(
-                `/member/coupons/claim?memberNo=${currentMemberNo}&couponTitle=${encodeURIComponent(title)}`,
-                { method: 'POST' }
-            );
-            const result = await response.text();
+            // 修改點：不再傳遞 memberNo
+            const response = await fetch(`/member/coupons/claim?couponTitle=${encodeURIComponent(title)}`, {
+                method: 'POST'
+            });
 
+            if (response.status === 401) { // 未登入處理
+                window.location.href = '/members/login';
+                return;
+            }
+
+            const result = await response.text();
             msgSpan.innerText = result;
             msgSpan.style.color = response.ok ? '#4caf50' : 'red';
 
@@ -246,9 +269,7 @@
                 document.getElementById('couponTitleInput').value = '';
             }
         } catch (error) {
-            console.error('Error claim coupon:', error);
-            msgSpan.innerText = '發生錯誤，請稍後再試';
-            msgSpan.style.color = 'red';
+            console.error('Error:', error);
         }
     }
 
@@ -259,11 +280,8 @@
         const body = document.getElementById('couponBody');
         const noData = document.getElementById('noData');
 
-        // 更新按鈕樣式
         if (buttonElement) {
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             buttonElement.classList.add('active');
         }
 
@@ -272,25 +290,20 @@
         noData.style.display = 'none';
 
         try {
-            // 修改 API 路徑判斷邏輯
-            let url;
-            if (type === 'expired') {
-                // 假設您的後端 API 路徑為 /expired/{memberNo}
-                url = `/member/coupons/expired/${currentMemberNo}`;
-            } else {
-                url = `/member/coupons/${currentMemberNo}`;
-            }
+            // 修改點：簡化 API URL
+            let url = (type === 'expired') ? '/member/coupons/expired' : '/member/coupons/my-coupons';
 
             const response = await fetch(url);
+
+            if (response.status === 401) {
+                window.location.href = '/members/login';
+                return;
+            }
 
             if (response.status === 204) {
                 loading.style.display = 'none';
                 noData.style.display = 'block';
                 return;
-            }
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
@@ -299,44 +312,47 @@
             body.innerHTML = '';
 
             data.forEach(item => {
-                // 這裡可以根據 item 的內容判斷顯示樣式
-                // 如果是已過期，可能需要一個特殊的 status-badge 顏色 (例如灰色)
-                let statusClass = 'status-unused';
-                let statusText = '未使用';
+                let statusClass = (item.couponStatus === 1) ? 'status-used' : 'status-unused';
+                let statusText = (item.couponStatus === 1) ? '已使用' : '未使用';
 
-                if (item.couponStatus === 1) {
-                    statusClass = 'status-used';
-                    statusText = '已使用';
-                } else if (type === 'expired' || (item.expiryDate && new Date(item.expiryDate) < new Date())) {
-                    statusClass = 'status-expired'; // 建議在 CSS 增加 .status-expired { background: #999; }
+                // 1. 安全抓取資料，避免 undefined
+                const couponObj = item.coupon || {};
+                const title = couponObj.couponTitle || '未知優惠券';
+                const discount = couponObj.discountValue ? `$${couponObj.discountValue}` : '-';
+
+                // 2. 修正 split 報錯：先檢查 expiryDate 是否存在
+                let expiryDate = '無期限';
+                if (couponObj.expiryDate) {
+                    expiryDate = couponObj.expiryDate.split('T')[0];
+                }
+
+                // 3. 過期判斷
+                if (couponObj.expiryDate && new Date(couponObj.expiryDate) < new Date()) {
+                    statusClass = 'status-expired';
                     statusText = '已過期';
                 }
 
-                const title = item.coupon ? item.coupon.couponTitle : '未知優惠券';
-                const discount = item.coupon ? `$${item.coupon.discountValue}` : '-';
-                const useTime = item.useTime ? item.useTime.replace('T', ' ') : '無期限';
-
                 body.innerHTML += `
-                <tr>
-                    <td><strong>${title}</strong><br><small>#${item.couponNo}</small></td>
-                    <td><strong style="color:#ff3333;">${discount}</strong></td>
-                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                    <td>${useTime}</td>
-                </tr>
-            `;
+                    <tr>
+                        <td><strong>${title}</strong></td>
+                        <td><strong style="color:#ff3333;">${discount}</strong></td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${expiryDate}</td>
+                    </tr>
+                `;
             });
-
-            if (data.length === 0) {
-                noData.style.display = 'block';
-                table.style.display = 'none';
-            }
-
         } catch (error) {
             loading.style.display = 'none';
-            loading.innerText = '發生錯誤，請稍後再試。';
             console.error('Error:', error);
         }
     }
+
+    // JavaScript 登入後跳轉回原頁面方式(測試Fail)
+    // function goToLogin() {
+    //     const currentPath = window.location.pathname; // 取得 /pages/my-coupons
+    //     window.location.href = `/members/login?redirect=${encodeURIComponent(currentPath)}`;
+    // }
+
 </script>
 </body>
 </html>

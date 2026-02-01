@@ -31,7 +31,7 @@ public class CouponController {
         // 新增時的空物件
         model.addAttribute("coupon", new Coupon());
 
-        return "coupon/adminCoupon"; // 新整合版主頁面
+        return "coupon/adminCoupon";
     }
 
     /**
