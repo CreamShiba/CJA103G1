@@ -1,5 +1,6 @@
 package com.karshop.sellertest.model;
 
+import com.karshop.membertest.model.MemberVO;
 import com.karshop.ord.model.OrdVO;
 import com.karshop.product.model.ProductVO;
 import jakarta.persistence.*;
@@ -14,6 +15,10 @@ public class SellerVO implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seller_no")
     private Integer sellerNo;
+
+    @OneToOne
+    @JoinColumn(name = "member_no")
+    private MemberVO member;
 
     @Column(name = "seller_name")
     private String sellerName;
@@ -45,6 +50,15 @@ public class SellerVO implements Serializable {
     // Getter / Setter
     public Integer getSellerNo() { return sellerNo; }
     public void setSellerNo(Integer sellerNo) { this.sellerNo = sellerNo; }
+
+    public MemberVO getMember() {
+        return member;
+    }
+
+    public void setMember(MemberVO member) {
+        this.member = member;
+    }
+
     public String getSellerName() { return sellerName; }
     public void setSellerName(String sellerName) { this.sellerName = sellerName; }
 
