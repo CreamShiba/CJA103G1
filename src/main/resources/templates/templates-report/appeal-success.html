@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>卡爾夏Karshop - 提交成功</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- 基礎背景與佈局 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #050000;
+            background-image: linear-gradient(to bottom, #000000 0%, #2a0000 40%, #000000 100%);
+            color: #ffffff;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- 成功卡片主體 --- */
+        .success-card {
+            border: 1px solid #cc0000;
+            background-color: #111;
+            padding: 60px;
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+        }
+
+        /* 打勾圖示顏色 */
+        .check-icon {
+            color: #cc0000;
+            font-size: 80px;
+            margin-bottom: 30px;
+        }
+
+        /* 1. 移除 SUCCESS,只保留提交成功 */
+        .title {
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            margin-bottom: 30px;
+            color: #ffffff;
+        }
+
+        /* 2. 修改文案並將顏色改為白色 (移除透明感) */
+        .message {
+            font-size: 18px;
+            line-height: 1.8;
+            color: #ffffff; /* 改為純白色 */
+            margin-bottom: 50px;
+            font-weight: 300;
+        }
+
+        /* 3. 申訴訂單編號與編號樣式調整 */
+        .order-info {
+            margin-bottom: 40px;
+        }
+
+        /* 調整顏色為白色,並確保與編號字體大小一致 */
+        .order-label {
+            display: block;
+            color: #ffffff; /* 顏色改為白色 */
+            font-size: 24px; /* 字體大小與 123 對齊 */
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .order-number {
+            display: block;
+            color: #cc0000; /* 編號維持紅色以利辨識 */
+            font-size: 24px; /* 字體大小與標籤對齊 */
+            font-weight: bold;
+        }
+
+        /* 返回按鈕 */
+        .return-btn {
+            background-color: #cc0000;
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .return-btn:hover { background-color: #ff0000; }
+    </style>
+</head>
+<body>
+
+<div class="success-card">
+    <div class="check-icon">
+        <i class="fas fa-check"></i>
+    </div>
+
+    <h1 class="title">提交成功</h1>
+
+    <!-- 💡 根據申訴類型顯示不同的訊息 -->
+    <p class="message" th:if="${appealType == 'install'}">
+        您的汽車安裝申訴已成功送出,我們將會盡速聯繫您。
+    </p>
+
+    <p class="message" th:if="${appealType == 'product'}">
+        您的商品訂單申訴已成功送出,我們將會盡速聯繫您。
+    </p>
+
+    <!-- 💡 如果沒有 appealType (向後兼容),顯示預設訊息 -->
+    <p class="message" th:if="${appealType == null}">
+        您的申訴已成功送出,我們將會盡速聯繫您。
+    </p>
+
+    <div class="order-info">
+        <span class="order-label">申訴訂單編號</span>
+        <span class="order-number" th:text="${orderNo}">123</span>
+    </div>
+
+    <a href="/appeals/add" class="return-btn">返回申訴頁面 RETURN</a>
+</div>
+
+</body>
+</html>

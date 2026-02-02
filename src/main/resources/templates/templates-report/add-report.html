@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>檢舉中心 - 卡爾夏汽車百貨</title>
+    <style>
+        /* --- 基礎設定 --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #050000;
+            background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
+            color: #ffffff;
+            line-height: 1.5;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: 0.3s;
+        }
+
+        a:hover {
+            color: #ff3333;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        /* --- 頂部導航 (Header) --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px;
+            font-size: 12px;
+            color: #ccc;
+            border-bottom: 1px solid #333;
+        }
+
+        .top-icons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .search-box {
+            border: 1px solid #555;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            width: 150px;
+            justify-content: space-between;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: '';
+            display: inline-block;
+            width: 30px;
+            height: 15px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            font-size: 14px;
+            align-items: center;
+        }
+
+        .nav-links a.active {
+            color: #ff3333;
+        }
+
+        /* --- 主要內容區 --- */
+        .container {
+            display: flex;
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 左側側邊欄 */
+        aside {
+            width: 250px;
+            flex-shrink: 0;
+            padding-right: 40px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 40px;
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .category-list li {
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .category-list li:hover {
+            color: #ff3333;
+        }
+
+        .category-list li.active {
+            color: #ff3333;
+            font-weight: bold;
+        }
+
+        /* --- 檢舉表單區域 --- */
+        .report-container {
+            flex: 1;
+            max-width: 1000px;
+        }
+
+        .report-card {
+            background: transparent;
+            border: none;
+            padding: 0;
+            box-shadow: none;
+        }
+
+        .report-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff3333;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .report-subtitle {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 40px;
+        }
+
+        .form-section {
+            display: block;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: normal;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group select {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="email"]:focus,
+        .form-group select:focus {
+            border-color: #ff3333;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+            background-color: #222;
+        }
+
+        .form-group input[type="text"]::placeholder,
+        .form-group input[type="email"]::placeholder {
+            color: #555;
+        }
+
+        .form-group select {
+            cursor: pointer;
+            color: #555;
+        }
+
+        .form-group select.has-value {
+            color: #fff;
+        }
+
+        .form-group select option {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        .form-group select option:first-child {
+            color: #555;
+        }
+
+        .textarea-group {
+            margin-bottom: 30px;
+        }
+
+        .textarea-group label {
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 10px;
+            display: block;
+            font-weight: normal;
+        }
+
+        .textarea-group textarea {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            padding: 16px;
+            color: #fff;
+            font-size: 14px;
+            min-height: 180px;
+            width: 100%;
+            resize: vertical;
+            outline: none;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .textarea-group textarea:focus {
+            border-color: #ff3333;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+            background-color: #222;
+        }
+
+        .textarea-group textarea::placeholder {
+            color: #555;
+        }
+
+        .submit-btn {
+            background-color: #ff3333;
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);
+        }
+
+        .submit-btn:hover {
+            background-color: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 51, 51, 0.4);
+        }
+
+        /* --- Footer --- */
+        footer {
+            margin-top: 100px;
+            padding: 60px 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            gap: 40px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .footer-logo {
+            font-size: 20px;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .footer-col h4 {
+            color: white;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        /* 用戶下拉選單 */
+        .user-dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: #1a1a1a;
+            min-width: 150px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            z-index: 100;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            color: #ccc;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 13px;
+            transition: 0.2s;
+            text-align: left;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #333;
+            color: #ff3333;
+        }
+
+        /* 彈窗樣式 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .modal-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border: 3px solid #ff9933;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #ff9933;
+            font-weight: bold;
+        }
+
+        .modal-title {
+            color: #ff3333;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .modal-message {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .modal-btn {
+            background-color: #ff3333;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        /* --- 多選下拉選單樣式 --- */
+        .multi-select-wrapper {
+            position: relative;
+        }
+
+        .multi-select-display {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 44px;
+        }
+
+        .multi-select-display:hover,
+        .multi-select-display.active {
+            border-color: #ff3333;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+            background-color: #222;
+        }
+
+        .multi-select-placeholder {
+            color: #555;
+        }
+
+        .multi-select-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            flex: 1;
+        }
+
+        .multi-select-tag {
+            background-color: #ff3333;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .multi-select-tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            line-height: 1;
+        }
+
+        .multi-select-arrow {
+            color: #fff;
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+
+        .multi-select-arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .multi-select-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            border-top: none;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .multi-select-dropdown.show {
+            display: block;
+        }
+
+        .multi-select-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .multi-select-option:hover {
+            background-color: #333;
+        }
+
+        .multi-select-option.selected {
+            background-color: #2a2a2a;
+        }
+
+        .multi-select-checkbox {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #555;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .multi-select-option.selected .multi-select-checkbox {
+            background-color: #ff3333;
+            border-color: #ff3333;
+        }
+
+        .multi-select-checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            display: none;
+        }
+
+        .multi-select-option.selected .multi-select-checkbox::after {
+            display: block;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="top-bar">
+        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search..."
+                       style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+                    <a href="#">登入</a> <a href="#">註冊</a>
+                </div>
+            </div>
+            <span id="cart">🛒</span>
+        </div>
+    </div>
+
+    <div class="main-header">
+        <div class="logo">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#">商城</a> <a href="#">安裝區</a>
+            <a href="#">論壇</a> <a href="#">公告</a><a href="#">常見問題</a>
+
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="#" onclick="navigateTo('coupons')">我的優惠券</a>
+                    <a href="#" onclick="navigateTo('favorite')">我的收藏</a>
+                    <a href="#" onclick="navigateTo('orderInfo')">訂單查詢</a>
+                    <a href="/appeals/add">申訴/檢舉</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+
+    <aside>
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Browse by</h3>
+            <ul class="category-list">
+                <li onclick="location.href='/appeals/add'">提交申訴</li>
+                <li class="active" onclick="location.href='/reports/add'">提交檢舉</li>
+                <li onclick="location.href='/appeals/history'">申訴紀錄</li>
+                <li onclick="location.href='/reports/history'">檢舉紀錄</li>
+            </ul>
+        </div>
+    </aside>
+
+    <div class="report-container">
+        <div class="report-card">
+            <h1 class="report-title">REPORT CENTER</h1>
+            <p class="report-subtitle">維護社群秩序，檢舉違規行為。</p>
+
+            <form th:action="@{/reports/submit}" method="post" id="reportForm">
+                <div class="form-section">
+                    <div class="form-group">
+                        <label for="reportsTarget">檢舉對象 (會員帳號/文章編號)</label>
+                        <input type="text" id="reportsTarget" name="reportsTarget"
+                               placeholder="請輸入對象 ID">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reportsType">檢舉類別</label>
+                        <select id="reportsType" name="reportsType">
+                            <option value="">-- 請選擇類別 --</option>
+                            <option value="商品">商品</option>
+                            <option value="賣家">賣家</option>
+                            <option value="評論">評論</option>
+                            <option value="文章">文章</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="reasonSelectField">
+                        <label for="reportsReason">檢舉原因 (可多選)</label>
+                        <div class="multi-select-wrapper">
+                            <div class="multi-select-display" id="multiSelectDisplay">
+                                <div class="multi-select-placeholder">-- 請先選擇類別 --</div>
+                                <div class="multi-select-tags" id="selectedTags"></div>
+                                <span class="multi-select-arrow" id="multiSelectArrow">▼</span>
+                            </div>
+                            <div class="multi-select-dropdown" id="multiSelectDropdown"></div>
+                        </div>
+                        <input type="hidden" id="reportsReason" name="reportsReason">
+                    </div>
+
+                    <div class="form-group hidden" id="otherReasonField">
+                        <label for="otherReasonInput">自定義檢舉原因</label>
+                        <input type="text" id="otherReasonInput"
+                               placeholder="請手動輸入檢舉原因">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">聯絡信箱</label>
+                        <input type="email" id="email" name="email"
+                               placeholder="請輸入您的 E-mail，以便接收處理結果">
+                    </div>
+
+                    <div class="textarea-group">
+                        <label for="reportsDescription">問題詳細描述</label>
+                        <textarea id="reportsDescription" name="reportsDescription"
+                                  placeholder="請詳細說明您遇到的問題..."></textarea>
+                    </div>
+                </div>
+
+                <button type="button" class="submit-btn" id="submitBtn">SUBMIT REPORT</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+        <div class="modal-icon">!</div>
+        <div class="modal-title">卡爾夏Karshop</div>
+        <div class="modal-message" id="modalMessage">請填寫問題詳細描述!</div>
+        <button class="modal-btn" onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-col">
+        <div class="footer-logo logo">卡爾夏</div>
+    </div>
+    <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+            <li>Shop Parts</li>
+            <li>Wholesale</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>The Company</h4>
+        <ul>
+            <li>About Us</li>
+            <li>FAQ</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul>
+            <li>info@mysite.com</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Follow Us</h4>
+        <ul>
+            <li>Instagram</li>
+        </ul>
+    </div>
+</footer>
+
+<script>
+    // 💡 下拉選單邏輯
+    window.onload = function() {
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+        const memberTrigger = document.getElementById('member-center-trigger');
+        const memberDropdown = document.getElementById('member-dropdown');
+
+        if (userIcon) {
+            userIcon.onclick = function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+                if (memberDropdown) memberDropdown.classList.remove('show');
+            };
+        }
+
+        if (memberTrigger) {
+            memberTrigger.onclick = function(e) {
+                e.stopPropagation();
+                memberDropdown.classList.toggle('show');
+                if (userDropdown) userDropdown.classList.remove('show');
+            };
+        }
+
+        document.onclick = function() {
+            if(userDropdown) userDropdown.classList.remove('show');
+            if(memberDropdown) memberDropdown.classList.remove('show');
+        };
+    };
+
+    // 檢舉原因資料
+    const reasonData = {
+        "商品": ["廣告不實", "分類錯誤", "重覆刊登", "山寨品/高仿", "商品敘述與實物不符", "商品有瑕疵"],
+        "賣家": ["態度不佳", "出貨速度慢", "疑似詐騙行為"],
+        "評論": ["謾罵/人身攻擊", "評論不實", "惡意洗版", "侵害個人隱私"],
+        "文章": ["廣告洗版 / 商業廣告", "惡意攻擊 / 謾罵", "不實資訊 / 惡意誤導", "內容與標題不符", "侵害隱私 / 版權", "違禁品討論"]
+    };
+
+    let selectedReasons = [];
+    const multiSelectDisplay = document.getElementById('multiSelectDisplay');
+    const multiSelectDropdown = document.getElementById('multiSelectDropdown');
+    const multiSelectArrow = document.getElementById('multiSelectArrow');
+    const selectedTags = document.getElementById('selectedTags');
+    const hiddenInput = document.getElementById('reportsReason');
+
+    multiSelectDisplay.addEventListener('click', function(e) {
+        if (e.target.classList.contains('multi-select-tag-remove')) return;
+        multiSelectDropdown.classList.toggle('show');
+        multiSelectArrow.classList.toggle('open');
+        multiSelectDisplay.classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.multi-select-wrapper')) {
+            multiSelectDropdown.classList.remove('show');
+            multiSelectArrow.classList.remove('open');
+            multiSelectDisplay.classList.remove('active');
+        }
+    });
+
+    function updateSelectedTags() {
+        selectedTags.innerHTML = '';
+        const placeholder = multiSelectDisplay.querySelector('.multi-select-placeholder');
+        if (selectedReasons.length === 0) {
+            placeholder.style.display = 'block';
+        } else {
+            placeholder.style.display = 'none';
+            selectedReasons.forEach(reason => {
+                const tag = document.createElement('div');
+                tag.className = 'multi-select-tag';
+                tag.innerHTML = `${reason}<span class="multi-select-tag-remove" data-reason="${reason}">×</span>`;
+                selectedTags.appendChild(tag);
+            });
+        }
+        hiddenInput.value = selectedReasons.join(',');
+    }
+
+    selectedTags.addEventListener('click', function(e) {
+        if (e.target.classList.contains('multi-select-tag-remove')) {
+            const reason = e.target.getAttribute('data-reason');
+            selectedReasons = selectedReasons.filter(r => r !== reason);
+            updateSelectedTags();
+            updateDropdownOptions();
+        }
+    });
+
+    function updateDropdownOptions() {
+        const options = multiSelectDropdown.querySelectorAll('.multi-select-option');
+        options.forEach(option => {
+            const value = option.getAttribute('data-value');
+            option.classList.toggle('selected', selectedReasons.includes(value));
+        });
+    }
+
+    function handleOptionClick(e) {
+        const value = e.currentTarget.getAttribute('data-value');
+        if (selectedReasons.includes(value)) {
+            selectedReasons = selectedReasons.filter(r => r !== value);
+        } else {
+            selectedReasons.push(value);
+        }
+        updateSelectedTags();
+        updateDropdownOptions();
+    }
+
+    const reportsTypeSelect = document.getElementById('reportsType');
+    reportsTypeSelect.addEventListener('change', function() {
+        const type = this.value;
+        this.classList.toggle('has-value', type !== "");
+        selectedReasons = [];
+        updateSelectedTags();
+        multiSelectDropdown.innerHTML = '';
+
+        const reasonField = document.getElementById('reasonSelectField');
+        const otherField = document.getElementById('otherReasonField');
+
+        if (type === "其他") {
+            reasonField.classList.add('hidden');
+            otherField.classList.remove('hidden');
+        } else if (type && reasonData[type]) {
+            reasonField.classList.remove('hidden');
+            otherField.classList.add('hidden');
+            const placeholder = multiSelectDisplay.querySelector('.multi-select-placeholder');
+            placeholder.textContent = '-- 請選擇檢舉原因 --';
+            reasonData[type].forEach(reason => {
+                const option = document.createElement('div');
+                option.className = 'multi-select-option';
+                option.setAttribute('data-value', reason);
+                option.innerHTML = `<div class="multi-select-checkbox"></div><span>${reason}</span>`;
+                option.addEventListener('click', handleOptionClick);
+                multiSelectDropdown.appendChild(option);
+            });
+        } else {
+            reasonField.classList.remove('hidden');
+            otherField.classList.add('hidden');
+            multiSelectDisplay.querySelector('.multi-select-placeholder').textContent = '-- 請先選擇類別 --';
+        }
+    });
+
+    document.getElementById('submitBtn').addEventListener('click', function(e) {
+        const target = document.getElementById('reportsTarget').value.trim();
+        const type = document.getElementById('reportsType').value;
+        const otherReason = document.getElementById('otherReasonInput').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const description = document.getElementById('reportsDescription').value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!target) { showModal('請輸入檢舉對象!'); return; }
+        if (!type) { showModal('請選擇檢舉類別!'); return; }
+        if (type !== "其他" && selectedReasons.length === 0) { showModal('請至少選擇一個檢舉原因!'); return; }
+        if (type === "其他" && !otherReason) { showModal('請填寫自定義檢舉原因!'); return; }
+        if (!email) { showModal('請輸入聯絡信箱!'); return; }
+        if (!emailRegex.test(email)) { showModal('請輸入正確的 Email 格式!'); return; }
+        if (!description) { showModal('請填寫問題詳細描述!'); return; }
+
+        if (type === "其他") hiddenInput.value = otherReason;
+        document.getElementById('reportForm').submit();
+    });
+
+    function showModal(message) {
+        document.getElementById('modalMessage').textContent = message;
+        document.getElementById('modalOverlay').classList.add('show');
+    }
+    function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+</script>
+</body>
+</html>
