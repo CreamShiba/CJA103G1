@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>安裝申訴管理 - Autopile Admin</title>
+    <title>申訴案件管理 - Autopile Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* 原有樣式保持不變 */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100%; }
@@ -39,34 +40,25 @@
         .status-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; background-color: #e0f2f1; color: #00796b; }
         .btn-action { background-color: #00796b; color: white; border: none; padding: 8px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s; }
         .btn-action:hover { background-color: #00695c; }
+
+        /* 💡 分頁按鈕樣式 */
+        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 20px; background: white; border-top: 1px solid #eee; }
+        .btn-page { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        .btn-page:hover:not(:disabled) { background-color: #e9ecef; }
+        .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-info { font-size: 14px; color: #666; }
+
+        .type-badge { display: inline-block; padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; margin-right: 8px; }
+        .type-install { background-color: #e3f2fd; color: #1976d2; }
+        .type-product { background-color: #fff3e0; color: #f57c00; }
         .sidebar-footer { padding: 20px; border-top: 1px solid #eee; }
         .sidebar-footer a { color: #d9534f; text-decoration: none; font-size: 14px; }
-        /* 💡 新增：類型標籤樣式 */
-        .type-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-right: 8px;
-        }
-        .type-install {
-            background-color: #e3f2fd;
-            color: #1976d2;
-        }
-        .type-product {
-            background-color: #fff3e0;
-            color: #f57c00;
-        }
     </style>
 </head>
 <body>
 <div class="app-container">
     <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-icon"></div>
-            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
-        </div>
+        <div class="sidebar-header"><div class="logo-icon"></div><h2>卡爾夏 <span class="badge">ADMIN</span></h2></div>
         <nav class="sidebar-nav">
             <ul>
                 <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 A</a></li></ul></li>
@@ -100,7 +92,7 @@
     </aside>
     <main class="main-content">
         <header class="top-bar">
-            <h2 class="page-title">安裝申訴管理</h2>
+            <h2 class="page-title">申訴案件管理</h2>
             <div class="user-profile"><span>Admin</span><div class="avatar"><i class="fas fa-user"></i></div></div>
         </header>
         <div class="content-area">
@@ -119,31 +111,30 @@
                     </thead>
                     <tbody id="appealTableBody"></tbody>
                 </table>
+                <div class="pagination-container" id="paginationControls"></div>
             </div>
         </div>
     </main>
 </div>
+
 <script>
-    document.querySelectorAll('.submenu-toggle').forEach(toggle => {
+    document.querySelectorAll('.submenu-toggle, .sub-toggle-btn').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
             this.parentElement.classList.toggle('open');
         });
     });
 
-    document.querySelectorAll('.sub-toggle-btn').forEach(toggle => {
-        toggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            this.parentElement.classList.toggle('open');
-        });
-    });
+    let allData = [];
+    let currentPage = 1;
+    const pageSize = 6; // 每頁 6 筆
 
     document.addEventListener('DOMContentLoaded', function() {
         const params = new URLSearchParams(window.location.search);
         const currentStatus = params.get('status') || 'PENDING';
+
         const navPending = document.getElementById('nav-pending');
         const navClosed = document.getElementById('nav-closed');
-
         if (currentStatus === '已結案') {
             navClosed.classList.add('active');
             navPending.classList.remove('active');
@@ -152,51 +143,76 @@
             navClosed.classList.remove('active');
         }
 
-        // 💡 修改：取得包含安裝和商品申訴的資料
         fetch('/appeals/api/all')
             .then(res => res.json())
             .then(data => {
-                const tbody = document.getElementById('appealTableBody');
-                tbody.innerHTML = '';
-
-                data.forEach(item => {
-                    if (item.status === currentStatus) {
-                        const formattedDate = item.applyDate ? item.applyDate.replace('T', ' ').substring(0, 16) : 'N/A';
-
-                        let displayTitle = item.title || '';
-                        if (displayTitle.includes(',')) {
-                            const titleArray = displayTitle.split(',');
-                            if (titleArray.length > 2) {
-                                displayTitle = titleArray.slice(0, 2).join(',') + '...';
-                            }
-                        }
-
-                        const displayStatus = (item.status === 'PENDING') ? '尚未處理' : item.status;
-
-                        // 💡 根據類型顯示不同標籤
-                        const typeBadge = item.type === 'install'
-                            ? '<span class="type-badge type-install">🔧 安裝</span>'
-                            : '<span class="type-badge type-product">📦 商品</span>';
-
-                        // 💡 處理案件連結要帶上 type 參數
-                        const actionColumn = (item.status === '已結案')
-                            ? `<a href="/appeals/admin/handle?id=${item.appealsNo}&type=${item.type}" class="btn-action" style="background-color: #00796b;">查看</a>`
-                            : `<a href="/appeals/admin/handle?id=${item.appealsNo}&type=${item.type}" class="btn-action">處理案件</a>`;
-
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${typeBadge}</td>
-                                <td>${item.appealsNo}</td>
-                                <td>#${item.orderNo}</td>
-                                <td>${displayTitle}</td>
-                                <td><span class="status-badge">${displayStatus}</span></td>
-                                <td>${formattedDate}</td>
-                                <td>${actionColumn}</td>
-                            </tr>`;
-                    }
-                });
+                // 💡 無論是 PENDING 或 已結案，都會存入 allData
+                allData = data.filter(item => item.status === currentStatus);
+                renderTable(); // 渲染第一頁
             });
     });
+
+    function renderTable() {
+        const tbody = document.getElementById('appealTableBody');
+        tbody.innerHTML = '';
+
+        // 💡 計算當前頁面的切片範圍
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageData = allData.slice(start, end);
+
+        if (pageData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">暫無相關資料</td></tr>';
+        }
+
+        pageData.forEach(item => {
+            const formattedDate = item.applyDate ? item.applyDate.replace('T', ' ').substring(0, 16) : 'N/A';
+            const displayStatus = (item.status === 'PENDING') ? '尚未處理' : item.status;
+            const typeBadge = item.type === 'install'
+                ? '<span class="type-badge type-install">🔧 安裝</span>'
+                : '<span class="type-badge type-product">📦 商品</span>';
+
+            // 💡 根據狀態判斷顯示「查看」或「處理案件」按鈕
+            const actionColumn = (item.status === '已結案')
+                ? `<a href="/appeals/admin/handle?id=${item.appealsNo}&type=${item.type}" class="btn-action" style="background-color: #6c757d;">查看</a>`
+                : `<a href="/appeals/admin/handle?id=${item.appealsNo}&type=${item.type}" class="btn-action">處理案件</a>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${typeBadge}</td>
+                    <td>${item.appealsNo}</td>
+                    <td>#${item.orderNo}</td>
+                    <td>${item.title || '無標題'}</td>
+                    <td><span class="status-badge">${displayStatus}</span></td>
+                    <td>${formattedDate}</td>
+                    <td>${actionColumn}</td>
+                </tr>`;
+        });
+
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const controls = document.getElementById('paginationControls');
+        const totalPages = Math.ceil(allData.length / pageSize);
+
+        if (totalPages <= 1) {
+            controls.innerHTML = '';
+            return;
+        }
+
+        controls.innerHTML = `
+            <button class="btn-page" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一頁</button>
+            <span class="page-info">第 ${currentPage} 頁 / 共 ${totalPages} 頁 (共 ${allData.length} 筆資料)</span>
+            <button class="btn-page" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一頁</button>
+        `;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        renderTable();
+        document.querySelector('.content-area').scrollTop = 0;
+    }
 </script>
 </body>
 </html>

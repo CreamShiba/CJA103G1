@@ -70,12 +70,11 @@
         }
         .history-subtitle::before { content: '|'; color: #ff3333; font-weight: bold; }
 
-        /* 💡 修正表格對齊：使用固定寬度讓內容整齊 */
         .history-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0 12px;
-            table-layout: fixed; /* 強制固定比例 */
+            table-layout: fixed;
         }
 
         .history-table th {
@@ -102,7 +101,6 @@
         .history-table td:first-child { border-left: 1px solid rgba(255, 51, 51, 0.1); }
         .history-table td:last-child { border-right: 1px solid rgba(255, 51, 51, 0.1); }
 
-        /* 💡 狀態徽章修正：同步申訴紀錄的實心綠底風格 */
         .status-badge {
             padding: 4px 10px;
             border-radius: 4px;
@@ -113,18 +111,9 @@
             min-width: 60px;
         }
 
-        .status-pending {
-            background: #444;
-            color: #aaa;
-        }
+        .status-pending { background: #444; color: #aaa; }
+        .status-closed { background: #008000; color: #fff; box-shadow: 0 0 10px rgba(0, 128, 0, 0.3); }
 
-        .status-closed {
-            background: #008000; /* 實心綠底 */
-            color: #fff;
-            box-shadow: 0 0 10px rgba(0, 128, 0, 0.3);
-        }
-
-        /* 查看按鈕 */
         .view-btn {
             background-color: transparent;
             color: #ff3333;
@@ -137,14 +126,32 @@
             display: inline-block;
             border-radius: 2px;
         }
-        .view-btn:hover {
+        .view-btn:hover:not(:disabled) {
             background-color: #ff3333;
             color: white;
             box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
         }
+        .view-btn:disabled {
+            border-color: #444;
+            color: #444;
+            cursor: not-allowed;
+        }
 
-        /* 下拉選單 */
-        .user-dropdown-container { position: relative; display: inline-block; }
+        /* 💡 新增：分頁容器樣式 */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+            padding-bottom: 20px;
+        }
+        .page-info {
+            font-size: 14px;
+            color: #ddd;
+            font-family: 'Arial', sans-serif;
+        }
+
         .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; background-color: #1a1a1a; min-width: 150px; border: 1px solid #333; z-index: 100; margin-top: 10px; }
         .dropdown-menu.show { display: block; }
         .dropdown-menu a { color: #ccc; padding: 12px 16px; display: block; font-size: 13px; }
@@ -163,7 +170,7 @@
                 <input type="text" placeholder="Search..." style="background: transparent; border: none; color: white; width: 100%; outline: none;">
                 <span>🔍</span>
             </div>
-            <div class="user-dropdown-container">
+            <div class="user-dropdown-container" style="position: relative; display: inline-block;">
                 <span id="user-icon" style="cursor: pointer;">👤</span>
                 <div id="user-dropdown" class="dropdown-menu">
                     <a href="#">登入</a> <a href="#">註冊</a>
@@ -178,7 +185,7 @@
         <nav class="nav-links">
             <a href="#">商城</a> <a href="#">安裝區</a>
             <a href="#">論壇</a> <a href="#">公告</a><a href="#">常見問題</a>
-            <div class="user-dropdown-container">
+            <div class="user-dropdown-container" style="position: relative; display: inline-block;">
                 <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
                 <div id="member-dropdown" class="dropdown-menu">
                     <a href="#">我的優惠券</a> <a href="#">我的收藏</a> <a href="#">訂單查詢</a> <a href="/appeals/add">申訴/檢舉</a>
@@ -216,47 +223,105 @@
                 <th style="width: 15%;">檢視</th>
             </tr>
             </thead>
-            <tbody>
-            <tr th:each="report : ${reports}">
-                <td th:text="${report.reportsNo}">1</td>
-                <td th:text="${report.reportsTarget}">Target_Data</td>
-                <td th:text="${report.reportsType}">Type</td>
-                <td th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}">2026-01-29 12:00</td>
-                <td>
-                        <span th:class="${report.status == '已結案'} ? 'status-badge status-closed' : 'status-badge status-pending'"
-                              th:text="${report.status == 'PENDING' ? '尚未處理' : report.status}">待處理</span>
-                </td>
-                <td>
-                    <a th:href="@{/reports/history/detail(id=${report.reportsNo})}" class="view-btn">查看案件</a>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(reports)}">
-                <td colspan="6" style="text-align:center; padding: 80px; color: #444;">DATABASE EMPTY / 無檢舉紀錄</td>
-            </tr>
-            </tbody>
+            <tbody id="reportLogBody"></tbody>
         </table>
+
+        <div class="pagination-container" id="paginationControls"></div>
     </div>
 </div>
 
 <footer>
     <div class="footer-col"><div class="logo">卡爾夏</div></div>
     <div class="footer-col"><h4>Shop</h4><ul><li>Parts</li></ul></div>
-    <div class="footer-col"><h4>Company</h4><ul><li>About Us</li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li>About Us</li><li>FAQ</li></ul></div>
     <div class="footer-col"><h4>Contact</h4><ul><li>Email</li></ul></div>
     <div class="footer-col"><h4>Follow</h4><ul><li>Instagram</li></ul></div>
 </footer>
 
-<script>
+<script th:inline="javascript">
+    /* 取得 Thymeleaf 傳入的 List 資料 */
+    let allReports = /*[[${reports}]]*/ [];
+    let currentPage = 1;
+    const pageSize = 5; // 💡 您的要求：每頁 5 筆
+
     window.onload = function() {
+        initDropdowns();
+        renderTable(); // 初始渲染第一頁
+    };
+
+    function renderTable() {
+        const tbody = document.getElementById('reportLogBody');
+        tbody.innerHTML = '';
+
+        if (!allReports || allReports.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 80px; color: #444;">DATABASE EMPTY / 無檢舉紀錄</td></tr>';
+            return;
+        }
+
+        // 💡 計算當前頁面資料切片
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageData = allReports.slice(start, end);
+
+        pageData.forEach(report => {
+            // 日期格式化
+            const date = new Date(report.reportsTimestamp);
+            const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+
+            const statusClass = (report.status === '已結案') ? 'status-badge status-closed' : 'status-badge status-pending';
+            const statusText = (report.status === 'PENDING') ? '尚未處理' : report.status;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${report.reportsNo}</td>
+                    <td>${report.reportsTarget || 'N/A'}</td>
+                    <td>${report.reportsType || '未分類'}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="${statusClass}">${statusText}</span></td>
+                    <td><a href="/reports/history/detail?id=${report.reportsNo}" class="view-btn">查看案件</a></td>
+                </tr>`;
+        });
+
+        renderPaginationControls();
+    }
+
+    function renderPaginationControls() {
+        const controls = document.getElementById('paginationControls');
+        const totalPages = Math.ceil(allReports.length / pageSize);
+
+        if (totalPages <= 1) {
+            controls.innerHTML = '';
+            return;
+        }
+
+        controls.innerHTML = `
+            <button class="view-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一頁</button>
+            <span class="page-info">第 ${currentPage} 頁 / 共 ${totalPages} 頁</span>
+            <button class="view-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一頁</button>
+        `;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        renderTable();
+        // 點擊後平滑滾動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function initDropdowns() {
         const trigger = document.getElementById('member-center-trigger');
         const menu = document.getElementById('member-dropdown');
         const userIcon = document.getElementById('user-icon');
         const userMenu = document.getElementById('user-dropdown');
 
-        trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); userMenu.classList.remove('show'); };
-        userIcon.onclick = (e) => { e.stopPropagation(); userMenu.classList.toggle('show'); menu.classList.remove('show'); };
-        document.onclick = () => { menu.classList.remove('show'); userMenu.classList.remove('show'); };
-    };
+        if(trigger && menu) {
+            trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); if(userMenu) userMenu.classList.remove('show'); };
+        }
+        if(userIcon && userMenu) {
+            userIcon.onclick = (e) => { e.stopPropagation(); userMenu.classList.toggle('show'); if(menu) menu.classList.remove('show'); };
+        }
+        document.onclick = () => { if(menu) menu.classList.remove('show'); if(userMenu) userMenu.classList.remove('show'); };
+    }
 </script>
 </body>
 </html>

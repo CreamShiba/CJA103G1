@@ -49,4 +49,7 @@ public class ProductAppeals {
 
     @Column(name = "priority", nullable = false)
     private String priority; //優先等級
+
+    @Column(name = "categories", nullable = false)
+    private String categories;  //新增類別屬性
 }
