@@ -28,7 +28,7 @@ public class MemberCouponService {
         return memberCouponRepository.findByMemberNo(memberNo).stream()
                 .filter(mc -> mc.getCoupon() != null
                         && mc.getCoupon().getCouponStatus() == 1
-                        && mc.getCoupon().getCouponEnd().isAfter(java.time.LocalDateTime.now()))
+                        && mc.getCoupon().getCouponEnd().isAfter(LocalDateTime.now()))
                 .toList();
     }
 
@@ -70,7 +70,7 @@ public class MemberCouponService {
         com.karshop.coupon.Coupon coupon = couponOpt.get();
 
         // 當前時間已超過結束時間，也不允許領取
-        if (coupon.getCouponEnd().isBefore(java.time.LocalDateTime.now())) {
+        if (coupon.getCouponEnd().isBefore(LocalDateTime.now())) {
             return "該優惠券已過期，無法領取";
         }
 
@@ -97,7 +97,7 @@ public class MemberCouponService {
     }
 
     public List<MemberCoupon> getExpiredCouponsByMember(Integer memberNo) {
-        java.time.LocalDateTime now = java.time.LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
         return memberCouponRepository.findExpiredCoupons(memberNo, now);
     }
@@ -117,7 +117,7 @@ public class MemberCouponService {
                     if (coupon == null || coupon.getCouponStatus() != 1) {
                         throw new RuntimeException("優惠券已失效");
                     }
-                    if (coupon.getCouponEnd().isBefore(java.time.LocalDateTime.now())) {
+                    if (coupon.getCouponEnd().isBefore(LocalDateTime.now())) {
                         throw new RuntimeException("優惠券已過期");
                     }
 
