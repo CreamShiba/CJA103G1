@@ -12,11 +12,11 @@ import java.util.List;
 @Repository
 public interface InstallOrderRepository extends JpaRepository<InstallOrder, Integer> {
 
-        List<InstallOrder> findByMemberMemId(Integer memberNo);
+        List<InstallOrder> findByMemberMemNo(Integer memberNo);
 
-        List<InstallOrder> findByMemberMemIdOrderByInstallOrderNoDesc(Integer memberNo);
+        List<InstallOrder> findByMemberMemNoOrderByInstallOrderNoDesc(Integer memberNo);
 
-        List<InstallOrder> findByMemberMemIdAndOrderStatusValueOrderByInstallOrderNoDesc(Integer memberNo,
+        List<InstallOrder> findByMemberMemNoAndOrderStatusValueOrderByInstallOrderNoDesc(Integer memberNo,
                         Integer orderStatusValue);
 
         List<InstallOrder> findByTechnicianTechNoAndOrderStatusValue(Integer techNo, Integer orderStatusValue);
