@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -99,5 +100,37 @@ public class MemberCouponService {
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
 
         return memberCouponRepository.findExpiredCoupons(memberNo, now);
+    }
+
+    //訂單結帳套用優惠券
+    @Transactional(readOnly = true)
+    public MemberCoupon validateAndGetCoupon(Integer memberNo, Integer couponNo, Double orderAmount) {
+        MemberCouponId id = new MemberCouponId();
+        id.setMemberNo(memberNo);
+        id.setCouponNo(couponNo);
+
+        return memberCouponRepository.findById(id)
+                .filter(mc -> mc.getCouponStatus() == 0) // 必須是未使用
+                .map(mc -> {
+                    var coupon = mc.getCoupon();
+                    // 1. 檢查優惠券主表狀態與有效期限
+                    if (coupon == null || coupon.getCouponStatus() != 1) {
+                        throw new RuntimeException("優惠券已失效");
+                    }
+                    if (coupon.getCouponEnd().isBefore(java.time.LocalDateTime.now())) {
+                        throw new RuntimeException("優惠券已過期");
+                    }
+
+                    // 2. 核心需求：檢查優惠券金額是否超過訂單 20%
+                    // 使用你提供的 discountValue 欄位
+                    double maxDiscountAllowed = orderAmount * 0.2;
+                    if (coupon.getDiscountValue() > maxDiscountAllowed) {
+                        throw new RuntimeException("不符合使用條件：此券折扣金額 (" + coupon.getDiscountValue() +
+                                ") 超過訂單金額的 20% (" + (int)maxDiscountAllowed + ")");
+                    }
+
+                    return mc;
+                })
+                .orElseThrow(() -> new RuntimeException("找不到該優惠券或已被使用"));
     }
 }
