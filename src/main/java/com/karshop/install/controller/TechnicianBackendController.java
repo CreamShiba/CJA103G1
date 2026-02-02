@@ -37,7 +37,7 @@ public class TechnicianBackendController {
                 if (member == null)
                         return "redirect:/members/login";
 
-                Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
+                Technician tech = technicianRepository.findByMemberMemNo(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
 
                 if (tech.getIsActive() != 1)
@@ -75,7 +75,7 @@ public class TechnicianBackendController {
         @PostMapping("/order/{id}/accept")
         public String acceptOrder(@PathVariable Integer id, HttpSession session) {
                 MembersVO member = (MembersVO) session.getAttribute("member");
-                Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
+                Technician tech = technicianRepository.findByMemberMemNo(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
                 if (tech.getIsActive() != 1)
                         return "redirect:/installation/home?error=pending";
@@ -87,7 +87,7 @@ public class TechnicianBackendController {
         @PostMapping("/order/{id}/reject")
         public String rejectOrder(@PathVariable Integer id, HttpSession session) {
                 MembersVO member = (MembersVO) session.getAttribute("member");
-                Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
+                Technician tech = technicianRepository.findByMemberMemNo(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
                 if (tech.getIsActive() != 1)
                         return "redirect:/installation/home?error=pending";
@@ -99,7 +99,7 @@ public class TechnicianBackendController {
         @PostMapping("/order/{id}/complete")
         public String completeOrder(@PathVariable Integer id, HttpSession session) {
                 MembersVO member = (MembersVO) session.getAttribute("member");
-                Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
+                Technician tech = technicianRepository.findByMemberMemNo(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
                 if (tech.getIsActive() != 1)
                         return "redirect:/installation/home?error=pending";
@@ -127,7 +127,7 @@ public class TechnicianBackendController {
                 if (member == null)
                         return "redirect:/members/login";
 
-                Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
+                Technician tech = technicianRepository.findByMemberMemNo(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
                 if (tech.getIsActive() != 1)
                         return "redirect:/installation/home?error=pending";
@@ -170,7 +170,7 @@ public class TechnicianBackendController {
                 if (member == null)
                         return "redirect:/members/login";
 
-                Technician tech = technicianRepository.findByMemberMemId(member.getMemberNo())
+                Technician tech = technicianRepository.findByMemberMemNo(member.getMemberNo())
                                 .orElseThrow(() -> new IllegalStateException("非技師身份"));
                 if (tech.getIsActive() != 1)
                         return "redirect:/installation/home?error=pending";

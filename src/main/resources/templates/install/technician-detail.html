@@ -350,7 +350,7 @@
             loading.style.display = 'block';
             container.innerHTML = '';
 
-            fetch(`/CJA103G1/installation/api/availability?techNo=${techNo}&locationNo=${locationNo}`)
+            fetch(`/installation/api/availability?techNo=${techNo}&locationNo=${locationNo}`)
                 .then(res => res.json())
                 .then(data => {
                     loading.style.display = 'none';
