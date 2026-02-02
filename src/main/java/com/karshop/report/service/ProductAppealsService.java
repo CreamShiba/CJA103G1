@@ -35,6 +35,11 @@ public class ProductAppealsService {
         return repository.findById(id).orElse(null);
     }
 
+    // 💡 修正：根據會員編號取得商品申訴紀錄 (用於前台申訴紀錄頁面)
+    public List<ProductAppeals> getByMemberNo(Integer memberNo) {
+        return repository.findByMemberNo(memberNo);
+    }
+
     // 4. 💡 處理商品申訴（管理員回覆與狀態變更）
     public void handleProductAppeal(Integer id, String response, String status, Integer admNo) {
         ProductAppeals appeal = repository.findById(id).orElse(null);
