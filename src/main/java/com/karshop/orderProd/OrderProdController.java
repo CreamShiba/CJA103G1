@@ -28,7 +28,7 @@ public class OrderProdController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        List<OrderProd> orders = orderProdService.getMemberOrders(member.getMemId());
+        List<OrderProd> orders = orderProdService.getMemberOrders(member.getMemNo());
 
         if (orders.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -60,7 +60,7 @@ public class OrderProdController {
         OrderProd order = orderProdService.getOneOrder(ordNo);
 
         // 安全檢查：如果這張訂單不屬於當前登入會員，禁止存取
-        if (order == null || !order.getMemberNo().equals(member.getMemId())) {
+        if (order == null || !order.getMemberNo().equals(member.getMemNo())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
