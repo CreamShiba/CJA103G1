@@ -123,4 +123,84 @@ public class FavoriteProductController {
         return ResponseEntity.notFound().build();
     }
 
+    //對應productDetail.html 寫法
+    //HTML 指向 /fav/toggle，Controller 類別註解應改為 @RequestMapping("/fav")，或者將 HTML 的路徑改為 /favorite/toggle
+    //需重新整理畫面才會顯示收藏變動
+    @PostMapping("/toggle")
+    public String toggleFavorite(@RequestParam("prodNo") Integer prodNo,
+                                 HttpSession session,
+                                 jakarta.servlet.http.HttpServletRequest request) {
+
+        // 1. 檢查登入狀態
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        if (member == null) {
+            // 沒登入就導向登入頁
+            return "redirect:/members/login";
+        }
+
+        Integer memberNo = member.getMemId();
+
+        // 2. 判斷目前是否已收藏
+        FavoriteProduct existing = favoriteProductService.getOne(memberNo, prodNo);
+
+        if (existing != null) {
+            // 已有資料 -> 移除收藏
+            favoriteProductService.delete(memberNo, prodNo);
+        } else {
+            // 無資料 -> 新增收藏
+            FavoriteProduct fav = new FavoriteProduct();
+            fav.setMemberNo(memberNo);
+            fav.setProdNo(prodNo);
+
+            // 為了符合 JPA 關聯，若實體內有 productProd 欄位可不設或設為空，
+            // 因為 insertable = false。但 memberNo 與 prodNo 必須設定。
+            favoriteProductService.insert(fav);
+        }
+
+        // 3. 取得來源網址，讓使用者回到原商品頁，而不是空頁面
+        String referer = request.getHeader("Referer");
+        return "redirect:" + (referer != null ? referer : "/product/all");
+    }
+
+
+    //對應productDetail.html 寫法
+    //即時渲染畫面，需搭配html、js變動
+    @PostMapping("/toggleAjax")
+    @ResponseBody
+    public ResponseEntity<?> toggleFavoriteAjax(@RequestParam("prodNo") Integer prodNo,
+                                                HttpSession session) {
+
+        // 1. 取得登入會員資訊
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "請先登入"));
+        }
+
+        Integer memberNo = member.getMemId();
+        // 2. 檢查資料庫中是否已有該收藏紀錄
+        FavoriteProduct existing = favoriteProductService.getOne(memberNo, prodNo);
+
+        boolean isFavoriteNow; // 修正後的變數名
+
+        if (existing != null) {
+            // 原本已收藏 -> 執行刪除
+            favoriteProductService.delete(memberNo, prodNo);
+            isFavoriteNow = false;
+        } else {
+            // 原本未收藏 -> 執行新增
+            FavoriteProduct fav = new FavoriteProduct();
+            fav.setMemberNo(memberNo);
+            fav.setProdNo(prodNo);
+            favoriteProductService.insert(fav);
+            isFavoriteNow = true;
+        }
+
+        // 3. 回傳最新的狀態與訊息給前端
+        return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "isFavorite", isFavoriteNow,
+                "message", isFavoriteNow ? "已加入收藏" : "已取消收藏"
+        ));
+    }
+
 }

@@ -74,5 +74,30 @@ public class MemberCouponController {
         return "領取成功！".equals(result) ? ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result);
     }
 
+    // 取得當前購物車金額下「可使用」的優惠券清單
+//    @GetMapping("/available")
+//    public ResponseEntity<List<MemberCoupon>> getAvailableCoupons(@RequestParam Double orderAmount) {
+//        // 邏輯：status=0 && 尚未過期 && 訂單金額 >= 優惠券門檻
+//    }
+
+    //前端 checkout.html 按下「套用」時，透過 AJAX 詢問後端這張券能抵扣多少錢
+    @GetMapping("/validate-usage")
+    public ResponseEntity<?> validateCouponUsage(
+            @RequestParam Integer couponNo,
+            @RequestParam Double orderAmount) {
+
+        MembersVO member = loginUserHolder.get(); //
+        if (member == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("請先登入");
+
+        try {
+            MemberCoupon mc = memberCouponService.validateAndGetCoupon(member.getMemId(), couponNo, orderAmount);
+            // 如果通過，回傳折扣金額
+            return ResponseEntity.ok(mc.getCoupon().getDiscountValue());
+        } catch (RuntimeException e) {
+            // 如果失敗（例如超過 20%），回傳錯誤訊息
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 
 }
