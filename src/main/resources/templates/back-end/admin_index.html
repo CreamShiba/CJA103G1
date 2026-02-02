@@ -53,12 +53,12 @@
 
                     <li class="menu-item has-submenu">
                         <a class="submenu-toggle">
-                            <span><i class="fas fa-users-cog"></i> 自訂</span>
+                            <span><i class="fas fa-users-cog"></i> 分類管理</span>
                             <i class="fas fa-chevron-down arrow"></i>
                         </a>
                         <ul class="submenu">
-                            <li><a href="#">自訂</a></li>
-                            <li><a href="#">自訂</a></li>
+                            <li><a th:href="@{/admins/carcate/list}">汽車分類</a></li>
+                            <li><a th:href="@{/admins/prodcate/list}">商品分類</a></li>
                         </ul>
                     </li>
                     <li class="menu-item has-submenu">
@@ -93,7 +93,7 @@
             <header class="top-bar">
                 <h2 class="page-title">頁首頭</h2>
                 <div class="user-profile">
-                    <span>Admin</span>
+                    <span th:text="${session.admin.adminName}">Admin</span>
                     <div class="avatar">
                         <i class="fas fa-user"></i>
                     </div>

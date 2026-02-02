@@ -54,13 +54,13 @@ public class EmailService {
     }
   }
 
-  // 從 Redis 驗證 token → 拿到 memId（會員ID）
+  // 從 Redis 驗證 token → 拿到 memNo（會員ID）
   public Integer verifyToken(String token) {
-    String memIdStr = redisTemplate.opsForValue().get("verify:" + token);
-    if (memIdStr == null) return null;
+    String memNoStr = redisTemplate.opsForValue().get("verify:" + token);
+    if (memNoStr == null) return null;
 
     redisTemplate.delete("verify:" + token);
-    return Integer.parseInt(memIdStr);
+    return Integer.parseInt(memNoStr);
   }
 
   public void sendResetPasswordEmail(String email, String resetLink) {
@@ -95,8 +95,8 @@ public class EmailService {
 
   // 驗證「忘記密碼」token 是否存在
   public Integer verifyResetToken(String token) {
-    String memIdStr = redisTemplate.opsForValue().get("reset:" + token);
-    return (memIdStr != null) ? Integer.parseInt(memIdStr) : null;
+    String memNoStr = redisTemplate.opsForValue().get("reset:" + token);
+    return (memNoStr != null) ? Integer.parseInt(memNoStr) : null;
   }
 
 

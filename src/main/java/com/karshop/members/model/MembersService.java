@@ -58,7 +58,7 @@ public class MembersService {
     // 存進 Redis，30 分鐘有效
     redisTemplate.opsForValue()
             .set("verify:" + token,
-                    savedMember.getMemId().toString(),
+                    savedMember.getMemNo().toString(),
                     30,
                     TimeUnit.MINUTES);
 
@@ -87,11 +87,11 @@ public class MembersService {
 
   @Transactional
   public boolean verifyAndActivateMember(String token) {
-    Integer memId = emailService.verifyToken(token);
-    if (memId == null)
+    Integer memNo = emailService.verifyToken(token);
+    if (memNo == null)
       return false;
 
-    Optional<MembersVO> opt = membersRepository.findById(memId);
+    Optional<MembersVO> opt = membersRepository.findById(memNo);
     if (opt.isPresent()) {
       MembersVO member = opt.get();
       // 只在尚未啟用時才更新，避免重複啟用
@@ -118,7 +118,7 @@ public class MembersService {
       String token = UUID.randomUUID().toString();
       redisTemplate.opsForValue()
               .set("reset:" + token,
-                      member.getMemId().toString(),
+                      member.getMemNo().toString(),
                       15, TimeUnit.MINUTES);
 
       // 2. 在原請求線程中動態抓 baseUrl
@@ -169,7 +169,7 @@ public class MembersService {
   public void recordLoginError(MembersVO member) {
     // 執行自訂的sql
     membersRepository.incrementLoginError(
-            member.getMemId(),
+            member.getMemNo(),
             new Timestamp(System.currentTimeMillis())
     );
   }
@@ -177,7 +177,7 @@ public class MembersService {
   // ───────── 新增：成功登入後重置錯誤 ─────────
   @Transactional
   public void resetLoginError(MembersVO member) {
-    membersRepository.resetLoginErrorNative(member.getMemId());
+    membersRepository.resetLoginErrorNative(member.getMemNo());
   }
 
   // ─── 新增：含鎖定檢查的登入驗證 ───
@@ -225,9 +225,9 @@ public class MembersService {
     membersRepository.save(membersVO); // save() 會自動進行 update
   }
 
-  //      根據 memId 取得會員資料（edit/init 頁用）
-  public MembersVO getOneMember(Integer memId) {
-    return membersRepository.findById(memId).orElse(null);
+  //      根據 memNo 取得會員資料（edit/init 頁用）
+  public MembersVO getOneMember(Integer memNo) {
+    return membersRepository.findById(memNo).orElse(null);
   }
 
   //     根據帳號取得會員
@@ -257,8 +257,8 @@ public class MembersService {
   }
 
 
-  public MembersVO getById(Integer memId) {
-    return membersRepository.findById(memId).orElse(null);
+  public MembersVO getById(Integer memNo) {
+    return membersRepository.findById(memNo).orElse(null);
   }
 
 
@@ -266,15 +266,15 @@ public class MembersService {
   public Page<MembersVO> searchByCriteria(
           Byte memStatus,
           String memAcc,
-          Integer memId,
+          Integer memNo,
           String memName,
           Pageable pageable) {
 
     Specification<MembersVO> spec = (root, query, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
 
-      if (memId != null) {
-        predicates.add(cb.equal(root.get("memId"), memId));
+      if (memNo != null) {
+        predicates.add(cb.equal(root.get("memNo"), memNo));
       }
       if (memAcc != null && !memAcc.isBlank()) {
         predicates.add(cb.like(root.get("memAcc"), "%" + memAcc + "%"));
@@ -292,7 +292,7 @@ public class MembersService {
 //        return membersRepository.findAll(spec, pageable);
 
     // 1. 一次撈完所有符合條件的清單（不分頁）
-    List<MembersVO> fullList = membersRepository.findAll(spec, Sort.by("memId").ascending());
+    List<MembersVO> fullList = membersRepository.findAll(spec, Sort.by("memNo").ascending());
 
     // 2. 用 PageImpl 把它包成一個「unpaged」的 Page 回傳
     return new PageImpl<>(fullList, Pageable.unpaged(), fullList.size());
@@ -302,13 +302,13 @@ public class MembersService {
   public List<MembersVO> searchByCriteria(
           Byte memStatus,
           String memAcc,
-          Integer memId,
+          Integer memNo,
           String memName) {
     // 直接呼叫上面那支五參數、傳入 unpaged()
     Page<MembersVO> allPage = searchByCriteria(
             memStatus,
             memAcc,
-            memId,
+            memNo,
             memName,
             Pageable.unpaged()
     );

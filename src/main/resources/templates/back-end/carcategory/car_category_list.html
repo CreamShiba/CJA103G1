@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>車種類別管理 - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/back-end/carcategory/car_category.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-tachometer-alt"></i> 儀錶板</a>
+                </li>
+                <li class="menu-item has-submenu open">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-car"></i> 車輛資料管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#" class="active">車種類別管理</a></li>
+                        <li><a href="#">車輛型號管理</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#"><i class="fas fa-sign-out-alt"></i> 登出 (Logout)</a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">車種類別管理</h2>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar"><i class="fas fa-user"></i></div>
+            </div>
+        </header>
+
+        <div class="content-body">
+
+            <div class="card">
+                <div class="card-header">
+                    <h3>車種類別列表</h3>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                        <tr>
+                            <th>編號</th>
+                            <th>汽車名稱</th>
+                            <th>製造廠商</th>
+                            <th>生產區間</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="car : ${carList}">
+                            <td th:text="${car.carCategoryNo}"></td>
+                            <td th:text="${car.carName}"></td>
+                            <td th:text="${car.make}"></td>
+                            <td th:text="${car.prodInterval}"></td>
+                            <td class="action-cell">
+                                <a th:href="@{/admins/carcate/edit/{id}(id=${car.carCategoryNo})}" class="action-link">
+                                    <i class="fas fa-edit"></i> 編輯
+                                </a>
+
+                                <form th:action="@{/admins/carcate/delete/{id}(id=${car.carCategoryNo})}" method="post" style="display:inline;" onsubmit="return confirm('確定要刪除嗎？');">
+                                    <button type="submit" class="delete-btn-icon">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(carList)}">
+                            <td colspan="5" style="text-align:center; color:#888;">目前沒有任何車種類別資料</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card-footer">
+                    <button class="btn-primary" th:onclick="|window.location.href='@{add}'|">
+                        <i class="fas fa-plus"></i> 新增車種類別
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script>
+    document.querySelectorAll('.submenu-toggle').forEach(item => {
+        item.addEventListener('click', event => {
+            item.parentElement.classList.toggle('open');
+        });
+    });
+</script>
+</body>
+</html>

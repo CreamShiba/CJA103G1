@@ -87,3 +87,73 @@ select {
 .btn-submit:hover {
     background-color: #0056b3;
 }
+
+/* --- 功能權限分配區塊樣式 --- */
+
+/* 外框設定：去除預設醜邊框，改用圓角與留白 */
+fieldset.permission-group {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 25px;
+    background-color: #fafafa; /* 淡淡的灰色背景區隔區塊 */
+}
+
+/* 標題設定 */
+.permission-legend {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    padding: 0 10px;
+    margin-bottom: 10px;
+    width: auto; /* 修正某些瀏覽器佔滿整行的問題 */
+}
+
+/* 列表容器：使用 Grid 讓選項自動排成多欄 */
+.permission-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    /* 自動填滿：最小寬度 140px，依螢幕寬度自動換行 */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px; /* 格子之間的間距 */
+}
+
+/* 單個選項標籤設定 */
+.permission-item label {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: #555;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+/* 滑鼠懸停效果：變為主題色 */
+.permission-item label:hover {
+    border-color: #007bff;
+    background-color: #f0f7ff; /* 極淺的藍色 */
+    color: #007bff;
+}
+
+/* 勾選時的效果 (如果瀏覽器支援 :has 選擇器) */
+.permission-item label:has(input:checked) {
+    border-color: #007bff;
+    background-color: #e6f2ff;
+    font-weight: bold;
+}
+
+/* Checkbox 本體樣式 */
+.permission-item input[type="checkbox"] {
+    margin-right: 10px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #007bff; /* 設定勾選框的顏色為主題藍 */
+}

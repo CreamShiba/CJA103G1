@@ -23,8 +23,8 @@ public class AdminService {
   }
 
   //依 ID 查單筆
-  public AdminVO getById(Integer adminId) {
-    return adminRepository.findById(adminId)
+  public AdminVO getById(Integer adminNo) {
+    return adminRepository.findById(adminNo)
             .orElse(null);
   }
 

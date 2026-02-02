@@ -204,3 +204,178 @@
     box-shadow: 0 0 15px rgba(255, 51, 51, 0.5);
     transform: translateY(-2px);
 }
+
+/* --- Member Car Page Styles (黑紅風格) --- */
+
+/* 列表容器 */
+.car-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 40px;
+}
+
+/* 單台車卡片 */
+.car-item {
+    background-color: rgba(255, 255, 255, 0.05); /* 微亮背景 */
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.car-item:hover {
+    border-color: #ff3333; /* 懸停變紅 */
+    background-color: rgba(255, 51, 51, 0.05);
+    transform: translateX(5px);
+}
+
+/* 左側資訊區 */
+.car-info {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.car-icon-box {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #333, #000);
+    border: 2px solid #ff3333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
+}
+
+.car-icon-box i {
+    font-size: 24px;
+    color: #fff;
+}
+
+.car-text h4 {
+    color: #fff;
+    font-size: 18px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.car-text p {
+    color: #aaa;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* 右側按鈕區 */
+.btn-delete {
+    background: transparent;
+    border: 1px solid #555;
+    color: #888;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-delete:hover {
+    border-color: #ff3333;
+    color: #ff3333;
+    background: rgba(255, 51, 51, 0.1);
+}
+
+/* --- 新增車輛表單區 --- */
+.add-car-section {
+    border-top: 1px solid #333;
+    padding-top: 30px;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+.section-header {
+    margin-bottom: 20px;
+    border-left: 4px solid #ff3333;
+    padding-left: 15px;
+}
+
+.section-header h3 {
+    color: #fff;
+    font-size: 20px;
+    margin: 0;
+}
+
+.add-car-form {
+    display: grid;
+    grid-template-columns: 3fr 1fr; /* 輸入框寬，按鈕窄 */
+    gap: 20px;
+    align-items: end;
+}
+
+/* 自訂下拉選單 */
+.custom-select {
+    width: 100%;
+    background-color: #111;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 12px 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    appearance: none; /* 移除預設箭頭 */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 20px;
+}
+
+.custom-select:focus {
+    outline: none;
+    border-color: #ff3333;
+    box-shadow: 0 0 8px rgba(255, 51, 51, 0.4);
+}
+
+/* 新增按鈕 */
+.btn-add {
+    width: 100%;
+    background-color: #ff3333;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-add:hover {
+    background-color: #cc0000;
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.6);
+    transform: translateY(-2px);
+}
+
+/* RWD */
+@media (max-width: 768px) {
+    .car-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .btn-delete {
+        width: 100%;
+        justify-content: center;
+    }
+    .add-car-form {
+        grid-template-columns: 1fr;
+    }
+}
