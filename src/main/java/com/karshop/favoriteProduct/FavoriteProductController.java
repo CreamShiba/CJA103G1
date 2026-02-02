@@ -42,7 +42,7 @@ public class FavoriteProductController {
         }
 
         // 3. 從物件中取出編號
-        Integer memberNo = member.getMemId();
+        Integer memberNo = member.getMemNo();
 
         // 4. 抓取資料並回傳
         model.addAttribute("favorites", favoriteProductService.getFavoritesByMember(memberNo));
@@ -68,7 +68,7 @@ public class FavoriteProductController {
 
         FavoriteProduct fav = new FavoriteProduct();
         fav.setProductProd(productProd);
-        fav.setMemberNo(member.getMemId()); // 從物件中取出 ID
+        fav.setMemberNo(member.getMemNo()); // 從物件中取出 ID
 
         favoriteProductService.insert(fav);
         return ResponseEntity.ok().body(Map.of("status", "success", "message", "成功加入收藏！"));
@@ -97,7 +97,7 @@ public class FavoriteProductController {
         }
 
         // 2. 執行刪除 (傳入從物件中取出的 memId)
-        favoriteProductService.delete(member.getMemId(), prodNo);
+        favoriteProductService.delete(member.getMemNo(), prodNo);
 
         return ResponseEntity.ok().body(Map.of("status", "success", "message", "已取消收藏"));
     }
@@ -138,7 +138,7 @@ public class FavoriteProductController {
             return "redirect:/members/login";
         }
 
-        Integer memberNo = member.getMemId();
+        Integer memberNo = member.getMemNo();
 
         // 2. 判斷目前是否已收藏
         FavoriteProduct existing = favoriteProductService.getOne(memberNo, prodNo);
@@ -176,7 +176,7 @@ public class FavoriteProductController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "請先登入"));
         }
 
-        Integer memberNo = member.getMemId();
+        Integer memberNo = member.getMemNo();
         // 2. 檢查資料庫中是否已有該收藏紀錄
         FavoriteProduct existing = favoriteProductService.getOne(memberNo, prodNo);
 

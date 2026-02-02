@@ -26,7 +26,7 @@ public class MemberCouponController {
         MembersVO member = loginUserHolder.get();
         if (member == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        List<MemberCoupon> coupons = memberCouponService.getAllByMember(member.getMemId());
+        List<MemberCoupon> coupons = memberCouponService.getAllByMember(member.getMemNo());
         return coupons.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(coupons);
     }
 
@@ -45,7 +45,7 @@ public class MemberCouponController {
         }
 
         // 呼叫 Service，傳入從 Session 取得的 ID
-        List<MemberCoupon> unusedCoupons = memberCouponService.getUnusedByMember(member.getMemId());
+        List<MemberCoupon> unusedCoupons = memberCouponService.getUnusedByMember(member.getMemNo());
 
         if (unusedCoupons.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -60,7 +60,7 @@ public class MemberCouponController {
         MembersVO member = loginUserHolder.get();
         if (member == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        List<MemberCoupon> expiredCoupons = memberCouponService.getExpiredCouponsByMember(member.getMemId());
+        List<MemberCoupon> expiredCoupons = memberCouponService.getExpiredCouponsByMember(member.getMemNo());
         return expiredCoupons.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(expiredCoupons);
     }
 
@@ -70,7 +70,7 @@ public class MemberCouponController {
         MembersVO member = loginUserHolder.get();
         if (member == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("請先登入");
 
-        String result = memberCouponService.claimCouponByName(member.getMemId(), couponTitle);
+        String result = memberCouponService.claimCouponByName(member.getMemNo(), couponTitle);
         return "領取成功！".equals(result) ? ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result);
     }
 
@@ -90,7 +90,7 @@ public class MemberCouponController {
         if (member == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("請先登入");
 
         try {
-            MemberCoupon mc = memberCouponService.validateAndGetCoupon(member.getMemId(), couponNo, orderAmount);
+            MemberCoupon mc = memberCouponService.validateAndGetCoupon(member.getMemNo(), couponNo, orderAmount);
             // 如果通過，回傳折扣金額
             return ResponseEntity.ok(mc.getCoupon().getDiscountValue());
         } catch (RuntimeException e) {
