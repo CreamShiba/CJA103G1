@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Size;
 public class AdminDTO {
 
   /** 管理員 ID（隱藏欄位） */
-  private Integer adminId;
+  private Integer adminNo;
 
   @NotEmpty(message = "管理員帳號：請勿空白")
   @Pattern(regexp = "^[a-zA-Z0-9_]{4,16}$", message = "帳號只能是英文字母、數字和_，長度4~16")
@@ -39,12 +39,12 @@ public class AdminDTO {
 
   // ===== getters / setters =====
 
-  public Integer getAdminId() {
-    return adminId;
+  public Integer getadminNo() {
+    return adminNo;
   }
 
-  public void setAdminId(Integer adminId) {
-    this.adminId = adminId;
+  public void setadminNo(Integer adminNo) {
+    this.adminNo = adminNo;
   }
 
   public String getAdminAcc() {

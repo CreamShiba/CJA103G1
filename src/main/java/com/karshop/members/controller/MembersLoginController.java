@@ -142,9 +142,9 @@ public class MembersLoginController {
 
   @GetMapping("/resetPassword")
   public String showResetPasswordForm(@RequestParam("token") String token, Model model) {
-    Integer memId = emailService.verifyResetToken(token);
+    Integer memNo = emailService.verifyResetToken(token);
 
-    if (memId == null) {
+    if (memNo == null) {
       model.addAttribute("errorMsg", "重設連結已失效，請重新申請。");
       return "front-end/members/resetPasswordError"; // 錯誤頁面
     }
@@ -160,13 +160,13 @@ public class MembersLoginController {
                                      @RequestParam("newPassword") String newPassword,
                                      RedirectAttributes redirectAttrs,
                                      Model model) {
-    Integer memId = emailService.verifyResetToken(token);
-    if (memId == null) {
+    Integer memNo = emailService.verifyResetToken(token);
+    if (memNo == null) {
       model.addAttribute("errorMsg", "連結已失效，請重新申請重設密碼。");
       return "front-end/members/resetPasswordError"; // 錯誤頁與 GET 共用
     }
 
-    MembersVO member = membersService.getOneMember(memId);
+    MembersVO member = membersService.getOneMember(memNo);
     if (member == null) {
       model.addAttribute("errorMsg", "找不到會員帳號。");
       return "front-end/members/resetPasswordError";

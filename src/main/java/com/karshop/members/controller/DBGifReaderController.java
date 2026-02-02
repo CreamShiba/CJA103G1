@@ -20,7 +20,7 @@ public class DBGifReaderController {
 
   @GetMapping("/DBGifReader")
   public void getMemberImage(
-          @RequestParam("memId") Integer memId,
+          @RequestParam("memNo") Integer memNo,
           @RequestParam("type") String type,
           HttpServletRequest req,
           HttpServletResponse res) throws IOException {
@@ -29,13 +29,13 @@ public class DBGifReaderController {
     ServletOutputStream out = res.getOutputStream();
 
     try {
-      MembersVO member = memSvc.getOneMember(memId);
+      MembersVO member = memSvc.getOneMember(memNo);//檢查資料庫
       byte[] imageBytes = null;
 
-      if ("memAvatar".equalsIgnoreCase(type)) {
+      if ("memAvatar".equalsIgnoreCase(type)) {//判斷是否為頭像
         imageBytes = member.getMemAvatar();
       }
-      if (imageBytes != null) {
+      if (imageBytes != null) {//如果資料庫有圖，直接輸出圖片資料
         out.write(imageBytes);
       } else {
         InputStream in = getClass()
@@ -46,9 +46,11 @@ public class DBGifReaderController {
       }
 
     } catch (Exception e) {
+      //===========防止因找不到會員或資料庫連線失敗時例外發生===========
       InputStream in = getClass()
               .getClassLoader()
               .getResourceAsStream("static/images/user.png");
+      //===============================================================
       out.write(in.readAllBytes());
       in.close();
     }

@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,15 +54,15 @@ public class AdminController {
 
   // 顯示查詢結果（多筆）—— 單一條件
   @GetMapping("/search")
-  public String search(@RequestParam(required = false) String adminId,
+  public String search(@RequestParam(required = false) String adminNo,
                        @RequestParam(required = false) String adminName, Model model) {
 
     List<AdminVO> results = new ArrayList<>();
 
-    if (adminId != null && !adminId.isBlank()) {
+    if (adminNo != null && !adminNo.isBlank()) {
       // 依 ID 精確查一筆
-      if (adminId.matches("\\d+")) {
-        AdminVO a = adminService.getById(Integer.valueOf(adminId));
+      if (adminNo.matches("\\d+")) {
+        AdminVO a = adminService.getById(Integer.valueOf(adminNo));
         if (a != null) {
           results.add(a);
         }
@@ -166,16 +167,16 @@ public class AdminController {
 
   // 顯示編輯頁面
   @GetMapping("/edit")
-  public String showEditForm(@RequestParam("adminId") Integer adminId, Model model, RedirectAttributes ra) {
+  public String showEditForm(@RequestParam("adminNo") Integer adminNo, Model model, RedirectAttributes ra) {
 
-    // 防呆：若無 adminId，就導回查詢頁並顯示錯誤
-    if (adminId == null) {
+    // 防呆：若無 adminNo，就導回查詢頁並顯示錯誤
+    if (adminNo == null) {
       ra.addFlashAttribute("errorMsg", "必須指定管理員 ID");
       return "redirect:/admins/listAll";
     }
 
     // 讀取資料，若找不到也跳回查詢頁
-    AdminVO vo = adminService.getById(adminId);
+    AdminVO vo = adminService.getById(adminNo);
     if (vo == null) {
       ra.addFlashAttribute("errorMsg", "找不到指定的管理員");
       return "redirect:/admins/listAll";
@@ -184,7 +185,7 @@ public class AdminController {
     // ----- 下面開始改成用 DTO -----
     // 1. 建立 DTO 並把 VO 的資料搬過去
     AdminDTO form = new AdminDTO();
-    form.setAdminId(vo.getAdminId());
+    form.setadminNo(vo.getAdminNo());
     form.setAdminAcc(vo.getAdminAcc());
     form.setAdminPwd(vo.getAdminPwd());
     form.setAdminName(vo.getAdminName());
@@ -211,6 +212,7 @@ public class AdminController {
   public String updateAdmin(
           @Valid @ModelAttribute("form") AdminDTO form,
           BindingResult result,
+          HttpSession session,
           Model model,
           RedirectAttributes ra) {
 
@@ -225,10 +227,11 @@ public class AdminController {
       return "back-end/admin_edit";
     }
 
-    // 2. 先讀出原本的 VO，從 DTO 拿 adminId
-    AdminVO vo = adminService.getById(form.getAdminId());
+    // 2. 先讀出原本的 VO，從 DTO 拿 adminNo
+    AdminVO vo = adminService.getById(form.getadminNo());
 
     // 3. 更新基本欄位
+    vo.setAdminAcc(form.getAdminAcc());
     vo.setAdminPwd(form.getAdminPwd());
     vo.setAdminName(form.getAdminName());
     vo.setAdminStatus(form.getAdminStatus());
@@ -248,6 +251,22 @@ public class AdminController {
     // 5. 呼叫 Service 更新
     adminService.update(vo);
     ra.addFlashAttribute("successMsg", "更新成功！");
+   // 只有在修改「自己」時，才更新 Session ★★★
+    AdminVO currentLoginAdmin = (AdminVO) session.getAttribute("admin");
+
+    // 進行比對 (防止空指針例外，先檢查 currentLoginAdmin 是否存在)
+    if (currentLoginAdmin != null &&
+            currentLoginAdmin.getAdminNo().equals(vo.getAdminNo())) {
+
+      // 情況 A: 如果你 Session 裡存的是整個物件
+      currentLoginAdmin.setAdminName(vo.getAdminName());
+      // 如果有改頭像或其他欄位，也要在這裡 set 進去
+      // currentLoginAdmin.setAdminAvatar(vo.getAdminAvatar());
+      session.setAttribute("admin", currentLoginAdmin); // 寫回 Session
+
+      // 情況 B: 如果你 Session 裡只存了名字字串 (Key 是 "adminName")
+      session.setAttribute("adminName", vo.getAdminName());
+    }
     return "redirect:/admins/listAll";
   }
 

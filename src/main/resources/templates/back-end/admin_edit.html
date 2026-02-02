@@ -14,7 +14,7 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="logo-icon"></div>
-            <h2>Autopile <span class="badge">ADMIN</span></h2>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
         </div>
 
         <nav class="sidebar-nav">
@@ -45,7 +45,7 @@
         <header class="top-bar">
             <h2 class="page-title">編輯管理員</h2>
             <div class="user-profile">
-                <span>Admin</span>
+                <span th:text="${session.admin.adminName}">Admin</span>
                 <div class="avatar">
                     <i class="fas fa-user"></i>
                 </div>
@@ -66,7 +66,7 @@
                 <div class="form-container">
                     <form id="edit-admin-form" th:action="@{/admins/edit}" th:object="${form}" method="post">
 
-                        <input type="hidden" th:field="*{adminId}">
+                        <input type="hidden" th:field="*{adminNo}">
 
                         <div class="form-row">
                             <label>姓名 (Name)</label>
@@ -96,11 +96,11 @@
                             </select>
                         </div>
 
-                        <fieldset class="form-group" style="margin-top: 20px;">
-                            <legend style="font-weight: bold; margin-bottom: 10px;">功能權限分配</legend>
-                            <ul style="list-style: none; padding-left: 0;">
-                                <li th:each="func : ${allFunctions}" style="margin-bottom: 5px;">
-                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <fieldset class="form-group permission-group">
+                            <legend class="permission-legend">功能權限分配</legend>
+                            <ul class="permission-list">
+                                <li th:each="func : ${allFunctions}" class="permission-item">
+                                    <label>
                                         <input type="checkbox" th:field="*{manageFuncIds}" th:value="${func.authNo}" />
                                         <span th:text="${func.authName}">功能名稱</span>
                                     </label>
