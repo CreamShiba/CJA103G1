@@ -28,7 +28,7 @@ public class MembersVO implements Serializable {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column (name= "member_no", updatable = false)
-  private Integer memId;
+  private Integer memNo;
 
   @Column (name = "member_account", updatable = false)
   @NotEmpty(message = "會員帳號: 請勿空白")
@@ -85,12 +85,12 @@ public class MembersVO implements Serializable {
     super();
   }
 
-  public Integer getMemId() {
-    return memId;
+  public Integer getMemNo() {
+    return memNo;
   }
 
-  public void setMemId(Integer memId) {
-    this.memId = memId;
+  public void setMemNo(Integer memNo) {
+    this.memNo = memNo;
   }
 
   public String getMemAcc() {

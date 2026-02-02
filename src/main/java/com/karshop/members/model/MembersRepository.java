@@ -29,12 +29,12 @@ public interface MembersRepository extends JpaRepository<MembersVO, Integer>,Jpa
           value = "UPDATE member SET member_login_errcount = member_login_errcount + 1, member_login_errtime = :now WHERE member_no = :id",
           nativeQuery = true
   )
-  int incrementLoginError(@Param("id") Integer memId,
+  int incrementLoginError(@Param("id") Integer memNo,
                           @Param("now") Timestamp now);
 
   @Modifying
   @Transactional
-  @Query(value="UPDATE member SET member_login_errcount = 0 WHERE member_no = :memId", nativeQuery=true)
-  int resetLoginErrorNative(@Param("memId") Integer memId);
+  @Query(value="UPDATE member SET member_login_errcount = 0 WHERE member_no = :memNo", nativeQuery=true)
+  int resetLoginErrorNative(@Param("memNo") Integer memNo);
 
 }

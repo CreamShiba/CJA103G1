@@ -14,7 +14,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo-icon"></div>
-                <h2>Autopile <span class="badge">ADMIN</span></h2>
+                <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
             </div>
 
             <nav class="sidebar-nav">
@@ -93,7 +93,7 @@
             <header class="top-bar">
                 <h2 class="page-title">管理員帳號管理</h2>
                 <div class="user-profile">
-                    <span>Admin</span>
+                    <span th:text="${session.admin.adminName}">Admin</span>
                     <div class="avatar">
                         <i class="fas fa-user"></i>
                     </div>
@@ -123,7 +123,6 @@
                             <tbody id="admin-table-body">
                                 <tr th:each="a : ${adminPage}">
                                     <td style="display: flex; align-items: center; gap: 10px; border-bottom: none;">
-                                        <img src="https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" class="table-avatar" alt="Avatar">
                                         <span th:text="${a.adminName}"></span>
                                     </td>
                                     <td th:text="${a.adminAcc}"></td>
@@ -132,7 +131,7 @@
                                     <td th:text="${#dates.format(a.adminUpdatedAt,'yyyy-MM-dd')}"></td>
 
                                     <td>
-                                        <a th:href="@{/admins/edit(adminId=${a.adminId})}" class="action-link">
+                                        <a th:href="@{/admins/edit(adminNo=${a.adminNo})}" class="action-link">
                                             <i class="fas fa-edit"></i> 編輯資料
                                         </a>
                                     </td>

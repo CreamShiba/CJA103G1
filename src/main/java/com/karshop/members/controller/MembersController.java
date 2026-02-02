@@ -165,7 +165,7 @@ public class MembersController {
       // 存進 Redis，30 分鐘有效
       redisTemplate.opsForValue()
               .set("verify:" + token,
-                      member.getMemId().toString(),
+                      member.getMemNo().toString(),
                       30,
                       TimeUnit.MINUTES);
 
@@ -226,7 +226,8 @@ public class MembersController {
   @PostMapping("/update")
   public String updateMember(@Valid @ModelAttribute("membersVO") MembersVO membersVO, BindingResult result,
                              Model model, HttpSession session,
-                             @RequestParam(value = "memAvatarFile", required = false) MultipartFile memAvatarFile)
+                             @RequestParam(value = "memAvatarFile", required = false) MultipartFile memAvatarFile,
+                             RedirectAttributes redirectAttributes)
                              throws IOException {
 
     MembersVO sessionMember = (MembersVO) session.getAttribute("member");
@@ -234,8 +235,8 @@ public class MembersController {
       return "redirect:/members/login";
     }
 
-    // 強制使用 Session 中的 memId & memAcc（防止偽造）
-    membersVO.setMemId(sessionMember.getMemId());
+    // 強制使用 Session 中的 memNo & memAcc（防止偽造）
+    membersVO.setMemNo(sessionMember.getMemNo());
     membersVO.setMemAcc(sessionMember.getMemAcc());
     membersVO.setMemRegTime(sessionMember.getMemRegTime());
 
@@ -267,130 +268,16 @@ public class MembersController {
     // 更新 session 裡的資料（避免還是舊資料）
     session.setAttribute("member", membersVO);
 
-    return "redirect:/members/update?success"; // 可以在 update 頁面用參數判斷顯示「修改成功」
+    // 2. 使用 addFlashAttribute 傳遞訊息 (這個訊息只會存活一次請求)
+    redirectAttributes.addFlashAttribute("successMsg", "會員資料修改成功！");
+
+    return "redirect:/members/view"; // 可以在 update 頁面用參數判斷顯示「修改成功」
   }
 
   // 顯示email驗證失敗頁面
   @GetMapping("/emailFail")
   public String showEmailVerificationFailed() {
-    return "front-end/members/emailVerificationFailed";
-  }
-
-  // 顯示後台選擇頁面
-  @GetMapping("/selectPage")
-  public String showSelectPage(Model model) {
-    model.addAttribute("membersList", membersService.findAllMembers());
-    model.addAttribute("currentPage", "accounts");
-    model.addAttribute("currentPage2", "selectPage");
-    return "back-end/members/selectPage";
-  }
-
-  @GetMapping("/searchResults")
-  public String showSearchResults(@RequestParam(value = "memStatus", required = false) Byte memStatus,
-                                  @RequestParam(value = "memAcc", required = false) String memAcc,
-                                  @RequestParam(value = "memId", required = false) Integer memId,
-                                  @RequestParam(value = "memName", required = false) String memName,
-                                  @RequestParam(value = "page", defaultValue = "0") int page,
-                                  @RequestParam(value = "size", defaultValue = "5") int size, Model model) {
-
-    boolean noCriteria = (memStatus == null) && (memAcc == null || memAcc.isBlank()) && (memId == null)
-            && (memName == null || memName.isBlank());
-    if (noCriteria) {
-      return "redirect:/members/listAll";
-    }
-
-//		// 使用 page 和 size 動態分頁
-//		Pageable pageable = PageRequest.of(page, size, Sort.by("memId").ascending());
-//		Page<MembersVO> pageResult = membersService.searchByCriteria(memStatus, memAcc, memId, memName, pageable);
-
-    List<MembersVO> membersList =
-            membersService.searchByCriteria(memStatus, memAcc, memId, memName);
-
-//		model.addAttribute("page", pageResult);
-//		model.addAttribute("membersList", pageResult.getContent());
-
-    model.addAttribute("membersList", membersList);
-
-    model.addAttribute("memStatus", memStatus);
-    model.addAttribute("memAcc", memAcc);
-    model.addAttribute("memId", memId);
-    model.addAttribute("memName", memName);
-    model.addAttribute("currentPage", "accounts");
-
-    return "back-end/members/searchResults";
-  }
-
-  @GetMapping("/listAll")
-  public String listAll(Model model) {
-    // 一次拿所有會員，交給前端 DataTables 處理
-    List<MembersVO> all = membersService.findAllMembers();
-    model.addAttribute("membersList", all);
-    model.addAttribute("currentPage", "accounts");
-    model.addAttribute("currentPage2", "listAll");
-    return "back-end/members/listAll";
-  }
-
-  @GetMapping("/editMembers")
-  public String showEditForm(@RequestParam(value = "memId", required = false) Integer memId, Model model,
-                             RedirectAttributes ra) {
-
-    // 1. 防呆：没有 memId
-    if (memId == null) {
-      ra.addFlashAttribute("errorMsg", "必須指定會員 ID");
-      return "redirect:/members/listAll"; //
-    }
-
-    // 2. 撈資料
-    MembersVO member = membersService.getOneMember(memId);
-    if (member == null) {
-      ra.addFlashAttribute("errorMsg", "找不到指定的會員");
-      return "redirect:/members/listAll";
-    }
-
-    // 3. 成功：把 VO 塞入 Model
-    model.addAttribute("membersVO", member);
-    model.addAttribute("currentPage", "accounts");
-    return "back-end/members/editMembers";
-  }
-
-  @PostMapping("/editMembers")
-  public String updateMember(@Valid @ModelAttribute("membersVO") MembersVO membersVO, BindingResult br, Model model,
-                             @RequestParam(value = "memAvatarFile", required = false) MultipartFile avatar,
-                             @RequestParam(value = "memAvatarFrameFile", required = false) MultipartFile frame) throws IOException {
-
-    MembersVO original = membersService.getById(membersVO.getMemId());
-
-    //*************************** 1. 驗證錯誤處理 ***************************
-    if (br.hasErrors()) {
-      // 補回畫面沒綁定的欄位，避免空值造成畫面壞掉或資料被清空
-      membersVO.setMemAvatar(original.getMemAvatar());
-      membersVO.setMemRegTime(original.getMemRegTime());
-
-      if (membersVO.getMemLogErrTime() == null)
-        membersVO.setMemLogErrTime(original.getMemLogErrTime());
-
-      List<String> errorMsgs = new ArrayList<>();
-      for (FieldError error : br.getFieldErrors()) {
-        errorMsgs.add(error.getDefaultMessage());
-      }
-      model.addAttribute("errorMsgs", errorMsgs);
-      model.addAttribute("currentPage", "accounts");
-      return "back-end/members/editMembers";
-    }
-
-    //*************************** 2. 處理上傳圖片（補原圖） ***************************
-    if (avatar != null && !avatar.isEmpty()) {
-      membersVO.setMemAvatar(avatar.getBytes());
-    } else {
-      membersVO.setMemAvatar(original.getMemAvatar());
-    }
-
-    //*************************** 3. 設定更新時間 ***************************
-    membersVO.setMemLogErrTime(original.getMemLogErrTime());
-
-    //*************************** 4. 執行更新並導向查詢結果頁 ***************************
-    membersService.editMember(membersVO);
-    return "redirect:/members/searchResults?memId=" + membersVO.getMemId();
+    return "front-end/members/emailVerifyFailed";
   }
 
   // 去除 BindingResult 中某個欄位的 FieldError 紀錄

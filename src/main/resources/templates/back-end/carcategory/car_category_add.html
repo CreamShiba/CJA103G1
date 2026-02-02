@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增車種類別 - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/back-end/carcategory/car_category.css}">
+</head>
+<body>
+
+<div class="app-container">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item has-submenu open">
+                    <a class="submenu-toggle"><span><i class="fas fa-car"></i> 車輛資料管理</span></a>
+                    <ul class="submenu">
+                        <li><a href="#" class="active">車種類別管理</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">新增車種類別</h2>
+            <div class="user-profile"><span>Admin</span><div class="avatar"><i class="fas fa-user"></i></div></div>
+        </header>
+
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header">
+                    <h3>填寫類別資訊</h3>
+                </div>
+
+                <div class="form-container">
+                    <form th:action="@{/admins/carcate/insert}" th:object="${carCategoryVO}" method="post">
+
+                        <div class="form-row">
+                            <label for="carName">汽車名稱 (Car Name)</label>
+                            <input type="text" id="carName" th:field="*{carName}" placeholder="請輸入汽車名稱">
+                            <span class="error-msg" th:if="${#fields.hasErrors('carName')}" th:errors="*{carName}"></span>
+                        </div>
+
+                        <div class="form-row">
+                            <label for="make">製造廠商 (Make)</label>
+                            <input type="text" id="make" th:field="*{make}" placeholder="請輸入製造商 (如: Toyota)">
+                            <span class="error-msg" th:if="${#fields.hasErrors('make')}" th:errors="*{make}"></span>
+                        </div>
+
+                        <div class="form-row">
+                            <label for="prodInterval">生產區間 (Production Interval)</label>
+                            <input type="text" id="prodInterval" th:field="*{prodInterval}" placeholder="請輸入年份區間 (如: 2010-2015)">
+                            <span class="error-msg" th:if="${#fields.hasErrors('prodInterval')}" th:errors="*{prodInterval}"></span>
+                        </div>
+
+                        <div class="form-actions">
+                            <a th:href="@{/admins/carcate/list}" class="btn-secondary">取消</a>
+                            <button type="submit" class="btn-primary">確認新增</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

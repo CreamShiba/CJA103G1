@@ -22,13 +22,13 @@ import jakarta.validation.constraints.Pattern;
 @Table(name = "adm")
 public class AdminVO implements Serializable {
   private static final long serialVersionUID = 1L;
-
+//updable=fale可以設定此欄位無法更新
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "adm_no", updatable = false)
-  private Integer adminId;
+  private Integer adminNo;
 
-  @Column(name = "adm_account", updatable = false)
+  @Column(name = "adm_account")
   @NotEmpty(message = "管理員帳號: 請勿空白")
   @Pattern(regexp = "^[a-zA-Z0-9_]{4,16}$", message = "管理員帳號: 只能是英文字母、數字和_，長度必需在4到16之間")
   private String adminAcc;
@@ -69,12 +69,12 @@ public class AdminVO implements Serializable {
     super();
   }
 
-  public Integer getAdminId() {
-    return adminId;
+  public Integer getAdminNo() {
+    return adminNo;
   }
 
-  public void setAdminId(Integer adminId) {
-    this.adminId = adminId;
+  public void setAdminNo(Integer adminNo) {
+    this.adminNo = adminNo;
   }
 
   public String getAdminAcc() {

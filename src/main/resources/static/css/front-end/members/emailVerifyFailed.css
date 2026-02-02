@@ -1,4 +1,4 @@
-/* emailverifySuccess.css */
+/* emailverifyFailed.css */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -60,9 +60,11 @@ body {
 .status-icon {
     width: 64px;
     height: 64px;
-    color: #ff3333; /* 主題紅色 */
+    /* 設計選擇：保持品牌紅色 #ff3333。
+       即使是錯誤頁面，為了維持紅黑主題的一致性，使用紅色警告也很合適。
+    */
+    color: #ff3333;
     opacity: 0.9;
-    /* 增加一點微弱的發光效果強調成功 */
     filter: drop-shadow(0 0 5px rgba(255, 51, 51, 0.4));
 }
 
@@ -93,7 +95,7 @@ body {
     margin-top: 40px;
 }
 
-/* 按鈕樣式 (模擬連結為按鈕) */
+/* 按鈕樣式 */
 .action-btn {
     display: inline-flex;
     align-items: center;
@@ -105,7 +107,7 @@ body {
     border: 1px solid #ff3333;
     border-radius: 5px;
     font-size: 16px;
-    text-decoration: none; /* 移除連結下底線 */
+    text-decoration: none;
     cursor: pointer;
     font-weight: bold;
     transition: all 0.3s ease;
