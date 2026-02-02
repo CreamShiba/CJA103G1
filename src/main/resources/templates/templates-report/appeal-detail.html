@@ -258,6 +258,18 @@
           <div class="info-label">案件編號</div>
           <div class="info-value" th:text="${appeal.appealsNo}">#001</div>
         </div>
+
+        <!-- 💡 新增:訂單編號 (根據類型顯示不同欄位) -->
+        <div class="info-row" th:if="${type == 'install'}">
+          <div class="info-label">訂單編號</div>
+          <div class="info-value" th:text="'#' + ${appeal.installOrderNo}">#123</div>
+        </div>
+
+        <div class="info-row" th:if="${type == 'product'}">
+          <div class="info-label">訂單編號</div>
+          <div class="info-value" th:text="'#' + ${appeal.ordNo}">#112</div>
+        </div>
+
         <div class="info-row">
           <div class="info-label">申訴類別</div>
           <div class="info-value" th:text="${appeal.categories}">技師態度不佳</div>
@@ -270,16 +282,31 @@
         <div class="content-label" style="margin-top: 30px;">申訴詳細描述</div>
         <div class="content-box" th:text="${appeal.description}">這裡顯示詳細描述...</div>
 
-        <div th:if="${!#lists.isEmpty(images)}">
+        <!-- 💡 修正:安裝申訴圖片 -->
+        <div th:if="${type == 'install' && !#lists.isEmpty(images)}">
           <div class="content-label">附圖附件</div>
           <div class="image-gallery">
-            <img th:each="img : ${images}" th:src="@{/appeals/image/{id}(id=${img.imgNo})}" class="appeal-img">
+            <img th:each="img : ${images}"
+                 th:src="@{/appeals/image/{id}(id=${img.imgNo})}"
+                 class="appeal-img"
+                 onclick="window.open(this.src, '_blank')">
+          </div>
+        </div>
+
+        <!-- 💡 新增:商品申訴圖片 -->
+        <div th:if="${type == 'product' && !#lists.isEmpty(images)}">
+          <div class="content-label">附圖附件</div>
+          <div class="image-gallery">
+            <img th:each="img : ${images}"
+                 th:src="@{/appeals/product/image/{id}(id=${img.imgNo})}"
+                 class="appeal-img"
+                 onclick="window.open(this.src, '_blank')">
           </div>
         </div>
 
         <div class="response-card">
           <div class="response-title">管理員處理回覆</div>
-          <div class="response-text" th:text="${appeal.response != null ? appeal.response : '案件處理中，請耐心等候。'}">尚未回覆</div>
+          <div class="response-text" th:text="${appeal.response != null ? appeal.response : '案件處理中,請耐心等候。'}">尚未回覆</div>
         </div>
       </div>
 

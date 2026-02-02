@@ -73,7 +73,7 @@
         .view-btn:hover { background-color: #ff3333; color: white; box-shadow: 0 0 10px rgba(255, 51, 51, 0.5); }
         .view-btn:disabled { border-color: #444; color: #444; cursor: not-allowed; }
 
-        /* 💡 新增分頁容器樣式 */
+        /* 💡 分頁容器樣式 */
         .pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 30px; padding-bottom: 20px; }
         .page-info { font-size: 14px; color: #ddd; font-family: 'Arial', sans-serif; }
 
@@ -170,12 +170,27 @@
     /* 💡 取得後端傳入的申訴 List 資料 */
     let allAppeals = /*[[${appeals}]]*/ [];
     let currentPage = 1;
-    const pageSize = 5; // 💡 您的要求：每頁顯示 5 筆
+    const pageSize = 5; // 💡 每頁顯示 5 筆
 
     window.onload = function() {
         initUserDropdown();
         renderTable(); // 初始渲染
     };
+
+    // 💡 新增：格式化類別內容的函數，限制最多兩個原因
+    function formatCategories(categoryStr) {
+        if (!categoryStr) return '無描述';
+
+        // 假設原因是用逗號隔開的，將其轉為陣列並去除空格
+        const reasons = categoryStr.split(',').map(r => r.trim()).filter(r => r);
+
+        if (reasons.length <= 2) {
+            return reasons.join(', ');
+        } else {
+            // 只取前兩個，後方補上 ...
+            return reasons.slice(0, 2).join(', ') + '...';
+        }
+    }
 
     // 💡 渲染表格函數
     function renderTable() {
@@ -187,7 +202,7 @@
             return;
         }
 
-        // 💡 計算當前頁面資料範圍
+        // 計算當前頁面資料範圍
         const start = (currentPage - 1) * pageSize;
         const end = start + pageSize;
         const pageData = allAppeals.slice(start, end);
@@ -204,11 +219,14 @@
             const statusClass = (appeal.status === '已結案') ? 'status-badge status-closed' : 'status-badge status-pending';
             const statusText = (appeal.status === 'PENDING') ? '待處理' : appeal.status;
 
+            // 💡 調用 formatCategories 限制原因顯示數量
+            const displayCategories = formatCategories(appeal.categories);
+
             tbody.innerHTML += `
                 <tr>
                     <td>${typeBadge}</td>
                     <td>${appeal.appealsNo}</td>
-                    <td>${appeal.categories || '無描述'}</td>
+                    <td title="${appeal.categories || ''}">${displayCategories}</td>
                     <td>${formattedDate}</td>
                     <td><span class="${statusClass}">${statusText}</span></td>
                     <td><a href="/appeals/history/detail?id=${appeal.appealsNo}&type=${appeal.type}" class="view-btn">查看案件</a></td>
@@ -238,7 +256,7 @@
     function changePage(page) {
         currentPage = page;
         renderTable();
-        window.scrollTo(0, 0); // 切換後回到頁面頂部
+        window.scrollTo(0, 0);
     }
 
     function initUserDropdown() {
