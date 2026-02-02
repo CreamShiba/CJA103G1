@@ -189,4 +189,12 @@ public class MembersVO implements Serializable {
     this.memLogErrTime = memLogErrTime;
   }
 
+  public String getMemberName() {
+    return this.memName;
+  }
+
+  public Integer getMemberNo() {
+    return this.memNo;
+  }
+
 }
