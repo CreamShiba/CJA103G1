@@ -36,13 +36,13 @@ public class MemberOrderController {
 
         List<InstallOrder> orders;
         if (status != null) {
-            orders = orderRepository.findByMemberMemIdAndOrderStatusValueOrderByInstallOrderNoDesc(member.getMemberNo(),
+            orders = orderRepository.findByMemberMemNoAndOrderStatusValueOrderByInstallOrderNoDesc(member.getMemberNo(),
                     status);
         } else {
-            orders = orderRepository.findByMemberMemIdOrderByInstallOrderNoDesc(member.getMemberNo());
+            orders = orderRepository.findByMemberMemNoOrderByInstallOrderNoDesc(member.getMemberNo());
         }
 
-        boolean isTechnician = technicianRepository.findByMemberMemId(member.getMemberNo())
+        boolean isTechnician = technicianRepository.findByMemberMemNo(member.getMemberNo())
                 .map(t -> t.getIsActive() == 1)
                 .orElse(false);
         model.addAttribute("isTechnician", isTechnician);

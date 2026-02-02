@@ -58,7 +58,7 @@ public class TechnicianManagementService {
                 .orElseThrow(() -> new IllegalArgumentException("會員不存在"));
 
         // 檢查是否重複申請
-        if (technicianRepository.findByMemberMemId(dto.getMemberNo()).isPresent()) {
+        if (technicianRepository.findByMemberMemNo(dto.getMemberNo()).isPresent()) {
             throw new IllegalStateException("您已經申請過技師資格");
         }
 
@@ -87,7 +87,7 @@ public class TechnicianManagementService {
      */
     @Transactional
     public void updateTechnicianProfile(TechnicianOnboardingDTO dto, Integer memberNo) throws IOException {
-        Technician technician = technicianRepository.findByMemberMemId(memberNo)
+        Technician technician = technicianRepository.findByMemberMemNo(memberNo)
                 .orElseThrow(() -> new IllegalStateException("技師不存在"));
 
         technician.setRealName(dto.getRealName());
@@ -117,7 +117,7 @@ public class TechnicianManagementService {
     @Transactional
     public void updateTechnicianServices(Integer memberNo, List<Integer> selectedServiceIds,
             java.util.Map<Integer, Integer> prices) {
-        Technician technician = technicianRepository.findByMemberMemId(memberNo)
+        Technician technician = technicianRepository.findByMemberMemNo(memberNo)
                 .orElseThrow(() -> new IllegalStateException("技師不存在"));
 
         if (selectedServiceIds != null) {
