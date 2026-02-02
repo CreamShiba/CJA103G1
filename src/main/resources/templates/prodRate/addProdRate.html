@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>訂單評價 | 卡爾夏汽車百貨</title>
+    <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
+    <link rel="stylesheet" th:href="@{/css/prodRateStyle.css}">
+
+</head>
+<body>
+
+<header>
+    <div class="top-bar">
+        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search..."
+                       style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+                    <a href="#">登入</a>
+                    <a href="#">註冊</a>
+                </div>
+            </div>
+            <span id="cart" style="cursor: pointer;">🛒</span>
+        </div>
+    </div>
+
+    <div class="main-header">
+        <div class="logo" onclick="navigateTo('home')" style="cursor: pointer;">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#" onclick="navigateTo('shop')">商城</a>
+            <a href="#" onclick="navigateTo('installation')">安裝區</a>
+            <a href="#" onclick="navigateTo('forum')">論壇</a>
+            <a href="#" onclick="navigateTo('notice')">公告</a>
+            <a href="#" onclick="navigateTo('faq')">常見問題</a>
+
+            <!-- 會員中心下拉選單 -->
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a>
+                    <a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a>
+                    <a href="http://localhost:8080/pages/my-orders" onclick="navigateTo('orderInfo')">訂單查詢</a>
+                    <a href="#" onclick="navigateTo('')">申訴/檢舉</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <aside>
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">會員中心</h3>
+            <ul class="category-list" id="category-list">
+                <li><a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a></li>
+                <li><a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a></li>
+                <li><a href="http://localhost:8080/pages/my-orders">訂單查詢</a></li>
+                <li><a href="#" onclick="navigateTo('')">申訴/檢舉</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <main class="content-area">
+        <div class="form-container">
+            <h2 style="margin-bottom: 10px;">填寫商品評價</h2>
+            <p style="color: #666; margin-bottom: 25px; font-size: 0.8em">
+                訂單編號：<span th:text="${form.rates[0].ordNo} " style="font-size: 0.8em;"></span>
+            </p>
+
+            <form th:action="@{/prodRate/insert}" th:object="${form}" method="post" enctype="multipart/form-data">
+
+                <div th:each="rate, iterStat : *{rates}" class="product-evaluation-card">
+                    <input type="hidden" th:field="*{rates[__${iterStat.index}__].prodRateNo}" />
+
+                    <input type="hidden" th:field="*{rates[__${iterStat.index}__].ordNo}" />
+                    <input type="hidden" th:field="*{rates[__${iterStat.index}__].memberNo}" />
+                    <input type="hidden" th:field="*{rates[__${iterStat.index}__].prodNo}" />
+                    <input type="hidden" th:field="*{rates[__${iterStat.index}__].rateStatus}" />
+
+                    <div class="product-header">
+                        <img th:if="${productImgMap[rate.prodNo] != null}"
+                             th:src="@{/prodRate/productImage/DBGifReader(imgNo=${productImgMap[rate.prodNo]})}"
+                             alt="商品圖片" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                        <div>
+                            <h4 th:text="${productMap[rate.prodNo].productName}" style="margin:0; color:#333;">商品名稱</h4>
+                            <small style="color: #888;">商品編號：<span th:text="${rate.prodNo}"></span></small>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label>商品評分</label>
+                        <input type="hidden" th:id="'rateInput_' + ${iterStat.index}"
+                               class="rateInput"
+                               th:field="*{rates[__${iterStat.index}__].rate}" />
+                        <div class="star-rating"
+                             th:data-idx="${iterStat.index}"
+                             th:style="${rate.rateStatus == 2} ? 'pointer-events: none; opacity: 0.8;' : ''">
+                            <span class="star" data-value="1">☆</span>
+                            <span class="star" data-value="2">☆</span>
+                            <span class="star" data-value="3">☆</span>
+                            <span class="star" data-value="4">☆</span>
+                            <span class="star" data-value="5">☆</span>
+                        </div>
+                        <small th:if="${#fields.hasErrors('rates[__${iterStat.index}__].rate')}"
+                               th:errors="*{rates[__${iterStat.index}__].rate}" style="color:red;"></small>
+                    </div>
+
+                    <div class="row">
+                        <label>心得分享</label>
+                        <textarea th:field="*{rates[__${iterStat.index}__].rateContent}"
+                                  rows="4" maxlength="800"
+                                  th:readonly="${rate.rateStatus == 2}"
+                                  th:style="${rate.rateStatus == 2} ? 'background-color: #f5f5f5;' : ''"
+                                  placeholder="這件商品的品質如何？分享給其他買家參考吧！"></textarea>
+                        <small th:if="${#fields.hasErrors('rates[__${iterStat.index}__].rateContent')}"
+                               th:errors="*{rates[__${iterStat.index}__].rateContent}" style="color:red;"></small>
+                    </div>
+
+                    <div class="row-p">
+                        <label th:text="${rate.rateStatus == 2} ? '您的評價照片' : '上傳實拍照片'"></label>
+                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+
+                            <th:block th:if="${rate.rateStatus != 2}">
+                                <label th:for="'ratePicFile' + ${iterStat.index}" class="upload-placeholder">
+                                    <div class="camera-icon">📷</div>
+                                    <span>上傳</span>
+                                </label>
+                                <input type="file" th:id="'ratePicFile' + ${iterStat.index}"
+                                       name="ratePicFiles" accept="image/*"
+                                       th:onchange="'previewImage(this,' + ${iterStat.index} + ')'" style="display:none;" />
+
+                                <div th:id="'previewContainer' + ${iterStat.index}">
+                                    <img th:id="'imagePreview' + ${iterStat.index}"
+                                         th:src="${rate.ratePic != null} ? @{/prodRate/DBGifReader(prodRateNo=${rate.prodRateNo})} : ''"
+                                         th:style="${rate.ratePic != null} ? 'display:block; width: 100px; height: 100px; object-fit: cover; border-radius: 5px;' : 'display:none; width: 100px; height: 100px; object-fit: cover; border-radius: 5px;'"/>
+                                </div>
+                            </th:block>
+
+                            <th:block th:if="${rate.rateStatus == 2}">
+                                <div th:if="${rate.ratePic != null}">
+                                    <img th:src="@{/prodRate/DBGifReader(prodRateNo=${rate.prodRateNo})}"
+                                         style="width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;"/>
+                                </div>
+                                <p th:if="${rate.ratePic == null}" style="color: #999; font-style: italic;">未提供照片</p>
+                            </th:block>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-row" style="margin-top: 40px;">
+                    <button type="submit" class="btn-submit" style="width: 200px;" th:if="${hasEditableRate}">
+                        送出評價
+                    </button>
+
+                    <button type="button" class="btn-cancel" onclick="history.back()">返回</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+    // 獲取當前會員編號
+    const currentMemberNo = 1;
+
+    // 頁面載入完成後
+    window.onload = function() {
+        initUserDropdown();
+        initStarRatings();
+    };
+
+    // 初始化下拉選單
+    function initUserDropdown() {
+        // 處理右上角使用者圖示
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+        const memberTrigger = document.getElementById('member-center-trigger');
+        const memberDropdown = document.getElementById('member-dropdown');
+
+        if (userIcon && userDropdown) {
+            userIcon.onclick = function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+                memberDropdown.classList.remove('show');
+            };
+        }
+
+        // 處理導航列中的「會員中心」
+        if (memberTrigger && memberDropdown) {
+            memberTrigger.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                memberDropdown.classList.toggle('show');
+                userDropdown.classList.remove('show');
+            };
+        }
+
+        // 全域點擊監聽：點擊選單以外區域時關閉
+        document.addEventListener('click', function(event) {
+            const isUserIcon = event.target.closest('#user-icon');
+            const isMemberTrigger = event.target.closest('#member-center-trigger');
+            const isUserDropdown = event.target.closest('#user-dropdown');
+            const isMemberDropdown = event.target.closest('#member-dropdown');
+
+            if (!isUserIcon && !isUserDropdown) {
+                userDropdown.classList.remove('show');
+            }
+
+            if (!isMemberTrigger && !isMemberDropdown) {
+                memberDropdown.classList.remove('show');
+            }
+        });
+    }
+    // 導航功能
+    function navigateTo(page) {
+        const routes = {
+            'home': '/pages/front-end/index',
+            'shop': '/shop',
+            'installation': '/installation',
+            'forum': '/forum',
+            'notice': '/notice',
+            'faq': '/faq',
+            'category1': '/category/category1',
+            'category2': '/category/category2',
+            'category3': '/category/category3',
+            'category4': '/category/category4',
+            'category5': '/category/category5',
+            'coupons': '/pages/my-coupons',
+            'favorite':'/favorite/list-page'
+        };
+
+        if (routes[page]) {
+            window.location.href = routes[page];
+        }
+    }
+
+    // 圖片預覽功能：根據 index 處理對應的預覽圖
+    function previewImage(input, index) {
+        const preview = document.getElementById('imagePreview' + index);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
+    // ✅ 初始化星級評分系統
+    function initStarRatings() {
+        const starContainers = document.querySelectorAll('.star-rating');
+
+        console.log('找到 ' + starContainers.length + ' 個星級評分容器');
+
+        starContainers.forEach(container => {
+            const stars = container.querySelectorAll('.star');
+            const idx = container.getAttribute('data-idx');
+            const hiddenInput = document.getElementById('rateInput_' + idx);
+            const currentValue = container.getAttribute('data-current-value'); // ✅ 從後端獲取的初始值
+
+            console.log('初始化評分 #' + idx + ', 當前值: ' + currentValue + ', hiddenInput值: ' + (hiddenInput ? hiddenInput.value : 'null'));
+
+            // ✅ 初始化:如果已有值,顯示已選的星級
+            if (hiddenInput) {
+                // 優先使用 data-current-value,其次使用 hiddenInput.value
+                const initialValue = currentValue || hiddenInput.value;
+                if (initialValue && initialValue !== '' && initialValue !== '0') {
+                    updateStars(container, initialValue);
+                    console.log('設置初始星級: ' + initialValue);
+                }
+            }
+
+            stars.forEach(star => {
+                // 點擊事件
+                star.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    if (hiddenInput) {
+                        hiddenInput.value = value;
+                        console.log('點擊星級 ' + value + ', 更新 hiddenInput');
+                    }
+                    updateStars(container, value);
+                });
+
+                // 滑鼠移入效果
+                star.addEventListener('mouseover', function() {
+                    const value = this.getAttribute('data-value');
+                    highlightStars(container, value);
+                });
+
+                // 滑鼠移出效果
+                star.addEventListener('mouseout', function() {
+                    if (hiddenInput && hiddenInput.value) {
+                        updateStars(container, hiddenInput.value);
+                    } else {
+                        resetStars(container);
+                    }
+                });
+            });
+        });
+
+        // ✅ 更新星級顯示
+        function updateStars(container, value) {
+            const stars = container.querySelectorAll('.star');
+            stars.forEach(s => {
+                const starValue = parseInt(s.getAttribute('data-value'));
+                if (starValue <= parseInt(value)) {
+                    s.classList.add('active');
+                    s.innerText = '★';
+                    s.style.color = '#FFD700'; // 金色
+                } else {
+                    s.classList.remove('active');
+                    s.innerText = '☆';
+                    s.style.color = '#ddd'; // 灰色
+                }
+            });
+        }
+
+        // ✅ 滑鼠懸停高亮
+        function highlightStars(container, value) {
+            const stars = container.querySelectorAll('.star');
+            stars.forEach(s => {
+                const starValue = parseInt(s.getAttribute('data-value'));
+                if (starValue <= value) {
+                    s.innerText = '★';
+                    s.style.color = '#FFD700';
+                } else {
+                    s.innerText = '☆';
+                    s.style.color = '#ddd';
+                }
+            });
+        }
+
+        // ✅ 重置星級
+        function resetStars(container) {
+            const stars = container.querySelectorAll('.star');
+            stars.forEach(s => {
+                s.classList.remove('active');
+                s.innerText = '☆';
+                s.style.color = '#ddd';
+            });
+        }
+    }
+
+    async function fetchOrders() {
+        try {
+            // 1. 獲取訂單
+            const orderResponse = await fetch(`/member/orders/${currentMemberNo}`);
+            // 2. 獲取該會員的所有評價紀錄 (用來比對哪些訂單已評價)
+            // 建議在 Controller 新增一個 API：/prodRate/member/{memberNo}
+            const rateResponse = await fetch(`/prodRate/all`); // 簡化示範，實務上應根據會員過濾
+
+            const orders = await orderResponse.json();
+            const allRates = await rateResponse.json();
+
+            // 建立一個 Set 儲存已評價過的訂單編號
+            const ratedOrderNos = new Set(allRates.filter(r => r.memberNo === currentMemberNo).map(r => r.ordNo));
+
+            const body = document.getElementById('orderBody');
+            body.innerHTML = '';
+
+            orders.forEach(ord => {
+                let ratingContent = `<span style="color: #ccc;">--</span>`;
+
+                if (ord.ordStatus === '已完成') {
+                    if (ratedOrderNos.has(ord.ordNo)) {
+                        // --- 修改處：已評價的狀態 ---
+                        ratingContent = `
+                        <div style="display:flex; flex-direction:column; gap:5px;">
+                            <span style="color: #28a745; font-size: 12px; font-weight: bold;">✅ 已評價</span>
+                            <button class="btn-detail" style="padding: 2px 5px; font-size: 11px;"
+                                    onclick="window.location.href='/prodRate/view-rate?ordNo=${ord.ordNo}'">
+                                查看內容
+                            </button>
+                        </div>`;
+                    } else {
+                        // 未評價狀態
+                        ratingContent = `
+                        <button class="btn-rate"
+                                onclick="window.location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">
+                            去評價
+                        </button>`;
+                    }
+                }
+
+                // ... 其餘渲染邏輯保持不變 ...
+                body.innerHTML += `
+                <tr>
+                    <td>#${ord.ordNo}</td>
+                    <td>${ratingContent}</td>
+                    <td>${actionButtons}</td>
+                </tr>`;
+            });
+        } catch (error) { console.error(error); }
+    }
+</script>
+</body>
+</html>
