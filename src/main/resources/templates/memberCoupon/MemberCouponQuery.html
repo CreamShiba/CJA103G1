@@ -61,9 +61,9 @@
             <div class="user-dropdown-container">
                 <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
                 <div id="member-dropdown" class="dropdown-menu">
-                    <a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a>
-                    <a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a>
-                    <a href="http://localhost:8080/pages/my-orders" onclick="navigateTo('orderInfo')">訂單查詢</a>
+                    <a th:href="@{/pages/my-coupons}" onclick="navigateTo('coupons')">我的優惠券</a>
+                    <a th:href="@{/favorite/list-page}" onclick="navigateTo('favorite')">我的收藏</a>
+                    <a th:href="@{/pages/my-orders}" onclick="navigateTo('orderInfo')">訂單查詢</a>
                     <a href="#" onclick="navigateTo('')">申訴/檢舉</a>
                 </div>
             </div>

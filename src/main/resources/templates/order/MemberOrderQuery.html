@@ -64,17 +64,50 @@
             left: 0; top: 0;
             width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.5);
+            overflow: hidden; /* 防止背景出現雙捲軸 */
         }
         /* 彈窗內容 */
         .modal-content {
             background-color: #fefefe;
-            margin: 10% auto;
+            margin: 5% auto;
             padding: 20px;
             border-radius: 8px;
-            width: 60%;
-            max-width: 800px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            width: 80%;
+            max-width: 900px;
+            max-height: 85vh; /* 限制最大高度為螢幕高度的 85% */
+            overflow-y: auto; /* 重點：垂直方向內容過多時顯示捲軸 */
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
         }
+
+        /* 讓標題區塊固定（可選：增加易讀性） */
+        .modal-content h3 {
+            margin-top: 0;
+            position: sticky;
+            top: -20px; /* 抵消 padding */
+            background: white;
+            padding: 15px 0;
+            z-index: 10;
+            border-bottom: 2px solid #eee;
+        }
+
+        /* 關閉按鈕固定在右上角 */
+        .close {
+            position: sticky;
+            top: -10px;
+            right: 0;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 11;
+            color: #888;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
         .close {
             float: right;
             font-size: 28px;
@@ -314,6 +347,7 @@
         const noOrderDiv = document.getElementById('noOrder');
 
         try {
+            // 1. 取得訂單資料
             const orderRes = await fetch('/member/orders/my-orders', {
                 credentials: 'same-origin',
                 headers: { 'Accept': 'application/json' }
@@ -332,71 +366,88 @@
 
             const orders = await orderRes.json();
 
-            // 獲取評價資料 (需對應您的後端 prodRate 相關 API)
+            // 2. 獲取評價資料 (此 API 需回傳該會員的所有 ProdRate 紀錄)
             let allRates = [];
             try {
-                const rateRes = await fetch('/prodRate/member-all', {
+                const rateRes = await fetch('/prodRate/member-all?t=' + new Date().getTime(), {
                     credentials: 'same-origin',
                     headers: { 'Accept': 'application/json' }
                 });
                 if (rateRes.ok) allRates = await rateRes.json();
             } catch (rateErr) {
-                console.warn('載入評價資料失敗:', rateErr);
+                console.warn('載入評價資料失敗，請確認後端 /prodRate/member-all 介面是否正常:', rateErr);
             }
 
             body.innerHTML = '';
             noOrderDiv.style.display = 'none';
 
             orders.forEach(ord => {
-                // 1. 找出此訂單是否已有評價紀錄
-                const ordRates = allRates.filter(r => r.ordNo === ord.ordNo);
-                const hasRated = ordRates.length > 0;
+                // --- 狀態樣式邏輯 ---
+                let statusClass = '';
+                if (ord.ordStatus === '已完成' || ord.ordStatus === '已取消') {
+                    statusClass = 'status-completed'; // 灰色
+                } else if (ord.ordStatus === '待付款') {
+                    statusClass = 'status-pending';   // 黃色
+                } else if (ord.ordStatus === '已出貨') {
+                    statusClass = 'status-paid';      // 綠色 (進行中)
+                } else {
+                    statusClass = 'status-paid';
+                }
 
-                // 假設後端 rateStatus: 1 代表草稿/可修改, 2 代表已發布/不可修改
-                const canEdit = ordRates.some(r => r.rateStatus === 1);
+                // --- 評價按鈕邏輯 (對應 prorate 欄位) ---
+                let ratingBtn = `<span style="color: #ccc;"> </span>`;
 
-                let statusClass = (ord.ordStatus === '已完成' || ord.ordStatus === '已取消') ? 'status-completed' :
-                    (ord.ordStatus === '待付款' ? 'status-pending' : 'status-paid');
-
-                // --- 2. 評價按鈕邏輯修正 ---
-                let ratingBtn = `<span style="color: #ccc;">--</span>`;
-
-                // 只有狀態為「已完成」的訂單才處理評價邏輯
+                // 只有「已完成」的訂單才允許評價或修改評價
                 if (ord.ordStatus === '已完成') {
+                    const ordRates = allRates.filter(r => r.ordNo === ord.ordNo);
+                    const hasRated = ordRates.length > 0;
+
+                    // 只要有一筆 status 是 1，就代表還在「可修改」階段
+                    const canEdit = hasRated && ordRates.some(r => Number(r.rateStatus) === 1);
+
+                    // 必須「所有」項目的狀態都是 2，才顯示「查看」
+                    const allLocked = hasRated && ordRates.every(r => Number(r.rateStatus) === 2);
+
                     if (!hasRated) {
-                        // 尚未評價
                         ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
                     } else if (canEdit) {
-                        // 已評價但仍可修改 (黃色按鈕)
+                        // 狀態 1：顯示黃色修改按鈕
                         ratingBtn = `<button class="btn-rate" style="background-color:#ffc107; color:black;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
-                    } else {
-                        // 評價已完成 (綠色按鈕)，導向查看評價頁面
+                    } else if (allLocked) {
+                        // 狀態 2：顯示綠色查看按鈕
                         ratingBtn = `<button class="btn-rate" style="background-color:#28a745;" onclick="location.href='/prodRate/view-page?ordNo=${ord.ordNo}'">查看評價</button>`;
                     }
                 }
 
-                // --- 3. 動作按鈕 (詳情/確認收貨) ---
+                // --- 動作按鈕邏輯 (詳情 / 確認收貨) ---
                 let actionBtn = `<button class="btn-detail" onclick="viewDetail(${ord.ordNo})">詳情</button>`;
-                if (ord.ordStatus === '已發貨') {
-                    actionBtn = `<button class="btn-complete" style="margin-right:5px;" onclick="confirmReceipt(${ord.ordNo})">確認收貨</button>` + actionBtn;
+
+                // 新增：若訂單狀態為「已發貨」，在詳情按鈕前增加「確認收貨」按鈕
+                if (ord.ordStatus === '已出貨') {
+                    actionBtn = `
+                    <button class="btn-complete" style="margin-right:5px; background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;"
+                            onclick="confirmReceipt(${ord.ordNo})">
+                        確認收貨
+                    </button>
+                ` + actionBtn;
                 }
 
-                // 渲染至表格
+                // 3. 渲染至表格
                 body.innerHTML += `
-                    <tr>
-                        <td>#${ord.ordNo}</td>
-                        <td>${formatDate(ord.ordDate)}</td>
-                        <td>${ord.ordPaymentMethod || '--'}</td>
-                        <td>${ord.ordPaymentStatus || '--'}</td>
-                        <td><strong style="color:red;">$${ord.ordPrice}</strong></td>
-                        <td><span class="status-badge ${statusClass}">${ord.ordStatus}</span></td>
-                        <td>${ord.ordShipMethod || '--'}</td>
-                        <td>${ratingBtn}</td>
-                        <td>${actionBtn}</td>
-                    </tr>`;
+                <tr>
+                    <td>#${ord.ordNo}</td>
+                    <td>${formatDate(ord.ordDate)}</td>
+                    <td>${ord.ordPaymentMethod || ' '}</td>
+                    <td>${ord.ordPaymentStatus || ' '}</td>
+                    <td><strong style="color:red;">$${ord.ordPrice}</strong></td>
+                    <td><span class="status-badge ${statusClass}">${ord.ordStatus}</span></td>
+                    <td>${ord.ordShipMethod || ' '}</td>
+                    <td>${ratingBtn}</td>
+                    <td>${actionBtn}</td>
+                </tr>`;
             });
         } catch (err) {
-            console.error(err);
+            console.error('fetchOrders 發生錯誤:', err);
             body.innerHTML = `<tr><td colspan="9" style="color:red;text-align:center;">讀取失敗: ${err.message}</td></tr>`;
         }
     }
@@ -426,7 +477,7 @@
             document.getElementById('modalRecipient').innerText = order.ordRecipient || '未填寫';
             document.getElementById('modalAddress').innerText = order.ordAddress || '未填寫';
             document.getElementById('modalShipMethod').innerText = order.ordShipMethod || '未指定';
-            document.getElementById('modalShipNo').innerText = order.ordShipNo || '尚未發貨';
+            document.getElementById('modalShipNo').innerText = order.ordShipNo || '尚未提供物流單號';
             document.getElementById('modalTotal').innerText = order.ordPrice;
 
             const detailBody = document.getElementById('detailBody');
@@ -435,7 +486,7 @@
             if (order.ordDetails && order.ordDetails.length > 0) {
                 order.ordDetails.forEach(item => {
                     // 同步後端屬性名稱：若商品物件在 Java 是 productProd，這裡請對應修改
-                    const pName = item.productProd ? item.productProd.prodName : (item.product ? item.product.productName : `商品#${item.prodNo}`);
+                    const pName =  item.productProd ? item.productProd.productName : `商品#${item.prodNo}`;
                     detailBody.innerHTML += `
                         <tr>
                             <td><img src="/favorite/showImage?prodNo=${item.prodNo}" onerror="this.src='/images/no-image.png'"></td>
