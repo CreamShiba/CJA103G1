@@ -19,10 +19,10 @@ public class ProductProd {
     @Column(name = "seller_no")
     private Integer sellerNo;
 
-    @Column(name = "product_name")
+    @Column(name = "prod_name")
     private String productName;
 
-    @Column(name = "product_desc")
+    @Column(name = "prod_desc")
     private String productDesc;
 
     @Column(name = "prod_price")
