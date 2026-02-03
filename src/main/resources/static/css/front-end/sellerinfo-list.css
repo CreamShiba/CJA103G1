@@ -1,0 +1,345 @@
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #1a1a2e;
+    min-height: 100vh;
+}
+
+/* ✅ 統一容器樣式 - 與 seller-apply 一致 */
+.apply-container {
+    max-width: 800px;
+    margin: 100px auto 60px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+/* ✅ 統一標題區 - 與 seller-apply 一致 */
+.apply-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    padding: 50px 30px;
+    text-align: center;
+    position: relative;
+}
+
+.apply-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 60%);
+}
+
+.header-content {
+    position: relative;
+    z-index: 1;
+}
+
+.apply-header h1 {
+    font-size: 32px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.apply-header p {
+    font-size: 16px;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+/* 返回按鈕 */
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+    backdrop-filter: blur(10px);
+    z-index: 10;
+}
+
+.back-btn:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+/* 狀態徽章 */
+.status-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-active {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+/* 評價顯示 */
+.rating-display {
+    margin-top: 15px;
+    font-size: 16px;
+}
+
+.rating-display i {
+    color: #ffd700;
+}
+
+.rating-display span {
+    font-weight: 600;
+    margin: 0 5px;
+}
+
+.rating-count {
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+}
+
+/* ✅ 統一表單內容 */
+.form-content {
+    padding: 40px 35px;
+}
+
+/* 警告框 */
+.alert {
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    border-radius: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* ✅ 統一表單區塊樣式 */
+.form-section {
+    margin-bottom: 35px;
+}
+
+.section-title {
+    font-size: 18px;
+    color: #1a1a2e;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+/* ✅ 統一表單行 */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group .required {
+    color: #dc3545;
+    margin-left: 3px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: all 0.3s;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #1a1a2e;
+    box-shadow: 0 0 0 3px rgba(26,26,46,0.1);
+}
+
+.form-group input:read-only {
+    background: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* 圖片上傳區 */
+.image-section {
+    text-align: center;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #ddd;
+    transition: 0.3s;
+}
+
+.image-section:hover {
+    border-color: #1a1a2e;
+    background: #f0f4f8;
+}
+
+.current-image {
+    margin-bottom: 20px;
+}
+
+.current-image img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    object-fit: cover;
+}
+
+.image-preview {
+    margin-top: 20px;
+    display: none;
+}
+
+.image-preview img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    object-fit: cover;
+}
+
+.upload-label {
+    cursor: pointer;
+    background: #1a1a2e;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.upload-label:hover {
+    background: #16213e;
+    transform: translateY(-2px);
+}
+
+.upload-hint {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #999;
+}
+
+/* 統一按鈕組 */
+.btn-group {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.btn {
+    padding: 15px 40px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(26,26,46,0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26,26,46,0.5);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+@media (max-width: 768px) {
+    .apply-container {
+        margin: 80px 20px 40px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .apply-header h1 {
+        font-size: 24px;
+    }
+
+    .form-content {
+        padding: 30px 20px;
+    }
+}

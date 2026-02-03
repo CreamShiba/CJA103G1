@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>申請成為賣家 - 卡爾夏汽車百貨</title>
+    <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/front-end/seller-apply.css}">
+</head>
+<body>
+
+<div class="apply-container">
+
+    <div class="apply-header">
+        <div class="header-content">
+            <h1>
+                <i class="fas fa-rocket"></i> 成為賣家,開創事業
+            </h1>
+            <p>加入卡爾夏平台,輕鬆開啟您的網路商店之旅</p>
+
+            <div class="features">
+                <span class="feature-tag">
+                    <i class="fas fa-check-circle"></i> 免費申請
+                </span>
+                <span class="feature-tag">
+                    <i class="fas fa-clock"></i> 3-5天快速審核
+                </span>
+                <span class="feature-tag">
+                    <i class="fas fa-chart-line"></i> 輕鬆管理
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-content">
+        <!-- 顯示錯誤/成功訊息 -->
+        <div th:if="${success}" class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <span th:text="${error}"></span>
+        </div>
+        <div th:if="${info}" class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <span th:text="${info}"></span>
+        </div>
+
+        <!-- 申請須知 -->
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> 申請流程</h4>
+            <ul>
+                <li>填寫基本資料並提交申請</li>
+                <li>我們將在 3-5 個工作天內完成審核</li>
+                <li>審核通過後,您將收到電子郵件通知</li>
+                <li>即可開始上架商品並開始銷售</li>
+            </ul>
+        </div>
+
+        <!-- 表單 -->
+        <form th:action="@{/members/seller/apply}" th:object="${seller}" method="post">
+
+            <!-- 基本資料 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-user-circle"></i> 基本資料
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>店鋪名稱 <span class="required">*</span></label>
+                        <input type="text" th:field="*{shop_name}" required
+                               placeholder="例如: 小明的雜貨舖"
+                               th:disabled="${isAlreadySeller}">
+                    </div>
+                    <div class="form-group">
+                        <label>真實姓名 <span class="required">*</span></label>
+                        <input type="text" th:field="*{seller_name}" required
+                               placeholder="請輸入真實姓名"
+                               th:disabled="${isAlreadySeller}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>統一編號</label>
+                    <input type="text" th:field="*{seller_tax_id}"
+                           placeholder="請輸入統一編號(選填，8位數字)"
+                           maxlength="8"
+                           pattern="[0-9]{8}">
+                    <small style="color: #666; font-size: 12px;">若為公司或行號請填寫，個人賣家可不填</small>
+                </div>
+
+                <div class="form-group">
+                    <label>店鋪簡介</label>
+                    <textarea th:field="*{description}"
+                              placeholder="簡單介紹一下您的店鋪特色...(選填)"
+                              th:disabled="${isAlreadySeller}"></textarea>
+                </div>
+            </div>
+
+            <!-- 聯絡資訊 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-address-card"></i> 聯絡資訊
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>聯絡電話 <span class="required">*</span></label>
+                        <input type="tel" th:field="*{phone}" required
+                               placeholder="0912-345-678"
+                               th:disabled="${isAlreadySeller}">
+                    </div>
+                    <div class="form-group">
+                        <label>電子郵件 <span class="required">*</span></label>
+                        <input type="email" th:field="*{email}" required
+                               placeholder="your@email.com"
+                               th:disabled="${isAlreadySeller}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>店鋪地址</label>
+                    <input type="text" th:field="*{address}"
+                           placeholder="請輸入完整地址(選填)"
+                           th:disabled="${isAlreadySeller}">
+                </div>
+            </div>
+
+            <!-- 收款帳戶 -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-piggy-bank"></i> 收款帳戶
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>銀行名稱 <span class="required">*</span></label>
+                        <input type="text" th:field="*{bank_name}" required
+                               placeholder="例如: 玉山銀行"
+                               th:disabled="${isAlreadySeller}">
+                    </div>
+                    <div class="form-group">
+                        <label>銀行代碼 <span class="required">*</span></label>
+                        <input type="text" th:field="*{bank_code}" required
+                               placeholder="例如: 808" maxlength="10"
+                               th:disabled="${isAlreadySeller}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>銀行帳號 <span class="required">*</span></label>
+                        <input type="text" th:field="*{bank_account}" required
+                               placeholder="請輸入完整帳號"
+                               th:disabled="${isAlreadySeller}">
+                    </div>
+                    <div class="form-group">
+                        <label>戶名 <span class="required">*</span></label>
+                        <input type="text" th:field="*{account_holder}" required
+                               placeholder="請輸入戶名"
+                               th:disabled="${isAlreadySeller}">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 按鈕 -->
+            <div class="btn-group">
+
+                <button type="button" class="btn btn-secondary"
+                        onclick="window.location.href='/members/home'">
+                    <i class="fas fa-arrow-left"></i> 返回首頁
+                </button>
+                <button type="submit" class="btn btn-primary"
+                        th:if="${!isAlreadySeller}">
+                    <i class="fas fa-paper-plane"></i> 立即申請
+                </button>
+
+                <button type="button" class="btn btn-primary"
+                        th:if="${isAlreadySeller}"
+                        onclick="window.location.href='/members/seller/sellerinfo'">
+                    <i class="fas fa-edit"></i> 前往賣家中心編輯
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統通知管理 - 後台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+        }
+
+        .form-card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .table-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 22px;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #34495e;
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            transition: all 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-unread {
+            background: #ffe5e5;
+            color: #e74c3c;
+        }
+
+        .status-read {
+            background: #d4edda;
+            color: #27ae60;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-edit {
+            background: #f39c12;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-edit:hover {
+            background: #e67e22;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 頁首 -->
+    <div class="header">
+        <h1>🔔 系統通知管理</h1>
+        <p>建立和管理發送給會員的系統通知</p>
+    </div>
+
+    <div class="main-content">
+        <!-- 左側：新增/編輯表單 -->
+        <div class="form-card">
+            <h2 th:text="${isEdit ? '✏️ 編輯通知' : '➕ 新增通知'}">➕ 新增通知</h2>
+
+            <form th:action="${isEdit ? '/admin/system-messages/update' : '/admin/system-messages/create'}"
+                  method="post" th:object="${editMessage}">
+
+                <!-- 如果是編輯模式，需要傳遞 ID -->
+                <input th:if="${isEdit}" type="hidden" name="id" th:value="${editMessage.messageNo}"/>
+
+                <div class="form-group">
+                    <label for="memberNo">會員編號 *</label>
+                    <input type="number" id="memberNo" name="memberNo"
+                           th:value="${editMessage.memberNo}" required
+                           placeholder="請輸入會員編號">
+                </div>
+
+                <div class="form-group">
+                    <label for="messageContent">通知內容 *</label>
+                    <textarea id="messageContent" name="messageContent"
+                              th:text="${editMessage.messageContent}" required
+                              placeholder="請輸入通知內容（最多 500 字）"
+                              maxlength="500"></textarea>
+                    <small style="color: #7f8c8d;">字數限制：500 字元</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="messageStatus">讀取狀態</label>
+                    <select id="messageStatus" name="messageStatus">
+                        <option value="false" th:selected="${!editMessage.messageStatus}">未讀</option>
+                        <option value="true" th:selected="${editMessage.messageStatus}">已讀</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span th:text="${isEdit ? '💾 儲存變更' : '📤 發送通知'}">📤 發送通知</span>
+                    </button>
+                    <a th:if="${isEdit}" href="/admin/system-messages" class="btn btn-secondary">
+                        ✖ 取消編輯
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- 右側：通知列表 -->
+        <div class="table-card">
+            <h2>📋 通知記錄列表</h2>
+
+            <div th:if="${messages != null and !messages.isEmpty()}" class="table-wrapper">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>編號</th>
+                        <th>會員編號</th>
+                        <th>通知內容</th>
+                        <th>狀態</th>
+                        <th>發送時間</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="message : ${messages}">
+                        <td th:text="${message.messageNo}">1</td>
+                        <td th:text="${message.memberNo}">1001</td>
+                        <td>
+                            <div th:text="${#strings.abbreviate(message.messageContent, 50)}"
+                                 th:title="${message.messageContent}">
+                                您的訂單已成功出貨...
+                            </div>
+                        </td>
+                        <td>
+                                    <span th:class="${message.messageStatus ? 'status-badge status-read' : 'status-badge status-unread'}">
+                                        <span th:text="${message.messageStatus ? '✓ 已讀' : '● 未讀'}">● 未讀</span>
+                                    </span>
+                        </td>
+                        <td th:text="${#temporals.format(message.messageTime, 'yyyy-MM-dd HH:mm')}">
+                            2024-01-15 14:30
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a th:href="@{/admin/system-messages(editId=${message.messageNo})}"
+                                   class="btn btn-edit">
+                                    ✏️ 編輯
+                                </a>
+                                <form method="post" action="/admin/system-messages/delete"
+                                      style="margin: 0;"
+                                      onsubmit="return confirm('確定要刪除此通知嗎？');">
+                                    <input type="hidden" name="id" th:value="${message.messageNo}"/>
+                                    <button type="submit" class="btn btn-danger">
+                                        🗑️ 刪除
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 空狀態 -->
+            <div th:if="${messages == null or messages.isEmpty()}" class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h3>尚未有任何通知記錄</h3>
+                <p>建立第一則系統通知來通知會員</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 自動隱藏成功訊息（如果有的話）
+    setTimeout(function() {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            alert.style.display = 'none';
+        }
+    }, 3000);
+
+    // 字數計數器
+    const textarea = document.getElementById('messageContent');
+    if (textarea) {
+        const counter = document.createElement('div');
+        counter.style.cssText = 'text-align: right; color: #7f8c8d; font-size: 12px; margin-top: 5px;';
+        textarea.parentElement.appendChild(counter);
+
+        function updateCounter() {
+            const length = textarea.value.length;
+            counter.textContent = `${length} / 500`;
+            if (length > 450) {
+                counter.style.color = '#e74c3c';
+            } else {
+                counter.style.color = '#7f8c8d';
+            }
+        }
+
+        textarea.addEventListener('input', updateCounter);
+        updateCounter();
+    }
+</script>
+</body>
+</html>

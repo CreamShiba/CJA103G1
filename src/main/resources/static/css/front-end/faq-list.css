@@ -1,0 +1,146 @@
+
+    /* FAQ 容器 */
+.faq-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.page-header h1 {
+    font-size: 42px;
+    color: #fff;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.page-header p {
+    color: #aaa;
+    font-size: 18px;
+}
+
+/* FAQ 卡片 */
+.faq-card {
+    background: linear-gradient(135deg, #1a0000 0%, #2a0000 100%);
+    border: 2px solid #660000;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.faq-card:hover {
+    border-color: #ff3333;
+    box-shadow: 0 8px 25px rgba(255, 51, 51, 0.3);
+    transform: translateY(-2px);
+}
+
+/* 問題標題區 */
+.faq-header {
+    padding: 25px 30px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+    transition: background 0.3s;
+}
+
+.faq-header:hover {
+    background: rgba(255, 51, 51, 0.1);
+}
+
+.faq-question {
+    font-size: 20px;
+    color: #fff;
+    font-weight: bold;
+    flex: 1;
+    margin: 0;
+}
+
+/* 展開/收合按鈕 */
+.faq-toggle {
+    font-size: 24px;
+    color: #ff3333;
+    font-weight: bold;
+    transition: transform 0.3s ease;
+    margin-left: 20px;
+}
+
+.faq-card.active .faq-toggle {
+    transform: rotate(180deg);
+}
+
+/* 答案區域 */
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.faq-card.active .faq-answer {
+    max-height: 500px;
+    padding: 25px 30px;
+    border-top: 1px solid #660000;
+}
+
+.faq-answer p {
+    color: #ddd;
+    line-height: 1.8;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* 底部資訊 */
+.faq-meta {
+    padding: 15px 30px;
+    border-top: 1px solid #660000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #888;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.faq-badge {
+    background: #ff3333;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* 載入和空狀態 */
+.loading, .empty-state {
+    text-align: center;
+    padding: 100px 20px;
+    color: #aaa;
+    font-size: 18px;
+}
+
+.empty-state div {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+/* 問號圖標 */
+.question-icon {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    background: #ff3333;
+    border-radius: 50%;
+    color: white;
+    text-align: center;
+    line-height: 32px;
+    margin-right: 12px;
+    font-weight: bold;
+    font-size: 20px;
+}

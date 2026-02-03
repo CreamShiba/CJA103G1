@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>卡爾夏汽車百貨</title>
+	<link rel="stylesheet" href="../../static/css/front-end/index.css" th:href="@{/css/front-end/index.css}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+	<link rel="stylesheet" th:href="@{/css/front-end/faq-list.css}">
+</head>
+<body>
+
+<header>
+	<div class="top-bar">
+		<div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+		<div class="top-icons">
+			<div class="search-box">
+				<input type="text" id="search-input" placeholder="Search..."
+					   style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+				<span>🔍</span>
+			</div>
+			<div class="user-dropdown-container">
+				<span id="user-icon" style="cursor: pointer;">👤</span>
+				<div id="user-dropdown" class="dropdown-menu">
+					<a href="#" onclick="handleLogin(event)" id="login-link">登入</a>
+					<a href="/register" id="register-link">註冊</a>
+
+					<!-- 會員資訊（登入後顯示） -->
+					<div id="username-display"
+						 style="display: none; padding: 12px 20px; font-weight: 600; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.2);">
+					</div>
+
+					<!-- 會員選單（登入後顯示） -->
+					<a href="/member/seller/sellerinfo" id="profile-link" style="display: none;">
+						<i class="fas fa-user"></i> 個人資料
+					</a>
+					<a href="/member/orders" id="orders-link" style="display: none;">
+						<i class="fas fa-shopping-bag"></i> 我的訂單
+					</a>
+					<a href="/seller/apply" id="apply-seller-btn" class="seller-link" style="display:none;">
+						<i class="fas fa-store"></i> 申請成為賣家
+					</a>
+					<a href="/seller/dashboard" id="seller-dashboard-btn" class="seller-link" style="display:none;">
+						<i class="fas fa-store"></i> 賣家中心
+					</a>
+					<a href="#" onclick="handleLogout(event)" id="logout-link" style="display: none;">
+						<i class="fas fa-sign-out-alt"></i> 登出
+					</a>
+				</div>
+			</div>
+			<span id="cart-icon" onclick="window.location.href='/carts'"
+				  style="cursor: pointer; position: relative;"> 🛒
+					<span id="cart-badge"
+						  style="position: absolute; top: -8px; right: -8px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; display: none; align-items: center; justify-content: center;">0</span>
+					</span>
+			</span>
+		</div>
+	</div>
+
+	<div class="main-header">
+		<a href="/" class="logo" style="cursor: pointer; text-decoration: none; color: inherit;">卡爾夏</a>
+		<nav class="nav-links">
+			<a href="/">商城</a>
+			<a href="#">安裝區</a>
+			<a href="#">論壇</a>
+			<a href="/members/announcement">公告</a>
+			<a href="/members/faq" class="active">常見問題</a>
+		</nav>
+	</div>
+</header>
+
+<div class="faq-container">
+	<div class="page-header">
+		<h1>❓ 常見問題</h1>
+		<p>快速找到您需要的答案</p>
+	</div>
+
+	<!-- 空狀態 -->
+	<div th:if="${faqs == null || faqs.isEmpty()}" class="empty-state">
+		<div style="font-size: 64px;">🔭</div>
+		<p>目前沒有已發佈的常見問題</p>
+	</div>
+
+	<!-- FAQ 列表 -->
+	<div th:if="${faqs != null && !faqs.isEmpty()}">
+		<div th:each="faq, stat : ${faqs}"
+			 class="faq-card"
+			 th:id="'faq-' + ${stat.index}">
+
+			<div class="faq-header" th:onclick="'toggleFaq(' + ${stat.index} + ')'">
+				<h3 class="faq-question">
+					<span class="question-icon">Q</span>
+					<span th:text="${faq.question}">問題內容</span>
+				</h3>
+				<span class="faq-toggle" th:id="'toggle-' + ${stat.index}">▼</span>
+			</div>
+
+			<div class="faq-answer" th:id="'answer-' + ${stat.index}">
+				<p th:text="${faq.answer}">答案內容</p>
+			</div>
+
+			<div class="faq-meta">
+                <span>
+                    📅 發佈時間:
+                    <span th:text="${#temporals.format(faq.create_date, 'yyyy/MM/dd HH:mm')}">2024/01/01 10:00</span>
+                </span>
+				<span class="faq-badge" th:text="${faq.status}">發佈</span>
+			</div>
+		</div>
+	</div>
+</div>
+
+<footer>
+	<div class="footer-col">
+		<div class="footer-logo logo">卡爾夏</div>
+	</div>
+	<div class="footer-col">
+		<h4>Shop</h4>
+		<ul>
+			<li>Shop Parts</li>
+			<li>Wholesale</li>
+		</ul>
+	</div>
+	<div class="footer-col">
+		<h4>The Company</h4>
+		<ul>
+			<li>About Us</li>
+			<li>FAQ</li>
+		</ul>
+	</div>
+	<div class="footer-col">
+		<h4>Contact Us</h4>
+		<ul>
+			<li>info@mysite.com</li>
+		</ul>
+	</div>
+	<div class="footer-col">
+		<h4>Follow Us</h4>
+		<ul>
+			<li>Instagram</li>
+		</ul>
+	</div>
+</footer>
+
+<script th:src="@{/js/front-end/index.js}"></script>
+<script>
+	// 切換 FAQ 展開/收合
+	function toggleFaq(index) {
+		const card = document.getElementById('faq-' + index);
+		if (card) {
+			card.classList.toggle('active');
+		}
+	}
+</script>
+
+</body>
+</html>
