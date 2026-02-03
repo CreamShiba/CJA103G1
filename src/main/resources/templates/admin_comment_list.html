@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>論壇留言管理 - 卡爾夏 Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 🟢 保留原始樣式 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
+        .app-container { display: flex; height: 100%; }
+        .sidebar { width: 260px; background-color: #ffffff; border-right: 1px solid #e1e4e8; display: flex; flex-direction: column; z-index: 10; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 24px; height: 12px; background-color: #0066cc; border-radius: 4px; }
+        .sidebar-header h2 { font-size: 18px; font-weight: bold; color: #1a1a1a; }
+        .badge { font-size: 10px; background: #e6f0ff; color: #0066cc; padding: 2px 6px; border-radius: 4px; vertical-align: middle; }
+        .sidebar-nav { flex-grow: 1; overflow-y: auto; padding-top: 20px; }
+        .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+        .menu-link, .menu-item a { display: flex; align-items: center; padding: 12px 24px; color: #555; text-decoration: none; font-size: 15px; transition: 0.2s; justify-content: space-between; cursor: pointer; }
+        .menu-link i:first-child, .menu-item a i:first-child { margin-right: 10px; width: 20px; text-align: center; }
+        .menu-link:hover, .menu-item a:hover { background-color: #f0f7ff; color: #0066cc; }
+        .submenu { list-style: none; background-color: #fafafa; display: none; padding: 0; margin: 0; }
+        .has-submenu.open .submenu { display: block; }
+        .has-submenu.open .arrow { transform: rotate(180deg); }
+        .submenu a { padding: 12px 24px 12px 58px; font-size: 14px; display: block; color: #666; text-decoration: none; }
+        .submenu a.active { background-color: #e0f2f1; color: #00796b; font-weight: bold; border-right: 3px solid #00796b; }
+        .sidebar-footer { padding: 20px; border-top: 1px solid #eee; }
+        .sidebar-footer a { color: #d9534f; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .top-bar { background-color: white; padding: 15px 40px; border-bottom: 1px solid #e1e4e8; display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 20px; color: #00796b; font-weight: bold; }
+        .user-profile { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 36px; height: 36px; background-color: #333; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .content-body { padding: 20px 40px; overflow-y: auto; flex-grow: 1; }
+        .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .admin-table th { background-color: #f8f9fa; padding: 12px 15px; text-align: left; font-size: 14px; color: #666; border-bottom: 2px solid #eee; }
+        .admin-table td { padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: middle; }
+        .btn-action { padding: 5px 10px; border-radius: 4px; font-size: 12px; text-decoration: none; display: inline-block; cursor: pointer; border: none; }
+        .btn-edit { background: #e6f0ff; color: #0066cc; margin-right: 5px; }
+        .btn-delete { background: #ffebeb; color: #d9534f; }
+        .action-container { display: flex; align-items: center; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <aside th:replace="~{forum_sidebar :: sidebarFragment(activePage='comment')}"></aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">論壇留言管理</h2>
+            <div class="user-profile">
+                <span>Admin User</span>
+                <div class="avatar"><i class="fas fa-user"></i></div>
+            </div>
+        </header>
+
+        <div class="content-body">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>所屬文章</th>
+                    <th>留言者</th>
+                    <th>內容</th>
+                    <th>時間</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="comment : ${comments}">
+                    <td th:text="${comment.commentId}"></td>
+                    <td th:text="${comment.forumPost?.title ?: '文章已刪除'}"></td>
+                    <td>
+                        <span th:text="${comment.member?.memUsername ?: '未知用戶'}"></span><br/>
+                        <small style="color:#999" th:text="'(UID: ' + ${comment.member?.memNo ?: '0'} + ')'"></small>
+                    </td>
+                    <td th:text="${comment.content}"></td>
+                    <td th:text="${#dates.format(comment.commentDate, 'MM-dd HH:mm')}"></td>
+                    <td>
+                        <div class="action-container">
+                            <a th:href="@{/admin/forum/comment/edit(commentId=${comment.commentId})}" class="btn-action btn-edit">
+                                <i class="fas fa-edit"></i> 編輯
+                            </a>
+
+                            <form th:action="@{/admin/forum/comment/delete}" method="post" onsubmit="return confirm('確定刪除？')" style="margin: 0;">
+                                <input type="hidden" name="commentId" th:value="${comment.commentId}" />
+                                <button type="submit" class="btn-action btn-delete"><i class="fas fa-trash-alt"></i> 刪除</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(comments)}">
+                    <td colspan="6" style="text-align: center; color: #999; padding: 30px;">目前沒有任何留言紀錄</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+<script>
+    function toggleMenu(element) {
+        const parentLi = element.closest('.has-submenu');
+        if (parentLi) { parentLi.classList.toggle('open'); }
+    }
+</script>
+</body>
+</html>

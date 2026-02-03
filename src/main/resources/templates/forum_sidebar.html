@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<aside th:fragment="sidebarFragment(activePage)" class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-icon"><i class="fas fa-leaf" style="color:white; font-size: 10px; margin-left: 5px;"></i></div>
+        <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+    </div>
+
+    <nav class="sidebar-nav">
+        <ul>
+            <li class="menu-item has-submenu">
+                <div class="menu-link" onclick="toggleMenu(this)">
+                    <span><i class="fas fa-chart-line"></i> 數據概覽</span>
+                    <i class="fas fa-chevron-down arrow"></i>
+                </div>
+                <ul class="submenu">
+                    <li><a href="#">流量分析</a></li>
+                </ul>
+            </li>
+
+            <li class="menu-item has-submenu open">
+                <div class="menu-link" onclick="toggleMenu(this)">
+                    <span><i class="fas fa-comments"></i> 論壇管理</span>
+                    <i class="fas fa-chevron-down arrow"></i>
+                </div>
+                <ul class="submenu">
+                    <li><a th:href="@{/admin/forum/article/list}" th:class="${activePage == 'article' ? 'active' : ''}">文章管理清單</a></li>
+                    <li><a th:href="@{/admin/forum/favorite/list}" th:class="${activePage == 'favorite' ? 'active' : ''}">文章收藏清單</a></li>
+                    <li><a th:href="@{/admin/forum/comment/list}" th:class="${activePage == 'comment' ? 'active' : ''}">留言管理清單</a></li>
+                    <li><a th:href="@{/admin/forum/report/list}" th:class="${activePage == 'report' ? 'active' : ''}">檢舉管理報表</a></li>
+                </ul>
+            </li>
+
+            <li class="menu-item has-submenu">
+                <div class="menu-link" onclick="toggleMenu(this)">
+                    <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                    <i class="fas fa-chevron-down arrow"></i>
+                </div>
+                <ul class="submenu">
+                    <li><a th:href="@{/admins/listAll}">管理員帳號管理</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+        <form th:action="@{/admins/logout}" method="post" id="logoutForm" style="display:none;"></form>
+        <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+            <i class="fas fa-sign-out-alt"></i> 登出 (Logout)
+        </a>
+    </div>
+</aside>
+</html>
