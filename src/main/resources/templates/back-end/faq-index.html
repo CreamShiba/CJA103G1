@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/back-end/admin_index.css" th:href="@{/css/back-end/admin_index.css}">
+    <link rel="stylesheet" href="/css/back-end/faq-index.css">
+</head>
+<body>
+
+<div class="app-container">
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item has-submenu"><!-- 改下拉選單加"has-submenu" -->
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 帳號管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">會員帳號管理</a></li><!--a標籤加class="active"表示已選擇-->
+                        <li><a th:href="@{/admins/listAll}">管理員帳號管理</a></li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-bullhorn"></i> 公告管理</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="/admins/announcement">公告列表</a></li>
+                        <li><a href="/admins/faq">FAQ 列表</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle">
+                        <span><i class="fas fa-users-cog"></i> 自訂</span>
+                        <i class="fas fa-chevron-down arrow"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="#">自訂</a></li>
+                        <li><a href="#">自訂</a></li>
+                    </ul>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-star"></i> 評論管理</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#"><i class="fas fa-headset"></i> 客服管理</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <form th:action="@{/admins/logout}" method="post" id="logoutForm">
+                <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                    <i class="fas fa-sign-out-alt"></i> 登出 (Logout)
+                </a>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">常見問題管理</h2>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="page-header-section">
+                <h1>
+                    <i class="fas fa-question-circle"></i>
+                    常見問題列表
+                </h1>
+                <button class="add-btn" onclick="openAddModal()">
+                    <i class="fas fa-plus"></i>
+                    新增 FAQ
+                </button>
+            </div>
+
+            <div class="faq-table">
+                <table>
+                    <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>問題</th>
+                        <th>答案</th>
+                        <th style="width: 100px;">狀態</th>
+                        <th style="width: 150px;">建立時間</th>
+                        <th style="width: 150px;">更新時間</th>
+                        <th style="width: 200px;">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${faqs == null || faqs.isEmpty()}">
+                        <td colspan="7" class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>目前沒有常見問題</p>
+                        </td>
+                    </tr>
+
+                    <tr th:each="faq, stat : ${faqs}" th:if="${faqs != null && !faqs.isEmpty()}">
+                        <td th:text="${stat.count}">1</td>
+                        <td><strong th:text="${faq.question}">問題內容</strong></td>
+                        <td>
+                            <span th:text="${#strings.length(faq.answer) > 50 ?
+                                           #strings.substring(faq.answer, 0, 50) + '...' :
+                                           faq.answer}">答案內容</span>
+                        </td>
+                        <td>
+                            <span th:class="'status-badge ' + (${faq.status} == '發佈' ? 'published' : 'draft')"
+                                  th:text="${faq.status}">發佈</span>
+                        </td>
+                        <td>
+                            <span th:text="${faq.create_date != null ? #temporals.format(faq.create_date, 'yyyy/MM/dd 下午 HH:mm') : '-'}">
+                                1970/01/01 上午 08:00
+                            </span>
+                        </td>
+                        <td>
+                            <span th:text="${faq.updated_date != null ? #temporals.format(faq.updated_date, 'yyyy/MM/dd 下午 HH:mm') : '-'}">
+                                2026/01/12 下午 03:29
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn btn-edit"
+                                        th:attr="data-id=${faq.faq_no}, data-question=${faq.question}, data-answer=${faq.answer}, data-status=${faq.status}"
+                                        onclick="openEditModal(this)">
+                                    <i class="fas fa-edit"></i> 編輯
+                                </button>
+
+                                <!-- 快速切換狀態按鈕 -->
+                                <form th:action="@{/admins/faq/toggle-status}" method="post" style="display: inline;">
+                                    <input type="hidden" name="id" th:value="${faq.faq_no}">
+                                    <button type="submit" class="btn btn-toggle"
+                                            th:title="${faq.status == '發佈' ? '設為草稿' : '發佈'}">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </form>
+
+                                <form th:action="@{/admins/faq/delete}"
+                                      method="post"
+                                      style="display: inline;"
+                                      onsubmit="return confirm('確定要刪除此 FAQ 嗎？此操作無法復原。');">
+                                    <input type="hidden" name="id" th:value="${faq.faq_no}">
+                                    <button type="submit" class="btn btn-delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- 新增/編輯 Modal -->
+<div id="modal-overlay" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 id="modal-title">新增 FAQ</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+
+        <!-- 新增表單 -->
+        <form id="add-form" th:action="@{/admins/faq/create}" method="post" style="display: none;">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="add-question">問題 *</label>
+                    <input type="text" id="add-question" name="question" required placeholder="請輸入問題">
+                </div>
+
+                <div class="form-group">
+                    <label for="add-answer">答案 *</label>
+                    <textarea id="add-answer" name="answer" required placeholder="請輸入答案"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="add-status">狀態 *</label>
+                    <select id="add-status" name="status" required>
+                        <option value="草稿">草稿</option>
+                        <option value="發佈">發佈</option>
+                    </select>
+                </div>
+
+                <input type="hidden" name="adm_no" value="11">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+                <button type="submit" class="btn-save">新增</button>
+            </div>
+        </form>
+
+        <!-- 編輯表單 -->
+        <form id="edit-form" th:action="@{/admins/faq/update}" method="post" style="display: none;">
+            <div class="modal-body">
+                <input type="hidden" id="edit-id" name="id">
+
+                <div class="form-group">
+                    <label for="edit-question">問題 *</label>
+                    <input type="text" id="edit-question" name="question" required placeholder="請輸入問題">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-answer">答案 *</label>
+                    <textarea id="edit-answer" name="answer" required placeholder="請輸入答案"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-status">狀態 *</label>
+                    <select id="edit-status" name="status" required>
+                        <option value="草稿">草稿</option>
+                        <option value="發佈">發佈</option>
+                    </select>
+                </div>
+
+                <input type="hidden" name="adm_no" value="11">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+                <button type="submit" class="btn-save">更新</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:src="@{/js/back-end/admin_index.js}"></script>
+<script th:src="@{/js/back-end/faq-index.js}"></script>
+
+
+</body>
+</html>

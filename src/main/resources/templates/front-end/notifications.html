@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統通知 - 會員中心</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .unread-badge {
+            display: inline-block;
+            background: #ff4757;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .actions {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #27ae60;
+        }
+
+        .notifications-list {
+            padding: 30px;
+        }
+
+        .notification-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .notification-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item.unread {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+
+        .notification-item.unread::before {
+            content: "NEW";
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ff4757;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .notification-content {
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .notification-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .notification-time {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 頁首 -->
+    <div class="header">
+        <h1>📬 系統通知</h1>
+        <div th:if="${unreadCount > 0}">
+            <span class="unread-badge" th:text="|未讀 ${unreadCount} 則|">未讀 3 則</span>
+        </div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div class="actions">
+        <a href="/member/dashboard" class="btn btn-primary">← 返回會員中心</a>
+
+        <form th:if="${unreadCount > 0}" method="post" action="/member/notifications/mark-all-read" style="margin: 0;">
+            <button type="submit" class="btn btn-success">✓ 全部標為已讀</button>
+        </form>
+    </div>
+
+    <!-- 通知列表 -->
+    <div class="notifications-list">
+        <!-- 如果有通知 -->
+        <div th:if="${messages != null and !messages.isEmpty()}">
+            <div th:each="message : ${messages}"
+                 th:class="${message.messageStatus ? 'notification-item' : 'notification-item unread'}">
+
+                <div class="notification-content" th:text="${message.messageContent}">
+                    您的訂單 #12345 已成功出貨，預計 3-5 個工作天送達。
+                </div>
+
+                <div class="notification-meta">
+                    <div class="notification-time">
+                        <span>🕐</span>
+                        <span th:text="${#temporals.format(message.messageTime, 'yyyy-MM-dd HH:mm')}">
+                                2024-01-15 14:30
+                            </span>
+                    </div>
+
+                    <form th:if="${!message.messageStatus}" method="post"
+                          action="/member/notifications/mark-read" style="margin: 0;">
+                        <input type="hidden" name="id" th:value="${message.messageNo}"/>
+                        <button type="submit" class="btn btn-success" style="padding: 5px 15px; font-size: 12px;">
+                            標為已讀
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 如果沒有通知 -->
+        <div th:if="${messages == null or messages.isEmpty()}" class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <h3>目前沒有任何通知</h3>
+            <p>您的通知訊息將會顯示在這裡</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 自動更新未讀數量（可選功能）
+    setInterval(async function() {
+        try {
+            const response = await fetch('/api/notifications/unread-count');
+            const count = await response.json();
+            // 更新網頁標題的未讀數量
+            if (count > 0) {
+                document.title = `(${count}) 系統通知 - 會員中心`;
+            } else {
+                document.title = '系統通知 - 會員中心';
+            }
+        } catch (error) {
+            console.error('無法更新未讀數量:', error);
+        }
+    }, 30000); // 每 30 秒更新一次
+</script>
+</body>
+</html>

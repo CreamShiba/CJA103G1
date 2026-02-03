@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購物車 - 卡爾夏汽車百貨</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" th:href="@{/css/front-end/cart-list.css}">
+</head>
+<body>
+
+<div th:if="${success}" class="alert alert-success">
+  <i class="fas fa-check-circle"></i><span th:text="${success}"></span>
+</div>
+<div th:if="${error}" class="alert alert-error">
+  <i class="fas fa-times-circle"></i><span th:text="${error}"></span>
+</div>
+
+<!-- 標題 -->
+<div class="cart-header">
+  <h1><i class="fas fa-shopping-cart"></i> 我的購物車</h1>
+  <span class="cart-count">共 <span th:text="${itemCount}">0</span> 件商品</span>
+</div>
+
+<!-- ===== 有商品時 ===== -->
+<div th:if="${itemCount > 0}">
+
+  <div th:each="item : ${cartItems}" class="cart-item">
+    <!-- 圖片 -->
+    <div class="item-image">
+      <!-- ✅ 如果 productMap 有圖片就顯示，否則用預設圖標 -->
+      <th:block th:with="product=${productMap.get(item.prod_no)}">
+        <img th:if="${product != null and product.productImage != null and !product.productImage.isEmpty()}"
+             th:src="@{'/product/showImage/' + ${item.prod_no}}"
+             style="width:100%;height:100%;object-fit:cover;border-radius:10px;" alt="">
+        <i th:if="${product == null or product.productImage == null or product.productImage.isEmpty()}"
+           class="fas fa-car"></i>
+      </th:block>
+    </div>
+
+    <!-- 資訊 -->
+    <div class="item-info">
+      <th:block th:with="product=${productMap.get(item.prod_no)}">
+        <!-- 名稱 -->
+        <div class="item-name" th:text="${product != null ? product.prodName : '商品編號：' + item.prod_no}">商品名稱</div>
+        <!-- 說明 -->
+        <div class="item-desc" th:text="${product != null ? product.prodDesc : ''}"></div>
+        <!-- 單價 -->
+        <div class="item-price" th:if="${product != null}">
+          NT$ <span th:text="${#numbers.formatInteger(product.prodPrice, 0, 'COMMA')}">0</span>
+        </div>
+        <!-- ✅ 庫存警告 -->
+        <div class="stock-warning" th:if="${product != null and item.quantity > product.prodQty}">
+          <i class="fas fa-exclamation-triangle"></i>
+          數量超過庫存！剩餘 <span th:text="${product.prodQty}">0</span> 件
+        </div>
+        <div class="stock-warning" th:if="${product != null and '下架中'.equals(product.prodStatus)}">
+          <i class="fas fa-exclamation-triangle"></i>
+          此商品已下架
+        </div>
+      </th:block>
+      <div class="item-time">
+        <i class="fas fa-clock"></i>
+        加入時間：<span th:text="${#temporals.format(item.added_time, 'yyyy-MM-dd HH:mm')}">2024-01-01</span>
+      </div>
+    </div>
+
+    <!-- ===== 數量控制 ===== -->
+    <div class="quantity-controls">
+      <button type="button" class="qty-btn"
+              th:onclick="|changeQty(${item.prod_no}, ${item.quantity - 1})|"
+              th:disabled="${item.quantity <= 1}">−</button>
+      <input type="number"
+             class="qty-input"
+             th:value="${item.quantity}"
+             min="1"
+             th:id="'qty-' + ${item.prod_no}"
+             onchange="inputQty(this)"
+             th:attr="data-prod-no=${item.prod_no}">
+      <button type="button" class="qty-btn"
+              th:onclick="|changeQty(${item.prod_no}, ${item.quantity + 1})|">+</button>
+    </div>
+
+    <!-- 小計 + 刪除 -->
+    <div class="item-right">
+      <th:block th:with="product=${productMap.get(item.prod_no)}">
+        <div class="item-subtotal" th:if="${product != null}">
+          NT$ <span th:text="${#numbers.formatInteger(product.prodPrice * item.quantity, 0, 'COMMA')}">0</span>
+        </div>
+      </th:block>
+      <form th:action="@{/members/carts/remove}" method="post" style="margin:0;">
+        <input type="hidden" name="prodNo" th:value="${item.prod_no}">
+        <button type="submit" class="btn-remove"
+                onclick="return confirm('確定要移除這個商品嗎？')">
+          <i class="fas fa-trash"></i> 移除
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 頁尾：總計 + 操作 -->
+  <div class="cart-footer">
+    <div class="cart-summary">
+      <span class="summary-label">總計</span>
+      <span class="summary-value">NT$ <span th:text="${#numbers.formatInteger(totalAmount, 0, 'COMMA')}">0</span></span>
+    </div>
+    <div class="cart-actions">
+      <form th:action="@{/members/carts/clear}" method="post" style="display:inline;">
+        <button type="submit" class="btn-clear"
+                onclick="return confirm('確定要清空購物車嗎？')">
+          <i class="fas fa-trash-alt"></i> 清空購物車
+        </button>
+      </form>
+      <!-- ✅ 點這個進入 checkout 確認頁，不是直接付款 -->
+      <a href="/members/carts/checkout">
+        <button type="button" class="btn-payment">
+          <i class="fas fa-credit-card"></i> 前往結帳
+        </button>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- 空車 -->
+<div th:if="${itemCount == 0}" class="empty-cart">
+  <i class="fas fa-shopping-cart"></i>
+  <h2>購物車是空的</h2>
+  <p>請使用上方的測試按鈕加入商品！</p>
+</div>
+</div>
+
+<!-- ✅ footer：和 index.html 完全相同 -->
+<footer>
+  <div class="footer-col">
+    <div class="footer-logo logo">卡爾夏</div>
+  </div>
+  <div class="footer-col">
+    <h4>Shop</h4>
+    <ul><li>Shop Parts</li><li>Wholesale</li></ul>
+  </div>
+  <div class="footer-col">
+    <h4>The Company</h4>
+    <ul><li>About Us</li><li>FAQ</li></ul>
+  </div>
+  <div class="footer-col">
+    <h4>Contact Us</h4>
+    <ul><li>karshop@gmail.com</li></ul>
+  </div>
+  <div class="footer-col">
+    <h4>Follow Us</h4>
+    <ul><li>Instagram</li></ul>
+  </div>
+</footer>
+
+<div class="chat-btn"></div>
+
+<!-- ===== JS ===== -->
+<script>
+  // +/- 按鈕點擊
+  function changeQty(prodNo, newQty) {
+    if (newQty < 1) return;
+    sendUpdate(prodNo, newQty);
+  }
+
+  // 直接輸入數量後按 Enter / 失焦
+  function inputQty(el) {
+    let val = parseInt(el.value);
+    if (isNaN(val) || val < 1) { el.value = 1; val = 1; }
+    const prodNo = el.getAttribute('data-prod-no');
+    sendUpdate(prodNo, val);
+  }
+
+  // 呼叫後端更新數量，成功後重新載入
+  function sendUpdate(prodNo, qty) {
+    fetch('/members/carts/update-quantity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'prodNo=' + prodNo + '&quantity=' + qty
+    })
+            .then(r => r.json())
+            .then(data => {
+              if (data.success) {
+                location.reload();
+              } else {
+                alert('更新失敗：' + data.message);
+              }
+            })
+            .catch(() => alert('網路錯誤，請再試一次'));
+  }
+
+  // LocalStorage 同步
+  document.addEventListener("DOMContentLoaded", function() {
+    const localCart = localStorage.getItem('my_cart');
+    if (localCart) {
+      try {
+        const cartData = JSON.parse(localCart);
+        const prodNos = cartData.map(item => item.prodId);
+        fetch('/members/carts/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(prodNos)
+        })
+                .then(r => r.json())
+                .then(data => {
+                  if (data.success) {
+                    localStorage.removeItem('my_cart');
+                    window.location.reload();
+                  }
+                })
+                .catch(err => console.error('同步錯誤:', err));
+      } catch (e) { console.error('解析 LocalStorage 失敗:', e); }
+    }
+  });
+</script>
+</body>
+</html>
