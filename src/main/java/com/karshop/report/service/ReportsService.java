@@ -53,10 +53,19 @@ public class ReportsService {
         // 建立分頁請求，並依照檢舉時間倒序排序 (新的在前)
         Pageable pageable = PageRequest.of(page, size, Sort.by("reportsTimestamp").descending());
 
-        // 判斷狀態，如果是 PENDING 或 待處理，我們統一查詢資料庫
+        // 💡 修正查詢邏輯以符合 SQL 假資料的狀態
+        // 如果是查詢「待處理」標籤頁
         if ("PENDING".equals(status) || "待處理".equals(status)) {
-            return reportsRepository.findByStatusIn(List.of("PENDING", "待處理"), pageable);
+            // 同時抓取資料庫中狀態為「PENDING」、「待處理」以及「處理中」的假資料
+            return reportsRepository.findByStatusIn(List.of("PENDING", "待處理", "處理中"), pageable);
         }
+
+        // 如果是查詢「已結案」標籤頁
+        if ("已結案".equals(status)) {
+            // 同時抓取資料庫中狀態為「已處理」以及「駁回」的假資料
+            return reportsRepository.findByStatusIn(List.of("已處理", "駁回", "已結案"), pageable);
+        }
+
         return reportsRepository.findByStatus(status, pageable);
     }
 

@@ -6,7 +6,7 @@
     <title>檢舉管理 - Autopile Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* --- 你的 CSS 完全保留，未做任何更動 --- */
+        /* --- 你的 CSS 完全保留 --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100%; width: 100%; }
@@ -39,7 +39,13 @@
         .report-table { width: 100%; border-collapse: collapse; }
         .report-table th { padding: 16px; text-align: left; font-weight: 600; color: #00796b; font-size: 15px; border-bottom: 2px solid #e0f2f1; background-color: #f8f9fa; }
         .report-table td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+
+        /* 💡 狀態標籤顏色區分 */
         .status-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; background-color: #e0f2f1; color: #00796b; }
+        .status-processing { background-color: #fff3e0; color: #e65100; } /* 處理中: 橘色 */
+        .status-closed { background-color: #e8f5e9; color: #2e7d32; }     /* 已結案: 綠色 */
+        .status-rejected { background-color: #ffebee; color: #c62828; }   /* 駁回: 紅色 */
+
         .btn-action { background-color: #00796b; color: white; border: none; padding: 8px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s; }
         .btn-action:hover { background-color: #00695c; }
         .pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 20px; background: white; border-top: 1px solid #eee; }
@@ -135,14 +141,17 @@
                             </div>
                         </td>
                         <td>
-                            <span class="status-badge" th:text="${report.status == '待處理' ? '尚未處理' : report.status}"></span>
+                            <span class="status-badge"
+                                  th:classappend="${report.status == '處理中' ? 'status-processing' : (report.status == '已處理' || report.status == '已結案' ? 'status-closed' : (report.status == '駁回' ? 'status-rejected' : ''))}"
+                                  th:text="${report.status}">
+                            </span>
                         </td>
                         <td class="time-text" th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}"></td>
                         <td>
                             <a th:href="@{/reports/admin/handle(id=${report.reportsNo})}"
                                class="btn-action"
-                               th:style="${report.status == '已結案' ? 'background-color: #6c757d;' : ''}"
-                               th:text="${report.status == '已結案' ? '查看' : '處理案件'}"></a>
+                               th:style="${(report.status == '已結案' || report.status == '已處理' || report.status == '駁回') ? 'background-color: #6c757d;' : ''}"
+                               th:text="${(report.status == '已結案' || report.status == '已處理' || report.status == '駁回') ? '查看' : '處理案件'}"></a>
                         </td>
                     </tr>
                     <tr th:if="${reportPage.totalElements == 0}">
@@ -174,7 +183,6 @@
 <script>
     document.querySelectorAll('.submenu-toggle, .sub-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
-            // 💡 只有在點擊沒有 href 的父項目時才觸發摺疊，避免與連結跳轉衝突
             if (e.currentTarget.tagName === 'A' && e.currentTarget.getAttribute('href') !== null && e.currentTarget.getAttribute('href') !== '#') {
                 return;
             }

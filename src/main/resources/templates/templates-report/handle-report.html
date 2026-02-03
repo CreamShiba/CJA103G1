@@ -6,7 +6,7 @@
     <title>檢舉案件處理 - 卡爾夏 Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* --- 你的 CSS 完全保留，未做任何更動 --- */
+        /* --- 你的 CSS 完全保留 --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100%; width: 100%; }
@@ -116,7 +116,7 @@
 
     <main class="main-content">
         <header class="top-bar">
-            <h2 class="page-title" th:text="${report.status == '已結案'} ? '檢舉查看' : '檢舉案件處理'">檢舉案件處理</h2>
+            <h2 class="page-title" th:text="${report.status != '待處理' && report.status != '處理中'} ? '檢舉查看' : '檢舉案件處理'">檢舉案件處理</h2>
             <div class="user-profile"><span>Admin</span><div class="avatar"><i class="fas fa-user"></i></div></div>
         </header>
 
@@ -151,13 +151,13 @@
                     <div class="info-label">管理員回覆：</div>
                     <textarea id="replyMsg"
                               th:text="${report.response}"
-                              th:readonly="${report.status == '已結案'}"
-                              th:placeholder="${report.status == '已結案'} ? '' : '請在此輸入處理結果或說明...'"></textarea>
+                              th:readonly="${report.status == '已結案' || report.status == '已處理' || report.status == '駁回'}"
+                              th:placeholder="${report.status == '已結案' || report.status == '已處理' || report.status == '駁回'} ? '' : '請在此輸入處理結果或說明...'"></textarea>
                 </div>
 
                 <div class="btn-group">
-                    <a th:href="@{/reports/admin/list(status=${report.status == '已結案' ? '已結案' : '待處理'})}" class="btn-back">返回列表</a>
-                    <button th:if="${report.status != '已結案'}" class="btn-send" onclick="sendReply()">送出</button>
+                    <a th:href="@{/reports/admin/list(status=${(report.status == '待處理' || report.status == '處理中') ? '待處理' : '已結案'})}" class="btn-back">返回列表</a>
+                    <button th:if="${report.status == '待處理' || report.status == '處理中'}" class="btn-send" onclick="sendReply()">送出</button>
                 </div>
             </div>
 
@@ -180,10 +180,8 @@
 </div>
 
 <script th:inline="javascript">
-    // 側邊欄摺疊功能
     document.querySelectorAll('.submenu-toggle, .sub-toggle').forEach(toggle => {
         toggle.addEventListener('click', e => {
-            // 只有點擊非連結處才摺疊，避免干擾跳轉
             if (e.currentTarget.tagName === 'A' && e.currentTarget.getAttribute('href') !== null && e.currentTarget.getAttribute('href') !== '#') {
                 return;
             }
@@ -192,25 +190,21 @@
         });
     });
 
-    // 💡 判斷「其他」並顯示詳細內容的紅色標籤
     document.addEventListener('DOMContentLoaded', function() {
         const typeLabel = document.getElementById('typeLabel');
         const reasonLabel = document.getElementById('reasonLabel');
         const descriptionText = document.getElementById('descriptionText');
-
         const typeBox = document.getElementById('typeBox');
         const reasonBox = document.getElementById('reasonBox');
 
         if (descriptionText) {
             const detail = descriptionText.innerText;
-
             if (typeLabel && typeBox && typeLabel.innerText.includes('其他')) {
                 const newSpan = document.createElement('span');
                 newSpan.className = 'other-tag';
                 newSpan.innerText = `內容：${detail}`;
                 typeBox.appendChild(newSpan);
             }
-
             if (reasonLabel && reasonBox && reasonLabel.innerText.includes('其他')) {
                 const newSpan = document.createElement('span');
                 newSpan.className = 'other-tag';
@@ -220,7 +214,6 @@
         }
     });
 
-    // 彈窗功能
     function showModal(title, message) {
         document.getElementById('modalTitle').textContent = title;
         document.getElementById('modalMessage').textContent = message;
@@ -231,7 +224,6 @@
         document.getElementById('customModal').classList.remove('show');
     }
 
-    // 送出處理邏輯 (Ajax)
     function sendReply() {
         const reply = document.getElementById('replyMsg').value;
         if (!reply.trim()) {
@@ -239,12 +231,11 @@
             return;
         }
 
-        // 💡 透過 Thymeleaf 傳入 ID
         const id = /*[[${report.reportsNo}]]*/ 0;
         const params = new URLSearchParams();
         params.append('id', id);
         params.append('status', '已結案');
-        params.append('admNo', 1); // 開發階段預設為 1
+        params.append('admNo', 1);
         params.append('response', reply);
 
         fetch('/reports/api/handle', {
