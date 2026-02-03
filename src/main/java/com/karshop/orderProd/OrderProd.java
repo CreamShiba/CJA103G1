@@ -1,5 +1,6 @@
 package com.karshop.orderProd;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -81,6 +82,7 @@ public class OrderProd {
     private String payoutStatus = "未撥款"; // 預設值
 
     @OneToMany(fetch = FetchType.EAGER)
+    @JsonManagedReference
     @JoinColumn(name = "ord_no", referencedColumnName = "ord_no", insertable = false, updatable = false)
     private List<OrderProdDetail> ordDetails; // 變數名為 OrderProdDetail
 }
