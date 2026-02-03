@@ -6,6 +6,7 @@
     <title>檢舉案件處理 - 卡爾夏 Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* --- 你的 CSS 完全保留，未做任何更動 --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100%; width: 100%; }
@@ -91,15 +92,15 @@
                         <li class="menu-item has-sub-item">
                             <a class="sub-toggle"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <li><a href="/appeals/admin/list?status=PENDING">尚未處理</a></li>
-                                <li><a href="/appeals/admin/list?status=已結案">已結案</a></li>
+                                <li><a th:href="@{/appeals/admin/list(status='PENDING')}">尚未處理</a></li>
+                                <li><a th:href="@{/appeals/admin/list(status='已結案')}">已結案</a></li>
                             </ul>
                         </li>
                         <li class="menu-item has-sub-item open">
                             <a class="sub-toggle"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <li><a href="/reports/admin/list?status=PENDING" th:classappend="${report.status != '已結案'} ? 'active'">尚未處理</a></li>
-                                <li><a href="/reports/admin/list?status=已結案" th:classappend="${report.status == '已結案'} ? 'active'">已結案</a></li>
+                                <li><a th:href="@{/reports/admin/list(status='待處理')}" th:classappend="${currentStatus == '待處理' ? 'active' : ''}">尚未處理</a></li>
+                                <li><a th:href="@{/reports/admin/list(status='已結案')}" th:classappend="${currentStatus == '已結案' ? 'active' : ''}">已結案</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -149,13 +150,13 @@
                 <div style="margin-top: 12px;">
                     <div class="info-label">管理員回覆：</div>
                     <textarea id="replyMsg"
-                              th:text="${report.response == '尚未回覆'} ? '' : ${report.response}"
+                              th:text="${report.response}"
                               th:readonly="${report.status == '已結案'}"
                               th:placeholder="${report.status == '已結案'} ? '' : '請在此輸入處理結果或說明...'"></textarea>
                 </div>
 
                 <div class="btn-group">
-                    <a th:href="@{/reports/admin/list(status=${report.status == '已結案' ? '已結案' : 'PENDING'})}" class="btn-back">返回列表</a>
+                    <a th:href="@{/reports/admin/list(status=${report.status == '已結案' ? '已結案' : '待處理'})}" class="btn-back">返回列表</a>
                     <button th:if="${report.status != '已結案'}" class="btn-send" onclick="sendReply()">送出</button>
                 </div>
             </div>
@@ -163,7 +164,7 @@
             <div class="case-card" th:if="${report == null}">
                 <p style="color: red; padding: 20px; text-align: center;">系統錯誤：找不到該案件資料，請重新進入。</p>
                 <div class="btn-group">
-                    <a href="/reports/admin/list?status=PENDING" class="btn-back">返回列表</a>
+                    <a th:href="@{/reports/admin/list(status='待處理')}" class="btn-back">返回列表</a>
                 </div>
             </div>
         </div>
@@ -182,12 +183,16 @@
     // 側邊欄摺疊功能
     document.querySelectorAll('.submenu-toggle, .sub-toggle').forEach(toggle => {
         toggle.addEventListener('click', e => {
+            // 只有點擊非連結處才摺疊，避免干擾跳轉
+            if (e.currentTarget.tagName === 'A' && e.currentTarget.getAttribute('href') !== null && e.currentTarget.getAttribute('href') !== '#') {
+                return;
+            }
             e.preventDefault();
             toggle.parentElement.classList.toggle('open');
         });
     });
 
-    // 💡 判斷「其他」並顯示詳細內容的紅色標籤 (同步申訴功能)
+    // 💡 判斷「其他」並顯示詳細內容的紅色標籤
     document.addEventListener('DOMContentLoaded', function() {
         const typeLabel = document.getElementById('typeLabel');
         const reasonLabel = document.getElementById('reasonLabel');
@@ -199,7 +204,6 @@
         if (descriptionText) {
             const detail = descriptionText.innerText;
 
-            // 1. 檢查「檢舉類型」是否包含「其他」
             if (typeLabel && typeBox && typeLabel.innerText.includes('其他')) {
                 const newSpan = document.createElement('span');
                 newSpan.className = 'other-tag';
@@ -207,7 +211,6 @@
                 typeBox.appendChild(newSpan);
             }
 
-            // 2. 檢查「檢舉原因」是否包含「其他」
             if (reasonLabel && reasonBox && reasonLabel.innerText.includes('其他')) {
                 const newSpan = document.createElement('span');
                 newSpan.className = 'other-tag';
@@ -228,7 +231,7 @@
         document.getElementById('customModal').classList.remove('show');
     }
 
-    // 送出處理邏輯
+    // 送出處理邏輯 (Ajax)
     function sendReply() {
         const reply = document.getElementById('replyMsg').value;
         if (!reply.trim()) {
@@ -236,11 +239,12 @@
             return;
         }
 
+        // 💡 透過 Thymeleaf 傳入 ID
         const id = /*[[${report.reportsNo}]]*/ 0;
         const params = new URLSearchParams();
         params.append('id', id);
         params.append('status', '已結案');
-        params.append('admNo', 1);
+        params.append('admNo', 1); // 開發階段預設為 1
         params.append('response', reply);
 
         fetch('/reports/api/handle', {

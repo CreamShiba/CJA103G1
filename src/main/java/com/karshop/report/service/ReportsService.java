@@ -3,6 +3,10 @@ package com.karshop.report.service;
 import com.karshop.report.model.Reports;
 import com.karshop.report.repository.ReportsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // 確保資料完整性
 import java.time.LocalDateTime;
@@ -22,7 +26,7 @@ public class ReportsService {
      */
     public void submitReport(Reports report) {
         report.setReportsTimestamp(LocalDateTime.now()); // 紀錄檢舉時間
-        report.setStatus("PENDING"); // 預設狀態為 PENDING (尚未處理)
+        report.setStatus("待處理"); // 配合你的 SQL 預設值改為中文
         report.setAdmNo(1); // 預設負責管理員編號
         reportsRepository.save(report); // 執行存檔
     }
@@ -39,52 +43,48 @@ public class ReportsService {
     }
 
     /**
-     * 處理管理員對檢舉案件的審核與結案
-     * @param id 檢舉編號
-     * @param status 結案狀態 (如: 已結案)
-     * @param admNo 處理的管理員編號
-     * @param response 管理員回覆內容 (雖然檢舉改用 Email，但資料庫仍可保存紀錄)
+     * 💡 核心新增：後台分頁查詢
+     * @param status 篩選狀態 (待處理/處理中/已處理/駁回)
+     * @param page 目前頁碼
+     * @param size 每頁幾筆
+     * @return 分頁物件
      */
-    @Transactional // 加入事務管理，確保更新過程若出錯會自動回滾(Rollback)
+    public Page<Reports> getReportsByStatusWithPagination(String status, int page, int size) {
+        // 建立分頁請求，並依照檢舉時間倒序排序 (新的在前)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("reportsTimestamp").descending());
+
+        // 判斷狀態，如果是 PENDING 或 待處理，我們統一查詢資料庫
+        if ("PENDING".equals(status) || "待處理".equals(status)) {
+            return reportsRepository.findByStatusIn(List.of("PENDING", "待處理"), pageable);
+        }
+        return reportsRepository.findByStatus(status, pageable);
+    }
+
+    /**
+     * 處理管理員對檢舉案件的審核與結案
+     */
+    @Transactional // 加入事務管理
     public void handleReport(Integer id, String status, Integer admNo, String response) {
-        // 尋找該筆紀錄，找不到拋出例外
         Reports report = reportsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("找不到編號為 " + id + " 的檢舉紀錄"));
 
-        // 更新處理資訊
         report.setStatus(status);
         report.setAdmNo(admNo);
-        report.setResponse(response); // 存入管理員的回覆
-        report.setHandled(LocalDateTime.now()); // 紀錄處理完成時間
+        report.setResponse(response);
+        report.setHandled(LocalDateTime.now());
 
-        // 存回資料庫
         reportsRepository.save(report);
     }
 
     // ==========================================
-    // 3. 查詢功能 (包含個人紀錄查詢)
+    // 3. 查詢功能
     // ==========================================
 
-    /**
-     * 💡 這是讓檢舉紀錄頁面顯示資料的關鍵！
-     * 根據會員編號抓取該會員的所有檢舉紀錄
-     */
     public List<Reports> getReportsByMember(Integer memberNo) {
-        // 呼叫你在 Repository 中定義的新方法
         return reportsRepository.findByMemberNo(memberNo);
     }
 
-    /**
-     * 透過 ID 取得單一檢舉案件 (用於處理頁面)
-     */
     public Reports getReportById(Integer id) {
-        return reportsRepository.findById(id).orElse(null);
-    }
-
-    /**
-     * 舊有方法的別名，維持相容性
-     */
-    public Reports getOneReport(Integer id) {
         return reportsRepository.findById(id).orElse(null);
     }
 }
