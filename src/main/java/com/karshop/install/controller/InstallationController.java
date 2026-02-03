@@ -34,12 +34,22 @@ public class InstallationController {
     @GetMapping("/home")
     public String home(@RequestParam(required = false) Integer region,
             @RequestParam(required = false) List<Integer> serviceIds,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "9") int size,
             HttpSession session,
             Model model) {
-        List<TechnicianCardVO> technicians = technicianService.getAllActiveTechnicians(region, serviceIds);
-        model.addAttribute("technicians", technicians);
+        org.springframework.data.domain.Page<TechnicianCardVO> techPage = technicianService.getAllActiveTechnicians(
+                region, serviceIds, keyword, page, size, sort);
+
+        model.addAttribute("technicians", techPage.getContent()); // Keep 'technicians' as list for compatibility if
+                                                                  // simple
+        model.addAttribute("page", techPage); // Add full page object for pagination UI
         model.addAttribute("currentRegion", region);
         model.addAttribute("currentServiceIds", serviceIds);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("currentSort", sort);
 
         MembersVO member = (MembersVO) session.getAttribute("member");
         boolean isTechnician = false;
@@ -63,12 +73,21 @@ public class InstallationController {
     }
 
     @GetMapping("/technician/{id}")
-    public String technicianDetail(@PathVariable Integer id, Model model) {
+    public String technicianDetail(@PathVariable Integer id, HttpSession session, Model model) {
         TechnicianCardVO technician = technicianService.getTechnicianDetail(id);
         model.addAttribute("technician", technician);
 
         List<InstallLocation> locations = locationRepository.findAll();
         model.addAttribute("locations", locations);
+
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        boolean isTechnician = false;
+        if (member != null) {
+            isTechnician = technicianRepository.findByMemberMemNo(member.getMemberNo())
+                    .map(t -> t.getIsActive() == 1)
+                    .orElse(false);
+        }
+        model.addAttribute("isTechnician", isTechnician);
 
         return "install/technician-detail";
     }
@@ -99,6 +118,17 @@ public class InstallationController {
         if (member == null)
             return "redirect:/members/login";
         model.addAttribute("member", member);
+
+        // Check for existing (rejected) application to pre-fill data
+        technicianRepository.findByMemberMemNo(member.getMemberNo()).ifPresent(tech -> {
+            model.addAttribute("existingTech", tech);
+        });
+
+        boolean isTechnician = technicianRepository.findByMemberMemNo(member.getMemberNo())
+                .map(t -> t.getIsActive() == 1)
+                .orElse(false);
+        model.addAttribute("isTechnician", isTechnician);
+
         return "install/technician-apply";
     }
 
@@ -130,6 +160,9 @@ public class InstallationController {
             Technician tech = techOpt.get();
             if (tech.getIsActive() == 1) {
                 return "redirect:/technician/orders";
+            } else if (tech.getIsActive() == 2) {
+                // Rejected, allow to re-apply
+                return "redirect:/installation/apply-technician?reapply=true";
             } else {
                 // Pending approval or suspended
                 return "redirect:/installation/home?error=pending";

@@ -15,11 +15,12 @@
     <div class="top-bar">
         <div>卡爾夏 Installation Platform</div>
         <div class="top-icons">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Search..."
-                    style="background: transparent; border: none; color: white; width: 100%; outline: none;" disabled>
-                <span>🔍</span>
-            </div>
+            <form th:action="@{/installation/home}" method="get" class="search-box"
+                style="display: flex; align-items: center;">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="搜尋技師或地區..."
+                    style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+                <button type="submit" style="background: none; border: none; cursor: pointer; padding: 0;">🔍</button>
+            </form>
             <div class="user-dropdown-container">
                 <span id="user-icon" style="cursor: pointer;">👤</span>
                 <div id="user-dropdown" class="dropdown-menu">
@@ -46,7 +47,8 @@
                     </th:block>
                 </div>
             </div>
-            <span id="cart" style="cursor: not-allowed; opacity: 0.5;">🛒</span>
+            <a th:href="@{/member/orders}" id="cart"
+                style="cursor: pointer; opacity: 1; text-decoration: none; font-size: 1.2rem;">🛒</a>
         </div>
     </div>
 
@@ -104,6 +106,16 @@
                                 <span class="service-name-text" th:text="${svc.serviceName}">Service Name</span>
                             </label>
                         </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label class="form-label" style="margin-bottom: 10px; display: block;">排序方式</label>
+                        <label style="color: #ccc; cursor: pointer;">
+                            <!-- Checkbox acting as toggle for sort=rating_desc -->
+                            <input type="checkbox" name="sort" value="rating_desc"
+                                th:checked="${currentSort == 'rating_desc'}" style="margin-right: 8px;">
+                            評分由高到低
+                        </label>
                     </div>
 
                     <button type="submit" class="btn btn-primary" style="width: 100%;">搜尋</button>
@@ -182,7 +194,9 @@
             </div>
 
             <!-- Card Grid -->
-            <div class="card-grid">
+            <!-- min-height ensured to keep pagination at bottom even with few items (approx 3 rows) -->
+            <!-- align-content: start prevents rows from stretching to fill the vertical space when items are few -->
+            <div class="card-grid" style="min-height: 1100px; align-content: start;">
                 <div class="card" th:each="tech : ${technicians}">
                     <img th:src="${tech.profilePhotoBase64 != null ? tech.profilePhotoBase64 : 'https://placehold.co/400x300/333/999?text=卡爾夏'}"
                         class="card-img" alt="Technician">
@@ -207,6 +221,44 @@
                         </a>
                     </div>
                 </div>
+            </div>
+
+            <!-- Pagination -->
+            <!-- Pagination -->
+            <div class="pagination" th:if="${page.totalPages > 1}"
+                style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 40px; padding-bottom: 20px;">
+
+                <!-- Previous Button -->
+                <a th:if="${page.hasPrevious()}"
+                    th:href="@{/installation/home(page=${page.number - 1}, region=${currentRegion}, keyword=${keyword}, serviceIds=${currentServiceIds}, sort=${currentSort})}"
+                    style="text-decoration: none; padding: 8px 16px; background: #333; color: white; border-radius: 4px; border: 1px solid #444; transition: 0.3s; font-size: 14px; display: flex; align-items: center;"
+                    onmouseover="this.style.borderColor='#ff3333'; this.style.backgroundColor='#444'"
+                    onmouseout="this.style.borderColor='#444'; this.style.backgroundColor='#333'">
+                    &lt; 上一頁
+                </a>
+
+                <!-- Page Numbers -->
+                <div style="display: flex; gap: 4px;">
+                    <th:block th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+                        <a th:href="@{/installation/home(page=${i}, region=${currentRegion}, keyword=${keyword}, serviceIds=${currentServiceIds}, sort=${currentSort})}"
+                            th:text="${i + 1}"
+                            th:style="${page.number == i ? 
+                               'background: #ff3333; color: white; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: bold; border-radius: 4px;' : 
+                               'background: transparent; color: #888; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: color 0.2s; border-radius: 4px;'}"
+                            onmouseover="if(this.style.backgroundColor !== 'rgb(255, 51, 51)') this.style.color='white'"
+                            onmouseout="if(this.style.backgroundColor !== 'rgb(255, 51, 51)') this.style.color='#888'">
+                        </a>
+                    </th:block>
+                </div>
+
+                <!-- Next Button (Only if has next) -->
+                <a th:if="${page.hasNext()}"
+                    th:href="@{/installation/home(page=${page.number + 1}, region=${currentRegion}, keyword=${keyword}, serviceIds=${currentServiceIds}, sort=${currentSort})}"
+                    style="text-decoration: none; padding: 8px 16px; background: #333; color: white; border-radius: 4px; border: 1px solid #444; transition: 0.3s; font-size: 14px; display: flex; align-items: center;"
+                    onmouseover="this.style.borderColor='#ff3333'; this.style.backgroundColor='#444'"
+                    onmouseout="this.style.borderColor='#444'; this.style.backgroundColor='#333'">
+                    下一頁 &gt;
+                </a>
             </div>
         </main>
     </div>

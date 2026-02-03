@@ -62,77 +62,7 @@
 
     <div class="app-container">
         <!-- Sidebar (Replicated from admin_index.html) -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-icon"></div>
-                <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
-            </div>
-
-            <nav class="sidebar-nav">
-                <ul>
-                    <!-- Replicated Menu Items -->
-                    <li class="menu-item has-submenu">
-                        <a class="submenu-toggle">
-                            <span><i class="fas fa-users-cog"></i> 自訂</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="#">自訂</a></li>
-                            <li><a href="#">自訂</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="menu-item has-submenu">
-                        <a class="submenu-toggle">
-                            <span><i class="fas fa-tools"></i> 安裝服務管理</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </a>
-                        <ul class="submenu" style="display: block;"> <!-- Keep open for this page -->
-                            <li><a th:href="@{/admin/dashboard(tab='audit')}"
-                                    th:classappend="${currentTab == 'audit' ? 'active' : ''}">技師審核</a></li>
-                            <li><a th:href="@{/admin/dashboard(tab='technicians')}"
-                                    th:classappend="${currentTab == 'technicians' ? 'active' : ''}">技師管理</a></li>
-                            <li><a th:href="@{/admin/dashboard(tab='payout')}"
-                                    th:classappend="${currentTab == 'payout' ? 'active' : ''}">撥款管理</a></li>
-                            <li><a th:href="@{/admin/dashboard(tab='services')}"
-                                    th:classappend="${currentTab == 'services' ? 'active' : ''}">服務項目</a></li>
-                            <li><a th:href="@{/admin/dashboard(tab='locations')}"
-                                    th:classappend="${currentTab == 'locations' ? 'active' : ''}">場地管理</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="menu-item has-submenu">
-                        <a class="submenu-toggle">
-                            <span><i class="fas fa-users-cog"></i> 帳號管理</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="#">會員帳號管理</a></li>
-                            <li><a th:href="@{/admins/listAll}">管理員帳號管理</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="menu-item has-submenu">
-                        <a class="submenu-toggle">
-                            <span><i class="fas fa-users-cog"></i> 自訂</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="#">自訂</a></li>
-                            <li><a href="#">自訂</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <form th:action="@{/admins/logout}" method="post" id="logoutForm">
-                    <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
-                        <i class="fas fa-sign-out-alt"></i> 登出 (Logout)
-                    </a>
-                </form>
-            </div>
-        </aside>
+        <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='installation')}"></aside>
 
         <!-- Main Content -->
         <div class="main-content">
@@ -164,6 +94,7 @@
                         <thead>
                             <tr>
                                 <th>姓名</th>
+                                <th>申請人姓名</th>
                                 <th>申請地區</th>
                                 <th>銀行帳戶</th>
                                 <th>申請時間</th>
@@ -173,6 +104,7 @@
                         <tbody>
                             <tr th:each="tech : ${pendingTechs}">
                                 <td th:text="${tech.realName}">Name</td>
+                                <td th:text="${tech.member.memName}">Applicant</td>
                                 <td>
                                     <span class="badge" th:text="${tech.serviceArea}"
                                         style="background-color: #eee; color: #333;">Area</span>
@@ -185,6 +117,15 @@
                                 <td th:text="${#temporals.format(tech.createAt, 'yyyy-MM-dd HH:mm')}">Date</td>
                                 <td>
                                     <div style="display: flex; gap: 5px;">
+                                        <button type="button" class="btn btn-info" th:data-real-name="${tech.realName}"
+                                            th:data-phone="${tech.phone}" th:data-email="${tech.email}"
+                                            th:data-service-area="${tech.serviceArea}"
+                                            th:data-region-code-value="${tech.regionCodeValue}"
+                                            th:data-bank-code="${tech.bankCode}"
+                                            th:data-bank-account="${tech.bankAccount}"
+                                            th:data-is-active="${tech.isActive}" th:data-tech-no="${tech.techNo}"
+                                            onclick="showTechDetails(this.dataset)"
+                                            style="background-color: #17a2b8; border-color: #17a2b8; color: white;">詳情</button>
                                         <form th:action="@{'/admin/audit/' + ${tech.techNo} + '/approve'}"
                                             method="post">
                                             <button type="submit" class="btn btn-primary">通過</button>
@@ -197,7 +138,7 @@
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(pendingTechs)}">
-                                <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                                <td colspan="6" style="text-align: center; padding: 20px; color: #999;">
                                     目前沒有待審核的申請
                                 </td>
                             </tr>
@@ -207,6 +148,66 @@
 
                 <!-- TECHNICIANS MANAGEMENT SECTION -->
                 <div th:if="${currentTab == 'technicians'}" class="table-container">
+
+                    <!-- Pending Applications Block -->
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+                        <h3 style="margin: 0; font-size: 16px; color: #d9534f;">待審核申請列表</h3>
+                    </div>
+                    <table style="margin-bottom: 30px;">
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>申請人姓名</th>
+                                <th>申請地區</th>
+                                <th>銀行帳戶</th>
+                                <th>申請時間</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="tech : ${pendingTechs}">
+                                <td th:text="${tech.realName}">Name</td>
+                                <td th:text="${tech.member.memName}">Applicant</td>
+                                <td>
+                                    <span class="badge" th:text="${tech.serviceArea}"
+                                        style="background-color: #eee; color: #333;">Area</span>
+                                </td>
+                                <td>
+                                    <div th:text="${tech.bankCode}">Code</div>
+                                    <div th:text="${tech.bankAccount}" style="font-size: 12px; color: #888;">Account
+                                    </div>
+                                </td>
+                                <td th:text="${#temporals.format(tech.createAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <button type="button" class="btn btn-info" th:data-real-name="${tech.realName}"
+                                            th:data-phone="${tech.phone}" th:data-email="${tech.email}"
+                                            th:data-service-area="${tech.serviceArea}"
+                                            th:data-region-code-value="${tech.regionCodeValue}"
+                                            th:data-bank-code="${tech.bankCode}"
+                                            th:data-bank-account="${tech.bankAccount}"
+                                            th:data-is-active="${tech.isActive}" th:data-tech-no="${tech.techNo}"
+                                            onclick="showTechDetails(this.dataset)"
+                                            style="background-color: #17a2b8; border-color: #17a2b8; color: white;">詳情</button>
+                                        <form th:action="@{'/admin/audit/' + ${tech.techNo} + '/approve'}"
+                                            method="post">
+                                            <button type="submit" class="btn btn-primary">通過</button>
+                                        </form>
+                                        <form th:action="@{'/admin/audit/' + ${tech.techNo} + '/reject'}" method="post">
+                                            <button type="submit" class="btn btn-secondary"
+                                                style="color: #d9534f; border-color: #d9534f;">駁回</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(pendingTechs)}">
+                                <td colspan="6" style="text-align: center; padding: 20px; color: #999;">
+                                    目前沒有待審核的申請
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
                     <div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
                         <h3 style="margin: 0; font-size: 16px; color: #333;">已認證技師列表</h3>
                     </div>
@@ -214,6 +215,7 @@
                         <thead>
                             <tr>
                                 <th>姓名</th>
+                                <th>申請人姓名</th>
                                 <th>地區</th>
                                 <th>電話</th>
                                 <th>信箱</th>
@@ -223,19 +225,31 @@
                         <tbody>
                             <tr th:each="tech : ${activeTechs}">
                                 <td th:text="${tech.realName}">Name</td>
+                                <td th:text="${tech.member.memName}">Applicant</td>
                                 <td><span class="badge" th:text="${tech.serviceArea}">Area</span></td>
                                 <td th:text="${tech.phone}">Phone</td>
                                 <td th:text="${tech.email}">Email</td>
                                 <td>
-                                    <form th:action="@{'/admin/technician/' + ${tech.techNo} + '/suspend'}"
-                                        method="post" onsubmit="return confirm('確定要暫時停權此技師？(將退回審核狀態)');">
-                                        <button type="submit" class="btn btn-secondary"
-                                            style="color: #d9534f; border-color: #d9534f;">暫時停權</button>
-                                    </form>
+                                    <div style="display: flex; gap: 5px;">
+                                        <button type="button" class="btn btn-info" th:data-real-name="${tech.realName}"
+                                            th:data-phone="${tech.phone}" th:data-email="${tech.email}"
+                                            th:data-service-area="${tech.serviceArea}"
+                                            th:data-region-code-value="${tech.regionCodeValue}"
+                                            th:data-bank-code="${tech.bankCode}"
+                                            th:data-bank-account="${tech.bankAccount}"
+                                            th:data-is-active="${tech.isActive}" th:data-tech-no="${tech.techNo}"
+                                            onclick="showTechDetails(this.dataset)"
+                                            style="background-color: #17a2b8; border-color: #17a2b8; color: white;">詳情</button>
+                                        <form th:action="@{'/admin/technician/' + ${tech.techNo} + '/suspend'}"
+                                            method="post" onsubmit="return confirm('確定要暫時停權此技師？(將退回審核狀態)');">
+                                            <button type="submit" class="btn btn-secondary"
+                                                style="color: #d9534f; border-color: #d9534f;">暫時停權</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(activeTechs)}">
-                                <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                                <td colspan="6" style="text-align: center; padding: 20px; color: #999;">
                                     目前沒有已認證的技師
                                 </td>
                             </tr>
@@ -485,6 +499,186 @@
         </div>
     </div>
 
+    <!-- TECHNICIAN DETAILS MODAL -->
+    <div id="techDetailModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>技師詳細資料</h3>
+                <span class="close-btn" onclick="closeModal()">×</span>
+            </div>
+            <div class="modal-body">
+                <div class="tech-profile-header">
+                    <img id="modal-photo" src="" alt="Profile Photo" class="profile-photo">
+                    <div class="tech-basic-info">
+                        <h4 id="modal-name">Technician Name</h4>
+                        <span id="modal-status" class="status-badge">Status</span>
+                    </div>
+                </div>
+                <div class="tech-info-grid">
+                    <div class="info-item">
+                        <label>聯絡電話</label>
+                        <span id="modal-phone">Phone</span>
+                    </div>
+                    <div class="info-item">
+                        <label>電子信箱</label>
+                        <span id="modal-email">Email</span>
+                    </div>
+                    <div class="info-item">
+                        <label>服務地區</label>
+                        <span id="modal-area">Area</span>
+                    </div>
+                    <div class="info-item">
+                        <label>所屬區域</label>
+                        <span id="modal-region">Region</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <label>銀行代碼</label>
+                        <span id="modal-bank-code">822</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <label>銀行帳號</label>
+                        <span id="modal-bank-account">1234567890</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 0;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: slideDown 0.3s ease-out;
+            overflow: hidden;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .close-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .tech-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .profile-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #eee;
+        }
+
+        .tech-basic-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 20px;
+            color: #333;
+        }
+
+        .status-badge {
+            background-color: #eee;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .tech-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            margin-bottom: 10px;
+        }
+
+        .info-item.full-width {
+            grid-column: span 2;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .info-item span {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            text-align: right;
+            background-color: #f8f9fa;
+        }
+    </style>
+
     <script>
         // Check for URL parameters for error messages
         const urlParams = new URLSearchParams(window.location.search);
@@ -521,6 +715,41 @@
             document.getElementById('loc-price-' + id).style.display = 'table-cell';
             document.getElementById('loc-actions-' + id).style.display = 'table-cell';
             document.getElementById('loc-edit-' + id).style.display = 'none';
+        }
+
+        // Modal Functions
+        function showTechDetails(data) {
+            document.getElementById('modal-name').innerText = data.realName || 'N/A';
+            document.getElementById('modal-phone').innerText = data.phone || 'N/A';
+            document.getElementById('modal-email').innerText = data.email || 'N/A';
+            document.getElementById('modal-area').innerText = data.serviceArea || 'N/A';
+
+            // Region Map
+            const regions = { 1: '北部', 2: '中部', 3: '南部' };
+            document.getElementById('modal-region').innerText = regions[data.regionCodeValue] || '未知';
+
+            document.getElementById('modal-bank-code').innerText = data.bankCode || 'N/A';
+            document.getElementById('modal-bank-account').innerText = data.bankAccount || 'N/A';
+
+            // Status
+            const isActive = parseInt(data.isActive);
+            const status = isActive === 1 ? 'Current Active' : (isActive === 2 ? 'Rejected' : '詳細資料');
+            document.getElementById('modal-status').innerText = status;
+
+            // Photo
+            const photoImg = document.getElementById('modal-photo');
+            if (data.techNo) {
+                photoImg.src = '/admin/technician/' + data.techNo + '/photo';
+            } else {
+                photoImg.src = 'https://via.placeholder.com/80';
+            }
+
+            document.getElementById('techDetailModal').style.display = 'flex';
+        }
+
+        function closeModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('techDetailModal').style.display = 'none';
         }
     </script>
 </body>
