@@ -24,6 +24,7 @@ public class AdminController {
     private final TechnicianManagementService technicianService;
     private final PayoutService payoutService;
     private final InstallOrderRepository orderRepository;
+    private final com.karshop.install.repository.TechnicianRepository technicianRepository;
 
     /**
      * ✅ 管理員儀表板 (Unified Dashboard)
@@ -49,9 +50,12 @@ public class AdminController {
             List<Technician> pendingTechs = technicianService.getPendingApplications();
             model.addAttribute("pendingTechs", pendingTechs);
         } else if ("technicians".equals(tab)) {
-            // [技師管理] 取得所有通過審核的技師 (Active)
+            // [技師管理] 取得所有通過審核的技師 (Active) + 待審核 (Pending)
             List<Technician> activeTechs = technicianService.getApprovedTechnicians();
             model.addAttribute("activeTechs", activeTechs);
+
+            List<Technician> pendingTechs = technicianService.getPendingApplications();
+            model.addAttribute("pendingTechs", pendingTechs);
         } else if ("payout".equals(tab)) {
             // [撥款管理]
             // 待撥款 (訂單完成但尚未轉帳)
@@ -103,7 +107,7 @@ public class AdminController {
             return "redirect:/admins/login";
 
         technicianService.approveTechnician(id);
-        return "redirect:/admin/dashboard?tab=audit";
+        return "redirect:/admin/dashboard?tab=technicians";
     }
 
     /**
@@ -117,7 +121,7 @@ public class AdminController {
             return "redirect:/admins/login";
 
         technicianService.rejectTechnician(id);
-        return "redirect:/admin/dashboard?tab=audit";
+        return "redirect:/admin/dashboard?tab=technicians";
     }
 
     /**
@@ -241,5 +245,17 @@ public class AdminController {
 
         technicianService.deleteLocation(id);
         return "redirect:/admin/dashboard?tab=locations";
+    }
+
+    // --- 圖片讀取 (Image Serving) ---
+
+    @GetMapping("/technician/{id}/photo")
+    public void getTechnicianPhoto(@PathVariable Integer id, jakarta.servlet.http.HttpServletResponse response)
+            throws java.io.IOException {
+        com.karshop.install.entity.Technician tech = technicianRepository.findById(id).orElse(null);
+        if (tech != null && tech.getTechProfile() != null) {
+            response.setContentType("image/jpeg");
+            response.getOutputStream().write(tech.getTechProfile());
+        }
     }
 }

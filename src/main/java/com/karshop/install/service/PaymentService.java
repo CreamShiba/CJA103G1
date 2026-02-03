@@ -112,20 +112,29 @@ public class PaymentService {
             // Find order by TradeNo (need to scan or query, here simplified)
             // Ideally add findByEcpayTradeNo(String) to repo
             // For now, let's assume we extract ID from TradeNo pattern "Inst{id}time"
-            try {
-                String idPart = merchantTradeNo.substring(4, merchantTradeNo.indexOf("T"));
-                Integer orderNo = Integer.parseInt(idPart);
+            System.out.println("Processing Callback for TradeNo: " + merchantTradeNo); // DEBUG
 
-                InstallOrder order = orderRepository.findById(orderNo).orElse(null);
-                if (order != null && order.getPayStatus() != PayStatus.PAID) {
-                    order.setPayStatus(PayStatus.PAID);
-                    order.setOrderStatus(OrderStatus.PAID_UNINSTALLED);
-                    orderRepository.save(order);
-                    log.info("Order {} paid successfully", orderNo);
-                }
-            } catch (Exception e) {
-                log.error("Error processing callback", e);
+            String idPart = merchantTradeNo.substring(4, merchantTradeNo.indexOf("T"));
+            Integer orderNo = Integer.parseInt(idPart);
+            System.out.println("Extracted Order ID: " + orderNo); // DEBUG
+
+            InstallOrder order = orderRepository.findById(orderNo).orElse(null);
+            if (order == null) {
+                System.out.println("Order NOT FOUND: " + orderNo);
+                throw new IllegalStateException("Order not found: " + orderNo);
             }
+
+            if (order.getPayStatus() != PayStatus.PAID) {
+                order.setPayStatus(PayStatus.PAID);
+                order.setOrderStatus(OrderStatus.PAID_UNINSTALLED);
+                orderRepository.save(order);
+                log.info("Order {} paid successfully", orderNo);
+                System.out.println("Order " + orderNo + " updated to PAID");
+            } else {
+                System.out.println("Order " + orderNo + " was already PAID");
+            }
+        } else {
+            System.out.println("Payment Failed RtnCode: " + rtnCode);
         }
     }
 
