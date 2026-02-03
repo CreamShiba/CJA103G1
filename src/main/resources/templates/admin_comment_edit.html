@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>編輯留言 - 卡爾夏後台</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.2.1/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        body { background-color: #f8f9fa; }
+        main.flex-grow-1 { width: 100% !important; }
+        .content-body { padding: 40px; display: flex; justify-content: center; }
+        .edit-container { width: 100%; max-width: 800px; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+        .header-title { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 25px; color: #333; }
+        .info-readonly { background-color: #e9ecef; color: #495057; }
+        .btn-save { background-color: #007bff; border: none; padding: 10px 30px; }
+        .btn-cancel { margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="app-container d-flex" style="min-height: 100vh;">
+    <main class="flex-grow-1">
+        <header class="top-bar bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center">
+            <h2 class="mb-0 text-dark">
+                <i class="fa-solid fa-comment-dots"></i> 編輯留言內容
+            </h2>
+            <span class="text-muted small">管理者介面</span>
+        </header>
+
+        <div class="content-body">
+            <div class="edit-container">
+                <h4 class="header-title">
+                    <i class="fa-solid fa-pen-to-square"></i> 留言內容調整
+                </h4>
+
+                <form th:action="@{/admin/forum/comment/update}" th:object="${forumComment}" method="post">
+                    <input type="hidden" th:field="*{commentId}" />
+
+                    <input type="hidden" name="member.memNo" th:value="${forumComment.member?.memNo}" />
+                    <input type="hidden" name="forumPost.postId" th:value="${forumComment.forumPost?.postId}" />
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label>留言 ID</label>
+                            <input type="text" class="form-control info-readonly" th:value="*{commentId}" readonly />
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label>留言作者</label>
+                            <input type="text" class="form-control info-readonly"
+                                   th:value="*{member != null ? member.memUsername : '未知用戶'}" readonly />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>所屬文章標題</label>
+                        <input type="text" class="form-control info-readonly"
+                               th:value="*{forumPost != null ? forumPost.title : '文章已刪除'}" readonly />
+                    </div>
+
+                    <div class="form-group">
+                        <label>留言內容修改</label>
+                        <textarea class="form-control" rows="6" th:field="*{content}" required></textarea>
+                    </div>
+
+                    <hr />
+
+                    <div class="text-right">
+                        <a th:href="@{/admin/forum/comment}" class="btn btn-light btn-cancel">取消返回</a>
+                        <button type="submit" class="btn btn-primary btn-save">
+                            <i class="fa-solid fa-save"></i> 儲存變更
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
