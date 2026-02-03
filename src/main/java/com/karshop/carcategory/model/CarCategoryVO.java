@@ -3,13 +3,10 @@ package com.karshop.carcategory.model;
 
 
 import java.io.Serializable;
+import java.util.List;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.karshop.product.model.ProductVO;
+import jakarta.persistence.*;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -38,6 +35,10 @@ public class CarCategoryVO implements Serializable {
   @Column(name = "prod_interval")
   @NotEmpty(message = "生產區間: 請勿空白")
   private String prodInterval;
+
+//對映到ProductVO的carCategory
+  @OneToMany(mappedBy = "carCategory")
+  private List<ProductVO> products;
 
   public CarCategoryVO() {
     super();
@@ -73,5 +74,18 @@ public class CarCategoryVO implements Serializable {
 
   public void setProdInterval(String prodInterval) {
     this.prodInterval = prodInterval;
+  }
+
+  public List<ProductVO> getProducts() {
+    return products;
+  }
+
+  public void setProducts(List<ProductVO> products) {
+    this.products = products;
+  }
+
+  // 顯示結果範例：Toyota - Altis (2019-2023)
+  public String getFullName() {
+    return this.make + " - " + this.carName + " (" + this.prodInterval + ")";
   }
 }

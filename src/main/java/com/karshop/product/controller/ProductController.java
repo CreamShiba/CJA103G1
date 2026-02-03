@@ -1,6 +1,8 @@
 package com.karshop.product.controller;
 
 
+import com.karshop.carcategory.model.CarCategoryService;
+import com.karshop.carcategory.model.CarCategoryVO;
 import com.karshop.membertest.model.MemberVO;
 import com.karshop.ord.model.OrdService;
 import com.karshop.ord.model.OrdVO;
@@ -55,6 +57,9 @@ public class ProductController {
 
     @Autowired
     private SellerService sellerService;
+
+    @Autowired
+    private CarCategoryService carCategoryService;
 
     @Autowired
     private EntityManager entityManager;
@@ -317,6 +322,11 @@ public class ProductController {
     public List<ProductCategoryVO> populateProductCategories() {
         //   側邊攔、下拉選單
         return productCategoryService.getAll();
+    }
+
+    @ModelAttribute("carCategoryList")
+    public List<CarCategoryVO> populateCarCategories() {
+        return carCategoryService.getAllCarCategories();
     }
 
 }

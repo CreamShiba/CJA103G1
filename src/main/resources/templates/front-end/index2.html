@@ -45,7 +45,7 @@
                 我們找不到符合您搜尋條件的商品，請嘗試更換關鍵字或調整價格範圍。
             </p>
 
-            <a th:href="@{/shop(sellerNo=${sellerNo})}"
+            <a th:href="@{/shop(carCategoryNo=${carCategoryNo},sellerNo=${sellerNo})}"
                style="display: inline-block; padding: 10px 25px; background: #333; color: white; border-radius: 30px; text-decoration: none; font-size: 14px; transition: 0.3s;">
                 <i class="fas fa-undo"></i> 清除搜尋條件
             </a>
@@ -97,32 +97,32 @@
         <div class="pagination-area" th:if="${productPage.totalPages > 0}" style="margin-top: 40px; text-align: center;">
 
             <a th:if="${!productPage.first}"
-               th:href="@{/shop(page=1, keyword=${keyword}, productCategoryNo=${productCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+               th:href="@{/shop(page=1, keyword=${keyword}, productCategoryNo=${productCategoryNo}, carCategoryNo=${carCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                class="page-btn" title="回到第一頁">
                 <i class="fas fa-angle-double-left"></i>
             </a>
 
             <a th:if="${productPage.hasPrevious()}"
-               th:href="@{/shop(page=${currentPage - 1}, keyword=${keyword}, productCategoryNo=${productCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+               th:href="@{/shop(page=${currentPage - 1}, keyword=${keyword}, productCategoryNo=${productCategoryNo}, carCategoryNo=${carCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                class="page-btn">
                 <i class="fas fa-chevron-left"></i>
             </a>
 
             <span th:each="i : ${#numbers.sequence(1, productPage.totalPages)}">
-                <a th:href="@{/shop(page=${i}, keyword=${keyword}, productCategoryNo=${productCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                <a th:href="@{/shop(page=${i}, keyword=${keyword}, productCategoryNo=${productCategoryNo}, carCategoryNo=${carCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                    th:text="${i}"
                    class="page-btn"
                    th:classappend="${currentPage == i} ? 'active'">1</a>
             </span>
 
             <a th:if="${productPage.hasNext()}"
-               th:href="@{/shop(page=${currentPage + 1}, keyword=${keyword}, productCategoryNo=${productCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+               th:href="@{/shop(page=${currentPage + 1}, keyword=${keyword}, productCategoryNo=${productCategoryNo}, carCategoryNo=${carCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                class="page-btn">
                 <i class="fas fa-chevron-right"></i>
             </a>
 
             <a th:if="${!productPage.last}"
-               th:href="@{/shop(page=${productPage.totalPages}, keyword=${keyword}, productCategoryNo=${productCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+               th:href="@{/shop(page=${productPage.totalPages}, keyword=${keyword}, productCategoryNo=${productCategoryNo}, carCategoryNo=${carCategoryNo}, sellerNo=${sellerNo}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
                class="page-btn" title="跳到最後一頁">
                 <i class="fas fa-angle-double-right"></i>
             </a>
