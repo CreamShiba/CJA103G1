@@ -7,12 +7,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "order_rating") // 🔥 請改成你實際存放買家評價的表格名稱
+@Table(name = "prod_rate") // 🔥 請改成你實際存放買家評價的表格名稱
 public class BuyerRatingVO implements java.io.Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "rating_no") // 請改成該表格的 Primary Key
+    @Column(name = "prod_rate_no") // 請改成該表格的 Primary Key
     private Integer ratingNo;
 
     // 只需要關聯訂單，就可以透過訂單找到賣家
@@ -20,13 +20,13 @@ public class BuyerRatingVO implements java.io.Serializable {
     @JoinColumn(name = "ord_no", referencedColumnName = "ord_no")
     private OrdVO ord;
 
-    @Column(name = "score") // 請改成實際的分數欄位名稱
+    @Column(name = "rate") // 請改成實際的分數欄位名稱
     private Integer score;
 
-    @Column(name = "comment") // 請改成實際的評論欄位名稱
+    @Column(name = "rate_content") // 請改成實際的評論欄位名稱
     private String comment;
 
-    @Column(name = "rating_date")
+    @Column(name = "rate_time")
     private LocalDateTime ratingDate;
 
     // Getters & Setters

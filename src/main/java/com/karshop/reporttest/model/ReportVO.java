@@ -42,24 +42,13 @@ public class ReportVO implements java.io.Serializable {
     @Column(name = "handled")
     private LocalDateTime handledTime; // 處理時間
 
-    // ===========================================
-    // 🔥 重點：關聯設定 (將 prod_no 轉為 ProductVO)
-    // ===========================================
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "prod_no", referencedColumnName = "prod_no")
     private ProductVO product;
 
-    // 如果你有 SellerVO，建議也關聯起來，後台顯示賣家名稱會很方便
-    // 如果還沒有 SellerVO，這段可以先註解掉，改用 private Integer sellerNo;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_no", referencedColumnName = "seller_no")
     private SellerVO seller;
-
-
-    // ===========================================
-    // Getter & Setter (省略 Lombok 的話需手動加入)
-    // ===========================================
 
     public Integer getReportNo() { return reportNo; }
     public void setReportNo(Integer reportNo) { this.reportNo = reportNo; }
