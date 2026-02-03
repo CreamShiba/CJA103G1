@@ -84,7 +84,38 @@
                     </a>
                 </ul>
             </li>
-
+            <li class="menu-item has-submenu" th:classappend="${activePage == 'installation'} ? 'open' : ''">
+                <a class="submenu-toggle">
+                    <span><i class="fas fa-tools"></i> 安裝服務管理</span>
+                    <i class="fas fa-chevron-down arrow"></i>
+                </a>
+                <ul class="submenu">
+                    <li>
+                        <a th:href="@{/admin/dashboard(tab='technicians')}"
+                           th:classappend="${activePage == 'installation' && currentTab == 'technicians'} ? 'active' : ''">
+                            技師管理
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admin/dashboard(tab='locations')}"
+                           th:classappend="${activePage == 'installation' && currentTab == 'locations'} ? 'active' : ''">
+                            場地管理
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admin/dashboard(tab='payout')}"
+                           th:classappend="${activePage == 'installation' && currentTab == 'payout'} ? 'active' : ''">
+                            訂單撥款
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admin/dashboard(tab='services')}"
+                           th:classappend="${activePage == 'installation' && currentTab == 'services'} ? 'active' : ''">
+                            服務項目
+                        </a>
+                    </li>
+                </ul>
+            </li>
             <li class="menu-item has-submenu"
                 th:classappend="${activePage == 'reports'} ? 'open' : ''">
 

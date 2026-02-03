@@ -41,8 +41,8 @@ public class TechnicianManagementService {
      * 用於前台側邊欄顯示
      */
     public List<com.karshop.install.entity.ServiceItem> getTopServiceItems() {
-        // 暫時簡單實作：取得前 10 筆
-        return serviceItemRepository.findAll().stream().limit(10).collect(Collectors.toList());
+        // 暫時簡單實作：取得前 5 筆
+        return serviceItemRepository.findAll().stream().limit(5).collect(Collectors.toList());
     }
 
     /**
@@ -58,8 +58,28 @@ public class TechnicianManagementService {
                 .orElseThrow(() -> new IllegalArgumentException("會員不存在"));
 
         // 檢查是否重複申請
-        if (technicianRepository.findByMemberMemNo(dto.getMemberNo()).isPresent()) {
-            throw new IllegalStateException("您已經申請過技師資格");
+        java.util.Optional<Technician> existingTech = technicianRepository.findByMemberMemNo(dto.getMemberNo());
+        if (existingTech.isPresent()) {
+            Technician existing = existingTech.get();
+            // 如果狀態是 Rejected (2)，允許重新申請 (更新資料並設回 Pending 0)
+            if (existing.getIsActive() == 2) {
+                existing.setRealName(dto.getRealName());
+                existing.setPhone(dto.getPhone());
+                existing.setEmail(dto.getEmail());
+                existing.setServiceArea(dto.getServiceArea());
+                existing.setRegionCodeValue(dto.getRegionCode());
+                existing.setBankCode(dto.getBankCode());
+                existing.setBankAccount(dto.getBankAccount());
+                existing.setIsActive(0); // 重設為待審核
+
+                if (dto.getProfilePhoto() != null && !dto.getProfilePhoto().isEmpty()) {
+                    existing.setTechProfile(dto.getProfilePhoto().getBytes());
+                }
+
+                return technicianRepository.save(existing);
+            } else {
+                throw new IllegalStateException("您已經申請過技師資格");
+            }
         }
 
         Technician technician = new Technician();
@@ -193,11 +213,14 @@ public class TechnicianManagementService {
 
     /**
      * ❌ 管理員駁回申請
-     * 直接刪除申請紀錄
+     * 修改狀態為 Rejected (2)，保留資料但不顯示於待審核清單
      */
     @Transactional
     public void rejectTechnician(Integer techNo) {
-        technicianRepository.deleteById(techNo);
+        Technician technician = technicianRepository.findById(techNo)
+                .orElseThrow(() -> new IllegalArgumentException("技師不存在"));
+        technician.setIsActive(2); // 2: Rejected
+        technicianRepository.save(technician);
     }
 
     /**
@@ -207,7 +230,8 @@ public class TechnicianManagementService {
      * @param serviceIds 服務項目篩選 (可選，多選)
      */
     @Transactional(readOnly = true)
-    public List<TechnicianCardVO> getAllActiveTechnicians(Integer regionCode, List<Integer> serviceIds) {
+    public org.springframework.data.domain.Page<TechnicianCardVO> getAllActiveTechnicians(Integer regionCode,
+            List<Integer> serviceIds, String keyword, int page, int size, String sort) {
         List<Technician> technicians;
 
         if (serviceIds != null && !serviceIds.isEmpty()) {
@@ -240,8 +264,32 @@ public class TechnicianManagementService {
             technicians = technicianRepository.findByIsActive(1);
         }
 
+        // Keyword Filtering
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String kw = keyword.trim().toLowerCase();
+            technicians = technicians.stream()
+                    .filter(tech -> tech.getRealName().toLowerCase().contains(kw) ||
+                            (tech.getServiceArea() != null && tech.getServiceArea().toLowerCase().contains(kw)))
+                    .collect(Collectors.toList());
+        }
+
+        // Sorting Logic
+        if ("rating_desc".equals(sort)) {
+            technicians.sort((t1, t2) -> {
+                double r1 = t1.getRatingAmount() > 0 ? (double) t1.getRatingStar() / t1.getRatingAmount() : 0.0;
+                double r2 = t2.getRatingAmount() > 0 ? (double) t2.getRatingStar() / t2.getRatingAmount() : 0.0;
+                return Double.compare(r2, r1); // Descending
+            });
+        }
+
+        // Pagination Logic
+        int totalElements = technicians.size();
+        int start = Math.min(page * size, totalElements);
+        int end = Math.min((page + 1) * size, totalElements);
+        List<Technician> pagedTechnicians = technicians.subList(start, end);
+
         // 轉換 Entity -> VO (包含評分計算與圖片處理)
-        return technicians.stream().map(tech -> {
+        List<TechnicianCardVO> content = pagedTechnicians.stream().map(tech -> {
             TechnicianCardVO vo = new TechnicianCardVO();
             vo.setTechNo(tech.getTechNo());
             vo.setRealName(tech.getRealName());
@@ -273,6 +321,9 @@ public class TechnicianManagementService {
             vo.setServices(serviceVOs);
             return vo;
         }).collect(Collectors.toList());
+
+        return new org.springframework.data.domain.PageImpl<>(content,
+                org.springframework.data.domain.PageRequest.of(page, size), totalElements);
     }
 
     /**
@@ -347,12 +398,7 @@ public class TechnicianManagementService {
     @Transactional
     public void suspendTechnician(Integer techNo) {
         // 1. 檢查是否有未完成的訂單 (Pending, Awaiting Payment, Paid/Uninstalled)
-        long activeOrders = orderRepository.countActiveOrdersByTechnician(techNo); // Using field from AdminController,
-                                                                                   // need to ensure repo is injected
-                                                                                   // here.
-        // Wait, orderRepository is defined as 'installOrderRepository' in this service?
-        // No, let's check.
-        // This service has installOrderRepository? No. I need to add it.
+        long activeOrders = orderRepository.countActiveOrdersByTechnician(techNo);
 
         Technician technician = technicianRepository.findById(techNo)
                 .orElseThrow(() -> new IllegalArgumentException("技師不存在"));
