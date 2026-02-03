@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpSession;
 
 @Component
 public class AdminAuthInterceptor implements HandlerInterceptor {
-  private static final Integer SUPER_ADMIN_ID = 10;
+  private static final Integer SUPER_ADMIN_ID = 1;
   // URL → 功能 ID 對應表
   private static final Map<String, Integer> URL_TO_FUNC = Map.of(
           "/admins/listAll",2,  // 20對應的是權限編號
