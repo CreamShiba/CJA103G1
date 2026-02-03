@@ -127,7 +127,22 @@
                 <tr th:each="product : ${productList}">
                     <td th:text="${product.prodNo}"></td>
                     <td th:text="${product.productCategory != null} ? ${product.productCategory.productCategoryName} : '未分類'"></td>
-                    <td style="font-weight:bold;" th:text="${product.prodName}"></td>
+                    <td>
+                        <div style="font-weight:bold; font-size: 15px; margin-bottom: 4px; color: #fff;"
+                             th:text="${product.prodName}"></div>
+
+                        <div th:if="${product.carCategory != null}"
+                             style="font-size: 12px; color: #aaa; display: flex; align-items: center; gap: 5px;">
+                            <i class="fas fa-car" style="font-size: 10px; color: #888;"></i>
+                            <span th:text="${product.carCategory.fullName}"></span>
+                        </div>
+
+                        <div th:if="${product.carCategory == null}"
+                             style="font-size: 12px; color: #555; display: flex; align-items: center; gap: 5px;">
+                            <i class="fas fa-globe" style="font-size: 10px;"></i>
+                            <span>全車系通用</span>
+                        </div>
+                    </td>
                     <td><img th:src="@{/product/displayMain(prodNo=${product.prodNo})}" width="50" height="50" style="object-fit: cover; border-radius: 4px;"></td>
                     <td>
                         <a th:if="${product.prodStatus == '上架中'}"

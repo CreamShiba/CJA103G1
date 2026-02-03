@@ -78,15 +78,6 @@ function submitReportForm() {
     form.submit(); // 這行會真的把資料送去後端 @{/reports/submit}
 }
 
-const userIcon = document.getElementById('user-icon');
-const userDropdown = document.getElementById('user-dropdown');
-userIcon.addEventListener('click', (e) => {
-    e.stopPropagation();
-    userDropdown.classList.toggle('show');
-});
-window.addEventListener('click', () => {
-    if (userDropdown.classList.contains('show')) userDropdown.classList.remove('show');
-});
 // 頁面載入完成後
 window.onload = function() {
     initUserDropdown();

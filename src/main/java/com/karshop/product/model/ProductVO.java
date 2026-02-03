@@ -1,5 +1,6 @@
 package com.karshop.product.model;
 
+import com.karshop.carcategory.model.CarCategoryVO;
 import com.karshop.orddetail.model.OrdDetailVO;
 import com.karshop.productcategorytest.model.ProductCategoryVO;
 import com.karshop.productimage.model.ProductImageVO;
@@ -23,6 +24,10 @@ public class ProductVO implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY) // LAZY 建議加上，效能較好
     @JoinColumn(name = "product_category_no") // 對應資料庫的外來鍵欄位名稱
     private ProductCategoryVO productCategory;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "car_category_no")
+    private CarCategoryVO carCategory;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_no")
@@ -76,6 +81,14 @@ public class ProductVO implements Serializable {
 
     public void setProductCategory(ProductCategoryVO productCategory) {
         this.productCategory = productCategory;
+    }
+
+    public CarCategoryVO getCarCategory() {
+        return carCategory;
+    }
+
+    public void setCarCategory(CarCategoryVO carCategory) {
+        this.carCategory = carCategory;
     }
 
     public SellerVO getSeller() {

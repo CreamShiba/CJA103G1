@@ -12,8 +12,16 @@
         <div class="top-icons">
             <div class="search-box">
                 <form th:action="@{/shop}" method="get" style="display: flex; width: 100%; align-items: center;">
+
                     <input type="text" name="keyword" th:value="${keyword}" placeholder="Search..."
                            style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+
+                    <input type="hidden" name="carCategoryNo" th:value="${carCategoryNo}" th:if="${carCategoryNo != null}">
+
+                    <input type="hidden" name="sellerNo" th:value="${sellerNo}" th:if="${sellerNo != null}">
+
+                    <input type="hidden" name="productCategoryNo" th:value="${productCategoryNo}" th:if="${productCategoryNo != null}">
+
                     <button type="submit" style="background: transparent; border: none; cursor: pointer; padding: 0;">
                         <span style="font-size: 16px;">🔍</span>
                     </button>

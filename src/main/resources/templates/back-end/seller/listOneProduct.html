@@ -41,6 +41,23 @@
             </div>
         </div>
 
+        <div class="info-group">
+            <div class="label">適用車款 Car Model</div>
+            <div class="value">
+                <th:block th:if="${productVO.carCategory != null}">
+                <span th:text="'🚗 ' + ${productVO.carCategory.fullName}"
+                      style="background: #f0f2f5; padding: 5px 10px; border-radius: 4px; color: #333; font-weight: 500;">
+                </span>
+                </th:block>
+
+                <th:block th:if="${productVO.carCategory == null}">
+                <span style="color: #999;">
+                    <i class="fas fa-check-circle"></i> 全車系通用 / 未指定特定車款
+                </span>
+                </th:block>
+            </div>
+        </div>
+
         <div class="info-group" style="flex: 1;">
             <div class="label">目前評價 Rating</div>
             <div class="value">
