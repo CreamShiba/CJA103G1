@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>結帳 - 卡爾夏汽車百貨</title>
+  <link rel="stylesheet" href="../../static/css/front-end/index.css" th:href="@{/css/front-end/index.css}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    /* ===== 結帳專用 ===== */
+    .checkout-main {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    /* 步驟條 */
+    .checkout-steps {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 36px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #666;
+      font-size: 15px;
+    }
+    .step.active { color: #fff; font-weight: 600; }
+    .step-number {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #3a0000;
+      border: 2px solid #660000;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px; color: #666;
+    }
+    .step.active .step-number { background: #ff3333; border-color: #ff3333; color: #fff; }
+    .step-line {
+      width: 60px; height: 2px;
+      background: #3a0000;
+    }
+    .step-line.done { background: #ff3333; }
+
+    /* 2欄版面 */
+    .checkout-container {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;
+      gap: 28px;
+    }
+
+    /* 每個區塊 */
+    .checkout-section {
+      background: linear-gradient(135deg, #2a0000, #1a0000);
+      border: 1px solid #660000;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      color: #fff;
+      font-size: 18px;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #660000;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title i { color: #ff3333; }
+
+    /* 商品清單 */
+    .checkout-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      gap: 14px;
+    }
+    .checkout-item:last-child { border-bottom: none; }
+
+    .checkout-item-image {
+      width: 58px; height: 58px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #ff3333; font-size: 22px;
+      flex-shrink: 0;
+    }
+    .checkout-item-image img { width:100%; height:100%; object-fit:cover; border-radius:8px; }
+
+    .checkout-item-info { flex: 1; }
+    .checkout-item-name { color: #fff; font-size: 15px; font-weight: 600; }
+    .checkout-item-desc { color: #888; font-size: 13px; margin-top: 2px; }
+
+    .checkout-item-right { text-align: right; flex-shrink: 0; }
+    .checkout-item-qty   { color: #888; font-size: 13px; }
+    .checkout-item-price { color: #ff3333; font-size: 16px; font-weight: 700; }
+
+    .stock-warning {
+      color: #f44336; font-size: 12px; margin-top: 4px;
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    /* 配送資訊 */
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; color: #aaa; margin-bottom: 6px; font-size: 14px; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; box-sizing: border-box;
+      padding: 11px 14px;
+      border: 1px solid #660000;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: #ff3333; outline: none; }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: #666; }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .form-group select option { background: #1a0000; color: #fff; }
+
+    /* ===== 付款方式 ===== */
+    .payment-methods { display: flex; flex-direction: column; gap: 10px; }
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border: 2px solid #3a0000;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      background: rgba(0,0,0,0.2);
+    }
+    .payment-option:hover { border-color: #660000; background: rgba(100,0,0,0.15); }
+    .payment-option.selected { border-color: #ff3333; background: rgba(255,51,51,0.1); }
+
+    .payment-option input[type="radio"] { display: none; }
+    .payment-option .pay-icon {
+      width: 40px; height: 40px;
+      background: #3a0000;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #ff3333; font-size: 18px;
+      flex-shrink: 0;
+    }
+    .payment-option.selected .pay-icon { background: rgba(255,51,51,0.2); }
+
+    .pay-label { color: #fff; font-size: 15px; font-weight: 600; }
+    .pay-desc  { color: #888; font-size: 13px; margin-top: 2px; }
+
+    /* 折價券 */
+    .coupon-section {
+      background: rgba(255,51,51,0.07);
+      border: 1px dashed #660000;
+      border-radius: 8px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .coupon-title { color: #fff; font-size: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .coupon-input-group { display: flex; gap: 8px; }
+    .coupon-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #660000;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .coupon-input::placeholder { color: #666; }
+    .btn-apply-coupon {
+      background: #660000; color: #fff;
+      border: 1px solid #ff3333;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .btn-apply-coupon:hover { background: #ff3333; }
+    .coupon-message { margin-top: 8px; font-size: 13px; }
+    .coupon-success { color: #4CAF50; }
+    .coupon-error   { color: #f44336; }
+
+    /* 訂單摘要 */
+    .order-summary { position: sticky; top: 20px; }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 11px 0;
+      color: #aaa;
+      font-size: 15px;
+    }
+    .summary-row.subtotal  { border-bottom: 1px solid #660000; }
+    .summary-row.discount  { color: #4CAF50; }
+    .summary-row.total {
+      border-top: 2px solid #660000;
+      margin-top: 8px; padding-top: 14px;
+      font-size: 18px; font-weight: 700; color: #fff;
+    }
+    .summary-row.total .amount { color: #ff3333; font-size: 24px; }
+
+    /* 結帳按鈕 */
+    .checkout-actions { margin-top: 22px; }
+    .btn-checkout {
+      width: 100%;
+      background: #ff3333; color: #fff; border: none;
+      padding: 14px; border-radius: 6px;
+      font-size: 17px; font-weight: 600; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-bottom: 10px;
+    }
+    .btn-checkout:hover { background: #cc0000; transform: translateY(-1px); }
+    .btn-back {
+      width: 100%; display: block; text-align: center;
+      background: #3a0000; color: #aaa; border: 1px solid #660000;
+      padding: 11px; border-radius: 6px;
+      text-decoration: none; font-size: 15px;
+      transition: all 0.2s;
+    }
+    .btn-back:hover { border-color: #aaa; color: #fff; }
+
+    /* ===== 確認訂單 Modal ===== */
+    .confirm-modal {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 1000;
+      justify-content: center; align-items: center;
+    }
+    .confirm-modal.active { display: flex; }
+    .confirm-modal-content {
+      background: linear-gradient(135deg, #2a0000, #1a0000);
+      border: 1px solid #660000;
+      border-radius: 14px;
+      padding: 34px;
+      max-width: 460px; width: 90%;
+      text-align: center;
+    }
+    .confirm-modal-content h2 { color: #fff; font-size: 22px; margin-bottom: 14px; }
+    .confirm-modal-content p  { color: #aaa; line-height: 1.6; margin-bottom: 8px; }
+    .confirm-modal-total { color: #ff3333; font-size: 30px; font-weight: 700; margin: 14px 0; }
+    .confirm-modal-actions { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }
+    .btn-modal-cancel {
+      background: #3a0000; color: #aaa; border: 1px solid #660000;
+      padding: 10px 26px; border-radius: 6px; cursor: pointer; font-size: 15px;
+    }
+    .btn-modal-cancel:hover { border-color: #aaa; color: #fff; }
+    .btn-modal-confirm {
+      background: #ff3333; color: #fff; border: none;
+      padding: 10px 30px; border-radius: 6px;
+      cursor: pointer; font-size: 15px; font-weight: 600;
+    }
+    .btn-modal-confirm:hover { background: #cc0000; }
+
+    @media (max-width: 768px) {
+      .checkout-container { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ✅ header：和 index.html 完全相同 -->
+<header>
+  <div class="top-bar">
+    <div>卡爾夏汽車百貨</div>
+    <div class="top-icons">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search..."
+               style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+        <span>🔍</span>
+      </div>
+      <div class="user-dropdown-container">
+        <span id="user-icon" style="cursor: pointer;">👤</span>
+        <div id="user-dropdown" class="dropdown-menu">
+          <th:block th:if="${session.member == null}">
+            <a th:href="@{/members/login}">登入</a>
+            <a th:href="@{/members/register}">註冊</a>
+          </th:block>
+          <th:block th:if="${session.member != null}">
+            <span style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
+                  th:text="'Hi, ' + ${session.member.memName}">Hi, 會員</span>
+            <a th:href="@{/members/view}">編輯個人資料</a>
+            <a href="#">我的訂單</a>
+            <a th:href="@{/members/seller/apply}" th:if="${session.seller == null}">
+              <i class="fas fa-store"></i> 申請成為賣家
+            </a>
+            <th:block th:if="${session.seller != null}">
+              <a th:href="@{/seller/center}"><i class="fas fa-store"></i> 賣家中心</a>
+              <a th:href="@{/members/seller/sellerinfo}"><i class="fas fa-user-edit"></i> 編輯賣家資料</a>
+            </th:block>
+            <form th:action="@{/members/logout}" method="post" id="logoutForm">
+              <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">登出 (Logout)</a>
+            </form>
+          </th:block>
+        </div>
+      </div>
+      <a href="/members/carts" style="cursor: pointer; text-decoration: none;">
+        <span id="cart">🛒</span>
+      </a>
+    </div>
+  </div>
+  <div class="main-header">
+    <div class="logo">卡爾夏</div>
+    <nav class="nav-links">
+      <a href="#">商城</a>
+      <a href="#">安裝區</a>
+      <a href="#">論壇</a>
+      <a href="/members/announcement">公告</a>
+      <a href="/members/faq">常見問題</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===== 結帳內容 ===== -->
+<div class="checkout-main">
+
+  <!-- 步驟條 -->
+  <div class="checkout-steps">
+    <div class="step">
+      <div class="step-number">✓</div><span>購物車</span>
+    </div>
+    <div class="step-line done"></div>
+    <div class="step active">
+      <div class="step-number">2</div><span>確認訂單</span>
+    </div>
+    <div class="step-line"></div>
+    <div class="step">
+      <div class="step-number">3</div><span>完成付款</span>
+    </div>
+  </div>
+
+  <!-- ✅ 庫存警告訊息（由 controller 傳入） -->
+  <div th:if="${stockWarning}" style="max-width:100%; margin-bottom:20px; padding:14px 18px; border-radius:8px; background:rgba(244,67,54,0.15); color:#f44336; border:1px solid #f44336; display:flex; align-items:center; gap:10px;">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span th:text="${stockWarning}"></span>
+  </div>
+
+  <div class="checkout-container">
+    <!-- ===== 左側 ===== -->
+    <div>
+      <!-- 訂購商品 -->
+      <div class="checkout-section">
+        <h2 class="section-title"><i class="fas fa-box"></i> 訂購商品</h2>
+        <div th:each="item : ${cartItems}" class="checkout-item">
+          <div class="checkout-item-image">
+            <th:block th:with="product=${productMap.get(item.prod_no)}">
+              <img th:if="${product != null and product.productImage != null and !product.productImage.isEmpty()}"
+                   th:src="@{'/product/showImage/' + ${item.prod_no}}" alt="">
+              <i th:if="${product == null or product.productImage == null or product.productImage.isEmpty()}"
+                 class="fas fa-car"></i>
+            </th:block>
+          </div>
+          <div class="checkout-item-info">
+            <th:block th:with="product=${productMap.get(item.prod_no)}">
+              <div class="checkout-item-name" th:text="${product != null ? product.prodName : '商品編號：' + item.prod_no}"></div>
+              <div class="checkout-item-desc" th:text="${product != null ? product.prodDesc : ''}"></div>
+              <!-- ✅ 庫存警告 -->
+              <div class="stock-warning" th:if="${product != null and item.quantity > product.prodQty}">
+                <i class="fas fa-exclamation-triangle"></i>
+                數量超過庫存！請回去調整（剩餘 <span th:text="${product.prodQty}">0</span> 件）
+              </div>
+              <div class="stock-warning" th:if="${product != null and '下架中'.equals(product.prodStatus)}">
+                <i class="fas fa-exclamation-triangle"></i>
+                此商品已下架，無法結帳
+              </div>
+            </th:block>
+          </div>
+          <div class="checkout-item-right">
+            <th:block th:with="product=${productMap.get(item.prod_no)}">
+              <div class="checkout-item-qty">數量：<span th:text="${item.quantity}">1</span></div>
+              <div class="checkout-item-price" th:if="${product != null}">
+                NT$ <span th:text="${#numbers.formatInteger(product.prodPrice * item.quantity, 0, 'COMMA')}">0</span>
+              </div>
+            </th:block>
+          </div>
+        </div>
+      </div>
+
+      <!-- 配送資訊 -->
+      <div class="checkout-section">
+        <h2 class="section-title"><i class="fas fa-truck"></i> 配送資訊</h2>
+        <form id="checkout-form" th:action="@{/members/carts/process-payment}" method="post">
+          <div class="form-group">
+            <label>收件人姓名 *</label>
+            <input type="text" name="receiverName" required placeholder="請輸入收件人姓名">
+          </div>
+          <div class="form-group">
+            <label>收件人電話 *</label>
+            <input type="tel" name="receiverPhone" required placeholder="請輸入收件人電話">
+          </div>
+          <div class="form-group">
+            <label>收件地址 *</label>
+            <input type="text" name="receiverAddress" required placeholder="請輸入完整收件地址">
+          </div>
+          <div class="form-group">
+            <label>配送方式 *</label>
+            <select name="deliveryMethod" id="delivery-method" required onchange="updateShipping()">
+              <option value="">請選擇配送方式</option>
+              <option value="home">宅配到府 (NT$ 100)</option>
+              <option value="store">超商取貨 (NT$ 60)</option>
+              <option value="self">門市自取 (免運費)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>訂單備註</label>
+            <textarea name="orderNote" placeholder="有任何需要注意的事項，請在此填寫"></textarea>
+          </div>
+
+          <!-- 隱藏欄位：傳遞折扣金額和付款方式給後端 -->
+          <input type="hidden" name="paymentMethod" id="hidden-payment-method" value="">
+          <input type="hidden" name="discountAmount" id="hidden-discount" value="0">
+          <input type="hidden" name="couponCode" id="hidden-coupon" value="">
+        </form>
+      </div>
+
+      <!-- ===== 付款方式 ===== -->
+      <div class="checkout-section">
+        <h2 class="section-title"><i class="fas fa-credit-card"></i> 付款方式</h2>
+        <div class="payment-methods">
+          <label class="payment-option selected" onclick="selectPayment(this, 'credit')">
+            <input type="radio" name="paymentMethod" value="credit" checked>
+            <div class="pay-icon"><i class="fas fa-credit-card"></i></div>
+            <div>
+              <div class="pay-label">信用卡支付</div>
+              <div class="pay-desc">支持 Visa / MasterCard</div>
+            </div>
+          </label>
+          <label class="payment-option" onclick="selectPayment(this, 'atm')">
+            <input type="radio" name="paymentMethod" value="atm">
+            <div class="pay-icon"><i class="fas fa-university"></i></div>
+            <div>
+              <div class="pay-label">網路銀行 / ATM 轉帳</div>
+              <div class="pay-desc">銀行轉帳付款</div>
+            </div>
+          </label>
+          <label class="payment-option" onclick="selectPayment(this, 'convenience')">
+            <input type="radio" name="paymentMethod" value="convenience">
+            <div class="pay-icon"><i class="fas fa-store"></i></div>
+            <div>
+              <div class="pay-label">超商代收</div>
+              <div class="pay-desc">7-11 / FamilyMart</div>
+            </div>
+          </label>
+          <label class="payment-option" onclick="selectPayment(this, 'cash')">
+            <input type="radio" name="paymentMethod" value="cash">
+            <div class="pay-icon"><i class="fas fa-money-bill-wave"></i></div>
+            <div>
+              <div class="pay-label">交貨付款</div>
+              <div class="pay-desc">收到貨物時以現金付款</div>
+            </div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 右側：訂單摘要 ===== -->
+    <div>
+      <div class="checkout-section order-summary">
+        <h2 class="section-title"><i class="fas fa-file-invoice-dollar"></i> 訂單摘要</h2>
+
+        <!-- 折價券 -->
+        <div class="coupon-section">
+          <div class="coupon-title"><i class="fas fa-ticket-alt"></i> 折價券</div>
+          <div class="coupon-input-group">
+            <input type="text" class="coupon-input" id="coupon-code" placeholder="輸入折價券代碼">
+            <button type="button" class="btn-apply-coupon" onclick="applyCoupon()">套用</button>
+          </div>
+          <div id="coupon-message" class="coupon-message"></div>
+        </div>
+
+        <!-- 金額明細 -->
+        <div class="summary-row subtotal">
+          <span>小計</span>
+          <span>NT$ <span id="subtotal-amount" th:text="${#numbers.formatInteger(totalAmount, 0, 'COMMA')}">0</span></span>
+        </div>
+        <div class="summary-row">
+          <span>運費</span>
+          <span id="shipping-fee-text">NT$ 100</span>
+        </div>
+        <div class="summary-row discount" id="discount-row" style="display:none;">
+          <span>折扣</span>
+          <span id="discount-amount-text">- NT$ 0</span>
+        </div>
+        <div class="summary-row total">
+          <span>總計</span>
+          <span class="amount">NT$ <span id="total-amount">0</span></span>
+        </div>
+
+        <!-- 結帳按鈕 → 開啟確認 Modal -->
+        <div class="checkout-actions">
+          <button type="button" class="btn-checkout" onclick="openConfirmModal()">
+            <i class="fas fa-check"></i> 確認結帳
+          </button>
+          <a th:href="@{/members/carts}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> 返回購物車
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ footer：和 index.html 完全相同 -->
+<footer>
+  <div class="footer-col">
+    <div class="footer-logo logo">卡爾夏</div>
+  </div>
+  <div class="footer-col">
+    <h4>Shop</h4>
+    <ul><li>Shop Parts</li><li>Wholesale</li></ul>
+  </div>
+  <div class="footer-col">
+    <h4>The Company</h4>
+    <ul><li>About Us</li><li>FAQ</li></ul>
+  </div>
+  <div class="footer-col">
+    <h4>Contact Us</h4>
+    <ul><li>karshop@gmail.com</li></ul>
+  </div>
+  <div class="footer-col">
+    <h4>Follow Us</h4>
+    <ul><li>Instagram</li></ul>
+  </div>
+</footer>
+
+<div class="chat-btn"></div>
+
+<!-- ===== 確認訂單 Modal ===== -->
+<div class="confirm-modal" id="confirmModal">
+  <div class="confirm-modal-content">
+    <h2><i class="fas fa-receipt"></i> 確認訂單</h2>
+    <p>請確認以下訂單資訊無誤後，點擊「確認付款」提交訂單。</p>
+    <p style="color:#aaa; font-size:14px;" id="modal-payment-info">付款方式：信用卡支付</p>
+    <div class="confirm-modal-total" id="modal-total">NT$ 0</div>
+    <div class="confirm-modal-actions">
+      <button type="button" class="btn-modal-cancel" onclick="closeConfirmModal()">
+        <i class="fas fa-times"></i> 取消
+      </button>
+      <button type="button" class="btn-modal-confirm" onclick="submitOrder()">
+        <i class="fas fa-check"></i> 確認付款
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== JS ===== -->
+<script th:inline="javascript">
+  // 後端傳來的小計（用於前端計算）
+  var subtotalFromServer = [[${totalAmount}]];
+  var shippingFee = 100;
+  var discountAmount = 0;
+
+  // 配送方式改變
+  function updateShipping() {
+    const method = document.getElementById('delivery-method').value;
+    if (method === 'home')  shippingFee = 100;
+    else if (method === 'store') shippingFee = 60;
+    else if (method === 'self')  shippingFee = 0;
+    else shippingFee = 100;
+
+    document.getElementById('shipping-fee-text').textContent = 'NT$ ' + shippingFee.toLocaleString();
+    recalcTotal();
+  }
+
+  // 付款方式選擇
+  function selectPayment(el, value) {
+    document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('hidden-payment-method').value = value;
+  }
+
+  // ===== 折價券：呼叫後端驗證 =====
+  function applyCoupon() {
+    const code = document.getElementById('coupon-code').value.trim();
+    const msg  = document.getElementById('coupon-message');
+
+    if (!code) {
+      msg.textContent = '請輸入折價券代碼';
+      msg.className = 'coupon-message coupon-error';
+      return;
+    }
+
+    // ✅ 呼叫後端驗證 coupon
+    fetch('/members/carts/validate-coupon', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'couponCode=' + encodeURIComponent(code)
+    })
+            .then(r => r.json())
+            .then(data => {
+              if (data.valid) {
+                discountAmount = data.discountAmount;
+                document.getElementById('discount-row').style.display = 'flex';
+                document.getElementById('discount-amount-text').textContent = '- NT$ ' + discountAmount.toLocaleString();
+                document.getElementById('hidden-discount').value = discountAmount;
+                document.getElementById('hidden-coupon').value = code;
+                msg.textContent = '✓ ' + data.message;
+                msg.className = 'coupon-message coupon-success';
+                recalcTotal();
+              } else {
+                msg.textContent = '✗ ' + data.message;
+                msg.className = 'coupon-message coupon-error';
+              }
+            })
+            .catch(() => {
+              // ⚠️ 後端沒有做好時先用前端暫時處理
+              const fakeCoupons = { 'SAVE100': 100, 'SAVE500': 500, 'VIP20': 200 };
+              const upper = code.toUpperCase();
+              if (fakeCoupons[upper]) {
+                discountAmount = fakeCoupons[upper];
+                document.getElementById('discount-row').style.display = 'flex';
+                document.getElementById('discount-amount-text').textContent = '- NT$ ' + discountAmount.toLocaleString();
+                document.getElementById('hidden-discount').value = discountAmount;
+                document.getElementById('hidden-coupon').value = code;
+                msg.textContent = '✓ 折價券套用成功！（暫時用測試模式）';
+                msg.className = 'coupon-message coupon-success';
+                recalcTotal();
+              } else {
+                msg.textContent = '✗ 無效的折價券代碼';
+                msg.className = 'coupon-message coupon-error';
+              }
+            });
+  }
+
+  // 重新計算總金額
+  function recalcTotal() {
+    const total = subtotalFromServer + shippingFee - discountAmount;
+    document.getElementById('total-amount').textContent = (total > 0 ? total : 0).toLocaleString();
+  }
+
+  // 開啟確認 Modal
+  function openConfirmModal() {
+    // 檢查必填欄位
+    const form = document.getElementById('checkout-form');
+    if (!form.reportValidity()) return;
+
+    // 更新 Modal 內容
+    recalcTotal();
+    const total = subtotalFromServer + shippingFee - discountAmount;
+    document.getElementById('modal-total').textContent = 'NT$ ' + (total > 0 ? total : 0).toLocaleString();
+
+    const payMap = { credit:'信用卡支付', atm:'網路銀行 / ATM 轉帳', convenience:'超商代收', cash:'交貨付款' };
+    document.getElementById('modal-payment-info').textContent =
+            '付款方式：' + (payMap[document.getElementById('hidden-payment-method').value] || '信用卡支付');
+
+    document.getElementById('confirmModal').classList.add('active');
+  }
+
+  function closeConfirmModal() {
+    document.getElementById('confirmModal').classList.remove('active');
+  }
+
+  // ===== 提交訂單 → POST → 後端建立 Order =====
+  function submitOrder() {
+    closeConfirmModal();
+    // 按鈕鎖定防止重複點擊
+    document.querySelector('.btn-checkout').disabled = true;
+    document.querySelector('.btn-checkout').textContent = '處理中...';
+    // 提交表單
+    document.getElementById('checkout-form').submit();
+  }
+
+  // 點 Modal 外圍關閉
+  document.getElementById('confirmModal').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirmModal();
+  });
+
+  // 初始計算
+  recalcTotal();
+</script>
+</body>
+</html>
