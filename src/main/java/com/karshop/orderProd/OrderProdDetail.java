@@ -1,5 +1,6 @@
 package com.karshop.orderProd;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.karshop.productProd.ProductProd;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -18,13 +19,14 @@ public class OrderProdDetail {
     @Column(name = "prod_no")
     private Integer prodNo;
 
-    @Column(name = "qty")
+    @Column(name = "quantity")
     private Integer qty;
 
     @Column(name = "price")
     private Integer price;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JsonBackReference
     @JoinColumn(name = "prod_no", referencedColumnName = "prod_no", insertable = false, updatable = false)
     private ProductProd productProd;
 }

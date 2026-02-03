@@ -271,294 +271,234 @@
 </footer>
 
 <!--<script th:src="@{/js/front-end/index.js}"></script>-->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 <script>
-    // 如果 Session 裡沒人，直接在頁面渲染前踢走，並記錄來源網址
-    // window.location.href = '/members/login?redirect=' + encodeURIComponent(window.location.pathname);
-
-    // 獲取當前會員編號
-    // const currentMemberNo = 1;
-
-    // 頁面載入完成後
+    // 1. 初始化與頁面載入
     window.onload = function() {
         fetchOrders();
         initUserDropdown();
     };
 
-    // 初始化下拉選單
     function initUserDropdown() {
-        // 處理右上角使用者圖示
         const userIcon = document.getElementById('user-icon');
         const userDropdown = document.getElementById('user-dropdown');
         const memberTrigger = document.getElementById('member-center-trigger');
         const memberDropdown = document.getElementById('member-dropdown');
 
         if (userIcon && userDropdown) {
-            userIcon.onclick = function(e) {
+            userIcon.onclick = (e) => {
                 e.stopPropagation();
                 userDropdown.classList.toggle('show');
-                memberDropdown.classList.remove('show');
+                if(memberDropdown) memberDropdown.classList.remove('show');
             };
         }
 
-        // 處理導航列中的「會員中心」
         if (memberTrigger && memberDropdown) {
-            memberTrigger.onclick = function(e) {
+            memberTrigger.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 memberDropdown.classList.toggle('show');
-                userDropdown.classList.remove('show');
+                if(userDropdown) userDropdown.classList.remove('show');
             };
         }
 
-        // 全域點擊監聽:點擊選單以外區域時關閉
-        document.addEventListener('click', function(event) {
-            const isUserIcon = event.target.closest('#user-icon');
-            const isMemberTrigger = event.target.closest('#member-center-trigger');
-            const isUserDropdown = event.target.closest('#user-dropdown');
-            const isMemberDropdown = event.target.closest('#member-dropdown');
-
-            if (!isUserIcon && !isUserDropdown) {
-                userDropdown.classList.remove('show');
-            }
-
-            if (!isMemberTrigger && !isMemberDropdown) {
-                memberDropdown.classList.remove('show');
-            }
+        document.addEventListener('click', () => {
+            if(userDropdown) userDropdown.classList.remove('show');
+            if(memberDropdown) memberDropdown.classList.remove('show');
         });
     }
 
-    // 導航功能
-    function navigateTo(page) {
-        const routes = {
-            'home': '/pages/front-end/index',
-            'shop': '/shop',
-            'installation': '/installation',
-            'forum': '/forum',
-            'notice': '/notice',
-            'faq': '/faq',
-            'category1': '/category/category1',
-            'category2': '/category/category2',
-            'category3': '/category/category3',
-            'category4': '/category/category4',
-            'category5': '/category/category5',
-            'coupons': '/pages/my-coupons',
-            'favorite':'/favorite/list-page'
-        };
-
-        if (routes[page]) {
-            window.location.href = routes[page];
-        }
-    }
-
+    // 2. 獲取訂單清單 (修復版)
     async function fetchOrders() {
-        try {
-            // 改用 /orders/my-orders
-            const orderResponse = await fetch('/member/orders/my-orders');
-            const rateResponse = await fetch('/prodRate/all');
+        const body = document.getElementById('orderBody');
+        const noOrderDiv = document.getElementById('noOrder');
 
-            if (orderResponse.status === 401) {
+        try {
+            const orderRes = await fetch('/member/orders/my-orders', {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (orderRes.status === 401) {
                 window.location.href = '/members/login';
                 return;
             }
 
-            const noOrderDiv = document.getElementById('noOrder');
-            const body = document.getElementById('orderBody');
-
-            if (orderResponse.status === 204 || !orderResponse.ok) {
+            if (orderRes.status === 204) {
                 noOrderDiv.style.display = 'block';
-                body.innerHTML = ''; // 清空內容
+                body.innerHTML = '';
                 return;
             }
 
-            const orders = await orderResponse.json();
+            const orders = await orderRes.json();
 
-            // 取得當前會員 ID (從頁面上的隱藏欄位或 Session 屬性，這裡我們改從 API 拿到的資料比對)
-            // 假設後端傳回的 orders 帶有 memberNo
-            const myMemberNo = orders.length > 0 ? orders[0].memberNo : null;
-
+            // 獲取評價資料 (需對應您的後端 prodRate 相關 API)
             let allRates = [];
-            if (rateResponse.ok) {
-                allRates = await rateResponse.json();
+            try {
+                const rateRes = await fetch('/prodRate/member-all', {
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (rateRes.ok) allRates = await rateRes.json();
+            } catch (rateErr) {
+                console.warn('載入評價資料失敗:', rateErr);
             }
 
             body.innerHTML = '';
             noOrderDiv.style.display = 'none';
 
             orders.forEach(ord => {
-                // 評價過濾邏輯
-                const ordRates = allRates.filter(r => r.ordNo === ord.ordNo && r.memberNo === myMemberNo);
-                let hasRated = ordRates.length > 0;
-                let canEdit = ordRates.some(r => r.rateStatus === 1);
-                let allLocked = ordRates.length > 0 && ordRates.every(r => r.rateStatus === 2);
+                // 1. 找出此訂單是否已有評價紀錄
+                const ordRates = allRates.filter(r => r.ordNo === ord.ordNo);
+                const hasRated = ordRates.length > 0;
 
-                // 1. 【重點】先給預設值，避免未定義錯誤
-                let actionButtons = `<button class="btn-detail" onclick="viewDetail(${ord.ordNo})">詳情</button>`;
-                let ratingContent = `<span style="color: #ccc;">--</span>`;
+                // 假設後端 rateStatus: 1 代表草稿/可修改, 2 代表已發布/不可修改
+                const canEdit = ordRates.some(r => r.rateStatus === 1);
 
-                // 2. 判斷訂單狀態樣式
-                let statusClass = 'status-pending';
-                if (ord.ordStatus === '已完成' || ord.ordStatus === '已取消') {
-                    statusClass = 'status-completed';
-                } else if (ord.ordStatus !== '待付款') {
-                    statusClass = 'status-paid';
-                }
+                let statusClass = (ord.ordStatus === '已完成' || ord.ordStatus === '已取消') ? 'status-completed' :
+                    (ord.ordStatus === '待付款' ? 'status-pending' : 'status-paid');
 
-                // 3. 根據狀態賦予不同的內容
+                // --- 2. 評價按鈕邏輯修正 ---
+                let ratingBtn = `<span style="color: #ccc;">--</span>`;
+
+                // 只有狀態為「已完成」的訂單才處理評價邏輯
                 if (ord.ordStatus === '已完成') {
                     if (!hasRated) {
                         // 尚未評價
-                        ratingContent = `<button class="btn-rate" onclick="window.location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
+                        ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
                     } else if (canEdit) {
-                        // 狀態 1: 可修改一次 (黃色按鈕提醒)
-                        ratingContent = `<button class="btn-rate" style="background-color: #ffc107; color:black;" onclick="window.location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
-                    } else if (allLocked) {
-                        // 狀態 2: 已評價二次，鎖定，補回查看按鈕
-                        ratingContent = `
-                        <div style="display:flex; flex-direction:column; align-items:center; gap:3px;">
-                            <span style="color: #28a745; font-size: 11px; font-weight: bold;">✅ 已評價</span>
-                            <button class="btn-detail" style="padding: 2px 8px; font-size: 11px; background-color: #f1f1f1;"
-                                    onclick="window.location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">
-                                查看內容
-                            </button>
-                        </div>`;
+                        // 已評價但仍可修改 (黃色按鈕)
+                        ratingBtn = `<button class="btn-rate" style="background-color:#ffc107; color:black;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
+                    } else {
+                        // 評價已完成 (綠色按鈕)，導向查看評價頁面
+                        ratingBtn = `<button class="btn-rate" style="background-color:#28a745;" onclick="location.href='/prodRate/view-page?ordNo=${ord.ordNo}'">查看評價</button>`;
                     }
-                } else if (ord.ordStatus === '已發貨') {
-                    actionButtons = `
-                    <button class="btn-complete" onclick="confirmReceipt(${ord.ordNo})">確認收貨</button>
-                    <button class="btn-detail" onclick="viewDetail(${ord.ordNo})" style="margin-left:5px">詳情</button>`;
                 }
 
-                body.innerHTML += `
-                <tr>
-                    <td>#${ord.ordNo}</td>
-                    <td>${formatDate(ord.ordDate)}</td>
-                    <td>${ord.ordPaymentMethod || '--'}</td>
-                    <td>${ord.ordPaymentStatus || '--'}</td>
-                    <td><strong style="color:red;">$${ord.ordPrice || 0}</strong></td>
-                    <td><span class="status-badge ${statusClass}">${ord.ordStatus}</span></td>
-                    <td>${ord.ordShipMethod || '--'}</td>
-                    <td>${ratingContent}</td>
-                    <td>${actionButtons}</td>
-                </tr>`;
-            });
+                // --- 3. 動作按鈕 (詳情/確認收貨) ---
+                let actionBtn = `<button class="btn-detail" onclick="viewDetail(${ord.ordNo})">詳情</button>`;
+                if (ord.ordStatus === '已發貨') {
+                    actionBtn = `<button class="btn-complete" style="margin-right:5px;" onclick="confirmReceipt(${ord.ordNo})">確認收貨</button>` + actionBtn;
+                }
 
-        } catch (error) {
-            console.error('無法讀取資料:', error);
+                // 渲染至表格
+                body.innerHTML += `
+                    <tr>
+                        <td>#${ord.ordNo}</td>
+                        <td>${formatDate(ord.ordDate)}</td>
+                        <td>${ord.ordPaymentMethod || '--'}</td>
+                        <td>${ord.ordPaymentStatus || '--'}</td>
+                        <td><strong style="color:red;">$${ord.ordPrice}</strong></td>
+                        <td><span class="status-badge ${statusClass}">${ord.ordStatus}</span></td>
+                        <td>${ord.ordShipMethod || '--'}</td>
+                        <td>${ratingBtn}</td>
+                        <td>${actionBtn}</td>
+                    </tr>`;
+            });
+        } catch (err) {
+            console.error(err);
+            body.innerHTML = `<tr><td colspan="9" style="color:red;text-align:center;">讀取失敗: ${err.message}</td></tr>`;
         }
     }
 
+    // 3. 查看明細
     async function viewDetail(ordNo) {
         try {
-            // ✅ 修正：路徑改為 /orders/detail/${ordNo}
-            const response = await fetch(`/member/orders/detail/${ordNo}`);
+            const res = await fetch(`/member/orders/detail/${ordNo}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
 
-            if (response.status === 401) {
-                window.location.href = '/members/login';
-                return;
-            }
-            if (response.status === 403) {
-                alert('您沒有權限查看此訂單');
-                return;
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: 無法取得明細`);
             }
 
-            const order = await response.json();
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                const responseText = await res.text();
+                console.error('明細 API 返回非 JSON:', responseText.substring(0, 200));
+                throw new Error("伺服器返回格式錯誤");
+            }
 
-            // 填入訂單基本資訊
+            const order = await res.json();
             document.getElementById('modalOrdNo').innerText = '#' + order.ordNo;
-
-            // 填入物流與收件資訊 (對應 Order.java 欄位)
             document.getElementById('modalRecipient').innerText = order.ordRecipient || '未填寫';
             document.getElementById('modalAddress').innerText = order.ordAddress || '未填寫';
             document.getElementById('modalShipMethod').innerText = order.ordShipMethod || '未指定';
             document.getElementById('modalShipNo').innerText = order.ordShipNo || '尚未發貨';
+            document.getElementById('modalTotal').innerText = order.ordPrice;
 
-            // 渲染商品明細表格
             const detailBody = document.getElementById('detailBody');
             detailBody.innerHTML = '';
 
             if (order.ordDetails && order.ordDetails.length > 0) {
                 order.ordDetails.forEach(item => {
-                    const subtotal = item.price * item.qty;
-
-                    // 商品名稱與圖片處理
-                    const prodName = item.product ? item.product.productName : `商品編號: ${item.prodNo}`;
-                    const imgUrl = `/favorite/showImage?prodNo=${item.prodNo}`;
-
+                    // 同步後端屬性名稱：若商品物件在 Java 是 productProd，這裡請對應修改
+                    const pName = item.productProd ? item.productProd.prodName : (item.product ? item.product.productName : `商品#${item.prodNo}`);
                     detailBody.innerHTML += `
-                    <tr>
-                         <td>
-                            <img src="${imgUrl}"
-                                 alt="商品圖片"
-                                 style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #eee;"
-                                 onerror="this.src='/images/no-image.png';">
-                         </td>
-                        <td style="text-align:left;">${prodName}</td>
-                        <td>$${item.price}</td>
-                        <td>${item.qty}</td>
-                        <td>$${subtotal}</td>
-                    </tr>
-                `;
+                        <tr>
+                            <td><img src="/favorite/showImage?prodNo=${item.prodNo}" onerror="this.src='/images/no-image.png'"></td>
+                            <td style="text-align:left;">${pName}</td>
+                            <td>$${item.price}</td>
+                            <td>${item.qty}</td>
+                            <td>$${item.price * item.qty}</td>
+                        </tr>`;
                 });
-            } else {
-                detailBody.innerHTML = '<tr><td colspan="5">查無明細資料</td></tr>';
             }
-
-            // 填入總金額
-            document.getElementById('modalTotal').innerText = order.ordPrice;
-
-            // 顯示彈窗
             document.getElementById('detailModal').style.display = 'block';
-
-        } catch (error) {
-            console.error('Error:', error);
-            alert('讀取明細失敗，請稍後再試');
+        } catch (err) {
+            console.error('viewDetail 錯誤:', err);
+            alert('讀取失敗: ' + err.message);
         }
     }
 
-    // 關閉彈窗
+    // 4. 確認收貨
+    async function confirmReceipt(ordNo) {
+        if (!confirm('確認已收到商品並完成訂單嗎?')) return;
+        try {
+            const res = await fetch(`/member/orders/${ordNo}/complete`, {
+                method: 'PATCH',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            if (res.ok) {
+                alert('訂單已完成!');
+                fetchOrders();
+            } else {
+                const errorText = await res.text();
+                console.error('更新失敗:', errorText);
+                alert('更新失敗: ' + res.status);
+            }
+        } catch (err) {
+            console.error('confirmReceipt 錯誤:', err);
+            alert('網路錯誤: ' + err.message);
+        }
+    }
+
+    // 5. 輔助工具
     function closeModal() {
         document.getElementById('detailModal').style.display = 'none';
     }
 
-    // 點擊彈窗外部也可關閉
+    function formatDate(dateStr) {
+        return dateStr ? dateStr.replace('T', ' ').substring(0, 16) : '--';
+    }
+
+    function navigateTo(page) {
+        const routes = { 'home': '/', 'shop': '/shop', 'coupons': '/pages/my-coupons', 'favorite':'/favorite/list-page' };
+        if(routes[page]) window.location.href = routes[page];
+    }
+
+    // 點擊彈窗外部關閉
     window.onclick = function(event) {
         const modal = document.getElementById('detailModal');
         if (event.target == modal) {
-            modal.style.display = "none";
+            closeModal();
         }
     }
 
-    function formatDate(dateStr) {
-        if (!dateStr) return "";
-        return dateStr.replace('T', ' ').substring(0, 19);
-    }
-
-    async function confirmReceipt(ordNo) {
-        if (!confirm('確認已收到商品並完成訂單嗎?')) return;
-
-        try {
-            // ✅ 修正：路徑改為 /orders/${ordNo}/complete
-            const response = await fetch(`/member/orders${ordNo}/complete`, {
-                method: 'PATCH'
-            });
-
-            if (response.status === 401) {
-                window.location.href = '/members/login';
-                return;
-            }
-
-            if (response.ok) {
-                alert('感謝您的購買,訂單已完成!');
-                fetchOrders(); // 重新整理資料而不是 location.reload() 體驗更好
-            } else {
-                alert('操作失敗,請稍後再試');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    }
-
-
-</script>
+    </script>
 </body>
 </html>
