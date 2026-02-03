@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>卡爾夏 - 會員私訊中心</title>
+
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        /* =========================================
+           1. 基礎佈局 (完全保留樣式)
+        ========================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #050000;
+            background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
+            color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
+        }
+        a { text-decoration: none; color: inherit; transition: .3s; }
+        a:hover { color: #ff3333; }
+
+        header { flex-shrink: 0; z-index: 1050; position: relative; }
+        header .top-bar { display: flex; justify-content: space-between; padding: 10px 40px; font-size: 12px; color: #ccc; border-bottom: 1px solid #333; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; }
+        .logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .logo::before { content: ''; width: 30px; height: 15px; background: white; border-radius: 10px; }
+        .nav-links { display: flex; gap: 30px; font-size: 14px; align-items: center; }
+        .nav-links a.active { color: #ff3333; }
+
+        .user-dropdown-container { position: relative; display: inline-block; }
+        .dropdown-menu { display: none; position: absolute; top: 100%; left: 0; background-color: #222; min-width: 160px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); z-index: 2000; border: 1px solid #444; border-radius: 4px; padding: 5px 0; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a { color: #ccc; padding: 10px 15px; display: block; font-size: 14px; }
+        .dropdown-menu a:hover { background-color: #ff3333; color: white; }
+
+        /* =========================================
+           2. 私訊中心核心區域
+        ========================================= */
+        .main-container { display: flex; padding: 40px; max-width: 1600px; margin: 0 auto; flex: 1; width: 100%; gap: 30px; align-items: flex-start; }
+        .main-split-area { width: 100%; height: 700px; display: flex; overflow: hidden; background-color: rgba(0,0,0,0.6); border: 1px solid #444; border-radius: 12px; }
+
+        .friend-sidebar { width: 300px; background: rgba(26,26,26,0.8); border-right: 1px solid #333; display: flex; flex-direction: column; }
+        .friend-header { padding: 20px; background: #800; color: white; font-weight: bold; }
+        .friend-list { flex: 1; overflow-y: auto; }
+        .friend-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #222; cursor: pointer; transition: 0.2s; }
+        .friend-item:hover { background: rgba(255,51,51,0.1); }
+        .friend-item.active { background: #333; border-left: 4px solid #f33; }
+
+        .f-avatar { width: 45px; height: 45px; border-radius: 50%; overflow: hidden; margin-right: 12px; border: 1px solid #444; }
+        .f-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .chat-window { flex: 1; display: flex; flex-direction: column; background-color: rgba(10,10,10,0.5); position: relative; }
+
+        .chat-target-header { padding: 0 20px; background: rgba(26,26,26,0.9); border-bottom: 1px solid #333; display: flex; align-items: center; justify-content: space-between; height: 70px; flex-shrink: 0; }
+
+        #chat-menu-container { position: relative; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+        .chat-menu-btn { cursor: pointer; color: #888; font-size: 20px; transition: 0.2s; padding: 8px; }
+        .chat-menu-btn:hover { color: #f33; }
+
+        .chat-dropdown {
+            display: none;
+            position: absolute;
+            top: 45px;
+            right: 0;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            z-index: 3000;
+            min-width: 150px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .chat-dropdown.show { display: block; }
+        .chat-dropdown-item { padding: 12px 15px; font-size: 14px; color: #ccc; cursor: pointer; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+        .chat-dropdown-item:hover { background: #333; color: #f33; }
+
+        .chat-messages-area { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .bubble-content { padding: 10px 15px; border-radius: 12px; background: #222; color: #eee; }
+        .message-row.self { align-self: flex-end; }
+        .self .bubble-content { background: #800; color: #fff; }
+
+        .chat-input-area { padding: 20px; background: #111; display: flex; gap: 10px; border-top: 1px solid #333; }
+        .chat-input-box { flex: 1; padding: 12px; background: #222; border: 1px solid #444; color: #fff; border-radius: 20px; outline: none; }
+
+        footer { flex-shrink: 0; padding: 60px 40px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 40px; font-size: 14px; color: #aaa; border-top: 1px solid #333; background: rgba(0, 0, 0, 0.5); }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="top-bar">
+        <div>Kar爾夏 Car Life Center</div>
+        <div class="top-icons">👤 🛒</div>
+    </div>
+    <div class="main-header">
+        <div class="logo">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#">商城</a><a href="#">安裝區</a>
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="forum-center-trigger">論壇 ▾</a>
+                <div id="forum-dropdown" class="dropdown-menu">
+                    <a th:href="@{/forum}">論壇首頁</a>
+                    <a th:href="@{/chat}" style="color: #ff3333" class="active">私訊中心</a>
+                </div>
+            </div>
+            <a href="#">公告</a>
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="#">我的優惠券</a>
+                    <a href="#">我的收藏</a>
+                    <a href="/chat" style="color: #ff3333">私訊中心</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="main-container">
+    <div class="main-split-area">
+        <div class="friend-sidebar">
+            <div class="friend-header"><i class="fa-solid fa-comments"></i> 我的訊息</div>
+            <div class="friend-list">
+                <div th:each="f : ${friends}" class="friend-item" th:id="'friend-' + ${f.memUsername}"
+                     th:onclick="switchChatTarget([[${f.memUsername}]], [[${f.memNo}]])">
+                    <div class="f-avatar"><img th:src="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + ${f.memNo}" /></div>
+                    <div class="f-info"><div class="f-name" th:text="${f.memUsername}"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-window">
+            <div class="chat-target-header">
+                <div style="display:flex; align-items:center;">
+                    <div class="f-avatar" style="width:40px; height:40px;"><img id="header-avatar" src="" /></div>
+                    <div id="header-name" style="font-weight:bold; color:#f33; margin-left:10px;">請選擇對象</div>
+                </div>
+                <div id="chat-menu-container" style="display:none;">
+                    <i class="fas fa-ellipsis-v chat-menu-btn" onclick="toggleChatMenu(event)"></i>
+                    <div class="chat-dropdown" id="chat-dropdown">
+                        <div class="chat-dropdown-item" onclick="addToBlacklist()">🚫 加入黑名單</div>
+                        <div class="chat-dropdown-item" onclick="removeFromBlacklist()">🔓 解除黑名單</div>
+                    </div>
+                </div>
+            </div>
+            <div class="chat-messages-area" id="chat-box"></div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input-box" id="msg-input" placeholder="說點什麼..." />
+                <button onclick="sendPrivateMessage()" style="background:none; border:none; color:#f33; cursor:pointer;"><i class="fa-solid fa-paper-plane fa-2x"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-col"><div class="footer-logo">卡爾夏</div><p>專業汽車百貨與改裝社群</p></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li>Shop Parts</li></ul></div>
+    <div class="footer-col"><h4>The Company</h4><ul><li>About Us</li></ul></div>
+    <div class="footer-col"><h4>Contact Us</h4><ul><li>info@mysite.com</li></ul></div>
+    <div class="footer-col"><h4>Follow Us</h4><ul><li>Instagram</li></ul></div>
+</footer>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var socket,
+        selfName = [[${userName}]],
+        // 🟢 修正 2：將 member.memId 修改為 member.memNo
+        selfId = [[${member.memNo}]],
+        currentTarget,
+        currentTargetId;
+
+    document.getElementById('member-center-trigger').onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById('forum-dropdown').classList.remove('show');
+        document.getElementById('member-dropdown').classList.toggle('show');
+    };
+    document.getElementById('forum-center-trigger').onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById('member-dropdown').classList.remove('show');
+        document.getElementById('forum-dropdown').classList.toggle('show');
+    };
+
+    function toggleChatMenu(e) {
+        e.stopPropagation();
+        document.getElementById('chat-dropdown').classList.toggle('show');
+    }
+
+    window.onclick = () => {
+        if(document.getElementById('member-dropdown')) document.getElementById('member-dropdown').classList.remove('show');
+        if(document.getElementById('forum-dropdown')) document.getElementById('forum-dropdown').classList.remove('show');
+        if(document.getElementById('chat-dropdown')) document.getElementById('chat-dropdown').classList.remove('show');
+    };
+
+    function connect() {
+        var host = window.location.host;
+        var url = (window.location.protocol==='https:'?'wss://':'ws://') + host + "/FriendWS/" + encodeURIComponent(selfName) + "/chat";
+        socket = new WebSocket(url);
+        socket.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            if (data.type === "history") {
+                document.getElementById('chat-box').innerHTML = "";
+                JSON.parse(data.message).forEach(m => renderMessage(JSON.parse(m)));
+            } else if (data.type === "private") {
+                if (data.sender === currentTarget || data.sender === selfName) {
+                    renderMessage(data);
+                }
+            }
+        };
+    }
+
+    function switchChatTarget(n, id) {
+        if (id === selfId) return;
+        currentTarget = n;
+        currentTargetId = id;
+        document.querySelectorAll('.friend-item').forEach(i => i.classList.remove('active'));
+        var el = document.getElementById('friend-' + n);
+        if (el) el.classList.add('active');
+        document.getElementById('header-name').innerText = n;
+        document.getElementById('header-avatar').src = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + id;
+        document.getElementById('chat-menu-container').style.display = 'flex';
+        if (socket && socket.readyState === 1) {
+            socket.send(JSON.stringify({type: "history", sender: selfName, receiver: n}));
+        }
+    }
+
+    function sendPrivateMessage() {
+        var i = document.getElementById('msg-input');
+        if (i.value.trim() !== "" && currentTarget && socket && socket.readyState === 1) {
+            socket.send(JSON.stringify({type: "private", sender: selfName, receiver: currentTarget, message: i.value.trim()}));
+            i.value = "";
+        }
+    }
+
+    function renderMessage(data) {
+        var isSelf = (data.sender === selfName);
+        var html = `<div class="message-row ${isSelf?'self':'other'}"><div class="bubble-content">${data.message}</div></div>`;
+        var box = document.getElementById('chat-box');
+        box.insertAdjacentHTML('beforeend', html);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function addToBlacklist() {
+        if (!confirm("確定封鎖 " + currentTarget + "？")) return;
+        fetch('/chat/addBlacklist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({blockedId: currentTargetId})
+        }).then(res => res.json()).then(d => {
+            if (d.success) alert("🚫 已封鎖");
+        });
+    }
+
+    function removeFromBlacklist() {
+        fetch('/chat/removeBlacklist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({blockedId: currentTargetId})
+        }).then(res => res.json()).then(d => {
+            if (d.success) alert("✅ 已解除");
+        });
+    }
+
+    window.onload = function() {
+        connect();
+        document.getElementById('msg-input').onkeypress = e => { if (e.key === 'Enter') sendPrivateMessage(); };
+    };
+    /*]]>*/
+</script>
+</body>
+</html>

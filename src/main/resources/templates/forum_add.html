@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>發布新文章 - 卡爾夏</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        body { background-color: #050000; color: #fff; font-family: Arial, sans-serif; padding: 50px; }
+        .form-container { max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.05); padding: 30px; border-radius: 8px; border: 1px solid #444; }
+        h2 { color: #ff3333; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; }
+        input, textarea, select { width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 4px; }
+        textarea { height: 150px; }
+        .btn-submit { background: #ff3333; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-submit:hover { background: #cc0000; }
+        .back-link { display: block; margin-top: 15px; text-align: center; color: #888; text-decoration: none; }
+
+        /* 圖片預覽樣式 */
+        .preview-container { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .preview-img { width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #666; }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2><i class="fa-solid fa-pen"></i> 撰寫新文章</h2>
+
+    <form th:action="@{/forum/insert}" th:object="${forumPost}" method="post" enctype="multipart/form-data">
+
+        <div class="form-group">
+            <label>文章標題</label>
+            <input type="text" th:field="*{title}" placeholder="請輸入標題" required />
+        </div>
+
+        <div class="form-group">
+            <label>文章分類</label>
+            <select name="categories.categoryId" required>
+                <option value="1">綜合討論</option>
+                <option value="2">改裝心得</option>
+                <option value="3">疑難雜症</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>內容</label>
+            <textarea th:field="*{postTxt}" placeholder="分享你的愛車生活..." required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fa-solid fa-camera"></i> 上傳圖片 (可多選)</label>
+            <input type="file" name="imageFiles" multiple accept="image/*" onchange="previewImages(event)" style="padding: 5px;" />
+            <div class="preview-container" id="previewBox"></div>
+        </div>
+
+        <button type="submit" class="btn-submit">立即發布</button>
+        <a th:href="@{/forum}" class="back-link">返回列表</a>
+    </form>
+</div>
+
+<script>
+    function previewImages(event) {
+        var box = document.getElementById('previewBox');
+        box.innerHTML = '';
+        var files = event.target.files;
+        if (files) {
+            for (var i = 0; i < files.length; i++) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'preview-img';
+                    box.appendChild(img);
+                }
+                reader.readAsDataURL(files[i]);
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

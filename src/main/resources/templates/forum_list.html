@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>卡爾夏 - 汽車討論區</title>
+
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        /* =========================================
+           1. 基礎設定 & 核心佈局 (完全保留原始樣式)
+        ========================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #050000;
+            background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
+            color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
+        }
+        a { text-decoration: none; color: inherit; transition: .3s; }
+        a:hover { color: #ff3333; }
+
+        header { flex-shrink: 0; z-index: 1050; position: relative; }
+        header .top-bar { display: flex; justify-content: space-between; padding: 10px 40px; font-size: 12px; color: #ccc; border-bottom: 1px solid #333; }
+        .top-icons { display: flex; gap: 20px; align-items: center; }
+        .search-box { border: 1px solid #555; padding: 5px 10px; width: 150px; display: flex; justify-content: space-between; }
+        .search-box input { background: transparent; border: none; color: white; font-size: 12px; width: 100%; outline: none; }
+
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; }
+        .logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .logo::before { content: ''; width: 30px; height: 15px; background: white; border-radius: 10px; }
+        .nav-links { display: flex; gap: 30px; font-size: 14px; align-items: center; }
+        .nav-links a.active { color: #ff3333; }
+
+        /* 下拉選單通用容器 */
+        .user-dropdown-container { position: relative; display: inline-block; }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #222;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            z-index: 2000;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 5px 0;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a { color: #ccc; padding: 10px 15px; display: block; font-size: 14px; }
+        .dropdown-menu a:hover { background-color: #ff3333; color: white; }
+
+        .main-container { display: flex; padding: 40px; max-width: 1600px; margin: 0 auto; flex: 1; width: 100%; gap: 30px; align-items: flex-start; }
+
+        aside.left-sidebar { width: 250px; flex-shrink: 0; }
+        .sidebar-title { font-size: 18px; margin-bottom: 20px; color: #ff3333; font-weight: bold; }
+        .category-list { list-style: none; }
+        .category-list li { padding: 10px 15px; margin-bottom: 8px; font-size: 14px; color: #aaa; cursor: pointer; border-radius: 6px; }
+        .category-list li.active, .category-list li:hover { color: #fff; background: #ff3333; font-weight: bold; }
+
+        .forum-main-area { flex: 1; min-width: 0; }
+        .filter-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+        .filter-btn { background: #2a2a2a; border: 1px solid #444; color: #ccc; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+        .filter-btn.active { background: #ff3333; border-color: #ff3333; color: #fff; }
+
+        .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.05); padding: 12px 15px; border: 1px solid #444; border-bottom: none; border-radius: 8px 8px 0 0; }
+        .action-btn.primary { background: #ff3333; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+
+        .thread-list { border: 1px solid #444; background: rgba(0,0,0,.4); border-radius: 0 0 8px 8px; }
+        .thread-row { display: flex; flex-direction: column; border-bottom: 1px solid #333; cursor: pointer; transition: 0.2s; }
+        .thread-row:hover { background: rgba(255,255,255,.05); }
+        .thread-summary { display: flex; align-items: center; padding: 15px 20px; width: 100%; }
+        .col-title { flex: 1; padding: 0 15px; }
+        .cat-badge { font-size: 12px; background: #333; padding: 3px 10px; border-radius: 10px; color: #aaa; }
+
+        .thread-detail { display: none; padding: 25px 40px; color: #ccc; border-top: 1px dashed #444; background: rgba(0, 0, 0, 0.2); position: relative; cursor: default; }
+        .thread-row.is-open .thread-detail { display: block; }
+
+        .post-menu-container { position: absolute; top: 15px; right: 20px; z-index: 10; }
+        .menu-dots-btn { background: transparent; border: none; color: #888; cursor: pointer; font-size: 18px; padding: 5px; }
+        .post-dropdown { display: none; position: absolute; right: 0; top: 30px; background: #222; border: 1px solid #444; border-radius: 4px; min-width: 120px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .post-dropdown.show { display: block; }
+        .post-dropdown-item { padding: 10px 15px; font-size: 13px; color: #ccc; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .post-dropdown-item:hover { background: #333; color: #ff3333; }
+
+        .post-actions { display: flex; margin: 20px 0; align-items: center; gap: 20px; }
+        .action-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .icon-circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #888; display: flex; justify-content: center; align-items: center; transition: 0.3s; }
+        .action-item.active .icon-circle { border-color: #ff8c00; color: #ff8c00; }
+        .text-warning { color: #ffc107 !important; }
+
+        .comments-container { margin-top: 20px; border-top: 1px solid #333; padding-top: 15px; }
+        .comment-row { display: flex; gap: 15px; padding: 12px 0; border-bottom: 1px solid #222; }
+        .comment-avatar { width: 35px; height: 35px; border-radius: 50%; overflow: hidden; border: 1px solid #444; flex-shrink: 0; }
+        .comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .c-name { font-weight: bold; color: #8ab4f8; margin-right: 5px; font-size: 13px; }
+
+        .comment-section { background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 15px; margin-top: 20px; display: flex; gap: 15px; align-items: center; }
+        .comment-input-wrapper { flex: 1; background: #222; border: 1px solid #444; border-radius: 4px; display: flex; align-items: center; padding: 5px 10px; }
+        .comment-input { flex: 1; background: transparent; border: none; color: #ddd; padding: 8px; outline: none; font-size: 14px; }
+        .comment-icons i { cursor: pointer; color: #888; margin-left: 10px; transition: 0.2s; }
+        .comment-icons i:hover { color: #ff3333; }
+
+        .chat-sidebar { width: 350px; background-color: #111; border-left: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; border-radius: 8px; height: 600px; position: sticky; top: 20px; }
+        .chat-header { background: linear-gradient(135deg, #a00, #500); color: white; padding: 15px; font-weight: bold; border-radius: 8px 8px 0 0; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background-color: #0a0a0a; display: flex; flex-direction: column; gap: 15px; }
+        .msg-row { display: flex; gap: 10px; align-items: flex-start; }
+        .msg-bubble { background: #222; padding: 8px 12px; border-radius: 12px; font-size: 13px; max-width: 85%; word-break: break-all; }
+        .msg-row.self { flex-direction: row-reverse; }
+        .msg-row.self .msg-bubble { background: #800; border-top-right-radius: 0; }
+        .chat-footer { padding: 10px; background: #111; border-top: 1px solid #333; display: flex; gap: 8px; border-radius: 0 0 8px 8px; }
+        .chat-input { flex: 1; background: #222; border: 1px solid #444; color: white; border-radius: 20px; padding: 6px 15px; outline: none; }
+
+        footer { flex-shrink: 0; padding: 60px 40px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 40px; font-size: 14px; color: #aaa; border-top: 1px solid #333; background: rgba(0, 0, 0, 0.5); }
+        .footer-logo { font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 10px; }
+        .lightbox-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
+        @media (max-width: 1200px) { .chat-sidebar { display: none; } }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="top-bar">
+        <div>Kar爾夏 Car Life Center</div>
+        <div class="top-icons">
+            <div class="search-box"><input type="text" placeholder="Search...">🔍</div>
+            👤 🛒
+        </div>
+    </div>
+    <div class="main-header">
+        <div class="logo">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#">商城</a>
+            <a href="#">安裝區</a>
+
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="forum-center-trigger" class="active">論壇 ▾</a>
+                <div id="forum-dropdown" class="dropdown-menu">
+                    <a th:href="@{/forum}">論壇首頁</a>
+                    <a th:href="@{/chat}" style="color: #ff3333">私訊中心</a>
+                </div>
+            </div>
+
+            <a href="#">公告</a>
+
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="#">我的優惠券</a>
+                    <a href="#">我的收藏</a>
+                    <a href="/chat" style="color: #ff3333">私訊中心</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="main-container">
+    <aside class="left-sidebar">
+        <h3 class="sidebar-title">看板目錄</h3>
+        <ul class="category-list" id="sidebar-categories">
+            <li class="active" onclick="filterCategory('全部主題')">所有文章</li>
+            <li onclick="filterCategory('綜合討論')">綜合討論</li>
+            <li onclick="filterCategory('保養維修')">保養維修</li>
+            <li onclick="filterCategory('改裝心得')">改裝心得</li>
+        </ul>
+    </aside>
+
+    <main class="forum-main-area">
+        <div class="filter-tabs">
+            <button class="filter-btn active" onclick="filterCategory('全部主題')">全部主題</button>
+            <button class="filter-btn" onclick="filterCategory('綜合討論')">綜合討論</button>
+            <button class="filter-btn" onclick="filterCategory('保養維修')">保養維修</button>
+            <button class="filter-btn" onclick="filterCategory('改裝心得')">改裝心得</button>
+        </div>
+
+        <div class="action-bar">
+            <div style="font-size: 13px; color: #888;">分享愛車生活</div>
+            <button class="action-btn primary" th:onclick="|location.href='@{/forum/addPage}'|">
+                <i class="fa-solid fa-pen"></i> 發布新文章
+            </button>
+        </div>
+
+        <div class="thread-list">
+            <div th:each="post : ${forumList}" class="thread-row" th:id="'post-' + ${post.postId}"
+                 th:data-category="${post.categories != null ? post.categories.name : '綜合討論'}"
+                 onclick="toggleDetail(this, event)">
+
+                <div class="thread-summary">
+                    <div style="width:40px; text-align:center;"><i class="fa-regular fa-comment-dots"></i></div>
+                    <div style="width:100px; text-align:center;"><span class="cat-badge" th:text="${post.categories != null ? post.categories.name : '綜合討論'}"></span></div>
+                    <div class="col-title">
+                        <div style="font-weight:bold; color:#eee;" th:text="${post.title}"></div>
+                        <div style="font-size:13px; color:#666;" th:text="${#strings.abbreviate(post.postTxt, 50)}"></div>
+                    </div>
+                    <div style="font-size:11px; color:#888; text-align:right; width:150px;">
+                        <span th:text="${post.member?.memUsername ?: '訪客'}"></span><br/>
+                        <span style="font-size:9px;" th:text="'UID: ' + ${post.member?.memNo ?: '0'}"></span><br/>
+                        <span th:text="${#dates.format(post.postDate, 'MM-dd HH:mm')}"></span>
+                    </div>
+                </div>
+
+                <div class="thread-detail">
+                    <div class="post-menu-container">
+                        <button class="menu-dots-btn" onclick="togglePostMenu(this, event)"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                        <div class="post-dropdown">
+                            <div class="post-dropdown-item" th:onclick="|handleFavorite(${post.postId}, event)|">
+                                <i th:id="'fav-icon-' + ${post.postId}" th:class="${myFavIds != null and #lists.contains(myFavIds, post.postId)} ? 'fa-solid fa-star text-warning' : 'fa-regular fa-star'"></i>
+                                <span th:id="'fav-text-' + ${post.postId}" th:text="${myFavIds != null and #lists.contains(myFavIds, post.postId)} ? '取消收藏' : '收藏文章'"></span>
+                            </div>
+                            <div class="post-dropdown-item" onclick="alert('已收到您的檢舉，管理員將盡快處理。')">
+                                <i class="fa-regular fa-flag"></i> 檢舉文章
+                            </div>
+                        </div>
+                    </div>
+
+                    <p style="white-space: pre-wrap; margin-bottom: 20px;" th:text="${post.postTxt}"></p>
+
+                    <div th:if="${not #lists.isEmpty(post.postImages)}" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <img th:each="img : ${post.postImages}" th:src="@{${img.url}}" style="height: 120px; border-radius: 4px; border: 1px solid #444;" onclick="showLightbox(this.src, event)" />
+                    </div>
+
+                    <div class="post-actions">
+                        <div th:class="${myLikedIds != null and #lists.contains(myLikedIds, post.postId)} ? 'action-item active' : 'action-item'" th:onclick="|handleLike(this, ${post.postId}, event)|">
+                            <div class="icon-circle"><i class="fa-solid fa-thumbs-up"></i></div>
+                            <span class="action-count" th:text="${post.postLike ?: 0}">0</span>
+                        </div>
+                    </div>
+
+                    <div class="comments-container">
+                        <div th:id="'comments-area-' + ${post.postId}">
+                            <div th:each="comment : ${post.comments}" class="comment-row">
+                                <div class="comment-avatar"><img th:src="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + ${comment.member?.memNo ?: 'default'}" /></div>
+                                <div class="comment-body">
+                                    <span class="c-name" th:text="${comment.member?.memUsername ?: '未知用戶'}"></span>
+                                    <span th:text="${comment.content}"></span>
+                                    <div style="font-size:11px; color:#666; margin-top:5px;" th:text="${#dates.format(comment.commentDate, 'MM-dd HH:mm')}"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="comment-section" onclick="event.stopPropagation();">
+                            <div class="comment-avatar">
+                                <img th:src="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + ${userName ?: 'guest'}" />
+                            </div>
+                            <div class="comment-input-wrapper">
+                                <input type="text" name="comment-text" class="comment-input" placeholder="寫下您的回覆..." th:data-post-id="${post.postId}" onkeydown="handleCommentSubmit(event, this)" />
+                                <div class="comment-icons">
+                                    <i class="fa-solid fa-paper-plane" th:onclick="|submitCommentBtn(${post.postId})|"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <aside class="chat-sidebar">
+        <div class="chat-header">即時聊天大廳</div>
+        <div class="chat-messages" id="chat-box"></div>
+        <div class="chat-footer">
+            <input type="text" id="chat-input" class="chat-input" placeholder="輸入訊息..." />
+            <button onclick="sendMessage()" style="background:#a00; border:none; color:white; width:30px; height:30px; border-radius:50%; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </aside>
+</div>
+
+<footer>
+    <div class="footer-col"><div class="footer-logo">卡爾夏</div><p>專業汽車百貨與改裝社群</p></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li>Shop Parts</li></ul></div>
+    <div class="footer-col"><h4>The Company</h4><ul><li>About Us</li></ul></div>
+    <div class="footer-col"><h4>Contact Us</h4><ul><li>info@mysite.com</li></ul></div>
+    <div class="footer-col"><h4>Follow Us</h4><ul><li>Instagram</li></ul></div>
+</footer>
+
+<div id="lightbox" class="lightbox-overlay" onclick="this.style.display='none'"><img id="lightbox-img" style="max-width:90%;" src="" /></div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const csrfMeta = document.querySelector("meta[name='_csrf']");
+    const csrfHeaderMeta = document.querySelector("meta[name='_csrf_header']");
+    const csrfToken = csrfMeta ? csrfMeta.content : "";
+    const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : "";
+
+    var userName = /*[[${userName}]]*/ 'Guest';
+    var socket;
+
+    document.getElementById('member-center-trigger').onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById('forum-dropdown').classList.remove('show');
+        document.getElementById('member-dropdown').classList.toggle('show');
+    };
+
+    document.getElementById('forum-center-trigger').onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById('member-dropdown').classList.remove('show');
+        document.getElementById('forum-dropdown').classList.toggle('show');
+    };
+
+    window.onclick = () => {
+        if(document.getElementById('member-dropdown')) document.getElementById('member-dropdown').classList.remove('show');
+        if(document.getElementById('forum-dropdown')) document.getElementById('forum-dropdown').classList.remove('show');
+        document.querySelectorAll('.post-dropdown').forEach(d => d.classList.remove('show'));
+    };
+
+    function filterCategory(cat) {
+        document.querySelectorAll('.filter-btn, .category-list li').forEach(el => {
+            el.classList.toggle('active', el.innerText.trim().includes(cat) || (cat === '全部主題' && el.innerText.trim().includes('所有文章')));
+        });
+        document.querySelectorAll('.thread-row').forEach(row => {
+            const rowCat = row.getAttribute('data-category');
+            row.style.display = (cat === '全部主題' || rowCat === cat) ? 'flex' : 'none';
+        });
+    }
+
+    function toggleDetail(el, e) {
+        if (e.target.closest('.post-actions') || e.target.closest('.post-menu-container') || e.target.closest('.comment-section') || e.target.tagName === 'IMG') return;
+        el.classList.toggle('is-open');
+    }
+    function togglePostMenu(btn, e) { e.stopPropagation(); btn.nextElementSibling.classList.toggle('show'); }
+
+    function handleLike(el, id, e) {
+        if(e) e.stopPropagation();
+        let headers = {};
+        if(csrfHeader) headers[csrfHeader] = csrfToken;
+
+        fetch('/forum/like/' + id, {
+            method: 'POST',
+            headers: headers
+        }).then(res => res.json()).then(data => {
+            if(data.success) {
+                el.querySelector('.action-count').innerText = data.newCount;
+                el.classList.toggle('active', data.action === "liked");
+            } else {
+                alert("操作失敗，請確認是否登入。");
+            }
+        });
+    }
+
+    function handleFavorite(id, e) {
+        if(e) e.stopPropagation();
+        let headers = {};
+        if(csrfHeader) headers[csrfHeader] = csrfToken;
+
+        fetch('/forum/favorite/' + id, {
+            method: 'POST',
+            headers: headers
+        }).then(res => res.text()).then(data => {
+            const i = document.getElementById('fav-icon-' + id);
+            const t = document.getElementById('fav-text-' + id);
+            if (data === "success") { i.className = 'fa-solid fa-star text-warning'; t.innerText = '取消收藏'; }
+            else if (data === "removed") { i.className = 'fa-regular fa-star'; t.innerText = '收藏文章'; }
+        });
+    }
+
+    function handleCommentSubmit(e, input) { if (e.key === 'Enter') submitComment(input.getAttribute('data-post-id'), input.value, input); }
+    function submitCommentBtn(id) { const input = document.querySelector(`input[data-post-id='${id}']`); submitComment(id, input.value, input); }
+
+    function submitComment(postId, content, input) {
+        if (!content.trim()) return;
+        let headers = { 'Content-Type': 'application/json' };
+        if(csrfHeader) headers[csrfHeader] = csrfToken;
+
+        fetch('/forum/addComment', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ postId: String(postId), content: content })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    input.value = '';
+                    const area = document.getElementById('comments-area-' + postId);
+                    const html = `
+                    <div class="comment-row" style="animation: fadeIn 0.5s;">
+                        <div class="comment-avatar"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${data.userName}" /></div>
+                        <div class="comment-body">
+                            <span class="c-name">${data.userName}</span>
+                            <span>${content}</span>
+                            <div style="font-size:11px; color:#666; margin-top:5px;">剛剛</div>
+                        </div>
+                    </div>`;
+                    area.insertAdjacentHTML('beforeend', html);
+                } else {
+                    alert(data.message || "留言失敗");
+                }
+            });
+    }
+
+    function connect() {
+        var host = window.location.host;
+        socket = new WebSocket((window.location.protocol==='https:'?'wss://':'ws://') + host + "/FriendWS/" + userName + "/public_room");
+        socket.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            if(data.type === 'chat') {
+                var isSelf = (data.sender === userName);
+                var html = `<div class="msg-row ${isSelf?'self':''}" style="display:flex; ${isSelf?'flex-direction:row-reverse;':''} gap:10px; margin-bottom:12px;">
+                    <div class="msg-avatar" style="width:32px; height:32px; border-radius:50%; overflow:hidden;"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${data.sender}" style="width:100%"/></div>
+                    <div class="msg-content" style="display:flex; flex-direction:column; ${isSelf?'align-items:flex-end;':''}">
+                        <div class="msg-name" style="font-size:11px; color:#888;">${data.sender}</div>
+                        <div class="msg-bubble" style="background:${isSelf?'#800':'#222'}; padding:8px 12px; border-radius:12px;">${data.message}</div>
+                    </div>
+                </div>`;
+                document.getElementById('chat-box').insertAdjacentHTML('beforeend', html);
+                document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
+            }
+        };
+    }
+
+    function sendMessage() {
+        var input = document.getElementById('chat-input');
+        if (input.value.trim() && socket.readyState === 1) {
+            var chatData = {
+                type: "chat",
+                sender: userName,
+                receiver: "all",
+                message: input.value
+            };
+            socket.send(JSON.stringify(chatData));
+            input.value = '';
+        } else if (socket.readyState !== 1) {
+            console.error("❌ WebSocket 尚未連線。");
+            alert("連線已中斷，請重新整理頁面。");
+        }
+    }
+
+    document.getElementById('chat-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { sendMessage(); }
+    });
+
+    window.onload = function() { connect(); };
+    function showLightbox(src, e) { e.stopPropagation(); document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').style.display = 'flex'; }
+    /*]]>*/
+</script>
+<style> @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } } </style>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>卡爾夏 - 登入</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.2.1/css/bootstrap.min.css}" />
+    <style>
+        body { background-color: #050000; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .login-card { background: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 10px; border: 1px solid #333; width: 400px; text-align: center; }
+        .btn-primary { background-color: #ff3333; border: none; }
+        .btn-primary:hover { background-color: #cc0000; }
+    </style>
+</head>
+<body>
+<div class="login-card">
+    <h2 class="mb-4">卡爾夏汽車討論區</h2>
+    <form th:action="@{/chat.do}" method="post">
+        <div class="form-group">
+            <input type="text" name="userName" class="form-control" placeholder="請輸入您的暱稱" required="required" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">開始討論</button>
+    </form>
+</div>
+</body>
+</html>
