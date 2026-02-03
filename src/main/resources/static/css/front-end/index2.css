@@ -1,0 +1,212 @@
+/* --- 基礎設定 --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #050000;
+    /* 模擬背景的紅色氛圍漸層 */
+    background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
+    color: #ffffff;
+    line-height: 1.5;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+    transition: 0.3s;
+}
+
+a:hover {
+    color: #ff3333;
+}
+
+ul {
+    list-style: none;
+}
+
+/* --- 主要內容區 (Layout) --- */
+.container {
+    display: flex;
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* 左側側邊欄 */
+aside {
+    width: 250px;
+    flex-shrink: 0;
+    padding-right: 40px;
+}
+
+.sidebar-section {
+    margin-bottom: 40px;
+}
+
+.sidebar-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #ddd;
+}
+
+.category-list li {
+    margin-bottom: 12px;
+    font-size: 14px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.category-list li.active {
+    color: #ff3333;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/*以下為Eagan增加的*/
+.product-card-link:hover .product-card {
+    transform: translateY(-10px);
+    border-color: #ff3333;
+    background: rgba(255,255,255,0.08);
+}
+
+.product-card-link:hover img {
+    transform: scale(1.05);
+}
+/* --- 分頁區塊 --- */
+.pagination-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 50px;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 15px;
+    background: #111;
+    border: 1px solid #333;
+    color: #ccc;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: 0.3s;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.page-btn:hover {
+    background: #222;
+    color: #fff;
+    border-color: #666;
+}
+
+/* 當前頁碼樣式 (紅色高亮) */
+.page-btn.active {
+    background: #ff3333;
+    color: white;
+    border-color: #ff3333;
+    pointer-events: none; /* 當前頁不可點擊 */
+}
+/* --- 評價星星樣式 --- */
+.product-rating {
+    font-size: 12px;       /* 星星大小 */
+    color: #ffc107;        /* 金黃色 (Bootstrap warning color) */
+    margin-bottom: 8px;    /* 與價格保持距離 */
+    letter-spacing: 1px;   /* 星星之間的間距 */
+}
+
+/* 評價人數文字 */
+.rating-count {
+    color: #888;           /* 灰色文字 */
+    font-size: 11px;
+    margin-left: 5px;
+}
+
+/* 微調原本的價格樣式，確保對齊 */
+.product-card h3 {
+    margin-bottom: 8px !important; /* 讓標題跟星星有點距離 */
+}
+
+/* =========================================
+   新增：圖片骨架屏 (Skeleton Loading) - 深色版
+   ========================================= */
+
+/* 定義圖片載入前的樣子 */
+.product-img-skeleton {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 維持原本的比例設定 */
+    transition: opacity 0.5s ease-in-out;
+
+    /* 🔥 關鍵：預設背景色改為深灰色，不要用全黑 */
+    background-color: #2a2a2a;
+
+    /* 🔥 關鍵：加入微光掃描動畫 (讓使用者知道正在讀取) */
+    background: linear-gradient(
+            90deg,
+            #2a2a2a 25%,
+            #3a3a3a 50%,
+            #2a2a2a 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+/* 圖片載入完成後，透過 JS 或瀏覽器原生行為蓋過去，
+   但如果圖片有透明背景，這層動畫會一直在下面跑，
+   所以建議圖片載入後可以移除這個動畫 (視情況而定，通常 JPG 沒差) */
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* =========================================
+   新增：商品卡片基礎樣式
+   (搬移自 HTML，讓 hover 效果能正常運作)
+   ========================================= */
+.product-card {
+    border: 1px solid #333;      /* 保留細微邊框 */
+    border-radius: 8px;
+
+    /* 改成透明，讓原本漂亮的紅黑漸層透出來 */
+    background-color: transparent;
+
+    /* 或者是極淡的半透明黑，增加一點層次感 (二選一，推薦透明) */
+    /* background-color: rgba(0, 0, 0, 0.3); */
+
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+
+/* 確保圖片外層容器也是滿的 */
+.product-img-container {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+/* 確保圖片本身的過渡效果 */
+.product-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.5s ease;
+}

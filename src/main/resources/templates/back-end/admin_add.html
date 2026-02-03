@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新增管理者 - Autopile Admin</title>
+    <title>新增管理者 - 卡爾夏 Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <!--    <link rel="stylesheet" th:href="@{/css/back-end/admin_listAll.css}">-->
@@ -95,7 +95,7 @@
         <header class="top-bar">
             <h2 class="page-title">新增管理員</h2>
             <div class="user-profile">
-                <span>Admin</span>
+                <span th:text="${session.admin.adminName}">Admin</span>
                 <div class="avatar">
                     <i class="fas fa-user"></i>
                 </div>
@@ -115,14 +115,6 @@
 
                 <div class="form-container">
                     <form id="add-admin-form" th:action="@{/admins/add}" th:object="${form}" method="post">
-<!--                        <div class="form-row avatar-row">-->
-<!--                            <div class="avatar-upload-box" onclick="document.getElementById('avatar-input').click()">-->
-<!--                                <img id="avatar-preview" src="" style="display:none;">-->
-<!--                                <span id="avatar-placeholder">+<br>Upload</span>-->
-<!--                            </div>-->
-<!--                            <input type="file" id="avatar-input" accept="image/*" style="display: none;">-->
-<!--                            <p class="hint-text">點擊上傳頭像 (選填)</p>-->
-<!--                        </div>-->
 
                         <div class="form-row">
                             <label>姓名 (Name)</label>
@@ -142,14 +134,15 @@
                             <label>信箱 (Email)</label>
                             <input type="email" id="new-email" th:field="*{adminEmail}"placeholder="example@autopile.com" required>
                         </div>
-                        <fieldset class="form-group">
-                            <legend>功能分配</legend>
-                            <ul>
-                                <li th:each="func : ${allFunctions}"><label> <input
-                                        type="checkbox" th:field="*{manageFuncIds}"
-                                        th:value="${func.authNo}" /> <span
-                                        th:text="${func.authName}">功能名稱</span>
-                                </label></li>
+                        <fieldset class="form-group permission-group">
+                            <legend class="permission-legend">功能權限分配</legend>
+                            <ul class="permission-list">
+                                <li th:each="func : ${allFunctions}" class="permission-item">
+                                    <label>
+                                        <input type="checkbox" th:field="*{manageFuncIds}" th:value="${func.authNo}" />
+                                        <span th:text="${func.authName}">功能名稱</span>
+                                    </label>
+                                </li>
                             </ul>
                         </fieldset>
                         <div class="form-actions">

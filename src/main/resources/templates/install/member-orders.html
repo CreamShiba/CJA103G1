@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的訂單 - 卡爾夏</title>
+    <link rel="stylesheet" th:href="@{/install/front-end/css/index.css}">
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div>卡爾夏 Installation Platform</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search..."
+                    style="background: transparent; border: none; color: white; width: 100%; outline: none;" disabled>
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+
+                    <th:block th:if="${session.member == null}">
+                        <a th:href="@{/members/login}">登入</a>
+                        <a th:href="@{/members/register}">註冊</a>
+                    </th:block>
+
+                    <th:block th:if="${session.member != null}">
+                        <span
+                            style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
+                            th:text="'Hi, ' + ${session.member.memName}">
+                            Hi, 會員
+                        </span>
+
+                        <a th:href="@{/members/view}">編輯個人資料</a>
+                        <a th:href="@{/member/orders}">我的訂單</a>
+                        <form th:action="@{/members/logout}" method="post" id="logoutForm">
+                            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                登出 (Logout)
+                            </a>
+                        </form>
+                    </th:block>
+                </div>
+            </div>
+            <span id="cart" style="cursor: not-allowed; opacity: 0.5;">🛒</span>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <a th:href="@{/installation/home}" class="logo">卡爾夏 Install</a>
+        <nav class="nav-links">
+            <a th:href="@{/installation/home}">尋找技師</a>
+            <a th:href="@{/member/orders}" class="active">我的訂單</a>
+            <a th:href="@{/installation/entry}" th:unless="${isTechnician}">成為技師</a>
+            <a th:href="@{/technician/orders}" th:if="${isTechnician}">技師後台</a>
+            <form th:action="@{/members/logout}" method="post" style="display:inline;">
+                <button type="submit"
+                    style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出</button>
+            </form>
+        </nav>
+    </header>
+
+    <!-- Main Layout -->
+    <div class="container">
+        <!-- Sidebar (Optional for Member Area, but nice for consistency) -->
+        <aside>
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">訂單管理</h3>
+                <ul class="category-list">
+                    <li th:class="${currentStatus == null} ? 'active' : ''">
+                        <a th:href="@{/member/orders}">全部訂單</a>
+                    </li>
+                    <li th:class="${currentStatus == 0} ? 'active' : ''">
+                        <a th:href="@{/member/orders(status=0)}">待確認</a>
+                    </li>
+                    <li th:class="${currentStatus == 1} ? 'active' : ''">
+                        <a th:href="@{/member/orders(status=1)}">等待付款</a>
+                    </li>
+                    <li th:class="${currentStatus == 2} ? 'active' : ''">
+                        <a th:href="@{/member/orders(status=2)}">已付款</a>
+                    </li>
+                    <li th:class="${currentStatus == 3} ? 'active' : ''">
+                        <a th:href="@{/member/orders(status=3)}">已完成</a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main style="flex: 1;">
+            <div style="margin-bottom: 30px;">
+                <h1 style="font-size: 28px; margin-bottom: 10px; color: white;">我的預約訂單</h1>
+            </div>
+
+            <!-- Using the same card style for order list, but structured as table if possible, or list of cards -->
+            <!-- Since CSS has table styles removed, let's use Card structure for each order -->
+
+            <div class="card-grid" style="grid-template-columns: 1fr;"> <!-- Full width cards for orders -->
+                <div class="card" th:each="order : ${orders}" style="display: flex; flex-direction: column;">
+                    <div class="card-body">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #333; padding-bottom: 1rem;">
+                            <h3 class="card-title" th:text="'訂單 #' + ${order.installOrderNo}">#1001</h3>
+                            <span class="badge" th:text="${order.orderStatus}"
+                                th:style="${order.orderStatus == '已付款待安裝' ? 'color: #10b981; border-color: #10b981' : ''}">Status</span>
+                        </div>
+
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; color: #ccc;">
+                            <div>
+                                <div style="color: #888; font-size: 12px;">預約技師</div>
+                                <div th:text="${order.technicianName}" style="font-size: 16px;">技師名</div>
+                            </div>
+                            <div>
+                                <div style="color: #888; font-size: 12px;">服務地點</div>
+                                <div th:text="${order.locationName}">地點</div>
+                            </div>
+                            <div>
+                                <div style="color: #888; font-size: 12px;">預約時間</div>
+                                <div>
+                                    <span th:text="${order.appointDate}">Date</span>
+                                    <span th:text="${order.appointTime}">Time</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color: #888; font-size: 12px;">總金額</div>
+                                <div th:text="'$' + ${order.totalPrice}"
+                                    style="color: #ff3333; font-weight: bold; font-size: 18px;">$1500</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 1rem;">
+                            <span th:text="${order.payStatus}" style="color: #aaa; font-size: 13px;">未付款</span>
+
+                            <div th:if="${order.orderStatus == '待付款'}" style="display: flex; gap: 8px;">
+                                <a th:href="@{'/member/order/' + ${order.installOrderNo} + '/pay'}" target="_blank"
+                                    class="btn btn-primary">
+                                    綠界付款
+                                </a>
+
+                            </div>
+
+                            <div th:if="${order.orderStatus == '已完成' && !order.reviewed}" style="margin-top: 10px;">
+                                <a th:href="@{'/member/order/' + ${order.installOrderNo} + '/review'}" class="btn"
+                                    style="background-color: #f59e0b; color: white; border: none; width: 100%; text-align: center; display: block; text-decoration: none;">
+                                    給予評價
+                                </a>
+                            </div>
+
+                            <div th:if="${order.orderStatus == '已完成' && order.reviewed}"
+                                style="margin-top: 10px; text-align: center; color: #10b981;">
+                                ✓ 已完成評價
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(orders)}" style="text-align: center; color: #888; padding: 50px;">
+                    目前沒有訂單紀錄
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-col">
+            <div class="footer-logo">卡爾夏</div>
+            <p>Professional Auto Service Platform.</p>
+        </div>
+        <div class="footer-col">
+            <h4>關於我們</h4>
+            <ul>
+                <li>平台介紹</li>
+                <li>聯絡我們</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>服務中心</h4>
+            <ul>
+                <li>常見問題</li>
+                <li>服務條款</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>社群</h4>
+            <ul>
+                <li>Facebook</li>
+                <li>Instagram</li>
+            </ul>
+        </div>
+    </footer>
+
+    <script>
+        // Check for URL parameters for error messages
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMsg = urlParams.get('error');
+        if (errorMsg) {
+            alert(decodeURIComponent(errorMsg));
+            // Optional: Clean URL
+            const newUrl = window.location.pathname + window.location.search.replace(/[\?&]error=[^&]+/, '');
+            history.replaceState({}, document.title, newUrl);
+        }
+
+        // User Dropdown Toggle
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+
+        if (userIcon && userDropdown) {
+            userIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+
+            window.addEventListener('click', () => {
+                if (userDropdown.classList.contains('show')) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

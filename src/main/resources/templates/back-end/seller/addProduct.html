@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新增商品 | 賣家中心</title>
+    <link rel="stylesheet" th:href="@{/css/back-end/seller/addProduct.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
+</head>
+<body>
+
+<header class="top-bar">
+    <div class="brand-area" th:onclick="|location.href='@{/product/dashboard(tab=products)}'|" style="cursor: pointer;">
+        <div class="logo-icon"></div> SELLER CENTER
+    </div>
+    <div class="user-profile">
+        <div class="user-avatar"></div>
+        <span>賣家帳號</span>
+    </div>
+</header>
+
+<main class="main-content">
+
+    <div class="form-card">
+        <div class="form-header">
+            <h2>新增商品 Add Product</h2>
+            <a th:href="@{/product/dashboard}" class="btn-back">← 返回列表</a>
+        </div>
+
+        <form th:action="@{/product/insert}" th:object="${productVO}" method="post" enctype="multipart/form-data">
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">商品名稱 Product Name</label>
+                <input type="text" class="form-control" th:field="*{prodName}" placeholder="請輸入商品名稱" required/>
+                <span th:if="${#fields.hasErrors('prodName')}" th:errors="*{prodName}" style="color: #ff4d4d; font-size: 12px;"></span>
+            </div>
+
+            <div>
+                <label>商品分類：</label>
+                <select th:field="*{productCategory.productCategoryNo}">
+                    <option th:each="cat : ${categoryList}"
+                            th:value="${cat.productCategoryNo}"
+                            th:text="${cat.productCategoryName}">
+                    </option>
+                </select>
+                <span th:if="${#fields.hasErrors('productCategory.productCategoryNo')}" th:errors="*{productCategory.productCategoryNo}" class="error"></span>
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">商品價格 Price</label>
+                <input type="number" class="form-control" th:field="*{prodPrice}" placeholder="請輸入價格" required/>
+                <span th:if="${#fields.hasErrors('prodPrice')}" th:errors="*{prodPrice}" style="color: #ff4d4d; font-size: 12px;"></span>
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">商品庫存 Quantity</label>
+                <input type="number" class="form-control" th:field="*{prodQty}" placeholder="請輸入庫存數量" required/>
+                <span th:if="${#fields.hasErrors('prodQty')}" th:errors="*{prodQty}" style="color: #ff4d4d; font-size: 12px;"></span>
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">商品資訊 Description</label>
+                <textarea class="form-control" th:field="*{prodDesc}" placeholder="請輸入商品詳細資訊..." required></textarea>
+                <span th:if="${#fields.hasErrors('prodDesc')}" th:errors="*{prodDesc}" style="color: #ff4d4d; font-size: 12px;"></span>
+            </div>
+
+            <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">上傳圖片 Upload Image</label>
+                <input type="file" name="upFile" id="fileInput" multiple accept="image/*"/>
+                <span th:if="${errorMessage}" th:text="${errorMessage}" style="color: #ff4d4d; font-size: 12px; font-weight: bold; display: block; margin-top: 5px;"></span>
+                <div id="preview-container"></div>
+            </div>
+
+            <button type="submit" class="btn-submit">確認上架 Submit</button>
+        </form>
+    </div>
+
+</main>
+<footer th:replace="~{fragments/footer :: Footer}"></footer>
+<script th:src="@{/js/back-end/seller/addProduct.js}"></script>
+
+</body>
+</html>

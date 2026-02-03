@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>評價技師 - 卡爾夏</title>
+    <link rel="stylesheet" th:href="@{/install/back-end/css/index.css}">
+    <link rel="stylesheet" th:href="@{/install/front-end/css/index.css}">
+    <style>
+        .review-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-summary {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .rating-group {
+            display: flex;
+            justify-content: center;
+            flex-direction: row-reverse;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .rating-group input {
+            display: none;
+        }
+
+        .rating-group label {
+            cursor: pointer;
+            font-size: 40px;
+            color: #ccc;
+            transition: color 0.2s;
+        }
+
+        .rating-group input:checked~label,
+        .rating-group label:hover,
+        .rating-group label:hover~label {
+            color: #fbbf24;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-submit:hover {
+            background: #1d4ed8;
+        }
+
+        .page-header {
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="page-header">
+        <div class="header-content">
+            <a th:href="@{/installation/home}" class="logo">Karshop Install</a>
+        </div>
+    </header>
+    <main>
+        <div class="review-container">
+            <h2 style="text-align: center; color: #1f2937; margin-bottom: 20px;">評價這次的服務</h2>
+
+            <div class="order-summary">
+                <h3 th:text="${order.technician.realName} + ' 技師'">技師姓名</h3>
+                <p th:text="'服務時間: ' + ${order.appointDate} + ' ' + ${order.appointTime.description}">時間</p>
+                <p th:text="'服務地點: ' + ${order.location.locationName}">地點</p>
+            </div>
+
+            <form th:action="@{'/member/order/' + ${order.installOrderNo} + '/review'}" method="post">
+                <div style="text-align: center; margin-bottom: 10px; color: #4b5563;">請選擇評分</div>
+                <div class="rating-group">
+                    <input type="radio" id="star5" name="rating" value="5" required /><label for="star5">★</label>
+                    <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
+                    <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
+                    <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
+                    <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
+                </div>
+
+                <textarea name="comment" placeholder="寫下您的評論（選填）..." maxlength="500"></textarea>
+
+                <button type="submit" class="btn-submit">送出評價</button>
+            </form>
+            <div style="text-align: center; margin-top: 15px;">
+                <a th:href="@{/member/orders}" style="color: #6b7280; text-decoration: none;">暫不評價</a>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技師詳情 - 卡爾夏</title>
+    <link rel="stylesheet" th:href="@{/install/front-end/css/index.css}">
+    <style>
+        /* Local layout styles */
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .split-layout {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .split-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Form Styles matching Dark Theme */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            background-color: #222;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ff3333;
+        }
+
+        /* Slot Grid */
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .slot-btn {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #444;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #222;
+            color: #ddd;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .slot-btn:hover {
+            border-color: #777;
+        }
+
+        .slot-btn.disabled {
+            background: #111;
+            color: #555;
+            cursor: not-allowed;
+            border-color: #222;
+        }
+
+        .slot-btn.selected {
+            background: #ff3333;
+            color: white;
+            border-color: #ff3333;
+        }
+
+        /* Service List */
+        .service-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed #333;
+            color: #ccc;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            background-color: #1a1a1a;
+            transition: 0.2s;
+        }
+
+        .checkbox-label:hover {
+            border-color: #555;
+        }
+
+        /* Custom Scrollbar for Reviews */
+        .review-scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .review-scroll-container::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+
+        .review-scroll-container::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+
+        .review-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div>卡爾夏 Installation Platform</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search..."
+                    style="background: transparent; border: none; color: white; width: 100%; outline: none;" disabled>
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+
+                    <th:block th:if="${session.member == null}">
+                        <a th:href="@{/members/login}">登入</a>
+                        <a th:href="@{/members/register}">註冊</a>
+                    </th:block>
+
+                    <th:block th:if="${session.member != null}">
+                        <span
+                            style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
+                            th:text="'Hi, ' + ${session.member.memName}">
+                            Hi, 會員
+                        </span>
+
+                        <a th:href="@{/members/view}">編輯個人資料</a>
+                        <a th:href="@{/member/orders}">我的訂單</a>
+                        <form th:action="@{/members/logout}" method="post" id="logoutForm">
+                            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                登出 (Logout)
+                            </a>
+                        </form>
+                    </th:block>
+                </div>
+            </div>
+            <span id="cart" style="cursor: not-allowed; opacity: 0.5;">🛒</span>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <a th:href="@{/installation/home}" class="logo">卡爾夏 Install</a>
+        <nav class="nav-links">
+            <a th:href="@{/installation/home}">尋找技師</a>
+            <a th:href="@{/member/orders}">我的訂單</a>
+            <a th:href="@{/installation/entry}">成為技師</a>
+            <form th:action="@{/members/logout}" method="post" style="display:inline;"
+                th:if="${session.member != null}">
+                <button type="submit"
+                    style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出</button>
+            </form>
+        </nav>
+    </header>
+
+    <div class="page-container">
+        <div class="split-layout">
+            <!-- Left: Technician Profile -->
+            <div>
+                <div class="card">
+                    <img th:src="${technician.profilePhotoBase64 != null ? technician.profilePhotoBase64 : 'https://placehold.co/400x400/333/999?text=卡爾夏'}"
+                        class="card-img" style="height: 300px;" alt="Technician">
+                    <div class="card-body">
+                        <h2 class="card-title" th:text="${technician.realName}">技師名稱</h2>
+                        <p style="color: #888; margin-bottom: 1rem;">
+                            <span th:text="${technician.serviceArea}">地區</span> |
+                            評分: <span th:text="${#numbers.formatDecimal(technician.avgRating, 1, 1)}"
+                                style="color: #ff3333; font-weight: bold;">5.0</span>
+                        </p>
+
+                        <div
+                            style="background: #1a1a1a; padding: 15px; border-radius: 4px; margin-bottom: 20px; border: 1px solid #333;">
+                            <div style="margin-bottom: 5px; color: #ccc;">
+                                <span style="color: #666; width: 20px; display: inline-block;">📞</span>
+                                <span th:text="${technician.phone}">0912-345-678</span>
+                            </div>
+                            <div style="color: #ccc;">
+                                <span style="color: #666; width: 20px; display: inline-block;">✉️</span>
+                                <span th:text="${technician.email}">tech@example.com</span>
+                            </div>
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid #333; margin: 1rem 0;">
+                        <h4 style="margin-bottom: 10px; color: white;">提供服務</h4>
+                        <ul style="list-style: none;">
+                            <li th:each="svc : ${technician.services}" class="service-item">
+                                <span th:text="${svc.serviceName}">服務</span>
+                                <strong th:text="'NT$ ' + ${svc.price}" style="color: #aaa;">500</strong>
+                            </li>
+                        </ul>
+                        <hr style="border: 0; border-top: 1px solid #333; margin: 1rem 0;">
+                        <h4 style="margin-bottom: 15px; color: white;">歷史評價 (<span
+                                th:text="${technician.reviews != null ? technician.reviews.size() : 0}">0</span>)</h4>
+
+                        <div class="review-scroll-container"
+                            style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                            <div th:if="${technician.reviews == null || technician.reviews.empty}"
+                                style="color: #666; font-style: italic;">
+                                暫無評價
+                            </div>
+                            <div th:each="review : ${technician.reviews}"
+                                style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #222;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <strong style="color: #ddd;" th:text="${review.memberName}">會員</strong>
+                                    <span style="color: #666; font-size: 0.9em;"
+                                        th:text="${#temporals.format(review.createdAt, 'yyyy/MM/dd')}">2023/01/01</span>
+                                </div>
+                                <div style="margin-bottom: 5px; color: #ff3333;">
+                                    <span th:each="i : ${#numbers.sequence(1, review.rating)}">★</span><span
+                                        th:if="${review.rating < 5}"
+                                        th:each="i : ${#numbers.sequence(review.rating + 1, 5)}"
+                                        style="color: #444;">★</span>
+                                </div>
+                                <p style="color: #aaa; font-size: 0.95em; white-space: pre-wrap;"
+                                    th:text="${review.comment}">評價內容</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Booking Form -->
+            <div class="card" style="padding: 30px;">
+                <h2 style="margin-bottom: 20px; color: white;">預約安裝</h2>
+
+                <form th:action="@{/installation/book}" method="post" id="bookingForm">
+                    <input type="hidden" name="techNo" th:value="${technician.techNo}">
+                    <input type="hidden" name="appointDate" id="inputDate">
+                    <input type="hidden" name="appointTime" id="inputTime">
+
+                    <!-- 1. Select Location -->
+                    <div class="form-group">
+                        <label class="form-label">選擇場地</label>
+                        <select name="locationNo" id="locationSelect" class="form-control" required
+                            onchange="loadAvailability()">
+                            <option value="" data-price="0">請選擇場地...</option>
+                            <option th:each="loc : ${locations}" th:value="${loc.locationNo}"
+                                th:data-price="${loc.pricePer}"
+                                th:text="${loc.locationName} + ' (場地費: $' + ${loc.pricePer} + ')'"></option>
+                        </select>
+                    </div>
+
+                    <!-- 2. Select Services -->
+                    <div class="form-group">
+                        <label class="form-label">選擇服務 (可多選)</label>
+                        <div th:each="svc : ${technician.services}">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="selectedServiceIds" th:value="${svc.tsNo}"
+                                    th:data-price="${svc.price}" onchange="calculateTotal()"
+                                    style="margin-right: 10px;">
+                                <span th:text="${svc.serviceName}" style="color: #ddd;"></span>
+                                <span style="margin-left: auto; color: #888;" th:text="'NT$ ' + ${svc.price}"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 3. Dynamic Slots -->
+                    <div class="form-group">
+                        <label class="form-label">選擇時段 (未來 30 天)</label>
+                        <div id="loadingMsg" style="display: none; color: #888;">查詢中...</div>
+                        <div id="slotContainer" class="slot-grid">
+                            <div
+                                style="grid-column: 1/-1; padding: 1rem; text-align: center; color: #666; background: #111; border-radius: 4px;">
+                                請先選擇場地以查看可用時段
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Price Display -->
+                    <div
+                        style="margin-top: 20px; padding: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #ccc;">預估總金額</span>
+                        <span id="totalPriceDisplay" style="color: #ff3333; font-size: 24px; font-weight: bold;">NT$
+                            0</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;" disabled
+                        id="submitBtn">
+                        送出預約申請
+                    </button>
+                    <p style="text-align: center; margin-top: 10px; color: #666; font-size: 12px;">* 建立訂單後，通常需要技師確認</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-col">
+            <div class="footer-logo">卡爾夏</div>
+        </div>
+    </footer>
+
+    <script th:inline="javascript">
+        const techNo = /*[[${technician.techNo}]]*/ 0;
+        let selectedSlot = null;
+
+        function loadAvailability() {
+            calculateTotal(); // Recalculate when location changes
+            const locationSelect = document.getElementById('locationSelect');
+            const locationNo = locationSelect.value;
+            const container = document.getElementById('slotContainer');
+            const loading = document.getElementById('loadingMsg');
+
+            if (!locationNo) {
+                container.innerHTML = '<div style="grid-column: 1/-1; padding: 1rem; text-align: center; color: #666; background: #111;">請先選擇場地</div>';
+                return;
+            }
+
+            loading.style.display = 'block';
+            container.innerHTML = '';
+
+            fetch(`/installation/api/availability?techNo=${techNo}&locationNo=${locationNo}`)
+                .then(res => res.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.length === 0) {
+                        container.innerHTML = '<div style="grid-column: 1/-1;">無可用時段</div>';
+                        return;
+                    }
+
+                    data.forEach(slot => {
+                        const btn = document.createElement('div');
+                        btn.className = 'slot-btn';
+                        btn.innerHTML = `<div>${slot.date}</div><div style="font-weight:bold;">${slot.timeSlotDesc}</div>`;
+
+                        if (!slot.isAvailable) {
+                            btn.classList.add('disabled');
+                        } else {
+                            btn.onclick = () => selectSlot(btn, slot.date, slot.timeSlot);
+                        }
+                        container.appendChild(btn);
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    loading.innerText = '查詢失敗';
+                });
+        }
+
+        function selectSlot(btn, date, time) {
+            // Clear previous
+            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+            // Select new
+            btn.classList.add('selected');
+
+            document.getElementById('inputDate').value = date;
+            document.getElementById('inputTime').value = time;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        function calculateTotal() {
+            let total = 0;
+
+            // 1. Location Price
+            const locationSelect = document.getElementById('locationSelect');
+            const selectedOption = locationSelect.options[locationSelect.selectedIndex];
+            const locationPrice = selectedOption.getAttribute('data-price');
+            if (locationPrice) {
+                total += parseInt(locationPrice);
+            }
+
+            // 2. Services Price
+            const checkboxes = document.querySelectorAll('input[name="selectedServiceIds"]:checked');
+            checkboxes.forEach(cb => {
+                const price = cb.getAttribute('data-price');
+                if (price) {
+                    total += parseInt(price);
+                }
+            });
+
+            // Update Display
+            document.getElementById('totalPriceDisplay').innerText = 'NT$ ' + total;
+        }
+
+        // User Dropdown Toggle
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+
+        if (userIcon && userDropdown) {
+            userIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+
+            window.addEventListener('click', () => {
+                if (userDropdown.classList.contains('show')) {
+                    userDropdown.classList.remove('show');
+                }
+            });
+        }
+    </script>
+
+</body>
+
+</html>

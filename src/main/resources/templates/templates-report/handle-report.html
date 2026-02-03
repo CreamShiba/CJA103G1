@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>檢舉案件處理 - 卡爾夏 Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
+        .app-container { display: flex; height: 100%; width: 100%; }
+
+        /* --- 側邊欄 Sidebar --- */
+        .sidebar { width: 260px; min-width: 260px; background-color: #ffffff; border-right: 1px solid #e1e4e8; display: flex; flex-direction: column; height: 100vh; z-index: 10; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 24px; height: 12px; background-color: #0066cc; border-radius: 4px; }
+        .sidebar-header h2 { font-size: 18px; font-weight: bold; color: #1a1a1a; }
+        .badge { font-size: 10px; background: #e6f0ff; color: #0066cc; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 0; }
+
+        .sidebar-nav { flex-grow: 1; overflow-y: auto; padding-top: 20px; }
+        .sidebar-nav ul { list-style: none; }
+        .menu-item { list-style: none; }
+        .menu-item > a { display: flex; align-items: center; padding: 12px 24px; color: #555; text-decoration: none; font-size: 15px; justify-content: space-between; transition: 0.2s; cursor: pointer; }
+        .menu-item > a:hover { background-color: #f0f7ff; color: #0066cc; }
+        .menu-item > a span { display: flex; align-items: center; }
+        .menu-item > a i:first-child { margin-right: 10px; width: 20px; text-align: center; }
+        .menu-item > a .arrow { font-size: 12px; margin-left: auto; transition: transform 0.2s; }
+        .menu-item.open > a .arrow { transform: rotate(180deg); }
+
+        .submenu, .sub-submenu { list-style: none; background-color: #fafafa; display: none; }
+        .has-submenu.open > .submenu, .has-sub-item.open > .sub-submenu { display: block; }
+        .submenu li > a { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px 12px 58px; font-size: 14px; color: #555; text-decoration: none; transition: all 0.2s; cursor: pointer; }
+        .submenu li > a:hover { background-color: #f0f0f0; }
+        .sub-submenu li a { padding: 10px 24px 10px 80px; font-size: 13px; color: #777; text-decoration: none; display: block; transition: all 0.2s; }
+        .sub-submenu li a:hover { background-color: #e8e8e8; }
+        .active { background-color: #e0f2f1 !important; color: #00796b !important; font-weight: bold; border-right: 3px solid #00796b; }
+
+        .sidebar-footer { padding: 20px; border-top: 1px solid #eee; margin-top: auto; }
+        .sidebar-footer a { color: #d9534f; text-decoration: none; font-size: 14px; }
+
+        /* --- 右側內容 --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .top-bar { background-color: white; padding: 15px 40px; border-bottom: 1px solid #e1e4e8; display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 20px; color: #00796b; font-weight: bold; }
+        .user-profile { display: flex; align-items: center; gap: 10px; }
+        .user-profile span { font-size: 14px; color: #333; font-weight: normal; }
+        .avatar { width: 36px; height: 36px; background-color: #333; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+        /* --- 內容區域 --- */
+        .content-area { flex: 1; overflow-y: auto; padding: 20px 40px; }
+        .case-card { background: white; border-radius: 8px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); width: 100%; max-width: 950px; margin: 0; }
+
+        .info-row { display: flex; align-items: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #f8f9fa; }
+        .info-label { width: 85px; min-width: 85px; font-weight: bold; color: #00796b; font-size: 15px; line-height: 1.5; white-space: nowrap; }
+        .info-text { flex: 1; color: #333; font-size: 15px; line-height: 1.5; padding-left: 0; }
+
+        /* 紅色詳細內容標籤 */
+        .other-tag { color: #d32f2f; font-weight: bold; background: #fff5f5; padding: 2px 10px; border-radius: 4px; border: 1px solid #ffcdd2; margin-left: 10px; font-size: 14px; }
+
+        textarea { width: 100%; height: 110px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; font-size: 14px; resize: none; margin-top: 8px; }
+        textarea[readonly] { background-color: #f8f9fa; color: #666; cursor: not-allowed; }
+
+        .btn-group { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
+        .btn-back { background-color: #f8f9fa; color: #666; border: 1px solid #ddd; padding: 9px 28px; border-radius: 4px; text-decoration: none; font-size: 14px; display: inline-block; text-align: center; }
+        .btn-send { background-color: #00796b; color: white; border: none; padding: 9px 40px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .btn-send:hover { background-color: #00695c; }
+
+        /* 自訂彈窗樣式 */
+        .custom-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); align-items: center; justify-content: center; }
+        .custom-modal.show { display: flex; }
+        .modal-content { background-color: white; padding: 0; border-radius: 12px; min-width: 400px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid #e0e0e0; font-size: 16px; font-weight: 600; color: #333; }
+        .modal-body { padding: 24px; font-size: 15px; color: #555; line-height: 1.6; }
+        .modal-footer { padding: 16px 24px; display: flex; justify-content: flex-end; border-top: 1px solid #e0e0e0; }
+        .modal-btn { background-color: #2196F3; color: white; border: none; padding: 10px 32px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <aside class="sidebar">
+        <div class="sidebar-header"><div class="logo-icon"></div><h2>卡爾夏 <span class="badge">ADMIN</span></h2></div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 A</a></li></ul></li>
+                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 B</a></li></ul></li>
+                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-user-shield"></i> 帳號管理</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">會員帳號管理</a></li><li><a href="#">管理員帳號管理</a></li></ul></li>
+
+                <li class="menu-item has-submenu open">
+                    <a class="submenu-toggle"><span><i class="fas fa-exclamation-circle"></i> 申訴/檢舉管理</span><i class="fas fa-chevron-down arrow"></i></a>
+                    <ul class="submenu">
+                        <li class="menu-item has-sub-item">
+                            <a class="sub-toggle"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
+                            <ul class="sub-submenu">
+                                <li><a href="/appeals/admin/list?status=PENDING">尚未處理</a></li>
+                                <li><a href="/appeals/admin/list?status=已結案">已結案</a></li>
+                            </ul>
+                        </li>
+                        <li class="menu-item has-sub-item open">
+                            <a class="sub-toggle"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
+                            <ul class="sub-submenu">
+                                <li><a href="/reports/admin/list?status=PENDING" th:classappend="${report.status != '已結案'} ? 'active'">尚未處理</a></li>
+                                <li><a href="/reports/admin/list?status=已結案" th:classappend="${report.status == '已結案'} ? 'active'">已結案</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-tools"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 C</a></li></ul></li>
+                <li class="menu-item"><a href="#"><i class="fas fa-star"></i> 自訂</a></li>
+                <li class="menu-item"><a href="#"><i class="fas fa-headset"></i> 自訂</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer"><a href="#">登出 (Logout)</a></div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title" th:text="${report.status == '已結案'} ? '檢舉查看' : '檢舉案件處理'">檢舉案件處理</h2>
+            <div class="user-profile"><span>Admin</span><div class="avatar"><i class="fas fa-user"></i></div></div>
+        </header>
+
+        <div class="content-area">
+            <div class="case-card" th:if="${report != null}">
+                <div class="info-row"><div class="info-label">檢舉編號：</div><div class="info-text" th:text="${report.reportsNo}">1</div></div>
+
+                <div class="info-row">
+                    <div class="info-label">檢舉類型：</div>
+                    <div class="info-text" id="typeBox">
+                        <span id="typeLabel" th:text="${report.reportsType}">類型內容</span>
+                    </div>
+                </div>
+
+                <div class="info-row"><div class="info-label">檢舉對象：</div><div class="info-text" th:text="${report.reportsTarget}">1234</div></div>
+
+                <div class="info-row">
+                    <div class="info-label">檢舉原因：</div>
+                    <div class="info-text" id="reasonBox">
+                        <span id="reasonLabel" th:text="${report.reportsReason}">原因內容</span>
+                    </div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-label">聯絡信箱：</div>
+                    <div class="info-text" th:text="${report.email != null && report.email != '' ? report.email : '未提供信箱'}">example@mail.com</div>
+                </div>
+
+                <div class="info-row"><div class="info-label">詳細描述：</div><div class="info-text" id="descriptionText" th:text="${report.reportsDescription}">詳細敘述內容...</div></div>
+
+                <div style="margin-top: 12px;">
+                    <div class="info-label">管理員回覆：</div>
+                    <textarea id="replyMsg"
+                              th:text="${report.response == '尚未回覆'} ? '' : ${report.response}"
+                              th:readonly="${report.status == '已結案'}"
+                              th:placeholder="${report.status == '已結案'} ? '' : '請在此輸入處理結果或說明...'"></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <a th:href="@{/reports/admin/list(status=${report.status == '已結案' ? '已結案' : 'PENDING'})}" class="btn-back">返回列表</a>
+                    <button th:if="${report.status != '已結案'}" class="btn-send" onclick="sendReply()">送出</button>
+                </div>
+            </div>
+
+            <div class="case-card" th:if="${report == null}">
+                <p style="color: red; padding: 20px; text-align: center;">系統錯誤：找不到該案件資料，請重新進入。</p>
+                <div class="btn-group">
+                    <a href="/reports/admin/list?status=PENDING" class="btn-back">返回列表</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="custom-modal" id="customModal">
+    <div class="modal-content">
+        <div class="modal-header" id="modalTitle">卡爾夏Karshop</div>
+        <div class="modal-body" id="modalMessage">請輸入回覆內容</div>
+        <div class="modal-footer"><button class="modal-btn" onclick="closeModal()">確定</button></div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // 側邊欄摺疊功能
+    document.querySelectorAll('.submenu-toggle, .sub-toggle').forEach(toggle => {
+        toggle.addEventListener('click', e => {
+            e.preventDefault();
+            toggle.parentElement.classList.toggle('open');
+        });
+    });
+
+    // 💡 判斷「其他」並顯示詳細內容的紅色標籤 (同步申訴功能)
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeLabel = document.getElementById('typeLabel');
+        const reasonLabel = document.getElementById('reasonLabel');
+        const descriptionText = document.getElementById('descriptionText');
+
+        const typeBox = document.getElementById('typeBox');
+        const reasonBox = document.getElementById('reasonBox');
+
+        if (descriptionText) {
+            const detail = descriptionText.innerText;
+
+            // 1. 檢查「檢舉類型」是否包含「其他」
+            if (typeLabel && typeBox && typeLabel.innerText.includes('其他')) {
+                const newSpan = document.createElement('span');
+                newSpan.className = 'other-tag';
+                newSpan.innerText = `內容：${detail}`;
+                typeBox.appendChild(newSpan);
+            }
+
+            // 2. 檢查「檢舉原因」是否包含「其他」
+            if (reasonLabel && reasonBox && reasonLabel.innerText.includes('其他')) {
+                const newSpan = document.createElement('span');
+                newSpan.className = 'other-tag';
+                newSpan.innerText = `內容：${detail}`;
+                reasonBox.appendChild(newSpan);
+            }
+        }
+    });
+
+    // 彈窗功能
+    function showModal(title, message) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMessage').textContent = message;
+        document.getElementById('customModal').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('customModal').classList.remove('show');
+    }
+
+    // 送出處理邏輯
+    function sendReply() {
+        const reply = document.getElementById('replyMsg').value;
+        if (!reply.trim()) {
+            showModal('卡爾夏Karshop', '請輸入回覆內容');
+            return;
+        }
+
+        const id = /*[[${report.reportsNo}]]*/ 0;
+        const params = new URLSearchParams();
+        params.append('id', id);
+        params.append('status', '已結案');
+        params.append('admNo', 1);
+        params.append('response', reply);
+
+        fetch('/reports/api/handle', {
+            method: 'POST',
+            body: params
+        })
+            .then(res => res.text())
+            .then(msg => {
+                if (msg === 'success') {
+                    showModal('卡爾夏Karshop', '處理成功！案件已移至「已結案」');
+                    setTimeout(() => {
+                        window.location.href = '/reports/admin/list?status=已結案';
+                    }, 1500);
+                } else {
+                    showModal('卡爾夏Karshop', '處理失敗：' + msg);
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                showModal('卡爾夏Karshop', '系統連線異常，請稍後再試');
+            });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>檢舉紀錄 - 卡爾夏汽車百貨</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- 基礎設定 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #050000;
+            background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
+            color: #ffffff;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        a:hover { color: #ff3333; }
+        ul { list-style: none; }
+
+        /* --- 頂部導航 --- */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 40px; font-size: 12px; color: #ccc; border-bottom: 1px solid #333; }
+        .top-icons { display: flex; gap: 20px; align-items: center; }
+        .search-box { border: 1px solid #555; padding: 5px 10px; display: flex; align-items: center; width: 150px; justify-content: space-between; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; }
+        .logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .logo::before { content: ''; display: inline-block; width: 30px; height: 15px; background: white; border-radius: 10px; }
+        .nav-links { display: flex; gap: 30px; font-size: 14px; align-items: center; }
+
+        /* --- 主要內容區佈局 --- */
+        .container { display: flex; padding: 40px; max-width: 1400px; margin: 0 auto; }
+        aside { width: 250px; flex-shrink: 0; padding-right: 40px; }
+        .sidebar-title { font-size: 18px; margin-bottom: 20px; color: #ddd; }
+        .category-list li { margin-bottom: 12px; font-size: 14px; color: #aaa; cursor: pointer; transition: 0.3s; }
+        .category-list li.active { color: #ff3333; font-weight: bold; }
+
+        /* --- 檢舉紀錄卡片區塊 --- */
+        .history-card {
+            flex: 1;
+            background: rgba(15, 0, 0, 0.5);
+            border-left: 4px solid #ff3333;
+            border-top: 1px solid rgba(255, 51, 51, 0.2);
+            border-right: 1px solid rgba(255, 51, 51, 0.2);
+            border-bottom: 1px solid rgba(255, 51, 51, 0.2);
+            padding: 45px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        }
+
+        .history-title {
+            font-size: 52px;
+            font-weight: 800;
+            color: #ff3333;
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,1);
+        }
+
+        .history-subtitle {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .history-subtitle::before { content: '|'; color: #ff3333; font-weight: bold; }
+
+        .history-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+            table-layout: fixed;
+        }
+
+        .history-table th {
+            padding: 10px 15px;
+            color: #ff3333;
+            font-size: 15px;
+            font-weight: bold;
+            text-align: left;
+            border-bottom: 1px solid #ff3333;
+        }
+
+        .history-table td {
+            padding: 20px 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid rgba(255, 51, 51, 0.1);
+            border-bottom: 1px solid rgba(255, 51, 51, 0.1);
+            color: #eee;
+            font-size: 15px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-table td:first-child { border-left: 1px solid rgba(255, 51, 51, 0.1); }
+        .history-table td:last-child { border-right: 1px solid rgba(255, 51, 51, 0.1); }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+            display: inline-block;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .status-pending { background: #444; color: #aaa; }
+        .status-closed { background: #008000; color: #fff; box-shadow: 0 0 10px rgba(0, 128, 0, 0.3); }
+
+        .view-btn {
+            background-color: transparent;
+            color: #ff3333;
+            border: 1px solid #ff3333;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-block;
+            border-radius: 2px;
+        }
+        .view-btn:hover:not(:disabled) {
+            background-color: #ff3333;
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+        }
+        .view-btn:disabled {
+            border-color: #444;
+            color: #444;
+            cursor: not-allowed;
+        }
+
+        /* 💡 新增：分頁容器樣式 */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+            padding-bottom: 20px;
+        }
+        .page-info {
+            font-size: 14px;
+            color: #ddd;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 100%; background-color: #1a1a1a; min-width: 150px; border: 1px solid #333; z-index: 100; margin-top: 10px; }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a { color: #ccc; padding: 12px 16px; display: block; font-size: 13px; }
+        .dropdown-menu a:hover { background-color: #333; color: #ff3333; }
+
+        footer { margin-top: 100px; padding: 60px 40px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 40px; font-size: 14px; color: #555; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="top-bar">
+        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" placeholder="Search..." style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container" style="position: relative; display: inline-block;">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+                    <a href="#">登入</a> <a href="#">註冊</a>
+                </div>
+            </div>
+            <span id="cart">🛒</span>
+        </div>
+    </div>
+
+    <div class="main-header">
+        <div class="logo">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#">商城</a> <a href="#">安裝區</a>
+            <a href="#">論壇</a> <a href="#">公告</a><a href="#">常見問題</a>
+            <div class="user-dropdown-container" style="position: relative; display: inline-block;">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="#">我的優惠券</a> <a href="#">我的收藏</a> <a href="#">訂單查詢</a> <a href="/appeals/add">申訴/檢舉</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    <aside>
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Browse by</h3>
+            <ul class="category-list">
+                <li onclick="location.href='/appeals/add'">提交申訴</li>
+                <li onclick="location.href='/reports/add'">提交檢舉</li>
+                <li onclick="location.href='/appeals/history'">申訴紀錄</li>
+                <li class="active" onclick="location.href='/reports/history'">檢舉紀錄</li>
+            </ul>
+        </div>
+    </aside>
+
+    <div class="history-card">
+        <h1 class="history-title">REPORT LOGS</h1>
+        <p class="history-subtitle">系統正在追蹤處理進度。結果將發送至您的 Email。</p>
+
+        <table class="history-table">
+            <thead>
+            <tr>
+                <th style="width: 10%;">編號</th>
+                <th style="width: 20%;">檢舉對象</th>
+                <th style="width: 15%;">類型</th>
+                <th style="width: 25%;">檢舉時間</th>
+                <th style="width: 15%;">狀態</th>
+                <th style="width: 15%;">檢視</th>
+            </tr>
+            </thead>
+            <tbody id="reportLogBody"></tbody>
+        </table>
+
+        <div class="pagination-container" id="paginationControls"></div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-col"><div class="logo">卡爾夏</div></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li>Parts</li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li>About Us</li><li>FAQ</li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul><li>Email</li></ul></div>
+    <div class="footer-col"><h4>Follow</h4><ul><li>Instagram</li></ul></div>
+</footer>
+
+<script th:inline="javascript">
+    /* 取得 Thymeleaf 傳入的 List 資料 */
+    let allReports = /*[[${reports}]]*/ [];
+    let currentPage = 1;
+    const pageSize = 5; // 💡 您的要求：每頁 5 筆
+
+    window.onload = function() {
+        initDropdowns();
+        renderTable(); // 初始渲染第一頁
+    };
+
+    function renderTable() {
+        const tbody = document.getElementById('reportLogBody');
+        tbody.innerHTML = '';
+
+        if (!allReports || allReports.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 80px; color: #444;">DATABASE EMPTY / 無檢舉紀錄</td></tr>';
+            return;
+        }
+
+        // 💡 計算當前頁面資料切片
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageData = allReports.slice(start, end);
+
+        pageData.forEach(report => {
+            // 日期格式化
+            const date = new Date(report.reportsTimestamp);
+            const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+
+            const statusClass = (report.status === '已結案') ? 'status-badge status-closed' : 'status-badge status-pending';
+            const statusText = (report.status === 'PENDING') ? '尚未處理' : report.status;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>${report.reportsNo}</td>
+                    <td>${report.reportsTarget || 'N/A'}</td>
+                    <td>${report.reportsType || '未分類'}</td>
+                    <td>${formattedDate}</td>
+                    <td><span class="${statusClass}">${statusText}</span></td>
+                    <td><a href="/reports/history/detail?id=${report.reportsNo}" class="view-btn">查看案件</a></td>
+                </tr>`;
+        });
+
+        renderPaginationControls();
+    }
+
+    function renderPaginationControls() {
+        const controls = document.getElementById('paginationControls');
+        const totalPages = Math.ceil(allReports.length / pageSize);
+
+        if (totalPages <= 1) {
+            controls.innerHTML = '';
+            return;
+        }
+
+        controls.innerHTML = `
+            <button class="view-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一頁</button>
+            <span class="page-info">第 ${currentPage} 頁 / 共 ${totalPages} 頁</span>
+            <button class="view-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一頁</button>
+        `;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        renderTable();
+        // 點擊後平滑滾動回頂部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function initDropdowns() {
+        const trigger = document.getElementById('member-center-trigger');
+        const menu = document.getElementById('member-dropdown');
+        const userIcon = document.getElementById('user-icon');
+        const userMenu = document.getElementById('user-dropdown');
+
+        if(trigger && menu) {
+            trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); if(userMenu) userMenu.classList.remove('show'); };
+        }
+        if(userIcon && userMenu) {
+            userIcon.onclick = (e) => { e.stopPropagation(); userMenu.classList.toggle('show'); if(menu) menu.classList.remove('show'); };
+        }
+        document.onclick = () => { if(menu) menu.classList.remove('show'); if(userMenu) userMenu.classList.remove('show'); };
+    }
+</script>
+</body>
+</html>

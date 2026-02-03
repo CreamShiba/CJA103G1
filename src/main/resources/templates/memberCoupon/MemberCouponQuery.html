@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的優惠券 | 卡爾夏汽車百貨</title>
+    <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
+    <link rel="stylesheet" th:href="@{/css/memberCouponStyle.css}">
+</head>
+<body>
+
+<!-- Header -->
+<header>
+    <div class="top-bar">
+        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div class="top-icons">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search..."
+                       style="background: transparent; border: none; color: white; width: 100%; outline: none;">
+                <span>🔍</span>
+            </div>
+            <div class="user-dropdown-container">
+                <span id="user-icon" style="cursor: pointer;">👤</span>
+                <div id="user-dropdown" class="dropdown-menu">
+
+                    <th:block th:if="${session.member == null}">
+                        <a th:href="@{/members/login}">登入</a>
+                        <a th:href="@{/members/register}">註冊</a>
+                    </th:block>
+
+                    <th:block th:if="${session.member != null}">
+							<span style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
+                                  th:text="'Hi, ' + ${session.member.memName}">
+								Hi, 會員
+							</span>
+
+                        <a th:href="@{/members/view}">編輯個人資料</a>
+                        <a th:href="@{/pages/my-orders}">我的訂單</a>
+                        <form th:action="@{/members/logout}" method="post" id="logoutForm">
+                            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                登出 (Logout)
+                            </a>
+                        </form>
+                    </th:block>
+                </div>
+            </div>
+            <span id="cart">🛒</span>
+        </div>
+    </div>
+
+    <div class="main-header">
+        <div class="logo" onclick="navigateTo('home')" style="cursor: pointer;">卡爾夏</div>
+        <nav class="nav-links">
+            <a href="#" onclick="navigateTo('shop')">商城</a>
+            <a href="#" onclick="navigateTo('installation')">安裝區</a>
+            <a href="#" onclick="navigateTo('forum')">論壇</a>
+            <a href="#" onclick="navigateTo('notice')">公告</a>
+            <a href="#" onclick="navigateTo('faq')">常見問題</a>
+
+            <!-- 會員中心下拉選單 -->
+            <div class="user-dropdown-container">
+                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
+                <div id="member-dropdown" class="dropdown-menu">
+                    <a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a>
+                    <a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a>
+                    <a href="http://localhost:8080/pages/my-orders" onclick="navigateTo('orderInfo')">訂單查詢</a>
+                    <a href="#" onclick="navigateTo('')">申訴/檢舉</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- 主要內容 -->
+<div class="container">
+    <!-- 側邊欄 -->
+    <aside>
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">會員中心</h3>
+            <ul class="category-list" id="category-list">
+                <li><a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a></li>
+                <li><a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a></li>
+                <li><a href="http://localhost:8080/pages/my-orders">訂單查詢</a></li>
+                <li><a href="#" onclick="navigateTo('')">申訴/檢舉</a></li>
+            </ul>
+        </div>
+    </aside>
+
+    <!-- 主要內容區 -->
+    <main class="content-area">
+        <div class="coupon-container">
+            <h2 class="coupon-header">我的優惠券清單</h2>
+
+            <!-- 領取優惠券區域 -->
+            <div class="claim-section">
+                <input type="text" id="couponTitleInput" placeholder="請輸入優惠券名稱">
+                <button class="btn-claim" onclick="claimCoupon()">立即領取</button>
+                <span id="claimMsg"></span>
+            </div>
+
+            <!-- 篩選按鈕 -->
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="loadCoupons('all', this)">全部</button>
+                <button class="filter-btn" onclick="loadCoupons('expired', this)">已過期/已使用</button>
+            </div>
+
+            <!-- 加載中 -->
+            <div id="loading" class="loading">資料讀取中...</div>
+
+            <!-- 優惠券表格 -->
+            <table id="couponTable" class="coupon-table" style="display:none;">
+                <thead>
+                <tr>
+                    <th>優惠券名稱</th>
+                    <th>折扣金額</th>
+                    <th>使用狀態</th>
+                    <th>使用期限</th>
+                </tr>
+                </thead>
+                <tbody id="couponBody"></tbody>
+            </table>
+
+            <!-- 無資料提示 -->
+            <div id="noData" class="no-data" style="display:none;">
+                目前沒有可用的優惠券。
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-col">
+        <div class="footer-logo logo">卡爾夏</div>
+    </div>
+    <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+            <li>Shop Parts</li>
+            <li>Wholesale</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>The Company</h4>
+        <ul>
+            <li>About Us</li>
+            <li>FAQ</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Contact Us</h4>
+        <ul>
+            <li>info@mysite.com</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Follow Us</h4>
+        <ul>
+            <li>Instagram</li>
+        </ul>
+    </div>
+</footer>
+
+<!--<script th:src="@{/js/front-end/index.js}"></script>-->
+<script>
+    // 獲取當前會員編號
+    // const currentMemberNo = 1;
+
+    // 頁面載入完成後
+    window.onload = function() {
+        loadCoupons('all');
+        initUserDropdown();
+    };
+
+    // 初始化下拉選單
+    function initUserDropdown() {
+        // 處理右上角使用者圖示
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+        const memberTrigger = document.getElementById('member-center-trigger');
+        const memberDropdown = document.getElementById('member-dropdown');
+
+        if (userIcon && userDropdown) {
+            userIcon.onclick = function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+                memberDropdown.classList.remove('show');
+            };
+        }
+
+        // 處理導航列中的「會員中心」
+        if (memberTrigger && memberDropdown) {
+            memberTrigger.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                memberDropdown.classList.toggle('show');
+                userDropdown.classList.remove('show');
+            };
+        }
+
+        // 全域點擊監聽：點擊選單以外區域時關閉
+        document.addEventListener('click', function(event) {
+            const isUserIcon = event.target.closest('#user-icon');
+            const isMemberTrigger = event.target.closest('#member-center-trigger');
+            const isUserDropdown = event.target.closest('#user-dropdown');
+            const isMemberDropdown = event.target.closest('#member-dropdown');
+
+            if (!isUserIcon && !isUserDropdown) {
+                userDropdown.classList.remove('show');
+            }
+
+            if (!isMemberTrigger && !isMemberDropdown) {
+                memberDropdown.classList.remove('show');
+            }
+        });
+    }
+
+    // 導航功能
+    function navigateTo(page) {
+        const routes = {
+            'home': '/pages/front-end/index',
+            'shop': '/shop',
+            'installation': '/installation',
+            'forum': '/forum',
+            'notice': '/notice',
+            'faq': '/faq',
+            'category1': '/category/category1',
+            'category2': '/category/category2',
+            'category3': '/category/category3',
+            'category4': '/category/category4',
+            'category5': '/category/category5',
+            'coupons': '/pages/my-coupons',
+            'favorite':'/favorite/list-page'
+        };
+
+        if (routes[page]) {
+            window.location.href = routes[page];
+        }
+    }
+
+    // 領取優惠券
+    async function claimCoupon() {
+        const title = document.getElementById('couponTitleInput').value;
+        const msgSpan = document.getElementById('claimMsg');
+
+        if (!title) {
+            msgSpan.innerText = '請輸入優惠券名稱';
+            msgSpan.style.color = 'red';
+            return;
+        }
+
+        try {
+            // 修改點：不再傳遞 memberNo
+            const response = await fetch(`/member/coupons/claim?couponTitle=${encodeURIComponent(title)}`, {
+                method: 'POST'
+            });
+
+            if (response.status === 401) { // 未登入處理
+                window.location.href = '/members/login';
+                return;
+            }
+
+            const result = await response.text();
+            msgSpan.innerText = result;
+            msgSpan.style.color = response.ok ? '#4caf50' : 'red';
+
+            if (response.ok) {
+                loadCoupons('all');
+                document.getElementById('couponTitleInput').value = '';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // 加載優惠券列表
+    async function loadCoupons(type, buttonElement) {
+        const loading = document.getElementById('loading');
+        const table = document.getElementById('couponTable');
+        const body = document.getElementById('couponBody');
+        const noData = document.getElementById('noData');
+
+        if (buttonElement) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+        }
+
+        loading.style.display = 'block';
+        table.style.display = 'none';
+        noData.style.display = 'none';
+
+        try {
+            // 修改點：簡化 API URL
+            let url = (type === 'expired') ? '/member/coupons/expired' : '/member/coupons/my-coupons';
+
+            const response = await fetch(url);
+
+            if (response.status === 401) {
+                window.location.href = '/members/login';
+                return;
+            }
+
+            if (response.status === 204) {
+                loading.style.display = 'none';
+                noData.style.display = 'block';
+                return;
+            }
+
+            const data = await response.json();
+            loading.style.display = 'none';
+            table.style.display = 'table';
+            body.innerHTML = '';
+
+            data.forEach(item => {
+                let statusClass = (item.couponStatus === 1) ? 'status-used' : 'status-unused';
+                let statusText = (item.couponStatus === 1) ? '已使用' : '未使用';
+
+                // 1. 安全抓取資料，避免 undefined
+                const couponObj = item.coupon || {};
+                const title = couponObj.couponTitle || '未知優惠券';
+                const discount = couponObj.discountValue ? `$${couponObj.discountValue}` : '-';
+
+                // 2. 修正 split 報錯：先檢查 expiryDate 是否存在
+                let expiryDate = '無期限';
+                if (couponObj.expiryDate) {
+                    expiryDate = couponObj.expiryDate.split('T')[0];
+                }
+
+                // 3. 過期判斷
+                if (couponObj.expiryDate && new Date(couponObj.expiryDate) < new Date()) {
+                    statusClass = 'status-expired';
+                    statusText = '已過期';
+                }
+
+                body.innerHTML += `
+                    <tr>
+                        <td><strong>${title}</strong></td>
+                        <td><strong style="color:#ff3333;">${discount}</strong></td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>${expiryDate}</td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            loading.style.display = 'none';
+            console.error('Error:', error);
+        }
+    }
+
+    // JavaScript 登入後跳轉回原頁面方式(測試Fail)
+    // function goToLogin() {
+    //     const currentPath = window.location.pathname; // 取得 /pages/my-coupons
+    //     window.location.href = `/members/login?redirect=${encodeURIComponent(currentPath)}`;
+    // }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服務項目管理 - 卡爾夏 Install</title>
+    <link rel="stylesheet" th:href="@{/install/front-end/css/index.css}">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #ff3333;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff3333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="main-header">
+        <a th:href="@{/installation/home}" class="logo">卡爾夏 Install</a>
+        <nav class="nav-links">
+            <a th:href="@{/technician/orders}">回到技師後台</a>
+            <form th:action="@{/members/logout}" method="post" style="display:inline;">
+                <button type="submit"
+                    style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出</button>
+            </form>
+        </nav>
+    </header>
+
+    <div class="form-container">
+        <h2 style="color: white; margin-bottom: 30px; text-align: center;">服務項目與價格管理</h2>
+
+        <!-- Search Input -->
+        <input type="text" id="serviceSearchInput" class="form-control" placeholder="輸入關鍵字搜尋服務..."
+            onkeyup="filterServices()" style="margin-bottom: 20px; border-color: #555;">
+
+        <form th:action="@{/technician/services}" method="post" th:object="${dto}">
+
+            <div class="form-group">
+                <div id="serviceListContainer"
+                    style="background: #2a2a2a; padding: 15px; border-radius: 4px; border: 1px solid #444; max-height: 600px; overflow-y: auto;">
+                    <div th:each="item : ${allServiceItems}" class="service-item-row"
+                        style="display: flex; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px dashed #444;">
+
+                        <!-- Checkbox -->
+                        <div style="width: 40px;">
+                            <input type="checkbox" th:field="*{serviceIds}" th:value="${item.serviceNo}"
+                                th:id="'svc_' + ${item.serviceNo}" style="transform: scale(1.5); cursor: pointer;"
+                                onchange="togglePriceInput(this)">
+                        </div>
+
+                        <!-- Service Name -->
+                        <div style="flex: 1;">
+                            <label th:for="'svc_' + ${item.serviceNo}" th:text="${item.serviceName}"
+                                class="service-name-label"
+                                style="color: #ddd; cursor: pointer; font-size: 1.1em;"></label>
+                        </div>
+
+                        <!-- Price Input -->
+                        <div style="width: 150px; display: flex; align-items: center;">
+                            <span style="color: #888; margin-right: 5px;">$</span>
+                            <input type="number" th:name="'servicePrices[' + ${item.serviceNo} + ']'"
+                                th:value="${dto.servicePrices[item.serviceNo] != null ? dto.servicePrices[item.serviceNo] : 500}"
+                                class="form-control price-input" style="padding: 5px; text-align: right;"
+                                th:data-service-id="${item.serviceNo}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">儲存設定</button>
+        </form>
+    </div>
+
+    <script>
+        function filterServices() {
+            var input = document.getElementById("serviceSearchInput");
+            var filter = input.value.toUpperCase();
+            var container = document.getElementById("serviceListContainer");
+            var rows = container.getElementsByClassName("service-item-row");
+
+            for (var i = 0; i < rows.length; i++) {
+                var label = rows[i].getElementsByClassName("service-name-label")[0];
+                var txtValue = label.textContent || label.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    rows[i].style.display = "flex"; // Restore flex display
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+
+        function togglePriceInput(checkbox) {
+            const row = checkbox.closest('.service-item-row');
+            const priceInput = row.querySelector('.price-input');
+            if (checkbox.checked) {
+                // priceInput.disabled = false; 
+                priceInput.style.opacity = '1';
+            } else {
+                // priceInput.disabled = true;
+                priceInput.style.opacity = '0.3';
+            }
+        }
+
+        // Initialize state on load
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('input[type="checkbox"][id^="svc_"]').forEach(cb => {
+                const row = cb.closest('.service-item-row');
+                const priceInput = row.querySelector('.price-input');
+                if (!cb.checked) {
+                    priceInput.style.opacity = '0.3';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

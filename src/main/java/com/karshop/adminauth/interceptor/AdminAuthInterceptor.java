@@ -12,15 +12,18 @@ import jakarta.servlet.http.HttpSession;
 
 @Component
 public class AdminAuthInterceptor implements HandlerInterceptor {
-
+  private static final Integer SUPER_ADMIN_ID = 1;
   // URL → 功能 ID 對應表
   private static final Map<String, Integer> URL_TO_FUNC = Map.of(
-          "/admins/listAll",10,  // 10對應的是權限編號
-          "/admins/selectPage",10,
-          "/admins/search", 10,
-          "/admins/add",    10,
-          "/admins/edit",      10,
-          "/admins/home",     10
+          "/admins/listAll",2,  // 20對應的是權限編號
+          "/admins/selectPage",2,
+          "/admins/search", 2,
+          "/admins/add",    2,
+          "/admins/edit",      2,
+          "/admins/carcate/list", 4,
+          "/admins/carcate/edit", 4,
+          "/admins/carcate/add", 4,
+          "/admins/carcate/insert", 4
           // 如有更多需要授權的路徑，繼續加在這裡
   );
 
@@ -43,7 +46,9 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
       response.sendError(HttpServletResponse.SC_FORBIDDEN, "尚未授權");
       return false;
     }
-
+    if (perms.contains(SUPER_ADMIN_ID)) {
+      return true;
+    }
     // 取得請求的相對路徑（去掉 contextPath）
     String path = request.getRequestURI()
             .substring(request.getContextPath().length());

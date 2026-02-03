@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員審核 - 卡爾夏</title>
+    <link rel="stylesheet" th:href="@{/install/back-end/css/index.css}">
+</head>
+
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <span class="logo-icon"></span>
+                <h2>卡爾夏 Admin</h2>
+            </div>
+
+            <div class="sidebar-nav">
+                <div class="menu-item">
+                    <a th:href="@{/admin/audit}" class="active">
+                        <span>📋 技師審核</span>
+                        <span class="badge" th:text="${pendingTechs.size() > 0 ? pendingTechs.size() : ''}"></span>
+                    </a>
+                </div>
+                <div class="menu-item">
+                    <a th:href="@{/admin/payout}">
+                        <span>💰 撥款管理</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <form th:action="@{/admins/logout}" method="post" style="display:inline;">
+                    <button type="submit"
+                        style="background:none;border:none;color:inherit;font:inherit;cursor:pointer;">登出帳號</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <h2 class="page-title">技師資格審核</h2>
+                <div class="user-profile">
+                    <span th:text="${session.admin != null ? session.admin.admName : 'Admin'}">Admin</span>
+                    <div class="avatar">A</div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div style="padding: 30px; overflow-y: auto;">
+                <div class="table-container">
+                    <div style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+                        <h3 style="margin: 0; font-size: 16px; color: #333;">待審核申請列表</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>姓名</th>
+                                <th>申請地區</th>
+                                <th>銀行帳戶</th>
+                                <th>申請時間</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="tech : ${pendingTechs}">
+                                <td th:text="${tech.realName}">Name</td>
+                                <td>
+                                    <span class="badge" th:text="${tech.serviceArea}"
+                                        style="background-color: #eee; color: #333;">Area</span>
+                                </td>
+                                <td>
+                                    <div th:text="${tech.bankCode}">Code</div>
+                                    <div th:text="${tech.bankAccount}" style="font-size: 12px; color: #888;">Account
+                                    </div>
+                                </td>
+                                <td th:text="${#temporals.format(tech.createAt, 'yyyy-MM-dd HH:mm')}">Date</td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <form th:action="@{'/admin/audit/' + ${tech.techNo} + '/approve'}"
+                                            method="post">
+                                            <button type="submit" class="btn btn-primary">通過</button>
+                                        </form>
+                                        <form th:action="@{'/admin/audit/' + ${tech.techNo} + '/reject'}" method="post">
+                                            <button type="submit" class="btn btn-secondary"
+                                                style="color: #d9534f; border-color: #d9534f;">駁回</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(pendingTechs)}">
+                                <td colspan="5" style="text-align: center; padding: 20px; color: #999;">
+                                    目前沒有待審核的申請
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
