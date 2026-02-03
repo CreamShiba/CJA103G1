@@ -7,14 +7,14 @@ import java.io.Serializable;
 import java.util.List;
 
 @Entity
-@Table(name = "member2")
+@Table(name = "member")
 public class MemberVO implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_no")
     private Integer memberNo;
 
-    @Column(name = "mem_name")
+    @Column(name = "member_name")
     private String memName;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL ,fetch = FetchType.LAZY)

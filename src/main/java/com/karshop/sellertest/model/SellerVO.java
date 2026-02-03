@@ -9,8 +9,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "seller")
+@Table(name = "seller_info")
 public class SellerVO implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "seller_no")
@@ -21,35 +22,58 @@ public class SellerVO implements Serializable {
     private MemberVO member;
 
     @Column(name = "seller_name")
-    private String sellerName;
+    private String sellerName; // 負責人姓名
 
-    @Column(name = "seller_status")
-    private String sellerStatus; // 待審核, 已開通, 停權
+    @Column(name = "shop_name")
+    private String shopName;
 
-    @Column(name = "seller_email")
+    @Column(name = "image_path")
+    private String imagePath;
+
+    @Column(name = "phone")
+    private String phone;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "email")
     private String sellerEmail;
 
     @Column(name = "seller_tax_id")
     private String sellerTaxId;
 
-//  銀行帳號 (為了之後撥款功能)
+    @Column(name = "status")
+    private String sellerStatus; // 狀態: 待審核, 已通過, 停權
+
+    @Column(name = "description")
+    private String description;  // 賣場描述
+
+    // isverified TINYINT -> Java 建議用 Boolean (0=false, 1=true)
+    @Column(name = "isverified")
+    private Boolean isVerified;  // 是否已認證
+
+    @Column(name = "bank_code")
+    private String bankCode;
+
     @Column(name = "bank_account")
     private String bankAccount;
 
-    @Column(name = "create_time")
+    @Column(name = "created")
     private LocalDateTime createTime;
 
-    // mappedBy = "seller" 指的是 ProductVO 裡面的 private SellerVO seller;
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
     private List<ProductVO> product;
 
-    // mappedBy = "seller" 指的是 OrdVO 裡面的 private SellerVO seller;
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
     private List<OrdVO>  order;
 
-    // Getter / Setter
-    public Integer getSellerNo() { return sellerNo; }
-    public void setSellerNo(Integer sellerNo) { this.sellerNo = sellerNo; }
+    public Integer getSellerNo() {
+        return sellerNo;
+    }
+
+    public void setSellerNo(Integer sellerNo) {
+        this.sellerNo = sellerNo;
+    }
 
     public MemberVO getMember() {
         return member;
@@ -59,15 +83,44 @@ public class SellerVO implements Serializable {
         this.member = member;
     }
 
-    public String getSellerName() { return sellerName; }
-    public void setSellerName(String sellerName) { this.sellerName = sellerName; }
-
-    public String getSellerStatus() {
-        return sellerStatus;
+    public String getSellerName() {
+        return sellerName;
     }
 
-    public void setSellerStatus(String sellerStatus) {
-        this.sellerStatus = sellerStatus;
+    public void setSellerName(String sellerName) {
+        this.sellerName = sellerName;
+    }
+
+    public String getShopName() {
+        return shopName;
+    }
+
+    public void setShopName(String shopName) {
+        this.shopName = shopName;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getSellerEmail() {
@@ -84,6 +137,38 @@ public class SellerVO implements Serializable {
 
     public void setSellerTaxId(String sellerTaxId) {
         this.sellerTaxId = sellerTaxId;
+    }
+
+    public String getSellerStatus() {
+        return sellerStatus;
+    }
+
+    public void setSellerStatus(String sellerStatus) {
+        this.sellerStatus = sellerStatus;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Boolean getVerified() {
+        return isVerified;
+    }
+
+    public void setVerified(Boolean verified) {
+        isVerified = verified;
+    }
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public void setBankCode(String bankCode) {
+        this.bankCode = bankCode;
     }
 
     public String getBankAccount() {
