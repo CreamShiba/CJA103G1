@@ -254,7 +254,7 @@
         });
     }
 
-    // 2. 獲取訂單清單 (修復版)
+    // 2. 獲取訂單清單
     async function fetchOrders() {
         const body = document.getElementById('orderBody');
         const noOrderDiv = document.getElementById('noOrder');
@@ -281,14 +281,18 @@
 
             // 2. 獲取評價資料 (此 API 需回傳該會員的所有 ProdRate 紀錄)
             let allRates = [];
-            try {
-                const rateRes = await fetch('/prodRate/member-all?t=' + new Date().getTime(), {
-                    credentials: 'same-origin',
-                    headers: { 'Accept': 'application/json' }
-                });
-                if (rateRes.ok) allRates = await rateRes.json();
-            } catch (rateErr) {
-                console.warn('載入評價資料失敗，請確認後端 /prodRate/member-all 介面是否正常:', rateErr);
+            async function initPage() {
+                try {
+                    // 先抓評價，再抓訂單
+                    const rateRes = await fetch(`/prodRate/member/${memberNo}`);
+                    allRates = await response.json();
+                    console.log("所有評價載入成功:", allRates);
+
+                    // 評價載入完畢後，才執行渲染訂單的 fetchOrders
+                    fetchOrders();
+                } catch (err) {
+                    console.error("載入失敗", err);
+                }
             }
 
             body.innerHTML = '';
@@ -309,28 +313,26 @@
 
                 // --- 評價按鈕邏輯 (對應 prorate 欄位) ---
                 let ratingBtn = `<span style="color: #ccc;"> </span>`;
+                const ordRates = allRates.filter(r => Number(r.ordNo || r.ord_no) === Number(ord.ordNo));
 
-                // 只有「已完成」的訂單才允許評價或修改評價
-                if (ord.ordStatus === '已完成') {
-                    const ordRates = allRates.filter(r => r.ordNo === ord.ordNo);
-                    const hasRated = ordRates.length > 0;
+                if (ordRates.length === 0) {
+                    // 沒資料
+                    ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
+                } else {
+                    // 將狀態全部轉為數字進行比對
+                    const statusList = ordRates.map(r => Number(r.rateStatus));
+                    const allLocked = statusList.every(s => s === 2);
+                    const hasDraft = statusList.some(s => s === 1);
 
-                    // 只要有一筆 status 是 1，就代表還在「可修改」階段
-                    const canEdit = hasRated && ordRates.some(r => Number(r.rateStatus) === 1);
-
-                    // 必須「所有」項目的狀態都是 2，才顯示「查看」
-                    const allLocked = hasRated && ordRates.every(r => Number(r.rateStatus) === 2);
-
-                    if (!hasRated) {
-                        ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
-                    } else if (canEdit) {
-                        // 狀態 1：顯示黃色修改按鈕
-                        ratingBtn = `<button class="btn-rate" style="background-color:#ffc107; color:black;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
-                    } else if (allLocked) {
-                        // 狀態 2：顯示綠色查看按鈕
-                        ratingBtn = `<button class="btn-rate" style="background-color:#28a745;" onclick="location.href='/prodRate/view-page?ordNo=${ord.ordNo}'">查看評價</button>`;
+                    if (allLocked) {
+                        ratingBtn = `<button class="btn-rate" style="background-color:#28a745;"
+          onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">查看評價</button>`;
+                    } else if (hasDraft) {
+                        ratingBtn = `<button class="btn-rate" style="background-color:#ffc107; color:black;"
+          onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
                     }
                 }
+                console.log("當前 allRates 內容:", JSON.stringify(allRates));
 
                 // --- 動作按鈕邏輯 (詳情 / 確認收貨) ---
                 let actionBtn = `<button class="btn-detail" onclick="viewDetail(${ord.ordNo})">詳情</button>`;
