@@ -47,16 +47,26 @@ public class MemberCouponService {
     /**
      * 更新優惠券狀態（例如：模擬核銷優惠券）
      */
-    @Transactional
+    @Transactional// 確保事務完整性
     public void useCoupon(Integer memberNo, Integer couponNo) {
         MemberCouponId id = new MemberCouponId();
         id.setMemberNo(memberNo);
         id.setCouponNo(couponNo);
+        MemberCoupon memberCoupon = memberCouponRepository.findById(id).orElse(null);
 
-        memberCouponRepository.findById(id).ifPresent(mc -> {
-            mc.setCouponStatus(1); // 設為已使用
-            memberCouponRepository.save(mc);
-        });
+        if (memberCoupon != null) {
+            // 額外判斷：必須是未使用(0) 且 當下時間尚未過期
+            // 注意：這需要 MemberCoupon 實體中有關聯 Coupon 或持有到期時間資訊
+            if (memberCoupon.getCouponStatus() == 0 &&
+                    LocalDateTime.now().isBefore(memberCoupon.getUseTime())) { // 此時的 useTime 仍是 coupon_end
+
+                memberCoupon.setCouponStatus(1); // 變更為已使用
+                memberCoupon.setUseTime(LocalDateTime.now()); // 覆蓋為實際使用時間
+                memberCouponRepository.save(memberCoupon);
+            } else {
+                throw new RuntimeException("優惠券已失效或已使用");
+            }
+        }
     }
 
 

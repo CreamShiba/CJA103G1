@@ -117,9 +117,19 @@ public class ProdRateController {
                     }
 
                     // 獲取商品圖片
-                    List<ProductImg> images = productImgService.getByProdNo(detail.getProdNo());
-                    if (images != null && !images.isEmpty()) {
-                        productImgMap.put(detail.getProdNo(), images.get(0).getImgNo());
+                    try {
+                        List<ProductImg> images = productImgService.getByProdNo(detail.getProdNo());
+                        if (images != null && !images.isEmpty()) {
+                            Integer imgNo = images.get(0).getImgNo();
+                            if (imgNo != null) {
+                                productImgMap.put(detail.getProdNo(), imgNo);
+                                System.out.println("✅ 商品 " + detail.getProdNo() + " 圖片編號: " + imgNo);
+                            }
+                        } else {
+                            System.out.println("⚠️ 商品 " + detail.getProdNo() + " 無圖片");
+                        }
+                    } catch (Exception e) {
+                        System.err.println("❌ 載入商品 " + detail.getProdNo() + " 圖片錯誤: " + e.getMessage());
                     }
                 });
             } else {
