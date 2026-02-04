@@ -17,7 +17,7 @@ public interface CouponRepository extends JpaRepository<Coupon, Integer>, JpaSpe
     // 過期的優惠券狀態改為 0
     @Transactional
     @Modifying
-    @Query("UPDATE Coupon c SET c.couponStatus = 0 WHERE c.couponEnd < :now AND c.couponStatus = 1")
+    @Query("UPDATE Coupon c SET c.couponStatus = 2 WHERE c.couponEnd < :now AND c.couponStatus = 1")
     void updateExpiredStatus(LocalDateTime now);
 
     @Transactional

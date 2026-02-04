@@ -155,3 +155,22 @@
 .btn-edit i {
     font-size: 16px;
 }
+
+.page-link {
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.page-link:hover {
+    background-color: #f1f1f1;
+}
+
+.page-link.active {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+}

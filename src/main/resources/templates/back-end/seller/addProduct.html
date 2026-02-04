@@ -47,6 +47,19 @@
             </div>
 
             <div class="form-group">
+                <label style="color:#ccc; font-size:14px;">適用車款 Car Model</label>
+
+                <select class="form-control" th:field="*{carCategory.carCategoryNo}">
+                    <option value="">-- 全通用 / 請選擇車款 --</option>
+
+                    <option th:each="car : ${carCategoryList}"
+                            th:value="${car.carCategoryNo}"
+                            th:text="${car.fullName}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label style="color:#ccc; font-size:14px;">商品價格 Price</label>
                 <input type="number" class="form-control" th:field="*{prodPrice}" placeholder="請輸入價格" required/>
                 <span th:if="${#fields.hasErrors('prodPrice')}" th:errors="*{prodPrice}" style="color: #ff4d4d; font-size: 12px;"></span>

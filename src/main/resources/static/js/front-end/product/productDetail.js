@@ -78,15 +78,6 @@ function submitReportForm() {
     form.submit(); // 這行會真的把資料送去後端 @{/reports/submit}
 }
 
-const userIcon = document.getElementById('user-icon');
-const userDropdown = document.getElementById('user-dropdown');
-userIcon.addEventListener('click', (e) => {
-    e.stopPropagation();
-    userDropdown.classList.toggle('show');
-});
-window.addEventListener('click', () => {
-    if (userDropdown.classList.contains('show')) userDropdown.classList.remove('show');
-});
 // 頁面載入完成後
 window.onload = function() {
     initUserDropdown();
@@ -130,5 +121,51 @@ document.addEventListener("DOMContentLoaded", function() {
                 flashMsg.remove();
             }, 500); // 等待淡出動畫結束後移除
         }, 3000); // 3秒後消失
+    }
+});
+
+// 商品收藏功能(處理 AJAX)
+document.addEventListener('DOMContentLoaded', function() {
+    const favBtn = document.getElementById('favBtn');
+    const favIcon = document.getElementById('favIcon');
+
+    if (favBtn) {
+        favBtn.addEventListener('click', function() {
+            const prodNo = this.getAttribute('data-prodno');
+
+            // 發送 AJAX 請求至您的 toggleFavoriteAjax 方法
+            fetch('/favorite/toggleAjax', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ 'prodNo': prodNo })
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        // 對應您 Controller 中的 ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        alert("請先登入後再執行收藏！");
+                        window.location.href = "/members/login";
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.status === 'success') {
+                        // 即時渲染：根據後端回傳的 boolean 值切換圖示與樣式
+                        if (data.isFavorite) {
+                            favIcon.className = 'fas fa-heart'; // 切換為實心
+                            favBtn.classList.add('active');
+                            favBtn.title = "取消收藏";
+                        } else {
+                            favIcon.className = 'far fa-heart'; // 切換為空心
+                            favBtn.classList.remove('active');
+                            favBtn.title = "加入收藏";
+                        }
+                        console.log(data.message); // 顯示「已加入收藏」或「已取消收藏」
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
     }
 });

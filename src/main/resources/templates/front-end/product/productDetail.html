@@ -63,6 +63,31 @@
                 <span class="rating-count-detail" th:text="'(' + ${productVO.ratingAmount} + ' 則評價)'"></span>
             </div>
 
+            <div style="margin-top: 15px; margin-bottom: 15px;">
+                <div th:if="${productVO.carCategory != null}"
+                     style="display: inline-flex; align-items: flex-start; /* 靠上對齊，避免多行時圖示跑位 */
+                            background: rgba(255,255,255,0.05);
+                            border: 1px solid #444;
+                            padding: 8px 15px;
+                            border-radius: 6px;
+                            color: #eee;
+                            max-width: 100%;"> <i class="fas fa-car" style="color: #00e676; margin-right: 8px; font-size: 1.1em; flex-shrink: 0; margin-top: 2px;"></i>
+
+                    <span style="color: #aaa; margin-right: 5px; white-space: nowrap; flex-shrink: 0;">適用車款:</span>
+
+                    <span th:text="${productVO.carCategory.fullName}"
+                          style="font-weight: bold; color: #fff; letter-spacing: 0.5px;
+                                 white-space: normal; line-height: 1.4;">
+                    </span>
+                </div>
+
+                <div th:if="${productVO.carCategory == null}"
+                     style="display: inline-flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px dashed #666; padding: 8px 15px; border-radius: 6px; color: #aaa;">
+                    <i class="fas fa-tools" style="margin-right: 8px;"></i>
+                    <span style="white-space: nowrap;">全車系通用 / 改裝通用款</span>
+                </div>
+            </div>
+
             <div class="seller-info-box">
 
                 <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}" class="seller-avatar-link">
@@ -123,16 +148,28 @@
                 </form>
 
                 <!-- 商品收藏-->
-                <form th:action="@{/fav/toggle}" method="post" style="display: flex;">
-                    <input type="hidden" name="prodNo" th:value="${productVO.prodNo}">
+<!--                原程式碼-->
+<!--                <form th:action="@{/fav/toggle}" method="post" style="display: flex;">-->
+<!--                    <input type="hidden" name="prodNo" th:value="${productVO.prodNo}">-->
 
-                    <button type="submit" class="fav-btn"
-                            th:classappend="${isFavorite} ? 'active'"
-                            th:title="${isFavorite} ? '取消收藏' : '加入收藏'">
+<!--                    <button type="submit" class="fav-btn"-->
+<!--                            th:classappend="${isFavorite} ? 'active'"-->
+<!--                            th:title="${isFavorite} ? '取消收藏' : '加入收藏'">-->
 
-                        <i th:class="${isFavorite} ? 'fas fa-heart' : 'far fa-heart'"></i>
-                    </button>
-                </form>
+<!--                        <i th:class="${isFavorite} ? 'fas fa-heart' : 'far fa-heart'"></i>-->
+<!--                    </button>-->
+<!--                </form>-->
+                    <div class="fav-section" style="display: flex;">
+                        <button type="button"
+                                id="favBtn"
+                                class="fav-btn"
+                                th:classappend="${isFavorite} ? 'active'"
+                                th:data-prodno="${productVO.prodNo}"
+                                th:title="${isFavorite} ? '取消收藏' : '加入收藏'">
+
+                            <i id="favIcon" th:class="${isFavorite} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                        </button>
+                    </div>
 
             </div>
 

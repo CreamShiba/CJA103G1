@@ -37,7 +37,7 @@ public class ProductService {
     }
 
     //  商城複合查詢
-    public Page<ProductVO> getAllForBuyer(int pageNumber, String keyword, Integer productCategoryNo, Integer sellerNo, Integer minPrice, Integer maxPrice){
+    public Page<ProductVO> getAllForBuyer(int pageNumber, String keyword, Integer productCategoryNo, Integer carCategoryNo,  Integer sellerNo, Integer minPrice, Integer maxPrice){
         // 設定分頁：
         // pageNumber - 1 : 因為 Spring 的頁數是從 0 開始算，但網址我們通常傳 1
         // 9 : 每頁顯示 9 筆
@@ -54,7 +54,7 @@ public class ProductService {
             maxPrice = maxPriceTemp;
         }
 
-        return productRepository.findAllForBuyer(keyword, productCategoryNo, sellerNo, minPrice, maxPrice, pageable);
+        return productRepository.findAllForBuyer(keyword, productCategoryNo, carCategoryNo, sellerNo, minPrice, maxPrice, pageable);
 
     }
 
