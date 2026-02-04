@@ -76,23 +76,48 @@ function openAuditModal(btn) {
     // 4. 設定 hidden input (給 Form 用)
     document.getElementById('input_sellerNo_approve').value = sellerNo;
     document.getElementById('input_sellerNo_ban').value = sellerNo;
+    if(document.getElementById('input_sellerNo_reject')) {
+        document.getElementById('input_sellerNo_reject').value = sellerNo;
+    }
 
     // 5. 按鈕顯示邏輯 (保持原本邏輯)
     let btnApprove = document.getElementById('formApprove');
     let btnBan = document.getElementById('formBan');
+    let btnReject = document.getElementById('formReject');
+
+    // 重置所有按鈕為不顯示 (避免殘留)
+    if(btnApprove) btnApprove.style.display = 'none';
+    if(btnBan) btnBan.style.display = 'none';
+    if(btnReject) btnReject.style.display = 'none';
+
+    let modalTitle = document.getElementById('modalTitle');
 
     if (status === '待審核') {
-        btnApprove.style.display = 'inline-block';
-        btnBan.style.display = 'inline-block';
-        document.getElementById('modalTitle').innerText = '📋 審核賣家申請';
+        // 待審核：可以「通過」或「駁回」
+        if(btnApprove) btnApprove.style.display = 'inline-block';
+        if(btnReject) btnReject.style.display = 'inline-block'; // 🔥 顯示駁回
+        modalTitle.innerText = '📋 審核賣家申請';
+
     } else if (status === '已開通') {
-        btnApprove.style.display = 'none';
-        btnBan.style.display = 'inline-block';
-        document.getElementById('modalTitle').innerText = 'ℹ️ 賣家詳細資料';
+        // 已開通：只能「停權」
+        if(btnBan) btnBan.style.display = 'inline-block';
+        modalTitle.innerText = 'ℹ️ 賣家詳細資料';
+
+    } else if (status === '未通過' || status === '審核未通過') {
+        // 未通過：通常只能查看，或者給予「通過」補救 (看你需求)
+        // 這裡設定為：僅查看，或允許管理員手動改成開通
+        if(btnApprove) btnApprove.style.display = 'inline-block';
+        modalTitle.innerText = 'ℹ️ 申請未通過資料';
+
+        // 針對 Badge 顏色做個特殊處理 (讓它變成灰色)
+        statusSpan.style.background = '#f0f0f0';
+        statusSpan.style.color = '#666';
+        statusSpan.style.border = '1px solid #ccc';
+
     } else {
-        btnApprove.style.display = 'inline-block';
-        btnBan.style.display = 'none';
-        document.getElementById('modalTitle').innerText = 'ℹ️ 賣家詳細資料 (已停權)';
+        // 停權：可以「解除停權 (通過)」
+        if(btnApprove) btnApprove.style.display = 'inline-block';
+        modalTitle.innerText = 'ℹ️ 賣家詳細資料 (已停權)';
     }
 
     // 顯示彈窗

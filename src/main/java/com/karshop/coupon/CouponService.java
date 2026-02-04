@@ -2,6 +2,10 @@ package com.karshop.coupon;
 
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -72,6 +76,15 @@ public class CouponService {
 
     public void update(Coupon coupon){
         couponRepository.save(coupon);
+    }
+
+    // 新增：取得分頁資料
+    public Page<Coupon> getAllPaged(int page, int size) {
+        // 設定排序方式（例如按編號倒序），頁數從 0 開始計算
+        Pageable pageable = PageRequest.of(page, size, Sort.by("couponNo").descending());
+        // 這裡若要維持「只顯示狀態為 1」的邏輯，建議在 Repository 定義 findByCouponStatus(Integer status, Pageable pageable)
+        // 簡單起見，我們先示範全量分頁
+        return couponRepository.findAll(pageable);
     }
 
 

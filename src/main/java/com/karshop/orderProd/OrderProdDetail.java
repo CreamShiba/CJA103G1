@@ -1,6 +1,7 @@
 package com.karshop.orderProd;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.karshop.productProd.ProductProd;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -26,7 +27,7 @@ public class OrderProdDetail {
     private Integer price;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JsonBackReference
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // 防止 Lazy Loading 報錯
     @JoinColumn(name = "prod_no", referencedColumnName = "prod_no", insertable = false, updatable = false)
     private ProductProd productProd;
 }

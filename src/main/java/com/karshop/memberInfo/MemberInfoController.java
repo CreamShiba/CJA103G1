@@ -2,6 +2,7 @@ package com.karshop.memberInfo;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,9 +22,13 @@ public class MemberInfoController {
     private MemberInfoService memberInfoService;
 
     @GetMapping("/manage")
-    public String showManagePage(Model model) {
-        List<MemberInfo> list = memberInfoService.getAll();
-        model.addAttribute("memberList", list);
+    public String showManagePage(@RequestParam(value = "p", defaultValue = "0") Integer page, Model model) {
+        int pageSize = 5; // 設定每頁顯示 5 筆
+        Page<MemberInfo> memberPage = memberInfoService.getAll(page, pageSize);
+
+        // 傳送 Page 物件到前端，它包含分頁資訊（總頁數、當前頁碼等）
+        model.addAttribute("memberPage", memberPage);
+        model.addAttribute("memberList", memberPage.getContent());
         return "/memberInfo/adminMemberInfo";
     }
 

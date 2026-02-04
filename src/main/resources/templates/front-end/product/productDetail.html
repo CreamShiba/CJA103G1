@@ -148,16 +148,28 @@
                 </form>
 
                 <!-- 商品收藏-->
-                <form th:action="@{/fav/toggle}" method="post" style="display: flex;">
-                    <input type="hidden" name="prodNo" th:value="${productVO.prodNo}">
+<!--                原程式碼-->
+<!--                <form th:action="@{/fav/toggle}" method="post" style="display: flex;">-->
+<!--                    <input type="hidden" name="prodNo" th:value="${productVO.prodNo}">-->
 
-                    <button type="submit" class="fav-btn"
-                            th:classappend="${isFavorite} ? 'active'"
-                            th:title="${isFavorite} ? '取消收藏' : '加入收藏'">
+<!--                    <button type="submit" class="fav-btn"-->
+<!--                            th:classappend="${isFavorite} ? 'active'"-->
+<!--                            th:title="${isFavorite} ? '取消收藏' : '加入收藏'">-->
 
-                        <i th:class="${isFavorite} ? 'fas fa-heart' : 'far fa-heart'"></i>
-                    </button>
-                </form>
+<!--                        <i th:class="${isFavorite} ? 'fas fa-heart' : 'far fa-heart'"></i>-->
+<!--                    </button>-->
+<!--                </form>-->
+                    <div class="fav-section" style="display: flex;">
+                        <button type="button"
+                                id="favBtn"
+                                class="fav-btn"
+                                th:classappend="${isFavorite} ? 'active'"
+                                th:data-prodno="${productVO.prodNo}"
+                                th:title="${isFavorite} ? '取消收藏' : '加入收藏'">
+
+                            <i id="favIcon" th:class="${isFavorite} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                        </button>
+                    </div>
 
             </div>
 

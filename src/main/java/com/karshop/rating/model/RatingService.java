@@ -1,5 +1,6 @@
 package com.karshop.rating.model;
 
+import com.karshop.members.model.MembersVO;
 import com.karshop.membertest.model.MemberVO;
 import com.karshop.ord.model.OrdVO;
 import com.karshop.sellertest.model.SellerVO;
@@ -35,8 +36,9 @@ public class RatingService {
         sellerVO.setSellerNo(sellerNo);
         ratingVO.setSeller(sellerVO);
 
-        MemberVO memberVO = new MemberVO();
-        memberVO.setMemberNo(memberNo);
+
+        MembersVO memberVO = new MembersVO();
+        memberVO.setMemNo(memberNo);
         ratingVO.setMember(memberVO);
 
         ratingRepository.save(ratingVO);

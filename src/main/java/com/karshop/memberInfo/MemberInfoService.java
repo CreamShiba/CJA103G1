@@ -1,6 +1,10 @@
 package com.karshop.memberInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,8 +18,14 @@ public class MemberInfoService {
     @Autowired
     private MemberInfoRepository repository;
 
-    public List<MemberInfo> getAll() {
-        return repository.findAll();
+//    public List<MemberInfo> getAll() {
+//        return repository.findAll();
+//    }
+
+    public Page<MemberInfo> getAll(int page, int size) {
+        // 設定排序方式（例如按會員編號升序），頁數從 0 開始
+        Pageable pageable = PageRequest.of(page, size, Sort.by("memberNo").ascending());
+        return repository.findAll(pageable);
     }
 
     @Transactional

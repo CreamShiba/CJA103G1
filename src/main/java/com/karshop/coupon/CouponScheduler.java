@@ -17,6 +17,6 @@ public class CouponScheduler {
     public void checkExpiredCoupons() {
         LocalDateTime now = LocalDateTime.now();
         couponRepository.updateExpiredStatus(now);
-        System.out.println("排程執行：已將過期優惠券狀態更新為失效。時間：" + now);
+        System.out.println("排程執行：已將過期優惠券狀態更新為已過期(2)。時間：" + now);
     }
 }

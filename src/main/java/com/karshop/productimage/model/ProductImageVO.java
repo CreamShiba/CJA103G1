@@ -49,14 +49,6 @@ public class ProductImageVO implements Serializable {
         this.product = product;
     }
 
-    //    public Integer getProdNo() {
-//        return prodNo;
-//    }
-//
-//    public void setProdNo(Integer prodNo) {
-//        this.prodNo = prodNo;
-//    }
-
     public LocalDate getUploadDate() {
         return uploadDate;
     }
