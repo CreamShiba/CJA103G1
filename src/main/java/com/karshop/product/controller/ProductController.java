@@ -3,7 +3,6 @@ package com.karshop.product.controller;
 
 import com.karshop.carcategory.model.CarCategoryService;
 import com.karshop.carcategory.model.CarCategoryVO;
-import com.karshop.membertest.model.MemberVO;
 import com.karshop.ord.model.OrdService;
 import com.karshop.ord.model.OrdVO;
 import com.karshop.product.model.ProductService;
@@ -14,10 +13,8 @@ import com.karshop.productimage.model.ProductImageService;
 import com.karshop.productimage.model.ProductImageVO;
 import com.karshop.reporttest.model.ReportRepository;
 import com.karshop.reporttest.model.ReportVO;
-import com.karshop.sellertest.model.SellerService;
 import com.karshop.sellertest.model.SellerVO;
 import jakarta.persistence.EntityManager;
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +53,6 @@ public class ProductController {
     private RedisTemplate<String, byte[]> imageRedisTemplate;
 
     @Autowired
-    private SellerService sellerService;
-
-    @Autowired
     private CarCategoryService carCategoryService;
 
     @Autowired
@@ -67,10 +61,12 @@ public class ProductController {
     @GetMapping("/addProduct")
     public String addProduct(ModelMap model,
                              @SessionAttribute(value = "seller", required = false) SellerVO sellerVO){
-//      測試用
+
         if(sellerVO == null){
-            sellerVO = new SellerVO();
-            sellerVO.setSellerNo(101);
+            return "redirect:/members/seller/apply";
+        }
+        if(!"已開通".equals(sellerVO.getSellerStatus())){
+            return "redirect:/members/seller/sellerinfo";
         }
 
         ProductVO productVO = new ProductVO();
@@ -86,10 +82,11 @@ public class ProductController {
                          @RequestParam("upFile") MultipartFile[] upFile,
                          @SessionAttribute(value = "seller", required = false) SellerVO sellerVO )throws IOException {
 
-        //      測試用
         if(sellerVO == null){
-            sellerVO = new SellerVO();
-            sellerVO.setSellerNo(101);
+            return "redirect:/members/seller/apply";
+        }
+        if(!"已開通".equals(sellerVO.getSellerStatus())){
+            return "redirect:/members/seller/sellerinfo";
         }
 
         if (result.hasErrors() || upFile[0].isEmpty()) {
@@ -119,12 +116,20 @@ public class ProductController {
     @GetMapping("/getOne_For_Update")
     public String getOne_For_Update(@RequestParam Integer prodNo, ModelMap model,
                                     @SessionAttribute(value = "seller", required = false) SellerVO sellerVO){
-//      測試用
-        if (sellerVO == null) {
-            sellerVO = new SellerVO();
-            sellerVO.setSellerNo(101);
+        if(sellerVO == null){
+            return "redirect:/members/seller/apply";
         }
+        if(!"已開通".equals(sellerVO.getSellerStatus())){
+            return "redirect:/members/seller/sellerinfo";
+        }
+
         ProductVO productVO = productService.getOneProduct(prodNo);
+
+//      檢查是否為該賣家的商品
+        if(!productVO.getSeller().getSellerNo().equals(sellerVO.getSellerNo())){
+            return "redirect:/product/dashboard";
+        }
+
         model.addAttribute("productVO",productVO);
 
         if("違規下架".equals(productVO.getProdStatus())){
@@ -143,12 +148,19 @@ public class ProductController {
                          @RequestParam("upFile") MultipartFile[] upFile,
                          @SessionAttribute(value = "seller", required = false) SellerVO sellerVO) throws IOException {
 
-//      測試用
-        if (sellerVO == null) {
-            sellerVO = new SellerVO();
-            sellerVO.setSellerNo(101);
+        if(sellerVO == null){
+            return "redirect:/members/seller/apply";
+        }
+        if(!"已開通".equals(sellerVO.getSellerStatus())){
+            return "redirect:/members/seller/sellerinfo";
         }
         productVO.setSeller(sellerVO);
+
+        // 檢查是否為該賣家的商品
+        ProductVO checkOwner = productService.getOneProduct(productVO.getProdNo());
+        if (!checkOwner.getSeller().getSellerNo().equals(sellerVO.getSellerNo())) {
+            return "redirect:/product/dashboard";
+        }
 
         if (result.hasErrors()) {
             return "back-end/seller/updateProduct";
@@ -231,9 +243,22 @@ public class ProductController {
 
     @GetMapping("/updateStatus")
     public String updateStatus(@RequestParam(value = "prodNo") Integer prodNo,
-                               @RequestParam(value = "prodStatus") String prodStatus){
+                               @RequestParam(value = "prodStatus") String prodStatus,
+                               @SessionAttribute(value = "seller", required = false) SellerVO sellerVO){
+        if(sellerVO == null){
+            return "redirect:/members/seller/apply";
+        }
+        if(!"已開通".equals(sellerVO.getSellerStatus())){
+            return "redirect:/members/seller/sellerinfo";
+        }
 
         ProductVO productVO = productService.getOneProduct(prodNo);
+
+        if (!productVO.getSeller().getSellerNo().equals(sellerVO.getSellerNo())) {
+            System.out.println("賣家 " + sellerVO.getSellerNo() + " 試圖操作別人的商品 " + prodNo);
+            return "redirect:/product/dashboard";
+        }
+
         productVO.setProdStatus(prodStatus);
         productService.updateProduct(productVO);
 
@@ -248,13 +273,12 @@ public class ProductController {
                                   @RequestParam(value = "searchStatus", required = false) String searchStatus,
                                   ModelMap model,
                                   @SessionAttribute(value = "seller", required = false) SellerVO sellerVO){
-
-        //      測試用
-        if (sellerVO == null) {
-            sellerVO = new SellerVO();
-            sellerVO.setSellerNo(101);
+        if(sellerVO == null){
+            return "redirect:/members/seller/apply";
         }
-
+        if(!"已開通".equals(sellerVO.getSellerStatus())){
+            return "redirect:/members/seller/sellerinfo";
+        }
         Integer sellerNo = sellerVO.getSellerNo();
         prepareSellerDashboardData(model, sellerNo);
         List<ProductVO> searchResult = productService.getProductBySearchForSeller(sellerNo, searchName, minPrice, maxPrice, searchStatus);
@@ -274,13 +298,12 @@ public class ProductController {
     @GetMapping("/dashboard")
     public String sellerDashboard(@RequestParam(value = "tab", defaultValue = "dashboard") String tab, ModelMap model,
                                   @SessionAttribute(value = "seller", required = false) SellerVO sellerVO) {
-
-        //      測試用
-        if (sellerVO == null) {
-            sellerVO = new SellerVO();
-            sellerVO.setSellerNo(101);
+        if(sellerVO == null){
+            return "redirect:/members/seller/apply";
         }
-
+        if(!"已開通".equals(sellerVO.getSellerStatus())){
+            return "redirect:/members/seller/sellerinfo";
+        }
         prepareSellerDashboardData(model, sellerVO.getSellerNo());
         model.addAttribute("activeTab", tab);
 
