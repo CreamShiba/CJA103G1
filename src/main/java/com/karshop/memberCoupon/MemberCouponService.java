@@ -24,12 +24,13 @@ public class MemberCouponService {
      */
     @Transactional(readOnly = true)
     public List<MemberCoupon> getAllByMember(Integer memberNo) {
+        return memberCouponRepository.findByMemberNoWithCoupon(memberNo);
         // 取得該會員所有券後，過濾掉主表狀態已失效 (0) 或已過期的券
-        return memberCouponRepository.findByMemberNo(memberNo).stream()
-                .filter(mc -> mc.getCoupon() != null
-                        && mc.getCoupon().getCouponStatus() == 1
-                        && mc.getCoupon().getCouponEnd().isAfter(LocalDateTime.now()))
-                .toList();
+//        return memberCouponRepository.findByMemberNo(memberNo).stream()
+//                .filter(mc -> mc.getCoupon() != null
+//                        && mc.getCoupon().getCouponStatus() == 1
+//                        && mc.getCoupon().getCouponEnd().isAfter(LocalDateTime.now()))
+//                .toList();
     }
 
     /**
@@ -57,6 +58,7 @@ public class MemberCouponService {
             memberCouponRepository.save(mc);
         });
     }
+
 
     @Transactional
     public String claimCouponByName(Integer memberNo, String couponTitle) {
@@ -133,4 +135,6 @@ public class MemberCouponService {
                 })
                 .orElseThrow(() -> new RuntimeException("找不到該優惠券或已被使用"));
     }
+
+
 }

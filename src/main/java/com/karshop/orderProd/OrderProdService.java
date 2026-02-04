@@ -29,7 +29,7 @@ public class OrderProdService {
             OrderProd order = orderOpt.get();
 
             // 檢查是否為已發貨狀態
-            if ("已發貨".equals(order.getOrdStatus())) {
+            if ("已出貨".equals(order.getOrdStatus())) {
                 order.setOrdStatus("已完成");
                 order.setOrdCompletedDate(LocalDateTime.now());
                 orderProdRepository.save(order); // JPA 會執行 Update
