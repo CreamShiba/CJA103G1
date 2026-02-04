@@ -37,6 +37,6 @@ public class SellerService {
     }
 
     public SellerVO findByMemberNo(Integer memberNo) {
-            return sellerRepository.findByMemberMemberNo(memberNo);
+            return sellerRepository.findByMemberMemNo(memberNo);
     }
 }

@@ -34,6 +34,7 @@
           <option value="">-- 所有狀態 --</option>
           <option value="待審核" th:selected="${status == '待審核'}">待審核</option>
           <option value="已開通" th:selected="${status == '已開通'}">已開通</option>
+          <option value="未通過" th:selected="${status == '未通過'}">未通過</option>
           <option value="停權" th:selected="${status == '停權'}">停權</option>
         </select>
 
@@ -63,6 +64,7 @@
           <td>
             <span th:if="${seller.sellerStatus == '待審核'}" class="status-badge status-wait">待審核</span>
             <span th:if="${seller.sellerStatus == '已開通'}" class="status-badge status-ok">已開通</span>
+            <span th:if="${seller.sellerStatus == '未通過'}" class="status-badge" style="background:#f0f0f0; color:#666; border:1px solid #ccc;">未通過</span>
             <span th:if="${seller.sellerStatus == '停權'}" class="status-badge status-block">停權</span>
           </td>
           <td>
@@ -168,15 +170,22 @@
                 <input type="hidden" name="sellerNo" id="input_sellerNo_approve">
                 <input type="hidden" name="status" value="已開通">
                 <button type="submit" class="btn btn-success" onclick="return confirm('確定資料無誤，允許開通？')">
-                  <i class="fas fa-check-circle"></i> 通過審核 / 開通
+                  <i class="fas fa-check-circle"></i> 通過
                 </button>
+              </form>
+
+              <form id="formReject" th:action="@{/admin/sellers/updateStatus}" method="post" style="display: inline-block;">
+                <input type="hidden" name="sellerNo" id="input_sellerNo_reject">
+                <input type="hidden" name="status" value="未通過"> <button type="submit" class="btn" style="background: #ff9800; color: white;" onclick="return confirm('確定要駁回此申請？賣家將可修改資料重送。')">
+                <i class="fas fa-times-circle"></i> 駁回申請
+              </button>
               </form>
 
               <form id="formBan" th:action="@{/admin/sellers/updateStatus}" method="post" style="display: inline-block;">
                 <input type="hidden" name="sellerNo" id="input_sellerNo_ban">
                 <input type="hidden" name="status" value="停權">
                 <button type="submit" class="btn btn-danger" onclick="return confirm('確定要停權此賣家？')">
-                  <i class="fas fa-ban"></i> 停權 / 駁回
+                  <i class="fas fa-ban"></i> 停權
                 </button>
               </form>
 

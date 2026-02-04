@@ -1,5 +1,6 @@
 package com.karshop.cart;
 
+import com.karshop.members.model.MembersVO;
 import com.karshop.membertest.model.MemberVO;
 import com.karshop.ord.model.OrdService;
 import com.karshop.ord.model.OrdVO;
@@ -281,7 +282,7 @@ public class cartcontroller {
             // ===================================================================
 
             // 從 session 拿會員物件
-            MemberVO memberVO = (MemberVO) session.getAttribute("member");
+            MembersVO memberVO = (MembersVO) session.getAttribute("member");
 
             // 從第一個商品拿賣家（同一平台，目前先用第一個商品的賣家）
             ProductVO firstProduct = productMap.values().iterator().next();

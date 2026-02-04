@@ -5,14 +5,12 @@ package com.karshop.members.model;
 import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.karshop.ord.model.OrdVO;
+import com.karshop.rating.model.RatingVO;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -80,6 +78,12 @@ public class MembersVO implements Serializable {
 
   @Column (name= "member_login_errtime")
   private Timestamp memLogErrTime;
+
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+  private List<RatingVO> rating;
+
+  @OneToMany(mappedBy = "member", cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
+  private List<OrdVO> order;
 
   public MembersVO() {
     super();
@@ -197,4 +201,19 @@ public class MembersVO implements Serializable {
     return this.memNo;
   }
 
+  public List<RatingVO> getRating() {
+    return rating;
+  }
+
+  public void setRating(List<RatingVO> rating) {
+    this.rating = rating;
+  }
+
+  public List<OrdVO> getOrder() {
+    return order;
+  }
+
+  public void setOrder(List<OrdVO> order) {
+    this.order = order;
+  }
 }

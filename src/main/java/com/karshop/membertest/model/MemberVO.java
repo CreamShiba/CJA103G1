@@ -23,7 +23,6 @@ public class MemberVO implements Serializable {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL ,fetch = FetchType.LAZY)
     private List<OrdVO> order;
 
-    // Getter / Setter
     public Integer getMemberNo() { return memberNo; }
     public void setMemberNo(Integer memberNo) { this.memberNo = memberNo; }
     public String getMemName() { return memName; }
