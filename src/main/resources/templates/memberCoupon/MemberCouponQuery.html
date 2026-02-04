@@ -6,70 +6,14 @@
     <title>我的優惠券 | 卡爾夏汽車百貨</title>
     <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
     <link rel="stylesheet" th:href="@{/css/memberCouponStyle.css}">
+
+    <link rel="stylesheet" th:href="@{/css/fragments/front_header.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
 </head>
 <body>
 
 <!-- Header -->
-<header>
-    <div class="top-bar">
-        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
-        <div class="top-icons">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Search..."
-                       style="background: transparent; border: none; color: white; width: 100%; outline: none;">
-                <span>🔍</span>
-            </div>
-            <div class="user-dropdown-container">
-                <span id="user-icon" style="cursor: pointer;">👤</span>
-                <div id="user-dropdown" class="dropdown-menu">
-
-                    <th:block th:if="${session.member == null}">
-                        <a th:href="@{/members/login}">登入</a>
-                        <a th:href="@{/members/register}">註冊</a>
-                    </th:block>
-
-                    <th:block th:if="${session.member != null}">
-							<span style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
-                                  th:text="'Hi, ' + ${session.member.memName}">
-								Hi, 會員
-							</span>
-
-                        <a th:href="@{/members/view}">編輯個人資料</a>
-                        <a th:href="@{/pages/my-orders}">我的訂單</a>
-                        <form th:action="@{/members/logout}" method="post" id="logoutForm">
-                            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
-                                登出 (Logout)
-                            </a>
-                        </form>
-                    </th:block>
-                </div>
-            </div>
-            <span id="cart">🛒</span>
-        </div>
-    </div>
-
-    <div class="main-header">
-        <div class="logo" onclick="navigateTo('home')" style="cursor: pointer;">卡爾夏</div>
-        <nav class="nav-links">
-            <a href="#" onclick="navigateTo('shop')">商城</a>
-            <a href="#" onclick="navigateTo('installation')">安裝區</a>
-            <a href="#" onclick="navigateTo('forum')">論壇</a>
-            <a href="#" onclick="navigateTo('notice')">公告</a>
-            <a href="#" onclick="navigateTo('faq')">常見問題</a>
-
-            <!-- 會員中心下拉選單 -->
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
-                <div id="member-dropdown" class="dropdown-menu">
-                    <a th:href="@{/pages/my-coupons}" onclick="navigateTo('coupons')">我的優惠券</a>
-                    <a th:href="@{/favorite/list-page}" onclick="navigateTo('favorite')">我的收藏</a>
-                    <a th:href="@{/pages/my-orders}" onclick="navigateTo('orderInfo')">訂單查詢</a>
-                    <a href="#" onclick="navigateTo('')">申訴/檢舉</a>
-                </div>
-            </div>
-        </nav>
-    </div>
-</header>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
 
 <!-- 主要內容 -->
 <div class="container">
@@ -78,10 +22,9 @@
         <div class="sidebar-section">
             <h3 class="sidebar-title">會員中心</h3>
             <ul class="category-list" id="category-list">
-                <li><a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a></li>
-                <li><a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a></li>
-                <li><a href="http://localhost:8080/pages/my-orders">訂單查詢</a></li>
-                <li><a href="#" onclick="navigateTo('')">申訴/檢舉</a></li>
+                <li><a th:href="@{/pages/my-coupons}" onclick="navigateTo('coupons')">我的優惠券</a></li>
+                <li><a th:href="@{/favorite/list-page}" onclick="navigateTo('favorite')">我的收藏</a></li>
+                <li><a th:href="@{/pages/my-orders}">訂單查詢</a></li>
             </ul>
         </div>
     </aside>
@@ -130,41 +73,12 @@
 
 <!-- Footer -->
 <footer>
-    <div class="footer-col">
-        <div class="footer-logo logo">卡爾夏</div>
-    </div>
-    <div class="footer-col">
-        <h4>Shop</h4>
-        <ul>
-            <li>Shop Parts</li>
-            <li>Wholesale</li>
-        </ul>
-    </div>
-    <div class="footer-col">
-        <h4>The Company</h4>
-        <ul>
-            <li>About Us</li>
-            <li>FAQ</li>
-        </ul>
-    </div>
-    <div class="footer-col">
-        <h4>Contact Us</h4>
-        <ul>
-            <li>info@mysite.com</li>
-        </ul>
-    </div>
-    <div class="footer-col">
-        <h4>Follow Us</h4>
-        <ul>
-            <li>Instagram</li>
-        </ul>
-    </div>
+    <footer th:replace="~{fragments/footer :: Footer}"></footer>
 </footer>
 
 <!--<script th:src="@{/js/front-end/index.js}"></script>-->
 <script>
-    // 獲取當前會員編號
-    // const currentMemberNo = 1;
+
 
     // 頁面載入完成後
     window.onload = function() {
@@ -280,6 +194,7 @@
         const body = document.getElementById('couponBody');
         const noData = document.getElementById('noData');
 
+        // 更新篩選按鈕樣式
         if (buttonElement) {
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             buttonElement.classList.add('active');
@@ -290,9 +205,7 @@
         noData.style.display = 'none';
 
         try {
-            // 修改點：簡化 API URL
-            let url = (type === 'expired') ? '/member/coupons/expired' : '/member/coupons/my-coupons';
-
+            const url = '/member/coupons/my-coupons';
             const response = await fetch(url);
 
             if (response.status === 401) {
@@ -300,37 +213,87 @@
                 return;
             }
 
-            if (response.status === 204) {
+            // ✅ 修正：204 只代表後端傳回空陣列，
+            // 但當前可能只是該標籤無資料，不應直接結束。
+            // 改為統一用空陣列處理，後面的過濾邏輯會自動顯示「無資料」。
+            let data = [];
+            if (response.status !== 204) {
+                data = await response.json();
+            }
+
+            // 前端校驗用的 helper：拿到每筆券的「有效狀態」
+            // 若後端 status = 0 但 couponEnd 已過期，視為 2
+            function getEffectiveStatus(item) {
+                if (item.couponStatus === 0 && item.coupon && item.coupon.couponEnd) {
+                    if (new Date() > new Date(item.coupon.couponEnd)) {
+                        return 2;
+                    }
+                }
+                return item.couponStatus;
+            }
+
+            // --- 前端過濾邏輯 ---
+            let filteredData;
+            if (type === 'all') {
+                // 「全部」標籤：顯示未使用 (status = 0) 的券
+                filteredData = data.filter(item => getEffectiveStatus(item) === 0);
+            } else if (type === 'expired') {
+                // ✅ 修正重點：「已過期/已使用」標籤
+                // 顯示已使用 (status = 1) 或已過期 (status = 2) 的券
+                filteredData = data.filter(item => {
+                    const s = getEffectiveStatus(item);
+                    return s === 1 || s === 2;
+                });
+            } else {
+                filteredData = data;
+            }
+
+            // 過濾後無資料才顯示提示
+            if (filteredData.length === 0) {
                 loading.style.display = 'none';
                 noData.style.display = 'block';
                 return;
             }
 
-            const data = await response.json();
             loading.style.display = 'none';
             table.style.display = 'table';
             body.innerHTML = '';
 
-            data.forEach(item => {
-                let statusClass = (item.couponStatus === 1) ? 'status-used' : 'status-unused';
-                let statusText = (item.couponStatus === 1) ? '已使用' : '未使用';
-
-                // 1. 安全抓取資料，避免 undefined
+            filteredData.forEach(item => {
+                let statusClass = '';
+                let statusText = '';
                 const couponObj = item.coupon || {};
-                const title = couponObj.couponTitle || '未知優惠券';
-                const discount = couponObj.discountValue ? `$${couponObj.discountValue}` : '-';
+                const now = new Date();
 
-                // 2. 修正 split 報錯：先檢查 expiryDate 是否存在
-                let expiryDate = '無期限';
-                if (couponObj.expiryDate) {
-                    expiryDate = couponObj.expiryDate.split('T')[0];
+                // 前端校驗過期：後端排程可能遲到，
+                // 所以當 status = 0（未使用）但 coupon.couponEnd 已經超過當前時間，
+                // 前端直接視為已過期 (2)
+                let effectiveStatus = item.couponStatus;
+                if (effectiveStatus === 0 && couponObj.couponEnd) {
+                    if (now > new Date(couponObj.couponEnd)) {
+                        effectiveStatus = 2;
+                    }
                 }
 
-                // 3. 過期判斷
-                if (couponObj.expiryDate && new Date(couponObj.expiryDate) < new Date()) {
+                // 根據 couponStatus 設定狀態（0:未使用, 1:已使用, 2:已過期）
+                if (item.couponStatus === 0) {
+                    statusClass = 'status-unused';
+                    statusText = '未使用';
+                } else if (item.couponStatus === 1) {
+                    statusClass = 'status-used';
+                    statusText = '已使用';
+                } else if (item.couponStatus === 2) {
                     statusClass = 'status-expired';
                     statusText = '已過期';
                 }
+
+                // 安全抓取資料，避免 undefined
+
+                const title = couponObj.couponTitle || '未知優惠券';
+                const discount = couponObj.discountValue ? `$${couponObj.discountValue}` : '-';
+
+                // ✅ 修正：useTime 可能為 null（例如未使用過的券），加入安全判斷
+                const expiryDate = item.useTime ? item.useTime.split('T')[0] : '無使用記錄';
 
                 body.innerHTML += `
                     <tr>
@@ -346,12 +309,6 @@
             console.error('Error:', error);
         }
     }
-
-    // JavaScript 登入後跳轉回原頁面方式(測試Fail)
-    // function goToLogin() {
-    //     const currentPath = window.location.pathname; // 取得 /pages/my-coupons
-    //     window.location.href = `/members/login?redirect=${encodeURIComponent(currentPath)}`;
-    // }
 
 </script>
 </body>

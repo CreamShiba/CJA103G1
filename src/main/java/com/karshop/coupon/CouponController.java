@@ -2,6 +2,7 @@ package com.karshop.coupon;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,13 +24,13 @@ public class CouponController {
 
 
     @GetMapping("/admin")
-    public String adminPage(Model model) {
-        // 取得所有優惠券用於列表顯示
-        List<Coupon> coupons = couponService.getAll();
-        model.addAttribute("coupons", coupons);
+    public String adminPage(@RequestParam(value = "p", defaultValue = "0") Integer page, Model model) {
+        int pageSize = 3; // 設定每頁顯示 3 筆
+        Page<Coupon> couponPage = couponService.getAllPaged(page, pageSize);
 
-        // 新增時的空物件
-        model.addAttribute("coupon", new Coupon());
+        model.addAttribute("couponPage", couponPage);
+        model.addAttribute("coupons", couponPage.getContent()); // 傳送目前的資料列表
+        model.addAttribute("coupon", new Coupon()); // 用於新增表單
 
         return "coupon/adminCoupon";
     }

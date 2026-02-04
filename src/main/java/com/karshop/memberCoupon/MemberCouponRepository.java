@@ -29,5 +29,8 @@ public interface MemberCouponRepository extends JpaRepository<MemberCoupon, Memb
             @Param("now") LocalDateTime now
     );
 
+    // MemberCouponRepository.java (需要在 Repository 加這個方法)
+    @Query("SELECT mc FROM MemberCoupon mc JOIN FETCH mc.coupon WHERE mc.memberNo = :memberNo")
+    List<MemberCoupon> findByMemberNoWithCoupon(@Param("memberNo") Integer memberNo);
 
 }

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的訂單 | 卡爾夏汽車百貨</title>
     <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/front_header.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
     <style>
         .order-container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .order-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -137,66 +139,7 @@
 <body>
 
 <!-- Header -->
-<header>
-    <div class="top-bar">
-        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
-        <div class="top-icons">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Search..."
-                       style="background: transparent; border: none; color: white; width: 100%; outline: none;">
-                <span>🔍</span>
-            </div>
-            <div class="user-dropdown-container">
-                <span id="user-icon" style="cursor: pointer;">👤</span>
-                <div id="user-dropdown" class="dropdown-menu">
-
-                    <th:block th:if="${session.member == null}">
-                        <a th:href="@{/members/login}">登入</a>
-                        <a th:href="@{/members/register}">註冊</a>
-                    </th:block>
-
-                    <th:block th:if="${session.member != null}">
-							<span style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
-                                  th:text="'Hi, ' + ${session.member.memName}">
-								Hi, 會員
-							</span>
-
-                        <a th:href="@{/members/view}">編輯個人資料</a>
-                        <a th:href="@{/pages/my-orders}">我的訂單</a>
-                        <form th:action="@{/members/logout}" method="post" id="logoutForm">
-                            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
-                                登出 (Logout)
-                            </a>
-                        </form>
-                    </th:block>
-                </div>
-            </div>
-            <span id="cart">🛒</span>
-        </div>
-    </div>
-
-    <div class="main-header">
-        <div class="logo" onclick="navigateTo('home')" style="cursor: pointer;">卡爾夏</div>
-        <nav class="nav-links">
-            <a href="#" onclick="navigateTo('shop')">商城</a>
-            <a href="#" onclick="navigateTo('installation')">安裝區</a>
-            <a href="#" onclick="navigateTo('forum')">論壇</a>
-            <a href="#" onclick="navigateTo('notice')">公告</a>
-            <a href="#" onclick="navigateTo('faq')">常見問題</a>
-
-            <!-- 會員中心下拉選單 -->
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
-                <div id="member-dropdown" class="dropdown-menu">
-                    <a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a>
-                    <a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a>
-                    <a href="http://localhost:8080/pages/my-orders" onclick="navigateTo('orderInfo')">訂單查詢</a>
-                    <a href="#" onclick="navigateTo('')">申訴/檢舉</a>
-                </div>
-            </div>
-        </nav>
-    </div>
-</header>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
 
 <!-- 主要內容 -->
 <div class="container">
@@ -205,10 +148,9 @@
         <div class="sidebar-section">
             <h3 class="sidebar-title">會員中心</h3>
             <ul class="category-list" id="category-list">
-                <li><a href="http://localhost:8080/pages/my-coupons" onclick="navigateTo('coupons')">我的優惠券</a></li>
-                <li><a href="http://localhost:8080/favorite/list-page" onclick="navigateTo('favorite')">我的收藏</a></li>
-                <li><a href="http://localhost:8080/pages/my-orders">訂單查詢</a></li>
-                <li><a href="#" onclick="navigateTo('')">申訴/檢舉</a></li>
+                <li><a th:href="@{/pages/my-coupons}" onclick="navigateTo('coupons')">我的優惠券</a></li>
+                <li><a th:href="@{/favorite/list-page}" onclick="navigateTo('favorite')">我的收藏</a></li>
+                <li><a th:href="@{/pages/my-orders}">訂單查詢</a></li>
             </ul>
         </div>
     </aside>
@@ -271,37 +213,8 @@
 </div>
 
 <!-- Footer -->
-<footer>
-    <div class="footer-col">
-        <div class="footer-logo logo">卡爾夏</div>
-    </div>
-    <div class="footer-col">
-        <h4>Shop</h4>
-        <ul>
-            <li>Shop Parts</li>
-            <li>Wholesale</li>
-        </ul>
-    </div>
-    <div class="footer-col">
-        <h4>The Company</h4>
-        <ul>
-            <li>About Us</li>
-            <li>FAQ</li>
-        </ul>
-    </div>
-    <div class="footer-col">
-        <h4>Contact Us</h4>
-        <ul>
-            <li>info@mysite.com</li>
-        </ul>
-    </div>
-    <div class="footer-col">
-        <h4>Follow Us</h4>
-        <ul>
-            <li>Instagram</li>
-        </ul>
-    </div>
-</footer>
+<footer th:replace="~{fragments/footer :: Footer}"></footer>
+
 
 <!--<script th:src="@{/js/front-end/index.js}"></script>-->
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>

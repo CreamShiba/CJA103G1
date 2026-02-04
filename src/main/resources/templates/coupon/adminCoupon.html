@@ -7,89 +7,92 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/back-end/admin_index.css}">
     <link rel="stylesheet" th:href="@{/css/couponStyle.css}">
+
+    <link rel="stylesheet" th:href="@{/css/fragments/admin_sidebar.css}">
 </head>
 <body>
 <div class="app-container">
 
     <!-- 側邊欄 -->
-    <aside class="sidebar scrollbar-styled">
-        <div class="sidebar-header">
-            <div class="logo-icon"></div>
-            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
-        </div>
+    <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='memberInfo')}"></aside>
+<!--    <aside class="sidebar scrollbar-styled">-->
+<!--        <div class="sidebar-header">-->
+<!--            <div class="logo-icon"></div>-->
+<!--            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>-->
+<!--        </div>-->
 
-        <nav class="sidebar-nav">
-            <ul>
-                <li class="menu-item has-submenu">
-                    <a class="submenu-toggle">
-                        <span><i class="fas fa-users-cog"></i> 自訂</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </a>
-                    <ul class="submenu">
-                        <li><a href="#">自訂</a></li>
-                        <li><a href="#">自訂</a></li>
-                    </ul>
-                </li>
-                <li class="menu-item has-submenu">
-                    <a class="submenu-toggle">
-                        <span><i class="fas fa-users-cog"></i> 自訂</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </a>
-                    <ul class="submenu">
-                        <li><a href="#">自訂</a></li>
-                        <li><a href="#">自訂</a></li>
-                    </ul>
-                </li>
+<!--        <nav class="sidebar-nav">-->
+<!--            <ul>-->
+<!--                <li class="menu-item has-submenu">-->
+<!--                    <a class="submenu-toggle">-->
+<!--                        <span><i class="fas fa-users-cog"></i> 自訂</span>-->
+<!--                        <i class="fas fa-chevron-down arrow"></i>-->
+<!--                    </a>-->
+<!--                    <ul class="submenu">-->
+<!--                        <li><a href="#">自訂</a></li>-->
+<!--                        <li><a href="#">自訂</a></li>-->
+<!--                    </ul>-->
+<!--                </li>-->
+<!--                <li class="menu-item has-submenu">-->
+<!--                    <a class="submenu-toggle">-->
+<!--                        <span><i class="fas fa-users-cog"></i> 自訂</span>-->
+<!--                        <i class="fas fa-chevron-down arrow"></i>-->
+<!--                    </a>-->
+<!--                    <ul class="submenu">-->
+<!--                        <li><a href="#">自訂</a></li>-->
+<!--                        <li><a href="#">自訂</a></li>-->
+<!--                    </ul>-->
+<!--                </li>-->
 
 
 
-                <li class="menu-item has-submenu">
-                    <a class="submenu-toggle">
-                        <span><i class="fas fa-users-cog"></i> 帳號管理</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </a>
-                    <ul class="submenu">
-                        <li><a th:href="@{/memberInfo/manage}">會員帳號管理</a></li>
-                        <li><a th:href="@{/admins/listAll}">管理員帳號管理</a></li>
-                    </ul>
-                </li>
+<!--                <li class="menu-item has-submenu">-->
+<!--                    <a class="submenu-toggle">-->
+<!--                        <span><i class="fas fa-users-cog"></i> 帳號管理</span>-->
+<!--                        <i class="fas fa-chevron-down arrow"></i>-->
+<!--                    </a>-->
+<!--                    <ul class="submenu">-->
+<!--                        <li><a th:href="@{/memberInfo/manage}">會員帳號管理</a></li>-->
+<!--                        <li><a th:href="@{/admins/listAll}">管理員帳號管理</a></li>-->
+<!--                    </ul>-->
+<!--                </li>-->
 
-                <li class="menu-item has-submenu">
-                    <a class="submenu-toggle">
-                        <span><i class="fas fa-users-cog"></i> 自訂</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </a>
-                    <ul class="submenu">
-                        <li><a href="#">自訂</a></li>
-                        <li><a href="#">自訂</a></li>
-                    </ul>
-                </li>
+<!--                <li class="menu-item has-submenu">-->
+<!--                    <a class="submenu-toggle">-->
+<!--                        <span><i class="fas fa-users-cog"></i> 自訂</span>-->
+<!--                        <i class="fas fa-chevron-down arrow"></i>-->
+<!--                    </a>-->
+<!--                    <ul class="submenu">-->
+<!--                        <li><a href="#">自訂</a></li>-->
+<!--                        <li><a href="#">自訂</a></li>-->
+<!--                    </ul>-->
+<!--                </li>-->
 
-                <li class="menu-item has-submenu open">
-                    <a class="submenu-toggle">
-                        <span><i class="fas fa-ticket-alt"></i>優惠券管理</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </a>
-                    <ul class="submenu">
-                        <li><a th:href="@{/coupon/admin}" id="all-coupons-link">優惠券列表</a></li>
-                        <li><a th:href="@{/coupon/admin#coupon-query}">查詢優惠券</a></li>
-                        <li><a th:href="@{/coupon/admin#coupon-add}">新增優惠券</a></li>
-                    </ul>
-                </li>
+<!--                <li class="menu-item has-submenu open">-->
+<!--                    <a class="submenu-toggle">-->
+<!--                        <span><i class="fas fa-ticket-alt"></i>優惠券管理</span>-->
+<!--                        <i class="fas fa-chevron-down arrow"></i>-->
+<!--                    </a>-->
+<!--                    <ul class="submenu">-->
+<!--                        <li><a th:href="@{/coupon/admin}" id="all-coupons-link">優惠券列表</a></li>-->
+<!--                        <li><a th:href="@{/coupon/admin#coupon-query}">查詢優惠券</a></li>-->
+<!--                        <li><a th:href="@{/coupon/admin#coupon-add}">新增優惠券</a></li>-->
+<!--                    </ul>-->
+<!--                </li>-->
 
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-star"></i> 自訂</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-headset"></i> 自訂</a>
-                </li>
-            </ul>
-        </nav>
+<!--                <li class="menu-item">-->
+<!--                    <a href="#"><i class="fas fa-star"></i> 自訂</a>-->
+<!--                </li>-->
+<!--                <li class="menu-item">-->
+<!--                    <a href="#"><i class="fas fa-headset"></i> 自訂</a>-->
+<!--                </li>-->
+<!--            </ul>-->
+<!--        </nav>-->
 
-        <div class="sidebar-footer">
-            <a href="#">登出 (Logout)</a>
-        </div>
-    </aside>
+<!--        <div class="sidebar-footer">-->
+<!--            <a href="#">登出 (Logout)</a>-->
+<!--        </div>-->
+<!--    </aside>-->
 
     <!-- 主內容區 -->
     <main class="main-content">
@@ -147,6 +150,25 @@
                     </tr>
                     </tbody>
                 </table>
+                <div class="pagination-container" th:if="${couponPage.totalPages > 1}" style="margin-top: 20px; text-align: center;">
+                    <ul class="pagination" style="display: inline-flex; list-style: none; gap: 10px;">
+
+                        <li th:class="${couponPage.first} ? 'disabled'">
+                            <a th:href="@{/coupon/admin(p=${couponPage.number - 1})}" th:if="${!couponPage.first}" class="btn-page">上一頁</a>
+                        </li>
+
+                        <li th:each="i : ${#numbers.sequence(0, couponPage.totalPages - 1)}">
+                            <a th:href="@{/coupon/admin(p=${i})}"
+                               th:text="${i + 1}"
+                               th:classappend="${i == couponPage.number} ? 'active-page' : ''"
+                               class="btn-page"></a>
+                        </li>
+
+                        <li th:class="${couponPage.last} ? 'disabled'">
+                            <a th:href="@{/coupon/admin(p=${couponPage.number + 1})}" th:if="${!couponPage.last}" class="btn-page">下一頁</a>
+                        </li>
+                    </ul>
+                </div>
             </section>
 
             <!-- 複合查詢 -->

@@ -749,3 +749,23 @@ input[type="hidden"] {
     font-size: 18px;
     flex-shrink: 0;
 }
+
+.btn-page {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #333;
+    border-radius: 4px;
+}
+.btn-page:hover {
+    background-color: #f0f0f0;
+}
+.active-page {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+.disabled a {
+    color: #ccc;
+    pointer-events: none;
+}
