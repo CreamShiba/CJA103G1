@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,31 +37,42 @@
         .appeal-table { width: 100%; border-collapse: collapse; }
         .appeal-table th { padding: 16px; text-align: left; font-weight: 600; color: #00796b; font-size: 15px; border-bottom: 2px solid #e0f2f1; background-color: #f8f9fa; }
         .appeal-table td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
-        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; background-color: #e0f2f1; color: #00796b; }
+
+        /* 💡 修改：狀態徽章顏色（待處理=灰色，已處理=綠色） */
+        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .status-pending { background-color: #e0e0e0; color: #666; }
+        .status-closed { background-color: #4caf50; color: white; }
+
         .btn-action { background-color: #00796b; color: white; border: none; padding: 8px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s; }
         .btn-action:hover { background-color: #00695c; }
-
-        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 20px; background: white; border-top: 1px solid #eee; }
-        .btn-page { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-        .btn-page:hover:not(:disabled) { background-color: #e9ecef; }
-        .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
-        .page-info { font-size: 14px; color: #666; }
+        .btn-action.view-only { background-color: #6c757d; }
 
         .type-badge { display: inline-block; padding: 4px 8px; border-radius: 3px; font-size: 11px; font-weight: 600; margin-right: 8px; }
         .type-install { background-color: #e3f2fd; color: #1976d2; }
         .type-product { background-color: #fff3e0; color: #f57c00; }
         .sidebar-footer { padding: 20px; border-top: 1px solid #eee; }
         .sidebar-footer a { color: #d9534f; text-decoration: none; font-size: 14px; }
+        .no-data { text-align: center; padding: 40px; color: #999; font-size: 16px; }
     </style>
 </head>
 <body>
 <div class="app-container">
+    <!-- 側邊欄 -->
     <aside class="sidebar">
-        <div class="sidebar-header"><div class="logo-icon"></div><h2>卡爾夏 <span class="badge">ADMIN</span></h2></div>
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
         <nav class="sidebar-nav">
             <ul>
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 A</a></li></ul></li>
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 B</a></li></ul></li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a>
+                    <ul class="submenu"><li><a href="#">功能 A</a></li></ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a>
+                    <ul class="submenu"><li><a href="#">功能 B</a></li></ul>
+                </li>
                 <li class="menu-item has-submenu">
                     <a class="submenu-toggle"><span><i class="fas fa-user-shield"></i> 帳號管理</span><i class="fas fa-chevron-down arrow"></i></a>
                     <ul class="submenu">
@@ -75,30 +86,49 @@
                         <li class="menu-item has-sub-item open">
                             <a class="sub-toggle-btn"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <li><a href="/appeals/admin/list?status=PENDING" id="nav-pending">尚未處理</a></li>
-                                <li><a href="/appeals/admin/list?status=已結案" id="nav-closed">已結案</a></li>
+                                <!-- 💡 改用 Thymeleaf 的 @{} 語法和中文狀態 -->
+                                <li>
+                                    <a th:href="@{/appeals/admin/list(status='待處理')}"
+                                       th:classappend="${param.status == null or param.status[0] == '待處理'} ? 'active' : ''">
+                                        待處理
+                                    </a>
+                                </li>
+                                <li>
+                                    <a th:href="@{/appeals/admin/list(status='已處理')}"
+                                       th:classappend="${param.status != null and param.status[0] == '已處理'} ? 'active' : ''">
+                                        已處理
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         <li class="menu-item has-sub-item">
                             <a class="sub-toggle-btn"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <li><a href="/reports/admin/list?status=PENDING">尚未處理</a></li>
-                                <li><a href="/reports/admin/list?status=已結案">已結案</a></li>
+                                <li><a href="/reports/admin/list?status=待處理">待處理</a></li>
+                                <li><a href="/reports/admin/list?status=已處理">已處理</a></li>
                             </ul>
                         </li>
                     </ul>
                 </li>
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-tools"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 C</a></li></ul></li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle"><span><i class="fas fa-tools"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a>
+                    <ul class="submenu"><li><a href="#">功能 C</a></li></ul>
+                </li>
                 <li class="menu-item"><a href="#"><i class="fas fa-star"></i> 自訂</a></li>
                 <li class="menu-item"><a href="#"><i class="fas fa-headset"></i> 自訂</a></li>
             </ul>
         </nav>
         <div class="sidebar-footer"><a href="#">登出 (Logout)</a></div>
     </aside>
+
+    <!-- 主要內容區 -->
     <main class="main-content">
         <header class="top-bar">
             <h2 class="page-title">申訴案件管理</h2>
-            <div class="user-profile"><span>Admin</span><div class="avatar"><i class="fas fa-user"></i></div></div>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar"><i class="fas fa-user"></i></div>
+            </div>
         </header>
         <div class="content-area">
             <div class="table-container">
@@ -114,123 +144,77 @@
                         <th>案件管理</th>
                     </tr>
                     </thead>
-                    <tbody id="appealTableBody"></tbody>
+                    <tbody>
+                    <!-- 💡 判斷是否有資料 -->
+                    <tr th:if="${#lists.isEmpty(appeals)}">
+                        <td colspan="7" class="no-data">暫無相關資料</td>
+                    </tr>
+
+                    <!-- 💡 使用 Thymeleaf 的 th:each 迴圈渲染資料 -->
+                    <tr th:each="appeal : ${appeals}">
+                        <!-- 類型徽章 -->
+                        <td>
+                            <span th:if="${appeal.type == 'install'}" class="type-badge type-install">🔧 安裝</span>
+                            <span th:if="${appeal.type == 'product'}" class="type-badge type-product">📦 商品</span>
+                        </td>
+
+                        <!-- 編號 -->
+                        <td th:text="${appeal.appealsNo}">1</td>
+
+                        <!-- 訂單編號 -->
+                        <td th:text="'#' + ${appeal.orderNo}">#400</td>
+
+                        <!-- 💡 申訴標題（限制顯示兩個原因，超過顯示 ...） -->
+                        <td>
+                            <span th:if="${appeal.title != null and #strings.contains(appeal.title, ',')}"
+                                  th:title="${appeal.title}">
+                                <span th:text="${#strings.arraySplit(appeal.title, ',')[0]}"></span>,
+                                <span th:if="${#lists.size(#strings.arraySplit(appeal.title, ',')) > 1}"
+                                      th:text="${#strings.arraySplit(appeal.title, ',')[1]}"></span>
+                                <span th:if="${#lists.size(#strings.arraySplit(appeal.title, ',')) > 2}">...</span>
+                            </span>
+                            <span th:if="${appeal.title != null and !#strings.contains(appeal.title, ',')}"
+                                  th:text="${appeal.title}">無標題</span>
+                            <span th:if="${appeal.title == null}">無標題</span>
+                        </td>
+
+                        <!-- 💡 狀態（直接顯示資料庫的值：待處理/已處理） -->
+                        <td>
+                            <span th:class="${appeal.status == '待處理'} ? 'status-badge status-pending' : 'status-badge status-closed'"
+                                  th:text="${appeal.status}">
+                                待處理
+                            </span>
+                        </td>
+
+                        <!-- 申訴時間 -->
+                        <td th:text="${appeal.applyDate != null ? #temporals.format(appeal.applyDate, 'yyyy-MM-dd HH:mm') : 'N/A'}">
+                            2025-04-01 10:00
+                        </td>
+
+                        <!-- 💡 操作按鈕（已處理顯示「查看」並變灰色） -->
+                        <td>
+                            <a th:href="@{/appeals/admin/handle(id=${appeal.appealsNo}, type=${appeal.type})}"
+                               th:class="${appeal.status == '已處理'} ? 'btn-action view-only' : 'btn-action'"
+                               th:text="${appeal.status == '已處理'} ? '查看' : '處理案件'">
+                                處理案件
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
                 </table>
-                <div class="pagination-container" id="paginationControls"></div>
             </div>
         </div>
     </main>
 </div>
 
 <script>
+    // 💡 保留側邊欄展開/收合功能
     document.querySelectorAll('.submenu-toggle, .sub-toggle-btn').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
             this.parentElement.classList.toggle('open');
         });
     });
-
-    let allData = [];
-    let currentPage = 1;
-    const pageSize = 6;
-
-    // 💡 新增：格式化類別標題的函數
-    function formatTitle(titleStr) {
-        if (!titleStr) return '無標題';
-        // 假設標題中的原因是用逗號隔開的
-        const reasons = titleStr.split(',').map(r => r.trim()).filter(r => r);
-        if (reasons.length <= 2) {
-            return reasons.join(', ');
-        } else {
-            // 超過兩個，顯示前兩個並補上 ...
-            return reasons.slice(0, 2).join(', ') + '...';
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const params = new URLSearchParams(window.location.search);
-        const currentStatus = params.get('status') || 'PENDING';
-
-        const navPending = document.getElementById('nav-pending');
-        const navClosed = document.getElementById('nav-closed');
-        if (currentStatus === '已結案') {
-            navClosed.classList.add('active');
-            navPending.classList.remove('active');
-        } else {
-            navPending.classList.add('active');
-            navClosed.classList.remove('active');
-        }
-
-        fetch('/appeals/api/all')
-            .then(res => res.json())
-            .then(data => {
-                allData = data.filter(item => item.status === currentStatus);
-                renderTable();
-            });
-    });
-
-    function renderTable() {
-        const tbody = document.getElementById('appealTableBody');
-        tbody.innerHTML = '';
-
-        const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
-        const pageData = allData.slice(start, end);
-
-        if (pageData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">暫無相關資料</td></tr>';
-        }
-
-        pageData.forEach(item => {
-            const formattedDate = item.applyDate ? item.applyDate.replace('T', ' ').substring(0, 16) : 'N/A';
-            const displayStatus = (item.status === 'PENDING') ? '尚未處理' : item.status;
-            const typeBadge = item.type === 'install'
-                ? '<span class="type-badge type-install">🔧 安裝</span>'
-                : '<span class="type-badge type-product">📦 商品</span>';
-
-            // 💡 調用 formatTitle 限制原因顯示數量，並加入 title 提示完整內容
-            const displayTitle = formatTitle(item.title);
-
-            const actionColumn = (item.status === '已結案')
-                ? `<a href="/appeals/admin/handle?id=${item.appealsNo}&type=${item.type}" class="btn-action" style="background-color: #6c757d;">查看</a>`
-                : `<a href="/appeals/admin/handle?id=${item.appealsNo}&type=${item.type}" class="btn-action">處理案件</a>`;
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>${typeBadge}</td>
-                    <td>${item.appealsNo}</td>
-                    <td>#${item.orderNo}</td>
-                    <td title="${item.title || ''}">${displayTitle}</td>
-                    <td><span class="status-badge">${displayStatus}</span></td>
-                    <td>${formattedDate}</td>
-                    <td>${actionColumn}</td>
-                </tr>`;
-        });
-
-        renderPagination();
-    }
-
-    function renderPagination() {
-        const controls = document.getElementById('paginationControls');
-        const totalPages = Math.ceil(allData.length / pageSize);
-
-        if (totalPages <= 1) {
-            controls.innerHTML = '';
-            return;
-        }
-
-        controls.innerHTML = `
-            <button class="btn-page" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>上一頁</button>
-            <span class="page-info">第 ${currentPage} 頁 / 共 ${totalPages} 頁 (共 ${allData.length} 筆資料)</span>
-            <button class="btn-page" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>下一頁</button>
-        `;
-    }
-
-    function changePage(page) {
-        currentPage = page;
-        renderTable();
-        document.querySelector('.content-area').scrollTop = 0;
-    }
 </script>
 </body>
 </html>

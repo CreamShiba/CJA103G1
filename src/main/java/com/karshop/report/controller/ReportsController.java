@@ -71,14 +71,22 @@ public class ReportsController {
 
     // --- 會員中心功能 ---
 
+    /**
+     * 💡 核心優化：前台顯示檢舉紀錄列表
+     * 開發階段：暫時改為抓取「全部資料」，確保看得到 ID 為 8, 9, 10 的假資料
+     */
     @GetMapping("/history")
     public String showReportHistory(Model model) {
-        Integer memberNo = 1;
-        List<Reports> list = reportsService.getReportsByMember(memberNo);
+        // Integer memberNo = 1; // 原本寫死的邏輯
+
+        // 為了整合期測試，直接抓取資料庫所有檢舉，讓假資料全部現身
+        List<Reports> list = reportsService.getAllReports();
+
         model.addAttribute("reports", list);
         return "templates-report/report-history";
     }
 
+    // 顯示檢舉紀錄的詳細資訊頁面
     @GetMapping("/history/detail")
     public String showReportHistoryDetail(@RequestParam("id") Integer id, Model model) {
         Reports report = reportsService.getReportById(id);

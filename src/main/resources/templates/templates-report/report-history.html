@@ -232,9 +232,9 @@
                 <td th:text="${report.reportsType != null ? report.reportsType : '未分類'}"></td>
                 <td th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}"></td>
                 <td>
-                        <span th:class="${report.status == '已結案' ? 'status-badge status-closed' : 'status-badge status-pending'}"
-                              th:text="${report.status == '待處理' ? '尚未處理' : report.status}">
-                        </span>
+                    <span th:class="${report.status == '已處理' || report.status == '已結案' ? 'status-badge status-closed' : 'status-badge status-pending'}"
+                          th:text="${report.status}">
+                    </span>
                 </td>
                 <td>
                     <a th:href="@{/reports/history/detail(id=${report.reportsNo})}" class="view-btn">查看案件</a>
@@ -260,6 +260,7 @@
 </footer>
 
 <script th:inline="javascript">
+    // 💡 僅保留下拉選單等基礎交互 JS
     window.onload = function() {
         initDropdowns();
     };

@@ -54,9 +54,10 @@
         .history-table th { border-bottom: 2px solid #ff3333; padding: 15px; color: #ff3333; font-size: 16px; font-weight: bold; }
         .history-table td { padding: 15px; border-bottom: 1px solid #333; font-size: 14px; color: #ddd; vertical-align: middle; }
 
+        /* 💡 修改：狀態徽章顏色（待處理=灰色，已處理=綠色） */
         .status-badge { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; }
         .status-pending { background: #444; color: #aaa; }
-        .status-closed { background: #008000; color: #fff; }
+        .status-closed { background: #4caf50; color: #fff; }
 
         .type-badge {
             display: inline-block;
@@ -216,8 +217,9 @@
                 ? '<span class="type-badge type-install">🔧 安裝</span>'
                 : '<span class="type-badge type-product">📦 商品</span>';
 
-            const statusClass = (appeal.status === '已結案') ? 'status-badge status-closed' : 'status-badge status-pending';
-            const statusText = (appeal.status === 'PENDING') ? '待處理' : appeal.status;
+            // 💡 修改：已處理改為綠色
+            const statusClass = (appeal.status === '已處理' || appeal.status === '已結案') ? 'status-badge status-closed' : 'status-badge status-pending';
+            const statusText = (appeal.status === '待處理') ? '待處理' : '已處理';
 
             // 💡 調用 formatCategories 限制原因顯示數量
             const displayCategories = formatCategories(appeal.categories);

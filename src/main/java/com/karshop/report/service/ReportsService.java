@@ -43,8 +43,8 @@ public class ReportsService {
     }
 
     /**
-     * 💡 核心新增：後台分頁查詢
-     * @param status 篩選狀態 (待處理/處理中/已處理/駁回)
+     * 💡 核心優化：後台分頁查詢 (已簡化狀態判定)
+     * @param status 篩選狀態 (待處理/已處理)
      * @param page 目前頁碼
      * @param size 每頁幾筆
      * @return 分頁物件
@@ -53,17 +53,16 @@ public class ReportsService {
         // 建立分頁請求，並依照檢舉時間倒序排序 (新的在前)
         Pageable pageable = PageRequest.of(page, size, Sort.by("reportsTimestamp").descending());
 
-        // 💡 修正查詢邏輯以符合 SQL 假資料的狀態
-        // 如果是查詢「待處理」標籤頁
-        if ("PENDING".equals(status) || "待處理".equals(status)) {
-            // 同時抓取資料庫中狀態為「PENDING」、「待處理」以及「處理中」的假資料
-            return reportsRepository.findByStatusIn(List.of("PENDING", "待處理", "處理中"), pageable);
+        // 💡 根據你簡化後的假資料狀態進行查詢
+        // 如果是查詢「尚未處理」標籤頁 (對應 URL 參數 status=待處理)
+        if ("待處理".equals(status) || "PENDING".equals(status)) {
+            return reportsRepository.findByStatus("待處理", pageable);
         }
 
-        // 如果是查詢「已結案」標籤頁
-        if ("已結案".equals(status)) {
-            // 同時抓取資料庫中狀態為「已處理」以及「駁回」的假資料
-            return reportsRepository.findByStatusIn(List.of("已處理", "駁回", "已結案"), pageable);
+        // 如果是查詢「已結案」標籤頁 (對應 URL 參數 status=已結案 或 假資料的 已處理)
+        if ("已結案".equals(status) || "已處理".equals(status)) {
+            // 因為假資料存「已處理」，但按鈕連結可能帶「已結案」，所以同時查詢這兩個字串
+            return reportsRepository.findByStatusIn(List.of("已處理", "已結案"), pageable);
         }
 
         return reportsRepository.findByStatus(status, pageable);
@@ -77,7 +76,7 @@ public class ReportsService {
         Reports report = reportsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("找不到編號為 " + id + " 的檢舉紀錄"));
 
-        report.setStatus(status);
+        report.setStatus(status); // 這邊送出的會是「已結案」
         report.setAdmNo(admNo);
         report.setResponse(response);
         report.setHandled(LocalDateTime.now());

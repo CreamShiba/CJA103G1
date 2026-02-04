@@ -18,17 +18,16 @@ public class InstallAppealsService {
     private InstallAppealImageRepository installAppealImageRepository;
 
     public void submitInstallAppeal(InstallAppeals appeal) {
-
         appeal.setApplyDate(LocalDateTime.now());
         appeal.setUpdatedDate(LocalDateTime.now());
         //設定申請與更新時間
 
         if (appeal.getMemberNo() == null || appeal.getMemberNo() <= 0) {
-            appeal.setStatus("IGNORED");
+            appeal.setStatus("待處理"); // 💡 改成中文
             appeal.setPriority("NONE");
             appeal.setResponse("系統:非會員申訴，不進入人工處理流程。");
         } else {
-            appeal.setStatus("PENDING");
+            appeal.setStatus("待處理"); // 💡 改成中文
 
             if(appeal.getDescription().contains("壞") || appeal.getDescription().contains("安全")) {
                 appeal.setPriority("HIGH");
@@ -51,9 +50,9 @@ public class InstallAppealsService {
         InstallAppeals appeal = installAppealsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("找不到編號為 " + id + " 的申訴紀錄"));
 
-        // 更新資料(對應SQL欄位
+        // 更新資料(對應SQL欄位)
         appeal.setResponse(response); //管理員回復的文字
-        appeal.setStatus(status); //狀態(ex:已結案
+        appeal.setStatus(status); //狀態(ex:已處理)
         appeal.setAdmNo(admNo); //紀錄是哪個管理員處理的
         appeal.setProcessDate(LocalDateTime.now()); //處理日期
         appeal.setUpdatedDate(LocalDateTime.now()); //最後更新日期
@@ -85,14 +84,14 @@ public class InstallAppealsService {
     }
 
     //需要一個方法「找出某個申訴案件的所有圖片編號」
-// 這要在 install_appeal_images 表找 appeals_no = ? 的所有紀錄
-// 假設你在 Repository 已經寫好 findByAppealsNo 方法
+    // 這要在 install_appeal_images 表找 appeals_no = ? 的所有紀錄
+    // 假設你在 Repository 已經寫好 findByAppealsNo 方法
     public List<InstallAppealImage> getImagesByAppealsNo(Integer appealsNo) {
         // 這裡我們等一下要在 Repository 補上一行查詢指令
         return installAppealImageRepository.findByAppealsNo(appealsNo);
     }
 
-    //這裡跟申訴紀錄有關 讓會員編號=1
+    //這裡跟申訴紀錄有關 根據會員編號查詢
     public List<InstallAppeals> getAppealsByMember(Integer memberNo) {
         return installAppealsRepository.findByMemberNo(memberNo);
     }
