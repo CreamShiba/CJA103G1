@@ -20,26 +20,22 @@ public class ChatRestController {
 	public Map<String, Object> addBlacklist(@RequestBody Map<String, Object> payload, HttpSession session) {
 		Map<String, Object> response = new HashMap<>();
 		MembersVO member = (MembersVO) session.getAttribute("member");
-		if (member == null) { response.put("success", false); return response; }
+
+		if (member == null) {
+			response.put("success", false);
+			response.put("message", "未登入");
+			return response;
+		}
 
 		try {
 			Integer myId = member.getMemNo();
+			// 修正：從 JSON payload 取得 blockedId 並確保轉為 Integer
 			Integer blockedId = Integer.valueOf(payload.get("blockedId").toString());
 
-			if (myId.equals(blockedId)) {
-				response.put("success", false);
-				response.put("message", "不能封鎖自己");
-				return response;
+			if (!blacklistRepository.existsByUserIdAndBlockedUserId(myId, blockedId)) {
+				blacklistRepository.save(new Blacklist(myId, blockedId));
 			}
-
-			// 🟢 這裡名稱正確：existsByUserId...
-			if (blacklistRepository.existsByUserIdAndBlockedUserId(myId, blockedId)) {
-				response.put("success", false);
-				response.put("message", "已在名單中");
-			} else {
-				blacklistRepository.saveAndFlush(new Blacklist(myId, blockedId));
-				response.put("success", true);
-			}
+			response.put("success", true);
 		} catch (Exception e) {
 			response.put("success", false);
 			response.put("message", e.getMessage());
@@ -51,17 +47,15 @@ public class ChatRestController {
 	public Map<String, Object> removeBlacklist(@RequestBody Map<String, Object> payload, HttpSession session) {
 		Map<String, Object> response = new HashMap<>();
 		MembersVO member = (MembersVO) session.getAttribute("member");
-		if (member == null) return response;
 
-		try {
-			Integer blockedId = Integer.valueOf(payload.get("blockedId").toString());
-
-			// 🟢 關鍵修正：原本是 deleteByUserNo... 改為 deleteByUserId...
-			blacklistRepository.deleteByUserIdAndBlockedUserId(member.getMemNo(), blockedId);
-
-			response.put("success", true);
-		} catch (Exception e) {
-			response.put("success", false);
+		if (member != null) {
+			try {
+				Integer blockedId = Integer.valueOf(payload.get("blockedId").toString());
+				blacklistRepository.deleteByUserIdAndBlockedUserId(member.getMemNo(), blockedId);
+				response.put("success", true);
+			} catch (Exception e) {
+				response.put("success", false);
+			}
 		}
 		return response;
 	}
