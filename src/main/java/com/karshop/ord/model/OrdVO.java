@@ -1,7 +1,7 @@
 package com.karshop.ord.model;
 
 import com.karshop.buyerrating.model.BuyerRatingVO;
-import com.karshop.membertest.model.MemberVO;
+import com.karshop.members.model.MembersVO;
 import com.karshop.orddetail.model.OrdDetailVO;
 import com.karshop.rating.model.RatingVO;
 import com.karshop.sellertest.model.SellerVO;
@@ -26,7 +26,7 @@ public class OrdVO implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_no")
-    private MemberVO member;
+    private MembersVO member;
 
     @Column(name = "coupon_no")
     private Integer couponNo;
@@ -81,8 +81,8 @@ public class OrdVO implements Serializable {
     private String payoutStatus;
 
 //  買家寫的評價
-    @OneToOne(mappedBy = "ord")
-    private BuyerRatingVO buyerRating;
+    @OneToMany(mappedBy = "ord", cascade =  CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<BuyerRatingVO> buyerRatings;
 
 //  平台抽成5%
     private static final double commission = 0.05;
@@ -111,11 +111,12 @@ public class OrdVO implements Serializable {
         this.seller = seller;
     }
 
-    public MemberVO getMember() {
+
+    public MembersVO getMember() {
         return member;
     }
 
-    public void setMember(MemberVO member) {
+    public void setMember(MembersVO member) {
         this.member = member;
     }
 
@@ -255,12 +256,12 @@ public class OrdVO implements Serializable {
         this.payoutStatus = payoutStatus;
     }
 
-    public BuyerRatingVO getBuyerRating() {
-        return buyerRating;
+    public List<BuyerRatingVO> getBuyerRatings() {
+        return buyerRatings;
     }
 
-    public void setBuyerRating(BuyerRatingVO buyerRating) {
-        this.buyerRating = buyerRating;
+    public void setBuyerRatings(List<BuyerRatingVO> buyerRatings) {
+        this.buyerRatings = buyerRatings;
     }
 }
 

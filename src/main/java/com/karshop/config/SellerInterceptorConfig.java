@@ -14,11 +14,11 @@ public class SellerInterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-//        registry.addInterceptor(sellerInterceptor)
-//                .addPathPatterns("/product/**")
-//                .excludePathPatterns("/product/detail")
-//                .excludePathPatterns("/product/displayMain")
-//                .excludePathPatterns("/product/displayDetail");
+        registry.addInterceptor(sellerInterceptor)
+                .addPathPatterns("/product/**")
+                .excludePathPatterns("/product/detail")
+                .excludePathPatterns("/product/displayMain")
+                .excludePathPatterns("/product/displayDetail");
 
     }
 }

@@ -74,6 +74,9 @@ public class TechnicianManagementService {
 
                 if (dto.getProfilePhoto() != null && !dto.getProfilePhoto().isEmpty()) {
                     existing.setTechProfile(dto.getProfilePhoto().getBytes());
+                } else if (existing.getTechProfile() == null || existing.getTechProfile().length == 0) {
+                    // If no existing profile and no new one uploaded, set default
+                    existing.setTechProfile(loadDefaultProfileImage());
                 }
 
                 return technicianRepository.save(existing);
@@ -96,9 +99,39 @@ public class TechnicianManagementService {
         // 若有上傳大頭貼，轉為 byte[] 存入
         if (dto.getProfilePhoto() != null && !dto.getProfilePhoto().isEmpty()) {
             technician.setTechProfile(dto.getProfilePhoto().getBytes());
+        } else {
+            // Set default profile image
+            technician.setTechProfile(loadDefaultProfileImage());
         }
 
         return technicianRepository.save(technician);
+    }
+
+    private byte[] cachedDefaultProfileImage;
+
+    private byte[] loadDefaultProfileImage() {
+        if (cachedDefaultProfileImage != null) {
+            return cachedDefaultProfileImage;
+        }
+        try {
+            org.springframework.core.io.Resource resource = new org.springframework.core.io.ClassPathResource(
+                    "static/images/user.png");
+            if (resource.exists()) {
+                cachedDefaultProfileImage = resource.getContentAsByteArray();
+                return cachedDefaultProfileImage;
+            }
+            // Fallback: try file system
+            java.io.File file = new java.io.File("src/main/resources/static/images/user.png");
+            if (file.exists()) {
+                cachedDefaultProfileImage = java.nio.file.Files.readAllBytes(file.toPath());
+                return cachedDefaultProfileImage;
+            }
+            System.err.println("Default profile image not found!");
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -304,7 +337,11 @@ public class TechnicianManagementService {
                 vo.setAvgRating(0.0);
             }
 
-            vo.setProfilePhotoFromBytes(tech.getTechProfile());
+            if (tech.getTechProfile() != null && tech.getTechProfile().length > 0) {
+                vo.setProfilePhotoFromBytes(tech.getTechProfile());
+            } else {
+                vo.setProfilePhotoFromBytes(loadDefaultProfileImage());
+            }
 
             // 取得該技師提供的服務
             List<TechnicianService> services = technicianServiceRepository
@@ -348,7 +385,11 @@ public class TechnicianManagementService {
             vo.setAvgRating(0.0);
         }
 
-        vo.setProfilePhotoFromBytes(tech.getTechProfile());
+        if (tech.getTechProfile() != null && tech.getTechProfile().length > 0) {
+            vo.setProfilePhotoFromBytes(tech.getTechProfile());
+        } else {
+            vo.setProfilePhotoFromBytes(loadDefaultProfileImage());
+        }
 
         List<TechnicianService> services = technicianServiceRepository
                 .findByTechnicianTechNoAndServiceStatus(tech.getTechNo(), 1);
@@ -360,7 +401,6 @@ public class TechnicianManagementService {
             svo.setPrice(ts.getPrice());
             return svo;
         }).collect(Collectors.toList());
-
         vo.setServices(serviceVOs);
 
         // 取得評論列表

@@ -1,6 +1,6 @@
 package com.karshop.sellertest.model;
 
-import com.karshop.membertest.model.MemberVO;
+import com.karshop.members.model.MembersVO;
 import com.karshop.ord.model.OrdVO;
 import com.karshop.product.model.ProductVO;
 import jakarta.persistence.*;
@@ -19,7 +19,7 @@ public class SellerVO implements Serializable {
 
     @OneToOne
     @JoinColumn(name = "member_no")
-    private MemberVO member;
+    private MembersVO member;
 
     @Column(name = "seller_name")
     private String sellerName; // 負責人姓名
@@ -67,6 +67,14 @@ public class SellerVO implements Serializable {
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
     private List<OrdVO>  order;
 
+    public String getSellerName() {
+        return sellerName;
+    }
+
+    public void setSellerName(String sellerName) {
+        this.sellerName = sellerName;
+    }
+
     public Integer getSellerNo() {
         return sellerNo;
     }
@@ -75,20 +83,12 @@ public class SellerVO implements Serializable {
         this.sellerNo = sellerNo;
     }
 
-    public MemberVO getMember() {
+    public MembersVO getMember() {
         return member;
     }
 
-    public void setMember(MemberVO member) {
+    public void setMember(MembersVO member) {
         this.member = member;
-    }
-
-    public String getSellerName() {
-        return sellerName;
-    }
-
-    public void setSellerName(String sellerName) {
-        this.sellerName = sellerName;
     }
 
     public String getShopName() {
