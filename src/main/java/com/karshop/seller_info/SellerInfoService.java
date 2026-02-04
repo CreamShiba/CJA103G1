@@ -15,10 +15,10 @@ import java.nio.file.Paths;
 import java.util.List;
 
 @Service("sellerinfoservice")
-public class sellerinfoservice {
+public class SellerInfoService {
 
     @Autowired
-    private sellerinforepository repository;
+    private SellerInfoRepository repository;
 
     private static final int PAGE_SIZE = 10;
 
@@ -26,13 +26,13 @@ public class sellerinfoservice {
     private static final String UPLOAD_DIR = "src/main/resources/static/uploads/seller-images/";
 
     @Transactional
-    public sellerinfo addSeller(sellerinfo seller) {
+    public SellerInfo addSeller(SellerInfo seller) {
         return repository.save(seller);
     }
 
     @Transactional
-    public sellerinfo updateSeller(sellerinfo seller) {
-        sellerinfo existingSeller = repository.findById(seller.getSeller_no())
+    public SellerInfo updateSeller(SellerInfo seller) {
+        SellerInfo existingSeller = repository.findById(seller.getSeller_no())
                 .orElseThrow(() -> new RuntimeException("賣家不存在,編號:" + seller.getSeller_no()));
 
         if (seller.getShop_name() != null) existingSeller.setShop_name(seller.getShop_name());
@@ -57,12 +57,12 @@ public class sellerinfoservice {
         repository.deleteById(sellerNo);
     }
 
-    public sellerinfo getOneSeller(Integer sellerNo) {
+    public SellerInfo getOneSeller(Integer sellerNo) {
         return repository.findById(sellerNo)
                 .orElseThrow(() -> new RuntimeException("找不到賣家,編號:" + sellerNo));
     }
 
-    public Page<sellerinfo> getAllSellers(int pageNumber) {
+    public Page<SellerInfo> getAllSellers(int pageNumber) {
         Pageable pageable = PageRequest.of(pageNumber - 1, PAGE_SIZE);
         return repository.findAll(pageable);
     }
@@ -94,15 +94,15 @@ public class sellerinfoservice {
         return "uploads/seller-images/" + fileName;
     }
 
-    public List<sellerinfo> searchByShopName(String shopName) {
+    public List<SellerInfo> searchByShopName(String shopName) {
         return repository.findByShopName(shopName);
     }
 
-    public List<sellerinfo> getVerifiedSellers() {
+    public List<SellerInfo> getVerifiedSellers() {
         return repository.findByVerified(true);
     }
 
-    public sellerinfo getSellerByMemberId(Integer memberId) {
+    public SellerInfo getSellerByMemberId(Integer memberId) {
         return repository.findByMemberNo(memberId)
                 .orElseThrow(() -> new RuntimeException("此會員尚未申請成為賣家"));
     }

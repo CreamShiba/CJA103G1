@@ -13,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -25,6 +27,23 @@ public class cartcontroller {
 
     @Autowired
     private OrdService ordService;
+
+    @Autowired
+    private com.karshop.coupon.CouponService couponService;
+
+    // ===================================================================
+    // 並發鎖 — 不動 ProductService 的情況下防止超賣
+    // ===================================================================
+    // 把「庫存檢查」和「建訂單」鎖在一起，同一時刻只允許一個 request 進入。
+    // 第二個人必須等第一個人完成後才進來檢查庫存，
+    // 這時候庫存已經被第一個人消耗掉了，不夠就會被擋住。
+    //
+    // ⚠️  這是類別級別的鎖，所有商品共用同一張。
+    //     學校專案流量不會到那個程度，這個最單純、最不容易出錯。
+    //     將來流量變大可以升級成 per-product 鎖或 Redis 分佈式鎖。
+    // ===================================================================
+    private final Object orderLock = new Object();
+
     @GetMapping
     public String showCart(HttpSession session, Model model) {
         Integer memberNo = getMemberNo(session);
@@ -40,7 +59,7 @@ public class cartcontroller {
         return "front-end/cart-list";
     }
 
-    @PostMapping("/add")
+    @PostMapping("/cart/add")
     public String addToCart(@RequestParam Integer prodNo,
                             @RequestParam(defaultValue = "1") Integer quantity,
                             HttpSession session,
@@ -192,28 +211,21 @@ public class cartcontroller {
     }
 
     // ===== ✅ 折價券驗證 API =====
-    // NOTE: 這裡先用暫時的 hardcode 方式驗證
-    //       之後如果有 CouponService 可以替換成呼叫 CouponService
     @PostMapping("/validate-coupon")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> validateCoupon(
             @RequestParam String couponCode) {
 
         Map<String, Object> response = new HashMap<>();
-
-        // TODO: 之後替換成從資料庫查詢 coupon
-        // 例如: CouponVO coupon = couponService.findByCode(couponCode);
-        Map<String, Integer> validCoupons = new HashMap<>();
-        validCoupons.put("SAVE100", 100);
-        validCoupons.put("SAVE500", 500);
-        validCoupons.put("VIP20",   200);
-
         String upperCode = couponCode.trim().toUpperCase();
 
-        if (validCoupons.containsKey(upperCode)) {
+        // ── 先從 CouponService 查詢（用 couponTitle 當索引碼） ──
+        Integer dbDiscount = lookupCouponDiscount(upperCode);
+
+        if (dbDiscount != null) {
             response.put("valid", true);
-            response.put("discountAmount", validCoupons.get(upperCode));
-            response.put("message", "折價券套用成功！節省 NT$ " + validCoupons.get(upperCode));
+            response.put("discountAmount", dbDiscount);
+            response.put("message", "折價券套用成功！節省 NT$ " + dbDiscount);
         } else {
             response.put("valid", false);
             response.put("message", "無效的折價券代碼");
@@ -223,6 +235,7 @@ public class cartcontroller {
     }
 
     // ===== ✅ 付款處理：連動建立 Order =====
+    @Transactional  // ✅ 保證 OrdVO + OrdDetailVO 同時成功或同時回滾
     @PostMapping("/process-payment")
     public String processPayment(
             @RequestParam(required = false) String paymentMethod,
@@ -246,111 +259,144 @@ public class cartcontroller {
                 return "redirect:/members/carts";
             }
 
-            Map<Integer, ProductVO> productMap = service.getProductsForCart(cartItems);
+            // ===================================================================
+            // ✅ synchronized(orderLock) 進入後才讀取庫存、才下單
+            //    同一時刻只允許一個 request 進入這個段落。
+            //    第一個人：讀庫存 → 下單 → 離開鎖
+            //    第二個人：才進來讀庫存 → 此時庫存已被第一個人消耗 → 如果不夠就被擋住
+            // ===================================================================
+            synchronized (orderLock) {
 
-            // ✅ 再次庫存檢查（防止前端作弊）
-            for (cart item : cartItems) {
-                ProductVO product = productMap.get(item.getProd_no());
-                if (product == null) {
-                    redirectAttributes.addFlashAttribute("error", "❌ 商品 " + item.getProd_no() + " 不存在！");
+                // ── 鎖進來後「再」從 DB 讀取最新商品資料 ──
+                //    必須在鎖裡面讀，才能看到別人剛才下單後的庫存變化
+                Map<Integer, ProductVO> productMap = service.getProductsForCart(cartItems);
+
+                // ✅ 庫存檢查
+                for (cart item : cartItems) {
+                    ProductVO product = productMap.get(item.getProd_no());
+                    if (product == null) {
+                        redirectAttributes.addFlashAttribute("error", "❌ 商品 " + item.getProd_no() + " 不存在！");
+                        return "redirect:/members/carts";
+                    }
+                    if (item.getQuantity() > product.getProdQty()) {
+                        redirectAttributes.addFlashAttribute("error",
+                                "❌ 「" + product.getProdName() + "」數量超過庫存（最多 " + product.getProdQty() + " 件）");
+                        return "redirect:/members/carts/checkout";
+                    }
+                    if ("下架中".equals(product.getProdStatus())) {
+                        redirectAttributes.addFlashAttribute("error",
+                                "❌ 「" + product.getProdName() + "」已經下架，無法訂購！");
+                        return "redirect:/members/carts/checkout";
+                    }
+                }
+
+                // ── 後端再次驗證 coupon 折扣金額（不信任前端傳來的 discountAmount） ──
+                int serverDiscount = 0;
+                if (couponCode != null && !couponCode.trim().isEmpty()) {
+                    Integer verified = lookupCouponDiscount(couponCode.trim().toUpperCase());
+                    if (verified != null) {
+                        serverDiscount = verified;
+                    }
+                }
+
+                // ── 計算總金額（全部用後端數據） ──
+                int subtotal = calcTotal(cartItems, productMap);
+                int shippingFee = 100;
+                if ("store".equals(deliveryMethod)) shippingFee = 60;
+                else if ("self".equals(deliveryMethod)) shippingFee = 0;
+
+                int totalAmount = subtotal + shippingFee - serverDiscount;
+                if (totalAmount < 0) totalAmount = 0;
+
+                // ===================================================================
+                // 連動 Order 資料庫：建立 OrdVO + OrdDetailVO
+                // ===================================================================
+//
+//                MemberVO memberVO = (MemberVO) session.getAttribute("member");
+//                ProductVO firstProduct = productMap.values().iterator().next();
+//                ====
+
+                if (productMap.isEmpty()) {
+                    redirectAttributes.addFlashAttribute("error", "❌ 購物車商品異常");
                     return "redirect:/members/carts";
                 }
-                if (item.getQuantity() > product.getProdQty()) {
-                    redirectAttributes.addFlashAttribute("error",
-                            "❌ 「" + product.getProdName() + "」數量超過庫存（最多 " + product.getProdQty() + " 件）");
-                    return "redirect:/members/carts/checkout";
+                ProductVO firstProduct = productMap.values().iterator().next();
+
+                // 2. 從 Session 拿會員物件 (改用正確的邏輯與變數名稱)
+                Object sessionMember = session.getAttribute("member");
+                System.out.println("DEBUG: Session 中的 member 物件是: " + sessionMember);
+
+                if (sessionMember == null) {
+                    redirectAttributes.addFlashAttribute("error", "❌ 找不到會員登入資訊，請重新登入");
+                    return "redirect:/members/carts";
                 }
-                if ("下架中".equals(product.getProdStatus())) {
-                    redirectAttributes.addFlashAttribute("error",
-                            "❌ 「" + product.getProdName() + "」已經下架，無法訂購！");
-                    return "redirect:/members/carts/checkout";
+
+                MemberVO memberVO = (MemberVO) sessionMember; // 這裡只宣告一次 memberVO
+
+//                ====CLEAR=====
+                // ─── 建立 OrdVO ───
+                OrdVO ordVO = new OrdVO();
+                ordVO.setSeller(firstProduct.getSeller());
+                if (memberVO != null) {
+                    ordVO.setMember(memberVO);
                 }
-            }
+                ordVO.setCouponNo(null);                             // coupon 先 null
+                ordVO.setOrdDate(LocalDateTime.now());
+                ordVO.setOriginPrice(subtotal);                      // 原價（折扣前小計）
+                ordVO.setDiscountPrice(serverDiscount);              // 折扣金額（後端驗證過的）
+                ordVO.setOrdPrice(totalAmount);                      // 實付金額
+                ordVO.setOrdStatus("待出貨");
+                ordVO.setOrdPaymentStatus("待付款");
+                ordVO.setOrdPaymentMethod(paymentMethod);            // credit / atm / convenience / cash
+                ordVO.setOrdShipMethod(deliveryMethod);              // home / store / self
+                ordVO.setOrdShipNo(null);
+                ordVO.setOrdRecipient(receiverName);
+                // 地址拼接（電話 + 備註，OrdVO 只有一個地址欄位）
+                StringBuilder addrBuilder = new StringBuilder();
+                if (receiverAddress != null) addrBuilder.append(receiverAddress);
+                if (receiverPhone != null && !receiverPhone.isEmpty()) {
+                    addrBuilder.append(" (電話：").append(receiverPhone).append(")");
+                }
+                if (orderNote != null && !orderNote.isEmpty()) {
+                    addrBuilder.append(" 備註：").append(orderNote);
+                }
+                ordVO.setOrdAddress(addrBuilder.toString());
+                ordVO.setOrdCompletedDate(null);
+                ordVO.setCancelReason(null);
+                ordVO.setPayoutStatus("待撥款");
 
-            // 計算總金額
-            int subtotal = calcTotal(cartItems, productMap);
-            int shippingFee = 100;
-            if ("store".equals(deliveryMethod)) shippingFee = 60;
-            else if ("self".equals(deliveryMethod)) shippingFee = 0;
+                // ─── 儲存 OrdVO（拿到生成的 ordNo） ───
+                ordService.addOrd(ordVO);
+                System.out.println("✅ [訂單] 已建立，ordNo = " + ordVO.getOrdNo());
 
-            int totalAmount = subtotal + shippingFee - (discountAmount != null ? discountAmount : 0);
-            if (totalAmount < 0) totalAmount = 0;
+                // ─── 建立 OrdDetailVO（每個購物車項目一筆） ───
+                List<OrdDetailVO> detailList = new ArrayList<>();
+                for (cart item : cartItems) {
+                    ProductVO product = productMap.get(item.getProd_no());
 
-            // ===================================================================
-            // ✅ 連動 Order 資料庫：建立 OrdVO + OrdDetailVO
-            // ===================================================================
+                    OrdDetailVO detail = new OrdDetailVO();
+                    detail.setOrder(ordVO);
+                    detail.setProduct(product);
+                    detail.setQuantity(item.getQuantity());
+                    detail.setPrice(product.getProdPrice());
 
-            // 從 session 拿會員物件
-            MemberVO memberVO = (MemberVO) session.getAttribute("member");
+                    detailList.add(detail);
+                }
 
-            // 從第一個商品拿賣家（同一平台，目前先用第一個商品的賣家）
-            ProductVO firstProduct = productMap.values().iterator().next();
+                // cascade=ALL → setOrderDetail 後 save 就會自動儲存細節
+                ordVO.setOrderDetail(detailList);
+                ordService.updateOrd(ordVO);
+                System.out.println("✅ [訂單細節] 已建立，共 " + detailList.size() + " 筆");
 
-            // ─── 建立 OrdVO ───
-            OrdVO ordVO = new OrdVO();
-            ordVO.setSeller(firstProduct.getSeller());           // 賣家（從商品拿）
-            if (memberVO != null) {
-                ordVO.setMember(memberVO);                       // 會員
-            }
-            ordVO.setCouponNo(null);                             // coupon 還沒有資料庫，先 null
-            // 之後有 CouponVO 時改為 coupon.getCouponNo()
-            ordVO.setOrdDate(LocalDateTime.now());               // 訂單日期
-            ordVO.setOriginPrice(subtotal);                      // 原價（小計，折扣前）
-            ordVO.setDiscountPrice(discountAmount != null ? discountAmount : 0); // 折扣金額
-            ordVO.setOrdPrice(totalAmount);                      // 實付金額（小計 + 運費 - 折扣）
-            ordVO.setOrdStatus("待出貨");
-            ordVO.setOrdPaymentStatus("待付款");
-            ordVO.setOrdPaymentMethod(paymentMethod);            // credit / atm / convenience / cash
-            ordVO.setOrdShipMethod(deliveryMethod);              // home / store / self
-            ordVO.setOrdShipNo(null);                            // 出貨單號，出貨後才填
-            ordVO.setOrdRecipient(receiverName);                 // 收件人姓名
-            // 地址拼接（電話 + 備註也放進來，因為 OrdVO 只有一個地址欄位）
-            StringBuilder addrBuilder = new StringBuilder();
-            if (receiverAddress != null) addrBuilder.append(receiverAddress);
-            if (receiverPhone != null && !receiverPhone.isEmpty()) {
-                addrBuilder.append(" (電話：").append(receiverPhone).append(")");
-            }
-            if (orderNote != null && !orderNote.isEmpty()) {
-                addrBuilder.append(" 備註：").append(orderNote);
-            }
-            ordVO.setOrdAddress(addrBuilder.toString());
-            ordVO.setOrdCompletedDate(null);                     // 完成日期，完成後才填
-            ordVO.setCancelReason(null);
-            ordVO.setPayoutStatus("待撥款");
+                // ─── 清空購物車 ───
+                service.clearCart(memberNo);
 
-            // ─── 先儲存 OrdVO（拿到生成的 ordNo） ───
-            ordService.addOrd(ordVO);
-            System.out.println("✅ [訂單] 已建立，ordNo = " + ordVO.getOrdNo());
+                redirectAttributes.addFlashAttribute("success",
+                        "✅ 訂單成功！訂單編號：" + ordVO.getOrdNo() + "，總金額 NT$ " + String.format("%,d", totalAmount));
 
-            // ─── 建立 OrdDetailVO（每個購物車項目一筆） ───
-            // ⚠️  setOrder / setProduct 從 mappedBy 確認無誤
-            // ⚠️  數量和單價的 setter 名稱是從 OrdDetailVO.java 推斷的，
-            //     如果 compile 錯請看你們的 OrdDetailVO.java 確認正確的 setter 名稱
-            List<OrdDetailVO> detailList = new ArrayList<>();
-            for (cart item : cartItems) {
-                ProductVO product = productMap.get(item.getProd_no());
+                return "redirect:/members/carts";
 
-                OrdDetailVO detail = new OrdDetailVO();
-                detail.setOrder(ordVO);                          // 對應哪張訂單
-                detail.setProduct(product);                      // 對應哪個商品
-                detail.setQuantity(item.getQuantity());    // 購買數量  ← 如果錯請看 OrdDetailVO 調整
-                detail.setPrice(product.getProdPrice()); // 單價   ← 如果錯請看 OrdDetailVO 調整
-
-                detailList.add(detail);
-            }
-
-            // 設定細節列表，利用 OrdVO 裡的 cascade=ALL 自動儲存
-            ordVO.setOrderDetail(detailList);
-            ordService.updateOrd(ordVO);                         // save 觸發 cascade，細節一起存進去
-            System.out.println("✅ [訂單細節] 已建立，共 " + detailList.size() + " 筆");
-
-            // ─── 清空購物車 ───
-            service.clearCart(memberNo);
-
-            redirectAttributes.addFlashAttribute("success",
-                    "✅ 訂單成功！訂單編號：" + ordVO.getOrdNo() + "，總金額 NT$ " + String.format("%,d", totalAmount));
-
-            return "redirect:/members/carts";
+            } // end synchronized
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -377,6 +423,38 @@ public class cartcontroller {
             }
         }
         return total;
+    }
+
+    /**
+     * 後端唯一的折價券查詢入口。
+     * 優先從 CouponService 用 couponTitle 查詢（有效券 status=1）；
+     * 找不到才 fallback 到暫時的測試用 hardcode map。
+     * 後來 Coupon 表裡加了 coupon_code 獨立欄位時，從這裡改查詢就好。
+     *
+     * @return 折扣金額（找不到傳回 null）
+     */
+    private Integer lookupCouponDiscount(String upperCode) {
+        // ── 從資料庫查詢：用 couponTitle 當索引碼 ──
+        try {
+            com.karshop.coupon.Coupon coupon = couponService.getAll().stream()
+                    .filter(c -> c.getCouponTitle() != null
+                            && c.getCouponTitle().trim().toUpperCase().equals(upperCode))
+                    .findFirst()
+                    .orElse(null);
+            if (coupon != null) {
+                return coupon.getDiscountValue();
+            }
+        } catch (Exception e) {
+            System.err.println("⚠️  [Coupon查詢] 資料庫查詢失敗，走 fallback: " + e.getMessage());
+        }
+
+        // ── Fallback：測試用的暫時硬寫 ──
+        // 正式上線後刪掉這個 map
+        Map<String, Integer> fallbackCoupons = new HashMap<>();
+        fallbackCoupons.put("SAVE100", 100);
+        fallbackCoupons.put("SAVE500", 500);
+        fallbackCoupons.put("VIP20",   200);
+        return fallbackCoupons.get(upperCode);  // 找不到傳 null
     }
 
     private Integer getMemberNo(HttpSession session) {

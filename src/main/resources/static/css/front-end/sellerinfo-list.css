@@ -343,3 +343,16 @@ body {
         padding: 30px 20px;
     }
 }
+/* 未通過狀態徽章 - 橘黃色 */
+.status-rejected {
+    background: rgba(255, 152, 0, 0.1);
+    color: #FF9800;
+    border: 1px solid #FF9800;
+}
+
+/* 警告提示框 */
+.alert-warning {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid #FF9800;
+    color: #e65100;
+}

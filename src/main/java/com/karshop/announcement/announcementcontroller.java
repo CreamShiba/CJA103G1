@@ -21,7 +21,7 @@ public class announcementcontroller {
      * 前台公告列表頁
      * 路徑：GET /announcement
      */
-    @GetMapping("/members/announcement")
+    @GetMapping("/announcement")
     public String announcementListPage(Model model) {
         List<announcement> announcements = service.getAnnouncementsByStatus("發佈");
         model.addAttribute("announcements", announcements);
@@ -39,10 +39,6 @@ public class announcementcontroller {
         model.addAttribute("announcements", announcements);
         return "back-end/announcement-index";
     }
-
-    /**
-     * 處理新增公告
-     */
     /**
      * 處理新增公告
      * 路徑：POST /admins/announcement/create
