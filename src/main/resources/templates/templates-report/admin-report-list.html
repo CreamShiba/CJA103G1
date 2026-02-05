@@ -6,7 +6,6 @@
     <title>檢舉管理 - Autopile Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* --- 你的 CSS 完全保留 --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100%; width: 100%; }
@@ -40,14 +39,14 @@
         .report-table th { padding: 16px; text-align: left; font-weight: 600; color: #00796b; font-size: 15px; border-bottom: 2px solid #e0f2f1; background-color: #f8f9fa; }
         .report-table td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
 
-        /* 💡 狀態標籤顏色區分 */
-        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; background-color: #e0f2f1; color: #00796b; }
-        .status-processing { background-color: #fff3e0; color: #e65100; } /* 處理中: 橘色 */
-        .status-closed { background-color: #e8f5e9; color: #2e7d32; }     /* 已結案: 綠色 */
-        .status-rejected { background-color: #ffebee; color: #c62828; }   /* 駁回: 紅色 */
+        /* ✅ 狀態標籤顏色區分：只有兩種狀態 */
+        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .status-pending { background-color: #e0e0e0; color: #666; } /* 待處理: 灰色 */
+        .status-closed { background-color: #4caf50; color: white; }  /* 已處理: 綠色 */
 
         .btn-action { background-color: #00796b; color: white; border: none; padding: 8px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s; }
         .btn-action:hover { background-color: #00695c; }
+        .btn-action.view-only { background-color: #6c757d; }
         .pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 20px; background: white; border-top: 1px solid #eee; }
         .btn-page { background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: 0.2s; font-size: 13px; text-decoration: none; color: inherit; }
         .btn-page:hover:not(.disabled) { background-color: #e9ecef; }
@@ -62,12 +61,22 @@
 <body>
 
 <div class="app-container">
+    <!-- ✅ 側邊欄 -->
     <aside class="sidebar">
-        <div class="sidebar-header"><div class="logo-icon"></div><h2>卡爾夏 <span class="badge">ADMIN</span></h2></div>
+        <div class="sidebar-header">
+            <div class="logo-icon"></div>
+            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
+        </div>
         <nav class="sidebar-nav">
             <ul>
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 A</a></li></ul></li>
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 B</a></li></ul></li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a>
+                    <ul class="submenu"><li><a href="#">功能 A</a></li></ul>
+                </li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a>
+                    <ul class="submenu"><li><a href="#">功能 B</a></li></ul>
+                </li>
 
                 <li class="menu-item has-submenu">
                     <a class="submenu-toggle"><span><i class="fas fa-user-shield"></i> 帳號管理</span><i class="fas fa-chevron-down arrow"></i></a>
@@ -77,33 +86,46 @@
                     </ul>
                 </li>
 
+                <!-- ✅ 申訴/檢舉管理 -->
                 <li class="menu-item has-submenu open">
                     <a class="submenu-toggle"><span><i class="fas fa-exclamation-circle"></i> 申訴/檢舉管理</span><i class="fas fa-chevron-down arrow"></i></a>
                     <ul class="submenu">
+                        <!-- ✅ 申訴總覽報表 -->
                         <li class="menu-item has-sub-item">
                             <a class="sub-toggle"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <li><a th:href="@{/appeals/admin/list(status='PENDING')}">尚未處理</a></li>
-                                <li><a th:href="@{/appeals/admin/list(status='已結案')}">已結案</a></li>
+                                <!-- ✅ 只有「待處理」和「已處理」 -->
+                                <li><a th:href="@{/appeals/admin/list(status='待處理')}">待處理</a></li>
+                                <li><a th:href="@{/appeals/admin/list(status='已處理')}">已處理</a></li>
                             </ul>
                         </li>
+
+                        <!-- ✅ 檢舉總覽報表 -->
                         <li class="menu-item has-sub-item open">
                             <a class="sub-toggle"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
+                                <!-- ✅ 只有「待處理」和「已處理」 -->
                                 <li>
                                     <a th:href="@{/reports/admin/list(status='待處理')}"
-                                       th:classappend="${currentStatus == '待處理' ? 'active' : ''}">尚未處理</a>
+                                       th:classappend="${currentStatus == '待處理'} ? 'active' : ''">
+                                        待處理
+                                    </a>
                                 </li>
                                 <li>
-                                    <a th:href="@{/reports/admin/list(status='已結案')}"
-                                       th:classappend="${currentStatus == '已結案' ? 'active' : ''}">已結案</a>
+                                    <a th:href="@{/reports/admin/list(status='已處理')}"
+                                       th:classappend="${currentStatus == '已處理'} ? 'active' : ''">
+                                        已處理
+                                    </a>
                                 </li>
                             </ul>
                         </li>
                     </ul>
                 </li>
 
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-tools"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 C</a></li></ul></li>
+                <li class="menu-item has-submenu">
+                    <a class="submenu-toggle"><span><i class="fas fa-tools"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a>
+                    <ul class="submenu"><li><a href="#">功能 C</a></li></ul>
+                </li>
                 <li class="menu-item"><a href="#"><span><i class="fas fa-star"></i> 自訂</span></a></li>
                 <li class="menu-item"><a href="#"><span><i class="fas fa-headset"></i> 自訂</span></a></li>
             </ul>
@@ -111,10 +133,14 @@
         <div class="sidebar-footer"><a href="#">登出 (Logout)</a></div>
     </aside>
 
+    <!-- 主要內容區 -->
     <main class="main-content">
         <header class="top-bar">
             <h2 class="page-title">檢舉管理系統</h2>
-            <div class="user-profile"><span>Admin</span><div class="avatar"><i class="fas fa-user"></i></div></div>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar"><i class="fas fa-user"></i></div>
+            </div>
         </header>
 
         <div class="content-area">
@@ -131,6 +157,7 @@
                     </tr>
                     </thead>
                     <tbody id="reportTableBody">
+                    <!-- ✅ 資料列 -->
                     <tr th:each="report : ${reportPage.content}">
                         <td th:text="${report.reportsNo}"></td>
                         <td th:text="${report.reportsType}"></td>
@@ -140,30 +167,39 @@
                                  th:text="${#strings.length(report.reportsReason) > 20 ? #strings.substring(report.reportsReason,0,20) + '...' : report.reportsReason}">
                             </div>
                         </td>
+
+                        <!-- ✅ 狀態徽章：只判斷「待處理」和「已處理」 -->
                         <td>
-                            <span class="status-badge"
-                                  th:classappend="${report.status == '處理中' ? 'status-processing' : (report.status == '已處理' || report.status == '已結案' ? 'status-closed' : (report.status == '駁回' ? 'status-rejected' : ''))}"
+                            <span th:class="${report.status == '待處理'} ? 'status-badge status-pending' : 'status-badge status-closed'"
                                   th:text="${report.status}">
+                                待處理
                             </span>
                         </td>
+
                         <td class="time-text" th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}"></td>
+
+                        <!-- ✅ 操作按鈕：已處理顯示「查看」並變灰色 -->
                         <td>
                             <a th:href="@{/reports/admin/handle(id=${report.reportsNo})}"
-                               class="btn-action"
-                               th:style="${(report.status == '已結案' || report.status == '已處理' || report.status == '駁回') ? 'background-color: #6c757d;' : ''}"
-                               th:text="${(report.status == '已結案' || report.status == '已處理' || report.status == '駁回') ? '查看' : '處理案件'}"></a>
+                               th:class="${report.status == '已處理'} ? 'btn-action view-only' : 'btn-action'"
+                               th:text="${report.status == '已處理'} ? '查看' : '處理案件'">
+                                處理案件
+                            </a>
                         </td>
                     </tr>
+
+                    <!-- ✅ 無資料提示 -->
                     <tr th:if="${reportPage.totalElements == 0}">
-                        <td colspan="6" style="text-align: center; padding: 40px; color: #999;">目前沒有檢舉資料</td>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #999;">暫無相關資料</td>
                     </tr>
                     </tbody>
                 </table>
 
+                <!-- ✅ 分頁控制 -->
                 <div class="pagination-container" th:if="${reportPage.totalPages > 1}">
                     <a th:href="@{/reports/admin/list(status=${currentStatus}, page=${currentPage - 1})}"
                        class="btn-page"
-                       th:classappend="${!reportPage.hasPrevious() ? 'disabled' : ''}">上一頁</a>
+                       th:classappend="${!reportPage.hasPrevious()} ? 'disabled' : ''">上一頁</a>
 
                     <span class="page-info">
                         第 <span th:text="${currentPage + 1}"></span> 頁 /
@@ -173,7 +209,7 @@
 
                     <a th:href="@{/reports/admin/list(status=${currentStatus}, page=${currentPage + 1})}"
                        class="btn-page"
-                       th:classappend="${!reportPage.hasNext() ? 'disabled' : ''}">下一頁</a>
+                       th:classappend="${!reportPage.hasNext()} ? 'disabled' : ''">下一頁</a>
                 </div>
             </div>
         </div>
@@ -181,6 +217,7 @@
 </div>
 
 <script>
+    // ✅ 側邊欄展開/收合功能
     document.querySelectorAll('.submenu-toggle, .sub-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             if (e.currentTarget.tagName === 'A' && e.currentTarget.getAttribute('href') !== null && e.currentTarget.getAttribute('href') !== '#') {

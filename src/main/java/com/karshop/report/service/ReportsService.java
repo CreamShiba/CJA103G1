@@ -8,27 +8,29 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // 確保資料完整性
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Service // 標記為服務層，處理業務邏輯與資料搬運
+@Service
 public class ReportsService {
 
-    @Autowired // 自動注入 Repository 連結資料庫
+    @Autowired
     private ReportsRepository reportsRepository;
 
     // ==========================================
     // 1. 前台功能：提交檢舉
     // ==========================================
     /**
-     * 會員送出檢舉表單時呼叫
+     * ✅ 會員送出檢舉表單時呼叫
      */
     public void submitReport(Reports report) {
-        report.setReportsTimestamp(LocalDateTime.now()); // 紀錄檢舉時間
-        report.setStatus("待處理"); // 配合你的 SQL 預設值改為中文
-        report.setAdmNo(1); // 預設負責管理員編號
-        reportsRepository.save(report); // 執行存檔
+        report.setReportsTimestamp(LocalDateTime.now());
+        report.setStatus("待處理"); // ✅ 統一使用「待處理」
+        report.setAdmNo(1);
+        reportsRepository.save(report);
+
+        System.out.println("✅ 新增檢舉成功！編號：" + report.getReportsNo() + "，狀態：" + report.getStatus());
     }
 
     // ==========================================
@@ -43,8 +45,8 @@ public class ReportsService {
     }
 
     /**
-     * 💡 核心優化：後台分頁查詢 (已簡化狀態判定)
-     * @param status 篩選狀態 (待處理/已處理)
+     * ✅ 核心優化：後台分頁查詢（簡化狀態判定）
+     * @param status 篩選狀態（待處理/已處理）
      * @param page 目前頁碼
      * @param size 每頁幾筆
      * @return 分頁物件
@@ -53,35 +55,30 @@ public class ReportsService {
         // 建立分頁請求，並依照檢舉時間倒序排序 (新的在前)
         Pageable pageable = PageRequest.of(page, size, Sort.by("reportsTimestamp").descending());
 
-        // 💡 根據你簡化後的假資料狀態進行查詢
-        // 如果是查詢「尚未處理」標籤頁 (對應 URL 參數 status=待處理)
-        if ("待處理".equals(status) || "PENDING".equals(status)) {
-            return reportsRepository.findByStatus("待處理", pageable);
-        }
+        System.out.println("💡 Service 查詢狀態：「" + status + "」");
 
-        // 如果是查詢「已結案」標籤頁 (對應 URL 參數 status=已結案 或 假資料的 已處理)
-        if ("已結案".equals(status) || "已處理".equals(status)) {
-            // 因為假資料存「已處理」，但按鈕連結可能帶「已結案」，所以同時查詢這兩個字串
-            return reportsRepository.findByStatusIn(List.of("已處理", "已結案"), pageable);
-        }
-
+        // ✅ 簡化邏輯：直接使用傳入的狀態值查詢
+        // 只接受「待處理」或「已處理」兩種狀態
         return reportsRepository.findByStatus(status, pageable);
     }
 
     /**
-     * 處理管理員對檢舉案件的審核與結案
+     * ✅ 處理管理員對檢舉案件的審核與結案
      */
-    @Transactional // 加入事務管理
+    @Transactional
     public void handleReport(Integer id, String status, Integer admNo, String response) {
         Reports report = reportsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("找不到編號為 " + id + " 的檢舉紀錄"));
 
-        report.setStatus(status); // 這邊送出的會是「已結案」
+        // ✅ 更新狀態（應該是「待處理」或「已處理」）
+        report.setStatus(status);
         report.setAdmNo(admNo);
         report.setResponse(response);
         report.setHandled(LocalDateTime.now());
 
         reportsRepository.save(report);
+
+        System.out.println("✅ 檢舉 #" + id + " 已更新為：" + status);
     }
 
     // ==========================================

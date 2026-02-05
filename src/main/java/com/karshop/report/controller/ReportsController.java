@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,14 +24,32 @@ public class ReportsController {
         return "templates-report/add-report";
     }
 
-    // 處理前台檢舉提交表單
+    // ✅ 處理前台檢舉提交表單（支援從商品頁檢舉後返回原頁面）
     @PostMapping("/submit")
-    public String handleReport(@ModelAttribute Reports report, Model model) {
+    public String handleReport(
+            @ModelAttribute Reports report,
+            @RequestParam(required = false) String source,  // ← 新增：接收來源標記
+            @RequestParam(required = false) Integer prodNo, // ← 新增：接收商品編號
+            RedirectAttributes redirectAttributes,           // ← 新增：用於傳遞訊息
+            Model model) {
+
         report.setReportsTimestamp(LocalDateTime.now());
-        report.setStatus("待處理");
+        report.setStatus("待處理"); // ✅ 統一使用「待處理」
         report.setMemberNo(1);
         report.setAdmNo(1);
         reportsService.submitReport(report);
+
+        // ✅ 設定成功提示訊息
+        redirectAttributes.addFlashAttribute("message", "檢舉已送出，我們會盡快審核！");
+
+        // ✅ 關鍵邏輯：判斷要跳轉去哪裡
+        if ("productDetail".equals(source) && prodNo != null) {
+            // 如果是從商品頁來的，就導回該商品的詳情頁
+            System.out.println("✅ 從商品頁檢舉，返回商品編號：" + prodNo);
+            return "redirect:/product/" + prodNo;
+        }
+
+        // 預設行為：顯示檢舉成功頁面（原本的邏輯）
         model.addAttribute("target", report.getReportsTarget());
         return "templates-report/report-success";
     }
@@ -42,7 +61,7 @@ public class ReportsController {
         return reportsService.getAllReports();
     }
 
-    // 處理管理員後台的審核結案動作
+    // ✅ 處理管理員後台的審核結案動作
     @PostMapping("/api/handle")
     @ResponseBody
     public String handleReportByAdmin(@RequestParam Integer id,
@@ -50,10 +69,12 @@ public class ReportsController {
                                       @RequestParam Integer admNo,
                                       @RequestParam String response){
         try{
+            // ✅ status 應該是「待處理」或「已處理」
             reportsService.handleReport(id, status, admNo, response);
+            System.out.println("✅ 檢舉 #" + id + " 已更新為：" + status);
             return "success";
         }catch (Exception e){
-            return "error" + e.getMessage();
+            return "error: " + e.getMessage();
         }
     }
 
@@ -72,13 +93,10 @@ public class ReportsController {
     // --- 會員中心功能 ---
 
     /**
-     * 💡 核心優化：前台顯示檢舉紀錄列表
-     * 開發階段：暫時改為抓取「全部資料」，確保看得到 ID 為 8, 9, 10 的假資料
+     * ✅ 前台顯示檢舉紀錄列表
      */
     @GetMapping("/history")
     public String showReportHistory(Model model) {
-        // Integer memberNo = 1; // 原本寫死的邏輯
-
         // 為了整合期測試，直接抓取資料庫所有檢舉，讓假資料全部現身
         List<Reports> list = reportsService.getAllReports();
 
@@ -99,7 +117,7 @@ public class ReportsController {
     }
 
     /**
-     * 💡 核心修改：後台管理列表 (支援 Thymeleaf 與 分頁)
+     * ✅ 核心修改：後台管理列表 (支援 Thymeleaf 與 分頁)
      * 存取路徑範例: /reports/admin/list?status=待處理&page=0
      */
     @GetMapping("/admin/list")
@@ -108,11 +126,15 @@ public class ReportsController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
 
+        System.out.println("💡 檢舉後台清單 - 查詢狀態：「" + status + "」，頁碼：" + page);
+
         // 強制每頁顯示 6 筆
         int pageSize = 6;
 
-        // 呼叫 Service 取得分頁資料
+        // ✅ 呼叫 Service 取得分頁資料
         Page<Reports> reportPage = reportsService.getReportsByStatusWithPagination(status, page, pageSize);
+
+        System.out.println("💡 查詢到 " + reportPage.getTotalElements() + " 筆資料，當前頁有 " + reportPage.getNumberOfElements() + " 筆");
 
         // 將資料與當前狀態傳回前端
         model.addAttribute("reportPage", reportPage);

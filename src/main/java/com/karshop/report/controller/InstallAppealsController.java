@@ -39,7 +39,7 @@ public class InstallAppealsController {
                              @RequestParam(value = "type", required = false) String[] types,
                              @RequestParam("description") String description,
                              @RequestParam(value = "images", required = false) MultipartFile[] images,
-                             HttpSession session, // 💡 加入 Session 參數
+                             HttpSession session,
                              Model model) {
 
         String categories = (types != null) ? String.join(",", types) : "";
@@ -47,9 +47,9 @@ public class InstallAppealsController {
         // 💡 從 Session 取得當前登入會員編號
         Integer memberNo = (Integer) session.getAttribute("memberNo");
 
-        // 💡 如果沒登入，使用測試用會員編號 4（測試模式）
+        // 💡 測試模式：如果沒登入，使用假資料 memberNo = 4
         if (memberNo == null) {
-            System.out.println("⚠️ 警告：未從 Session 取得會員編號，使用測試模式 memberNo = 4");
+            System.out.println("⚠️ 測試模式：未從 Session 取得會員編號，使用假資料 memberNo = 4");
             memberNo = 4;
         } else {
             System.out.println("✅ 從 Session 取得會員編號：" + memberNo);
@@ -60,8 +60,15 @@ public class InstallAppealsController {
             appeal.setInstallOrderNo(orderNo);
             appeal.setCategories(categories);
             appeal.setDescription(description);
-            appeal.setMemberNo(memberNo); // 💡 使用從 Session 取得的會員編號
-            setupDefaultValues(appeal);
+            appeal.setMemberNo(memberNo);
+            appeal.setResponse("尚未回覆");
+            appeal.setStatus("待處理"); // ✅ 統一使用「待處理」
+            appeal.setPriority("一般");
+            appeal.setApplyDate(LocalDateTime.now());
+            appeal.setUpdatedDate(LocalDateTime.now());
+            appeal.setTargetMemberNo(999);
+            appeal.setAdmNo(10);
+
             installAppealsService.submitInstallAppeal(appeal);
             saveImages(appeal.getAppealsNo(), images);
 
@@ -72,12 +79,12 @@ public class InstallAppealsController {
             productAppeal.setOrdNo(orderNo);
             productAppeal.setCategories(categories);
             productAppeal.setDescription(description);
-            productAppeal.setStatus("待處理");
+            productAppeal.setStatus("待處理"); // ✅ 統一使用「待處理」
             productAppeal.setResponse("尚未回覆");
             productAppeal.setPriority("一般");
             productAppeal.setApplyDate(LocalDateTime.now());
             productAppeal.setUpdatedDate(LocalDateTime.now());
-            productAppeal.setMemberNo(memberNo); // 💡 使用從 Session 取得的會員編號
+            productAppeal.setMemberNo(memberNo);
             productAppeal.setAdmNo(10);
             productAppeal.setTargetMemberNo(999);
 
@@ -90,18 +97,6 @@ public class InstallAppealsController {
         model.addAttribute("orderNo", orderNo);
         model.addAttribute("appealType", appealType);
         return "templates-report/appeal-success";
-    }
-
-    // 私有方法:設定安裝申訴的預設值
-    private void setupDefaultValues(InstallAppeals appeal) {
-        appeal.setResponse("尚未回覆");
-        appeal.setStatus("待處理");
-        appeal.setPriority("一般");
-        appeal.setApplyDate(LocalDateTime.now());
-        appeal.setUpdatedDate(LocalDateTime.now());
-        // 💡 移除這行：appeal.setMemberNo(4); 因為已經在上面設定了
-        appeal.setTargetMemberNo(999);
-        appeal.setAdmNo(10);
     }
 
     // 私有方法:處理安裝申訴圖片存檔
@@ -134,13 +129,12 @@ public class InstallAppealsController {
         }
     }
 
-    // ===== 🔧 修正: 前台申訴紀錄 - 從 Session 取得會員編號 =====
+    // ===== 前台申訴紀錄 =====
     @GetMapping("/history")
     public String showAppealHistory(HttpSession session, Model model) {
-        // 💡 從 Session 取得當前登入會員編號
         Integer memberNo = (Integer) session.getAttribute("memberNo");
 
-        // 💡 測試模式：如果沒登入，顯示所有假資料（方便測試）
+        // 測試模式：如果沒登入，顯示所有假資料
         boolean testMode = (memberNo == null);
         if (testMode) {
             System.out.println("⚠️ 測試模式：未從 Session 取得會員編號，顯示所有申訴紀錄");
@@ -152,12 +146,10 @@ public class InstallAppealsController {
 
         try {
             List<InstallAppeals> installList;
-
-            // 💡 根據是否登入，決定要顯示全部或只顯示該會員的申訴
             if (testMode) {
-                installList = installAppealsService.getAllInstallAppeals(); // 測試模式：顯示全部
+                installList = installAppealsService.getAllInstallAppeals();
             } else {
-                installList = installAppealsService.getAppealsByMember(memberNo); // 會員模式：只顯示自己的
+                installList = installAppealsService.getAppealsByMember(memberNo);
             }
 
             for (InstallAppeals appeal : installList) {
@@ -165,7 +157,7 @@ public class InstallAppealsController {
                 map.put("appealsNo", appeal.getAppealsNo());
                 map.put("type", "install");
                 map.put("categories", appeal.getCategories() != null ? appeal.getCategories() : "其他");
-                map.put("status", appeal.getStatus());
+                map.put("status", appeal.getStatus()); // ✅ 直接使用資料庫的狀態
                 map.put("applyDate", appeal.getApplyDate());
                 allAppeals.add(map);
             }
@@ -176,30 +168,19 @@ public class InstallAppealsController {
 
         try {
             List<ProductAppeals> productList;
-
-            // 💡 根據是否登入，決定要顯示全部或只顯示該會員的申訴
             if (testMode) {
-                productList = productAppealsService.getAll(); // 測試模式：顯示全部
+                productList = productAppealsService.getAll();
             } else {
-                productList = productAppealsService.getByMemberNo(memberNo); // 會員模式：只顯示自己的
+                productList = productAppealsService.getByMemberNo(memberNo);
             }
 
             for (ProductAppeals appeal : productList) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("appealsNo", appeal.getAppealsNo());
                 map.put("type", "product");
-
-                String displayCategories = "[商品申訴]";
-                try {
-                    if (appeal.getCategories() != null && !appeal.getCategories().isEmpty()) {
-                        displayCategories = appeal.getCategories();
-                    }
-                } catch (Exception ex) {
-                    System.err.println("取得商品申訴 categories 失敗,使用預設值");
-                }
-
-                map.put("categories", displayCategories);
-                map.put("status", appeal.getStatus());
+                map.put("categories", appeal.getCategories() != null && !appeal.getCategories().isEmpty()
+                        ? appeal.getCategories() : "[商品申訴]");
+                map.put("status", appeal.getStatus()); // ✅ 直接使用資料庫的狀態
                 map.put("applyDate", appeal.getApplyDate());
                 allAppeals.add(map);
             }
@@ -208,7 +189,7 @@ public class InstallAppealsController {
             e.printStackTrace();
         }
 
-        // 💡 修正排序邏輯：加入 Null 檢查防止錯誤
+        // 按時間排序（最新的在前）
         allAppeals.sort((a, b) -> {
             LocalDateTime dateA = (LocalDateTime) a.get("applyDate");
             LocalDateTime dateB = (LocalDateTime) b.get("applyDate");
@@ -242,10 +223,14 @@ public class InstallAppealsController {
         return "templates-report/appeal-detail";
     }
 
-    // ===== 🔧 修正: 後台申訴清單頁面（Thymeleaf 渲染）+ Debug Log =====
+    // ===== 後台申訴清單頁面（Thymeleaf 渲染）=====
     @GetMapping("/admin/list")
-    public String showInstallAdminPage(@RequestParam(value = "status", required = false, defaultValue = "待處理") String status,
-                                       Model model) {
+    public String showInstallAdminPage(
+            @RequestParam(value = "status", required = false, defaultValue = "待處理") String status,
+            Model model) {
+
+        System.out.println("💡 後台申訴清單 - 查詢狀態：「" + status + "」");
+
         List<Map<String, Object>> allAppeals = new ArrayList<>();
 
         try {
@@ -256,7 +241,7 @@ public class InstallAppealsController {
             for (InstallAppeals appeal : installList) {
                 System.out.println("💡 安裝申訴 #" + appeal.getAppealsNo() + " 狀態：「" + appeal.getStatus() + "」");
 
-                // 💡 只加入符合狀態的申訴
+                // ✅ 只加入符合狀態的申訴
                 if (appeal.getStatus().equals(status)) {
                     Map<String, Object> map = new HashMap<>();
                     map.put("appealsNo", appeal.getAppealsNo());
@@ -281,18 +266,15 @@ public class InstallAppealsController {
             for (ProductAppeals appeal : productList) {
                 System.out.println("💡 商品申訴 #" + appeal.getAppealsNo() + " 狀態：「" + appeal.getStatus() + "」");
 
-                // 💡 只加入符合狀態的申訴
+                // ✅ 只加入符合狀態的申訴
                 if (appeal.getStatus().equals(status)) {
                     Map<String, Object> map = new HashMap<>();
                     map.put("appealsNo", appeal.getAppealsNo());
                     map.put("orderNo", appeal.getOrdNo());
                     map.put("type", "product");
-
-                    String displayTitle = appeal.getCategories() != null && !appeal.getCategories().isEmpty()
+                    map.put("title", appeal.getCategories() != null && !appeal.getCategories().isEmpty()
                             ? appeal.getCategories()
-                            : "[商品] 單號: " + appeal.getOrdNo();
-
-                    map.put("title", displayTitle);
+                            : "[商品] 單號: " + appeal.getOrdNo());
                     map.put("status", appeal.getStatus());
                     map.put("applyDate", appeal.getApplyDate());
                     allAppeals.add(map);
@@ -305,7 +287,7 @@ public class InstallAppealsController {
 
         System.out.println("💡 過濾狀態「" + status + "」後剩下 " + allAppeals.size() + " 筆");
 
-        // 💡 按時間排序（最新的在前）+ Null 檢查
+        // 按時間排序（最新的在前）
         allAppeals.sort((a, b) -> {
             LocalDateTime dateA = (LocalDateTime) a.get("applyDate");
             LocalDateTime dateB = (LocalDateTime) b.get("applyDate");
@@ -314,14 +296,14 @@ public class InstallAppealsController {
             return dateB.compareTo(dateA);
         });
 
-        // 💡 傳遞資料到 Thymeleaf
+        // 傳遞資料到 Thymeleaf
         model.addAttribute("appeals", allAppeals);
         model.addAttribute("currentStatus", status);
 
         return "templates-report/admin-install-list";
     }
 
-    // ===== 後台 API - 使用 try-catch 防止錯誤 =====
+    // ===== 後台 API =====
     @GetMapping("/api/all")
     @ResponseBody
     public List<Map<String, Object>> showAllAppeals() {
@@ -335,7 +317,7 @@ public class InstallAppealsController {
                 map.put("orderNo", appeal.getInstallOrderNo());
                 map.put("type", "install");
                 map.put("title", appeal.getCategories() != null ? appeal.getCategories() : "其他");
-                map.put("status", appeal.getStatus());
+                map.put("status", appeal.getStatus()); // ✅ 直接使用資料庫的狀態
                 map.put("applyDate", appeal.getApplyDate());
                 result.add(map);
             }
@@ -351,18 +333,10 @@ public class InstallAppealsController {
                 map.put("appealsNo", appeal.getAppealsNo());
                 map.put("orderNo", appeal.getOrdNo());
                 map.put("type", "product");
-
-                String displayTitle = "[商品] 單號: " + appeal.getOrdNo();
-                try {
-                    if (appeal.getCategories() != null && !appeal.getCategories().isEmpty()) {
-                        displayTitle = appeal.getCategories();
-                    }
-                } catch (Exception ex) {
-                    System.err.println("取得商品申訴 categories 失敗,使用訂單編號");
-                }
-
-                map.put("title", displayTitle);
-                map.put("status", appeal.getStatus());
+                map.put("title", appeal.getCategories() != null && !appeal.getCategories().isEmpty()
+                        ? appeal.getCategories()
+                        : "[商品] 單號: " + appeal.getOrdNo());
+                map.put("status", appeal.getStatus()); // ✅ 直接使用資料庫的狀態
                 map.put("applyDate", appeal.getApplyDate());
                 result.add(map);
             }

@@ -6,7 +6,6 @@
     <title>申訴案件管理 - Autopile Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* 原有樣式保持不變 */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100%; }
@@ -38,7 +37,7 @@
         .appeal-table th { padding: 16px; text-align: left; font-weight: 600; color: #00796b; font-size: 15px; border-bottom: 2px solid #e0f2f1; background-color: #f8f9fa; }
         .appeal-table td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
 
-        /* 💡 修改：狀態徽章顏色（待處理=灰色，已處理=綠色） */
+        /* ✅ 狀態徽章顏色（待處理=灰色，已處理=綠色） */
         .status-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
         .status-pending { background-color: #e0e0e0; color: #666; }
         .status-closed { background-color: #4caf50; color: white; }
@@ -57,7 +56,7 @@
 </head>
 <body>
 <div class="app-container">
-    <!-- 側邊欄 -->
+    <!-- ✅ 側邊欄 -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="logo-icon"></div>
@@ -80,36 +79,43 @@
                         <li><a href="#">管理員帳號管理</a></li>
                     </ul>
                 </li>
+
+                <!-- ✅ 申訴/檢舉管理 -->
                 <li class="menu-item has-submenu open">
                     <a class="submenu-toggle"><span><i class="fas fa-exclamation-circle"></i> 申訴/檢舉管理</span><i class="fas fa-chevron-down arrow"></i></a>
                     <ul class="submenu">
+                        <!-- ✅ 申訴總覽報表 -->
                         <li class="menu-item has-sub-item open">
                             <a class="sub-toggle-btn"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <!-- 💡 改用 Thymeleaf 的 @{} 語法和中文狀態 -->
+                                <!-- ✅ 只有「待處理」和「已處理」兩個選項 -->
                                 <li>
                                     <a th:href="@{/appeals/admin/list(status='待處理')}"
-                                       th:classappend="${param.status == null or param.status[0] == '待處理'} ? 'active' : ''">
+                                       th:classappend="${currentStatus == '待處理'} ? 'active' : ''">
                                         待處理
                                     </a>
                                 </li>
                                 <li>
                                     <a th:href="@{/appeals/admin/list(status='已處理')}"
-                                       th:classappend="${param.status != null and param.status[0] == '已處理'} ? 'active' : ''">
+                                       th:classappend="${currentStatus == '已處理'} ? 'active' : ''">
                                         已處理
                                     </a>
                                 </li>
                             </ul>
                         </li>
+
+                        <!-- ✅ 檢舉總覽報表 -->
                         <li class="menu-item has-sub-item">
                             <a class="sub-toggle-btn"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
+                                <!-- ✅ 只有「待處理」和「已處理」兩個選項 -->
                                 <li><a href="/reports/admin/list?status=待處理">待處理</a></li>
                                 <li><a href="/reports/admin/list?status=已處理">已處理</a></li>
                             </ul>
                         </li>
                     </ul>
                 </li>
+
                 <li class="menu-item has-submenu">
                     <a class="submenu-toggle"><span><i class="fas fa-tools"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a>
                     <ul class="submenu"><li><a href="#">功能 C</a></li></ul>
@@ -145,12 +151,12 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- 💡 判斷是否有資料 -->
+                    <!-- ✅ 判斷是否有資料 -->
                     <tr th:if="${#lists.isEmpty(appeals)}">
                         <td colspan="7" class="no-data">暫無相關資料</td>
                     </tr>
 
-                    <!-- 💡 使用 Thymeleaf 的 th:each 迴圈渲染資料 -->
+                    <!-- ✅ 使用 Thymeleaf 的 th:each 迴圈渲染資料 -->
                     <tr th:each="appeal : ${appeals}">
                         <!-- 類型徽章 -->
                         <td>
@@ -164,7 +170,7 @@
                         <!-- 訂單編號 -->
                         <td th:text="'#' + ${appeal.orderNo}">#400</td>
 
-                        <!-- 💡 申訴標題（限制顯示兩個原因，超過顯示 ...） -->
+                        <!-- ✅ 申訴標題（限制顯示兩個原因，超過顯示 ...） -->
                         <td>
                             <span th:if="${appeal.title != null and #strings.contains(appeal.title, ',')}"
                                   th:title="${appeal.title}">
@@ -178,7 +184,7 @@
                             <span th:if="${appeal.title == null}">無標題</span>
                         </td>
 
-                        <!-- 💡 狀態（直接顯示資料庫的值：待處理/已處理） -->
+                        <!-- ✅ 狀態（直接顯示資料庫的值：待處理/已處理） -->
                         <td>
                             <span th:class="${appeal.status == '待處理'} ? 'status-badge status-pending' : 'status-badge status-closed'"
                                   th:text="${appeal.status}">
@@ -191,7 +197,7 @@
                             2025-04-01 10:00
                         </td>
 
-                        <!-- 💡 操作按鈕（已處理顯示「查看」並變灰色） -->
+                        <!-- ✅ 操作按鈕（已處理顯示「查看」並變灰色） -->
                         <td>
                             <a th:href="@{/appeals/admin/handle(id=${appeal.appealsNo}, type=${appeal.type})}"
                                th:class="${appeal.status == '已處理'} ? 'btn-action view-only' : 'btn-action'"
@@ -208,7 +214,7 @@
 </div>
 
 <script>
-    // 💡 保留側邊欄展開/收合功能
+    // ✅ 側邊欄展開/收合功能
     document.querySelectorAll('.submenu-toggle, .sub-toggle-btn').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
