@@ -112,3 +112,23 @@
     background-color: #333;
     color: #ff3333;
 }
+
+
+/* 1. 讓論壇觸發文字顯示手指游標 */
+#forum-center-trigger {
+    cursor: pointer;
+
+}
+
+/* 2. 修正論壇下拉選單的位置，改為靠左對齊 */
+#forum-dropdown {
+    left: 0;
+    right: auto;
+}
+
+/* 3. 當滑過私訊中心時，維持醒目的紅色 */
+#forum-dropdown a[th\:href*='chat']:hover {
+    color: #ff3333 !important;
+    background-color: #333;
+}
+

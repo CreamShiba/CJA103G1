@@ -24,6 +24,7 @@
         a { text-decoration: none; color: inherit; transition: .3s; }
         a:hover { color: #ff3333; }
 
+        /* 這裡保留 Header 的基本樣式，確保 Fragment 載入後排版正確 */
         header { flex-shrink: 0; z-index: 1050; position: relative; }
         header .top-bar { display: flex; justify-content: space-between; padding: 10px 40px; font-size: 12px; color: #ccc; border-bottom: 1px solid #333; }
         .top-icons { display: flex; gap: 20px; align-items: center; }
@@ -36,7 +37,6 @@
         .nav-links { display: flex; gap: 30px; font-size: 14px; align-items: center; }
         .nav-links a.active { color: #ff3333; }
 
-        /* 下拉選單通用容器 */
         .user-dropdown-container { position: relative; display: inline-block; }
         .dropdown-menu {
             display: none;
@@ -125,41 +125,7 @@
 
 <body>
 
-<header>
-    <div class="top-bar">
-        <div>Kar爾夏 Car Life Center</div>
-        <div class="top-icons">
-            <div class="search-box"><input type="text" placeholder="Search...">🔍</div>
-            👤 🛒
-        </div>
-    </div>
-    <div class="main-header">
-        <div class="logo">卡爾夏</div>
-        <nav class="nav-links">
-            <a href="#">商城</a>
-            <a href="#">安裝區</a>
-
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="forum-center-trigger" class="active">論壇 ▾</a>
-                <div id="forum-dropdown" class="dropdown-menu">
-                    <a th:href="@{/forum}">論壇首頁</a>
-                    <a th:href="@{/chat}" style="color: #ff3333">私訊中心</a>
-                </div>
-            </div>
-
-            <a href="#">公告</a>
-
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
-                <div id="member-dropdown" class="dropdown-menu">
-                    <a href="#">我的優惠券</a>
-                    <a href="#">我的收藏</a>
-                    <a href="/chat" style="color: #ff3333">私訊中心</a>
-                </div>
-            </div>
-        </nav>
-    </div>
-</header>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
 
 <div class="main-container">
     <aside class="left-sidebar">
@@ -214,7 +180,8 @@
                                 <i th:id="'fav-icon-' + ${post.postId}" th:class="${myFavIds != null and #lists.contains(myFavIds, post.postId)} ? 'fa-solid fa-star text-warning' : 'fa-regular fa-star'"></i>
                                 <span th:id="'fav-text-' + ${post.postId}" th:text="${myFavIds != null and #lists.contains(myFavIds, post.postId)} ? '取消收藏' : '收藏文章'"></span>
                             </div>
-                            <div class="post-dropdown-item" onclick="alert('已收到您的檢舉，管理員將盡快處理。')">
+                            <div class="post-dropdown-item"
+                                 th:onclick="|location.href='@{/reports/add(reportsTarget=${post.postId})}'|">
                                 <i class="fa-regular fa-flag"></i> 檢舉文章
                             </div>
                         </div>
@@ -292,15 +259,16 @@
     var userName = /*[[${userName}]]*/ 'Guest';
     var socket;
 
+    // 💡 下拉選單開關邏輯 (對接 Fragment 中的 ID)
     document.getElementById('member-center-trigger').onclick = (e) => {
         e.stopPropagation();
-        document.getElementById('forum-dropdown').classList.remove('show');
+        if(document.getElementById('forum-dropdown')) document.getElementById('forum-dropdown').classList.remove('show');
         document.getElementById('member-dropdown').classList.toggle('show');
     };
 
     document.getElementById('forum-center-trigger').onclick = (e) => {
         e.stopPropagation();
-        document.getElementById('member-dropdown').classList.remove('show');
+        if(document.getElementById('member-dropdown')) document.getElementById('member-dropdown').classList.remove('show');
         document.getElementById('forum-dropdown').classList.toggle('show');
     };
 
@@ -310,6 +278,7 @@
         document.querySelectorAll('.post-dropdown').forEach(d => d.classList.remove('show'));
     };
 
+    // 其他論壇邏輯、點讚、WebSocket、留言... 全部完整保留
     function filterCategory(cat) {
         document.querySelectorAll('.filter-btn, .category-list li').forEach(el => {
             el.classList.toggle('active', el.innerText.trim().includes(cat) || (cat === '全部主題' && el.innerText.trim().includes('所有文章')));
