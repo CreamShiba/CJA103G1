@@ -8,7 +8,13 @@
 <header th:fragment="frontHeader">
 
     <div class="top-bar">
-        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
+        <div class="seller-entry">
+            <a th:href="@{/product/dashboard}" style="color: white; text-decoration: none; font-size: 14px;">
+                <i class="fas fa-store"></i> 賣家中心
+            </a>
+            <span style="margin: 0 10px; color: #666;">|</span>
+            <a href="#" style="color: white; text-decoration: none; font-size: 14px;">下載 App</a>
+        </div>
         <div class="top-icons">
             <div class="search-box">
                 <form th:action="@{/shop}" method="get" style="display: flex; width: 100%; align-items: center;">
@@ -31,8 +37,28 @@
             <div class="user-dropdown-container">
                 <span id="user-icon" style="cursor: pointer;">👤</span>
                 <div id="user-dropdown" class="dropdown-menu">
-                    <a href="#">登入</a>
-                    <a href="#">註冊</a>
+
+                    <th:block th:if="${session.member == null}">
+                        <a th:href="@{/members/login}">登入</a>
+                        <a th:href="@{/members/register}">註冊</a>
+                    </th:block>
+
+                    <th:block th:if="${session.member != null}">
+							<span style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
+                                  th:text="'Hi, ' + ${session.member.memUsername}">
+								Hi, 會員
+							</span>
+
+                        <a th:href="@{/members/view}">編輯個人資料</a>
+                        <a href="#">我的優惠券</a>
+                        <a href="#">我的收藏</a>
+                        <a href="#">訂單查詢</a>
+                        <form th:action="@{/members/logout}" method="post" id="logoutForm">
+                            <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
+                                登出 (Logout)
+                            </a>
+                        </form>
+                    </th:block>
                 </div>
             </div>
 
@@ -54,15 +80,6 @@
             </div>
             <a href="#">公告</a>
             <a href="#">常見問題</a>
-
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
-                <div id="member-dropdown" class="dropdown-menu">
-                    <a href="#" onclick="navigateTo('coupons')">我的優惠券</a>
-                    <a href="#" onclick="navigateTo('favorite')">我的收藏</a>
-                    <a href="#" onclick="navigateTo('orderInfo')">訂單查詢</a>
-                </div>
-            </div>
         </nav>
     </div>
 </header>
