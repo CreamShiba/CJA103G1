@@ -26,18 +26,16 @@ public class ProdRateService {
      */
     public void updateRate(ProdRate prodRate) {
         ProdRate existing = repository.findById(prodRate.getProdRateNo()).orElse(null);
-        if (existing != null && existing.getRateStatus() == 1) {
+        if (existing != null && (existing.getRateStatus() == null || existing.getRateStatus() < 2)) {
             existing.setRate(prodRate.getRate());
             existing.setRateContent(prodRate.getRateContent());
             if (prodRate.getRatePic() != null && prodRate.getRatePic().length > 0) {
                 existing.setRatePic(prodRate.getRatePic());
             }
-            existing.setRateTime(prodRate.getRateTime());
-            // ✅ 編輯並再次提交：設為 2（已評價二次，鎖定）
-            existing.setRateStatus(2);
+            existing.setRateTime(java.time.LocalDateTime.now());
+            existing.setRateStatus(2); // 💡 更新後直接鎖定
             repository.save(existing);
-            System.out.println("✅ 編輯並再次提交評價 - 商品編號：" + existing.getProdNo() +
-                    "，狀態：1 → 2（已評價二次，鎖定）");
+            System.out.println("✅ 評價更新成功，狀態轉為 2");
         } else {
             System.err.println("❌ 無效的編輯：只有狀態 1 的記錄才能編輯");
         }
