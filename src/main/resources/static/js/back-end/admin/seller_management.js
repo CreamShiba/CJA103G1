@@ -1,13 +1,3 @@
-// index.js
-// 側邊欄摺疊邏輯 (保留原功能)
-const menuItems = document.querySelectorAll('.has-submenu .submenu-toggle');
-menuItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-        e.preventDefault();
-        const parent = item.parentElement;
-        parent.classList.toggle('open');
-    });
-});
 // 1. 開啟視窗 (保持全域函式，讓 HTML 按鈕可以呼叫)
 function openAuditModal(btn) {
     // 1. 從按鈕 dataset 取得資料 (新增了許多欄位)

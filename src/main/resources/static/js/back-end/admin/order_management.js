@@ -1,13 +1,3 @@
-// index.js
-// 側邊欄摺疊邏輯 (保留原功能)
-const menuItems = document.querySelectorAll('.has-submenu .submenu-toggle');
-menuItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-        e.preventDefault();
-        const parent = item.parentElement;
-        parent.classList.toggle('open');
-    });
-});
 // 1. 開啟撥款視窗
 function openPayoutModal(btn) {
     let ordNo = btn.dataset.ordno;
