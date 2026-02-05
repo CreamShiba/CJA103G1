@@ -332,15 +332,14 @@ public class cartcontroller {
                     return "redirect:/members/carts";
                 }
 
-                MemberVO memberVO = (MemberVO) sessionMember; // 這裡只宣告一次 memberVO
+                MembersVO membersVO = (MembersVO) sessionMember; // 這裡只宣告一次 memberVO
 
-<<<<<<< .mine
 //                ====CLEAR=====
                 // ─── 建立 OrdVO ───
                 OrdVO ordVO = new OrdVO();
                 ordVO.setSeller(firstProduct.getSeller());
-                if (memberVO != null) {
-                    ordVO.setMember(memberVO);
+                if (membersVO != null) {
+                    ordVO.setMember(membersVO);
                 }
                 ordVO.setCouponNo(null);                             // coupon 先 null
                 ordVO.setOrdDate(LocalDateTime.now());
@@ -366,40 +365,8 @@ public class cartcontroller {
                 ordVO.setOrdCompletedDate(null);
                 ordVO.setCancelReason(null);
                 ordVO.setPayoutStatus("待撥款");
-=======
             // 從 session 拿會員物件
             MembersVO memberVO = (MembersVO) session.getAttribute("member");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
-
                 // ─── 儲存 OrdVO（拿到生成的 ordNo） ───
                 ordService.addOrd(ordVO);
                 System.out.println("✅ [訂單] 已建立，ordNo = " + ordVO.getOrdNo());

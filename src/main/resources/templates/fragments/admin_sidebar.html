@@ -36,20 +36,27 @@
             </li>
 
             <li class="menu-item has-submenu"
-                th:classappend="${activePage == 'sellers'} ? 'open' : ''">
+                th:classappend="${activePage == 'sellers' || activePage == 'memberInfo' || activePage == 'listAll'} ? 'open' : ''">
                 <a class="submenu-toggle">
                     <span><i class="fas fa-users-cog"></i> 帳號管理</span>
                     <i class="fas fa-chevron-down arrow"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#">會員帳號管理</a></li>
+                    <li><a th:href="@{/memberInfo/manage}"
+                           th:classappend="${activePage == 'memberInfo'} ? 'active' : ''">
+                        會員帳號管理</a></li>
                     <li>
                         <a th:href="@{/admin/sellers}"
                            th:classappend="${activePage == 'sellers'} ? 'active' : ''">
                             賣家帳號管理
                         </a>
                     </li>
-                    <li><a href="#">管理員帳號管理</a></li>
+                    <li>
+                        <a th:href="@{/admins/listAll}"
+                           th:classappend="${activePage == 'listAll'} ? 'active' : ''">
+                            管理員帳號管理
+                        </a>
+                    </li>
                 </ul>
             </li>
 
@@ -134,14 +141,57 @@
                 </ul>
             </li>
 
-            <li class="menu-item has-submenu">
+            <li class="menu-item has-submenu"
+                th:classappend="${activePage == 'coupon'} ? 'open' : ''">
                 <a class="submenu-toggle">
-                    <span><i class="fas fa-users-cog"></i> 自訂</span>
+                    <span><i class="fas fa-ticket-alt"></i> 優惠券管理</span>
                     <i class="fas fa-chevron-down arrow"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="#">自訂</a></li>
-                    <li><a href="#">自訂</a></li>
+                    <li>
+                        <a th:href="@{/coupon/admin}"
+                           th:classappend="${activePage == 'coupon'} ? 'active' : ''">
+                            優惠券列表
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/coupon/admin#coupon-query}"
+                           th:classappend="${activePage == 'coupon'} ? 'active' : ''">
+                            查詢優惠券
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/coupon/admin#coupon-add}"
+                           th:classappend="${activePage == 'coupon'} ? 'active' : ''">
+                            新增優惠券
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+
+
+            <li class="menu-item has-submenu"
+                th:classappend="${activePage == 'announcement' || activePage == 'faq'} ? 'open' : ''">
+
+                <a class="submenu-toggle">
+                    <span><i class="fas fa-edit"></i> 內容管理</span>
+                    <i class="fas fa-chevron-down arrow"></i>
+                </a>
+
+                <ul class="submenu">
+                    <li>
+                        <a th:href="@{/admins/announcement}"
+                           th:classappend="${activePage == 'announcement'} ? 'active' : ''">
+                            公告列表
+                        </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admins/faq}"
+                           th:classappend="${activePage == 'faq'} ? 'active' : ''">
+                            FAQ 列表
+                        </a>
+                    </li>
                 </ul>
             </li>
 
