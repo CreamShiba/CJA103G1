@@ -1,13 +1,15 @@
 package com.karshop.buyerrating.model;
 
+import com.karshop.members.model.MembersVO;
 import com.karshop.ord.model.OrdVO;
+import com.karshop.product.model.ProductVO;
 import jakarta.persistence.Column;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "prod_rate") // 🔥 請改成你實際存放買家評價的表格名稱
+@Table(name = "prod_rate")
 public class BuyerRatingVO implements java.io.Serializable {
 
     @Id
@@ -16,20 +18,27 @@ public class BuyerRatingVO implements java.io.Serializable {
     private Integer ratingNo;
 
     // 只需要關聯訂單，就可以透過訂單找到賣家
-    @OneToOne
-    @JoinColumn(name = "ord_no", referencedColumnName = "ord_no")
+    @ManyToOne
+    @JoinColumn(name = "ord_no")
     private OrdVO ord;
 
-    @Column(name = "rate") // 請改成實際的分數欄位名稱
+    @ManyToOne
+    @JoinColumn(name = "prod_no")
+    private ProductVO product;
+
+    @ManyToOne
+    @JoinColumn(name = "member_no")
+    private MembersVO member;
+
+    @Column(name = "rate")
     private Integer score;
 
-    @Column(name = "rate_content") // 請改成實際的評論欄位名稱
+    @Column(name = "rate_content")
     private String comment;
 
     @Column(name = "rate_time")
     private LocalDateTime ratingDate;
 
-    // Getters & Setters
     public Integer getRatingNo() { return ratingNo; }
     public void setRatingNo(Integer ratingNo) { this.ratingNo = ratingNo; }
     public OrdVO getOrd() { return ord; }
@@ -40,4 +49,20 @@ public class BuyerRatingVO implements java.io.Serializable {
     public void setComment(String comment) { this.comment = comment; }
     public LocalDateTime getRatingDate() { return ratingDate; }
     public void setRatingDate(LocalDateTime ratingDate) { this.ratingDate = ratingDate; }
+
+    public ProductVO getProduct() {
+        return product;
+    }
+
+    public void setProduct(ProductVO product) {
+        this.product = product;
+    }
+
+    public MembersVO getMember() {
+        return member;
+    }
+
+    public void setMember(MembersVO member) {
+        this.member = member;
+    }
 }

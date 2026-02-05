@@ -61,7 +61,7 @@
             <a th:href="@{/installation/entry}" th:unless="${isTechnician}">成為技師</a>
             <a th:href="@{/technician/orders}" th:if="${isTechnician}">技師後台</a>
 
-            <a href="javascript:void(0)">回到商城</a>
+            <a th:href="@{/shop}">回到商城</a>
         </nav>
     </header>
 

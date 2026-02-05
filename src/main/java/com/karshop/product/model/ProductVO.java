@@ -1,5 +1,6 @@
 package com.karshop.product.model;
 
+import com.karshop.buyerrating.model.BuyerRatingVO;
 import com.karshop.carcategory.model.CarCategoryVO;
 import com.karshop.orddetail.model.OrdDetailVO;
 import com.karshop.productcategorytest.model.ProductCategoryVO;
@@ -66,6 +67,9 @@ public class ProductVO implements Serializable {
 
     @OneToMany(mappedBy ="product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrdDetailVO> orderDetail;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<BuyerRatingVO> buyerRatings;
 
     public Integer getProdNo() {
         return prodNo;
@@ -169,5 +173,13 @@ public class ProductVO implements Serializable {
 
     public void setOrderDetail(List<OrdDetailVO> orderDetail) {
         this.orderDetail = orderDetail;
+    }
+
+    public List<BuyerRatingVO> getBuyerRatings() {
+        return buyerRatings;
+    }
+
+    public void setBuyerRatings(List<BuyerRatingVO> buyerRatings) {
+        this.buyerRatings = buyerRatings;
     }
 }

@@ -1,5 +1,6 @@
 package com.karshop.cart;
 
+import com.karshop.members.model.MembersVO;
 import com.karshop.membertest.model.MemberVO;
 import com.karshop.ord.model.OrdService;
 import com.karshop.ord.model.OrdVO;
@@ -333,6 +334,7 @@ public class cartcontroller {
 
                 MemberVO memberVO = (MemberVO) sessionMember; // 這裡只宣告一次 memberVO
 
+<<<<<<< .mine
 //                ====CLEAR=====
                 // ─── 建立 OrdVO ───
                 OrdVO ordVO = new OrdVO();
@@ -364,6 +366,39 @@ public class cartcontroller {
                 ordVO.setOrdCompletedDate(null);
                 ordVO.setCancelReason(null);
                 ordVO.setPayoutStatus("待撥款");
+=======
+            // 從 session 拿會員物件
+            MembersVO memberVO = (MembersVO) session.getAttribute("member");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> .theirs
 
                 // ─── 儲存 OrdVO（拿到生成的 ordNo） ───
                 ordService.addOrd(ordVO);
