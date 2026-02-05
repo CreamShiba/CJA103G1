@@ -53,7 +53,7 @@ public class system_message {
         return member_no;
     }
 
-    public void setMemberno(Integer member_no) {
+    public void setMember_no(Integer member_no) {
         this.member_no = member_no;
     }
 

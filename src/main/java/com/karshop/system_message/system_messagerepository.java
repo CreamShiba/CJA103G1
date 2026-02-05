@@ -13,34 +13,19 @@ import java.util.List;
 @Repository
 public interface system_messagerepository extends JpaRepository<system_message, Integer> {
 
-    /**
-     * 查詢特定會員的所有通知，按時間降序排列
-     */
-    @Query("SELECT s FROM system_message  s WHERE s.member_no = :memberNo ORDER BY s.message_time DESC")
+    // 1. 將 :memberNo 改成 :member_no
+    @Query("SELECT s FROM system_message s WHERE s.member_no = :member_no ORDER BY s.message_time DESC")
     List<system_message> findByMember_noOrderByMessage_timeDesc(@Param("member_no") Integer member_no);
 
-    /**
-     * 查詢特定會員的未讀通知
-     */
-    @Query("SELECT s FROM system_message s WHERE s.member_no = :memberNo AND s.message_status = false ORDER BY s.message_time DESC")
+    // 2. 將 :memberNo 改成 :member_no
+    @Query("SELECT s FROM system_message s WHERE s.member_no = :member_no AND s.message_status = false ORDER BY s.message_time DESC")
     List<system_message> findUnreadMessagesByMember_no(@Param("member_no") Integer member_no);
 
-    /**
-     * 計算特定會員的未讀通知數量
-     */
-    @Query("SELECT COUNT(s) FROM system_message s WHERE s.member_no = :memberNo AND s.message_status = false")
+    // 3. 將 :memberNo 改成 :member_no
+    @Query("SELECT COUNT(s) FROM system_message s WHERE s.member_no = :member_no AND s.message_status = false")
     Long countUnreadMessagesByMember_no(@Param("member_no") Integer member_no);
 
-    /**
-     * 查詢所有通知，按時間降序排列（後台用）
-     * @return 所有系統通知
-     */
-    @Query("SELECT s FROM system_message s ORDER BY s.message_time DESC")
-    List<system_message> findAllOrderByMessage_timeDesc();
-
-    /**
-     * 查詢特定管理員發送的所有通知
-     */
-    @Query("SELECT s FROM system_message s WHERE s.adm_no = :admNo ORDER BY s.message_time DESC")
+    // 4. 下方的 adm_no 也請檢查（目前看起來你下方的 adm_no 是對應正確的，但建議檢查一致性）
+    @Query("SELECT s FROM system_message s WHERE s.adm_no = :adm_no ORDER BY s.message_time DESC")
     List<system_message> findByAdmNoOrderByMessage_timeDesc(@Param("adm_no") Integer adm_no);
 }

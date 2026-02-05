@@ -78,11 +78,9 @@ public class ShopController {
         List<ProductCategoryVO> categoryList = productCategoryService.getAll();
         model.addAttribute("categoryList", categoryList);
 
-        // MemberVO member = (MemberVO) session.getAttribute("member");
-        // Integer memberNo = (member != null) ? member.getMemberNo() : null;
+         MembersVO member = (MembersVO) session.getAttribute("member");
+         Integer memberNo = (member != null) ? member.getMemberNo() : null;
 
-        // 測試用假資料
-        Integer memberNo = 8;
         if (memberNo != null) {
              List<MemberCarVO> myCars = memberCarService.getCarsByMemberId(memberNo);
              model.addAttribute("myCars", myCars);

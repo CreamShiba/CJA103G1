@@ -90,7 +90,6 @@ public class ReportVO implements java.io.Serializable {
         this.handledTime = handledTime;
     }
 
-    // 🔥 重點 Getter/Setter
     public ProductVO getProduct() { return product; }
     public void setProduct(ProductVO product) { this.product = product; }
 

@@ -1,6 +1,6 @@
 package com.karshop.rating.model;
 
-import com.karshop.membertest.model.MemberVO;
+import com.karshop.members.model.MembersVO;
 import com.karshop.ord.model.OrdVO;
 import com.karshop.sellertest.model.SellerVO;
 import jakarta.persistence.*;
@@ -27,7 +27,7 @@ public class RatingVO implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "member_no")
-    private MemberVO member;
+    private MembersVO member;
 
     @Column(name = "rating_score")
     private Integer ratingScore;
@@ -62,11 +62,11 @@ public class RatingVO implements Serializable {
         this.seller = seller;
     }
 
-    public MemberVO getMember() {
+    public MembersVO getMember() {
         return member;
     }
 
-    public void setMember(MemberVO member) {
+    public void setMember(MembersVO member) {
         this.member = member;
     }
 
