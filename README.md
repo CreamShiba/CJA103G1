@@ -48,8 +48,7 @@
 4. 若功能完成  
     commit + push  
     再開 PR（選 master 為目標）
-5. 管理員 負責 Merge PR
-6. 若 PR 無法合併（conflict）  
+5. 若 PR 無法合併（conflict）  
     PR 發起人需再次 rebase main  
     解決衝突後重新 push
 
