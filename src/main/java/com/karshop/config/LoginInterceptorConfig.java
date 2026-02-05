@@ -44,7 +44,9 @@ public class LoginInterceptorConfig implements WebMvcConfigurer {
             "/admins/search",
             "/admins/add",
             "/admins/edit",
-            "/admins/carcate/*"
+            "/admins/carcate/*",
+            "/memberInfo/manage",
+            "/coupon/admin"
             // … 對應 Map 裡的所有 key
         )
         .excludePathPatterns(

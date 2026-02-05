@@ -1,8 +1,18 @@
+/* =========================================
+   1. 商品詳情頁專屬功能 (圖片、數量、檢舉)
+   ========================================= */
+
 function switchImage(element) {
     var newSrc = element.querySelector('img').src;
     var mainImg = document.getElementById('mainImg');
+
+    // 簡單的淡入淡出效果
     mainImg.style.opacity = 0;
-    setTimeout(function() { mainImg.src = newSrc; mainImg.style.opacity = 1; }, 200);
+    setTimeout(function() {
+        mainImg.src = newSrc;
+        mainImg.style.opacity = 1;
+    }, 200);
+
     document.querySelectorAll('.thumb-box').forEach(box => box.classList.remove('active'));
     element.classList.add('active');
 }
@@ -17,19 +27,16 @@ function updateQty(change) {
 
 /* --- 檢舉 Modal 相關 JS --- */
 
-// 開啟 Modal
 function openReportModal() {
     document.getElementById('reportModal').style.display = 'flex';
 }
 
-// 關閉 Modal
 function closeReportModal() {
     document.getElementById('reportModal').style.display = 'none';
-    // 清空表單
     document.getElementById('reportForm').reset();
 }
 
-// 點擊背景關閉
+// 點擊背景關閉 Modal
 window.onclick = function(event) {
     const modal = document.getElementById('reportModal');
     if (event.target == modal) {
@@ -37,81 +44,108 @@ window.onclick = function(event) {
     }
 }
 
-// 提交表單邏輯
 function submitReportForm() {
     const reasonSelect = document.getElementById('reportsReason');
-    const description = document.getElementById('reportsDescription').value;
     const form = document.getElementById('reportForm');
 
-    // 1. 簡單驗證：必須選擇原因
     if (reasonSelect.value === "") {
         alert("請選擇檢舉原因！");
-        reasonSelect.classList.add('error'); // 加上紅框
+        reasonSelect.classList.add('error');
         reasonSelect.focus();
         return;
     } else {
         reasonSelect.classList.remove('error');
     }
-
-    // 2. 準備提交
-    // 如果你想用 AJAX (不換頁提交):
-    /*
-    const formData = new FormData(form);
-    fetch(form.action, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json()) // 假設後端回傳 JSON
-    .then(data => {
-        alert('檢舉已送出，我們會盡快處理！');
-        closeReportModal();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('發生錯誤，請稍後再試');
-    });
-    */
-
-    // 3. 或者直接使用傳統表單提交 (會換頁):
-    // 這裡我們模擬 Alert 讓你知道成功了，實際上你可以直接 form.submit()
-    // alert(`檢舉已送出！\n原因：${reasonSelect.value}`);
-    form.submit(); // 這行會真的把資料送去後端 @{/reports/submit}
+    form.submit();
 }
 
-// 頁面載入完成後
-window.onload = function() {
-    initUserDropdown();
-};
+/* =========================================
+   2. 全域 Header 功能 (下拉選單、導頁) 
+   🔥 這裡是新加入的邏輯，與 index2.js 同步
+   ========================================= */
 
-// 初始化下拉選單
-function initUserDropdown() {
-    // 處理右上角使用者圖示
-    const userIcon = document.getElementById('user-icon');
-    const userDropdown = document.getElementById('user-dropdown');
-    const memberTrigger = document.getElementById('member-center-trigger');
-    const memberDropdown = document.getElementById('member-dropdown');
-
-    if (userIcon && userDropdown) {
-        userIcon.onclick = function (e) {
-            e.stopPropagation();
-            userDropdown.classList.toggle('show');
-            memberDropdown.classList.remove('show');
-        };
-    }
-
-    // 處理導航列中的「會員中心」
-    if (memberTrigger && memberDropdown) {
-        memberTrigger.onclick = function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            memberDropdown.classList.toggle('show');
-            userDropdown.classList.remove('show');
-        };
-    }
-}
-
-// 檢查是否有 flash message，有的話 3 秒後自動淡出
 document.addEventListener("DOMContentLoaded", function() {
+    // 初始化 Header 下拉選單
+    initHeaderDropdowns();
+
+    // 處理 Flash Message (提示訊息淡出)
+    handleFlashMessage();
+
+    // 初始化 Ajax 收藏按鈕
+    initAjaxFavorite();
+});
+
+function initHeaderDropdowns() {
+    // 定義所有下拉選單
+    const dropdowns = [
+        {
+            trigger: document.getElementById('user-icon'),
+            menu: document.getElementById('user-dropdown')
+        },
+        {
+            trigger: document.getElementById('member-center-trigger'),
+            menu: document.getElementById('member-dropdown')
+        },
+        {
+            // 🔥 補上論壇選單
+            trigger: document.getElementById('forum-center-trigger'),
+            menu: document.getElementById('forum-dropdown')
+        }
+    ];
+
+    // 綁定點擊事件 (互斥開啟)
+    dropdowns.forEach(item => {
+        if (item.trigger && item.menu) {
+            item.trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // 關閉其他選單
+                dropdowns.forEach(other => {
+                    if (other.menu && other.menu !== item.menu) {
+                        other.menu.classList.remove('show');
+                    }
+                });
+
+                // 切換自己
+                item.menu.classList.toggle('show');
+            });
+        }
+    });
+
+    // 點擊空白處關閉所有選單
+    window.addEventListener('click', function() {
+        dropdowns.forEach(item => {
+            if (item.menu) {
+                item.menu.classList.remove('show');
+            }
+        });
+    });
+}
+
+// 🔥 補上導頁函式 (解決 onclick="navigateTo..." 報錯)
+function navigateTo(page) {
+    let baseUrl = "/members/";
+    switch(page) {
+        case 'coupons':
+            window.location.href = baseUrl + "coupons";
+            break;
+        case 'favorite':
+            window.location.href = baseUrl + "favorite";
+            break;
+        case 'orderInfo':
+            window.location.href = baseUrl + "orders";
+            break;
+        default:
+            console.warn("未知的頁面跳轉: " + page);
+    }
+}
+
+/* =========================================
+   3. 其他輔助功能 (Flash Msg, Ajax Favorite)
+   ========================================= */
+
+function handleFlashMessage() {
     var flashMsg = document.getElementById('flashMessage');
     if (flashMsg) {
         setTimeout(function() {
@@ -119,13 +153,12 @@ document.addEventListener("DOMContentLoaded", function() {
             flashMsg.style.opacity = "0";
             setTimeout(function() {
                 flashMsg.remove();
-            }, 500); // 等待淡出動畫結束後移除
-        }, 3000); // 3秒後消失
+            }, 500);
+        }, 3000);
     }
-});
+}
 
-// 商品收藏功能(處理 AJAX)
-document.addEventListener('DOMContentLoaded', function() {
+function initAjaxFavorite() {
     const favBtn = document.getElementById('favBtn');
     const favIcon = document.getElementById('favIcon');
 
@@ -133,7 +166,6 @@ document.addEventListener('DOMContentLoaded', function() {
         favBtn.addEventListener('click', function() {
             const prodNo = this.getAttribute('data-prodno');
 
-            // 發送 AJAX 請求至您的 toggleFavoriteAjax 方法
             fetch('/favorite/toggleAjax', {
                 method: 'POST',
                 headers: {
@@ -143,7 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
             })
                 .then(response => {
                     if (response.status === 401) {
-                        // 對應您 Controller 中的 ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         alert("請先登入後再執行收藏！");
                         window.location.href = "/members/login";
                         return;
@@ -152,20 +183,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 })
                 .then(data => {
                     if (data && data.status === 'success') {
-                        // 即時渲染：根據後端回傳的 boolean 值切換圖示與樣式
                         if (data.isFavorite) {
-                            favIcon.className = 'fas fa-heart'; // 切換為實心
+                            favIcon.className = 'fas fa-heart';
                             favBtn.classList.add('active');
                             favBtn.title = "取消收藏";
                         } else {
-                            favIcon.className = 'far fa-heart'; // 切換為空心
+                            favIcon.className = 'far fa-heart';
                             favBtn.classList.remove('active');
                             favBtn.title = "加入收藏";
                         }
-                        console.log(data.message); // 顯示「已加入收藏」或「已取消收藏」
                     }
                 })
                 .catch(error => console.error('Error:', error));
         });
     }
-});
+}

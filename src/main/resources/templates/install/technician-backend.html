@@ -81,9 +81,9 @@
                     <span th:case="*">訂單管理中心</span>
                 </h2>
                 <div class="user-profile">
-                    <span th:text="${session.member != null ? session.member.memberName : 'Tech'}">Technician</span>
+                    <span th:text="${session.member != null ? session.member.memUsername : 'Tech'}">Technician</span>
                     <div class="avatar"
-                        th:text="${session.member != null ? #strings.substring(session.member.memberName,0,1) : 'T'}">T
+                        th:text="${session.member != null ? #strings.substring(session.member.memUsername,0,1) : 'T'}">T
                     </div>
                 </div>
             </div>

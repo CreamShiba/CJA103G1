@@ -58,47 +58,94 @@ ul { list-style: none; }
 .thumb-box:hover, .thumb-box.active { border-color: #ff3333; opacity: 1; }
 
 /* --- 右側資訊區 --- */
-.product-info-section { flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 15px; }
+/* 設定 min-height 確保高度足夠 */
+.product-info-section {
+    flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 15px; min-height: 500px;
+}
 .breadcrumb { color: #888; font-size: 14px; margin-bottom: 10px; }
 .product-title { font-size: 2rem; font-weight: bold; }
 .product-price { color: #ff3333; font-size: 2rem; font-weight: bold; }
 .divider { height: 1px; background: #333; margin: 15px 0; }
 .product-desc { color: #ccc; line-height: 1.8; white-space: pre-line; min-height: 100px; }
 
+/* --- 購買專區 (Buying Zone) 🔥 新增區塊 --- */
+.buying-zone {
+    background: rgba(255,255,255,0.03);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: auto; /* 推到底部 */
+    border: 1px solid #333;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
 /* --- 購物車與數量按鈕 --- */
 .qty-selector { display: inline-flex; border: 1px solid #444; border-radius: 5px; overflow: hidden; margin-right: 15px; }
 .qty-btn { background: #222; color: #fff; border: none; padding: 10px 15px; cursor: pointer; }
 .qty-input { width: 50px; text-align: center; border: none; background: #111; color: #fff; }
 
-.add-cart-btn {
-    background: #ff3333; color: white; border: none; padding: 12px 30px;
-    font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.3s;
-}
-.add-cart-btn:hover { background: #d62828; }
-.add-cart-btn:disabled { background: #555; cursor: not-allowed; }
 
 /* --- 功能按鈕 (檢舉/收藏) --- */
-.report-btn { margin-top: 20px; background: transparent; border: none; color: #666; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-.report-btn:hover { color: #ff3333; text-decoration: underline; }
+/* 🔥 新版檢舉按鈕樣式 */
+.report-btn {
+    /* 移除原本的 margin-top: 20px，因為現在位置不同了 */
+    background: transparent;
+    border: 1px solid transparent; /* 預留邊框位置，避免 hover 時跳動 */
+    color: #999; /* 比原本的 #666 稍微亮一點，提升可見度 */
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex; /* 讓圖標和文字對齊更好 */
+    align-items: center;
+    gap: 6px; /* 圖標與文字間距 */
+    padding: 6px 12px; /* 增加一點內距，讓它看起來更像個按鈕 */
+    border-radius: 4px; /* 圓角 */
+    transition: all 0.3s ease; /* 平滑過渡效果 */
+}
 
+/* 滑鼠指到的變化 */
+.report-btn:hover {
+    color: #ff3333; /* 變成警示紅 */
+    background: rgba(255, 51, 51, 0.1); /* 加上淡淡的紅色背景 */
+    border-color: rgba(255, 51, 51, 0.3); /* 加上淡淡的紅色邊框 */
+    box-shadow: 0 2px 8px rgba(255, 51, 51, 0.2); /* 增加一點立體感光暈 */
+}
+
+/*稍微放大圖標*/
+.report-btn i {
+    font-size: 14px;
+}
+
+/* 舊的小收藏按鈕 (保留相容性) */
 .fav-btn {
     background: transparent;
     border: 1px solid #444;
     color: #ccc;
-    width: 46px; height: 46px; /* 與購物車按鈕高度一致 */
+    width: 46px; height: 46px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 20px;
     display: flex; align-items: center; justify-content: center;
     transition: 0.2s;
 }
-.fav-btn:hover {
-    border-color: #ff3333; color: #ff3333; background: rgba(255, 51, 51, 0.1);
-}
+.fav-btn:hover { border-color: #ff3333; color: #ff3333; background: rgba(255, 51, 51, 0.1); }
 .fav-btn:active { transform: scale(0.95); }
-.fav-btn.active {
-    color: #ff3333; border-color: #ff3333; background: rgba(255, 51, 51, 0.1);
+.fav-btn.active { color: #ff3333; border-color: #ff3333; background: rgba(255, 51, 51, 0.1); }
+
+/* 🔥 新的大收藏按鈕 (用於購買專區) */
+.fav-btn-large {
+    height: 48px;
+    width: 48px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: transparent;
+    color: #aaa;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: 0.3s;
 }
+.fav-btn-large:hover { border-color: #ff4081; color: #ff4081; }
+.fav-btn-large.active { color: #ff4081; border-color: #ff4081; background: rgba(255, 64, 129, 0.1); }
+
 
 /* --- 詳情頁專用評價樣式 --- */
 .product-rating-detail {
@@ -154,97 +201,76 @@ ul { list-style: none; }
 .modal-submit { background: #ff3333; border: none; color: #fff; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
 
 /* --- 檢舉 Modal 優化樣式 --- */
+.form-group { margin-bottom: 15px; text-align: left; }
+.form-label { display: block; font-size: 13px; color: #ccc; margin-bottom: 5px; font-weight: bold; }
+.form-input { width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 5px; outline: none; font-size: 14px; transition: 0.3s; }
 
-/* 表單群組間距 */
-.form-group {
-    margin-bottom: 15px;
-    text-align: left;
-}
-
-/* 標籤文字 */
-.form-label {
-    display: block;
-    font-size: 13px;
-    color: #ccc;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-/* 輸入框與下拉選單通用樣式 */
-.form-input {
-    width: 100%;
-    padding: 10px;
-    background: #111;
-    border: 1px solid #444;
-    color: #fff;
-    border-radius: 5px;
-    outline: none;
-    font-size: 14px;
-    transition: 0.3s;
-}
-
-/* 下拉選單箭頭顏色修正 (部分瀏覽器支援) */
 select.form-input {
-    appearance: none; /* 移除預設樣式 */
-    -webkit-appearance: none;
+    appearance: none; -webkit-appearance: none;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    background-size: 16px;
-    cursor: pointer;
+    background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; cursor: pointer;
 }
 
-/* Focus 狀態 (紅色邊框) */
-.form-input:focus,
-.modal-textarea:focus {
-    border-color: #ff3333;
-    box-shadow: 0 0 5px rgba(255, 51, 51, 0.3);
-}
-
-/* 錯誤狀態 (驗證用) */
-.form-input.error {
-    border-color: #ff3333;
-    animation: shake 0.3s;
-}
-
-@keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0); }
-}
+.form-input:focus, .modal-textarea:focus { border-color: #ff3333; box-shadow: 0 0 5px rgba(255, 51, 51, 0.3); }
+.form-input.error { border-color: #ff3333; animation: shake 0.3s; }
+@keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
 
 /* Flash Message Toast */
 .flash-toast {
-    position: fixed;
-    top: 80px; /* 避開 Header 的高度 */
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(40, 167, 69, 0.95); /* 綠色背景 */
-    color: white;
-    padding: 12px 25px;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 15px;
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+    background: rgba(40, 167, 69, 0.95); color: white; padding: 12px 25px; border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999;
+    display: flex; align-items: center; gap: 10px; font-size: 15px;
     animation: slideDown 0.5s ease-out;
 }
+.flash-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; margin-left: 10px; line-height: 1; }
+@keyframes slideDown { from { top: -50px; opacity: 0; } to { top: 80px; opacity: 1; } }
 
-.flash-close {
-    background: none;
-    border: none;
+/* 🔥 直接購買按鈕 (Updated) */
+.buy-now-btn {
+    background: #ff5722;
     color: white;
-    font-size: 20px;
+    border: none;
+    padding: 0 20px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
     cursor: pointer;
-    margin-left: 10px;
-    line-height: 1;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    height: 48px; /* 統一高度 */
+    flex: 1; /* 平分寬度 */
+    box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);
 }
 
-@keyframes slideDown {
-    from { top: -50px; opacity: 0; }
-    to { top: 80px; opacity: 1; }
+.buy-now-btn:hover {
+    background: #f4511e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 87, 34, 0.5);
+}
+
+/* 🔥 加入購物車按鈕 (Updated) */
+.add-cart-btn {
+    background: transparent;
+    border: 1px solid var(--accent-purple, #7c4dff);
+    color: var(--accent-purple, #7c4dff);
+    height: 48px; /* 統一高度 */
+    flex: 1; /* 平分寬度 */
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 16px;
+    padding: 0 20px;
+}
+.add-cart-btn:hover {
+    background: var(--accent-purple, #7c4dff);
+    color: white;
+}
+.add-cart-btn:disabled {
+    background: #333;
+    border-color: #444;
+    color: #888;
+    cursor: not-allowed;
+    width: 100%; /* 無庫存時佔滿 */
 }
