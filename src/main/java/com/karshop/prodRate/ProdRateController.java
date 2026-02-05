@@ -39,29 +39,6 @@ public class ProdRateController {
     @Autowired
     private ProductImgService productImgService;
 
-
-
-    // 測試用-模擬訂單列表：顯示「填寫」或「修改」按鈕
-    @GetMapping("/my-orders")
-    public String listMyOrders(Model model) {
-        Integer memberNo = 1;
-        List<OrderProd> orders = orderProdService.getMemberOrders(memberNo);
-
-        // 建立對照表，Key 為 "訂單號_商品號"
-        Map<String, Integer> rateMap = new HashMap<>();
-        List<ProdRate> allRates = prodRateService.getAll();
-        for (ProdRate pr : allRates) {
-            if (pr.getMemberNo().equals(memberNo)) {
-                rateMap.put(pr.getOrdNo() + "_" + pr.getProdNo(), pr.getProdRateNo());
-            }
-        }
-
-        model.addAttribute("orders", orders);
-        model.addAttribute("rateMap", rateMap);
-        return "order/listOrders";
-    }
-
-
     // 1. 從訂單頁進入填寫評價的入口
     @GetMapping("/add-page")
     public String addPage(@RequestParam("ordNo") Integer ordNo, Model model) {
@@ -105,7 +82,6 @@ public class ProdRateController {
                         pr.setProdNo(detail.getProdNo());
                         pr.setRateStatus(null); // 新建時為 null
                         rateStatusMap.put(detail.getProdNo(), null);
-
                     }
 
                     rates.add(pr);
@@ -117,9 +93,19 @@ public class ProdRateController {
                     }
 
                     // 獲取商品圖片
-                    List<ProductImg> images = productImgService.getByProdNo(detail.getProdNo());
-                    if (images != null && !images.isEmpty()) {
-                        productImgMap.put(detail.getProdNo(), images.get(0).getImgNo());
+                    try {
+                        List<ProductImg> images = productImgService.getByProdNo(detail.getProdNo());
+                        if (images != null && !images.isEmpty()) {
+                            Integer imgNo = images.get(0).getImgNo();
+                            if (imgNo != null) {
+                                productImgMap.put(detail.getProdNo(), imgNo);
+                                System.out.println("✅ 商品 " + detail.getProdNo() + " 圖片編號: " + imgNo);
+                            }
+                        } else {
+                            System.out.println("⚠️ 商品 " + detail.getProdNo() + " 無圖片");
+                        }
+                    } catch (Exception e) {
+                        System.err.println("❌ 載入商品 " + detail.getProdNo() + " 圖片錯誤: " + e.getMessage());
                     }
                 });
             } else {
@@ -220,7 +206,6 @@ public class ProdRateController {
         }
     }
 
-
     /**
      * 封裝:補足頁面顯示商品名稱與圖片所需的 Map 資料
      */
@@ -283,10 +268,13 @@ public class ProdRateController {
     @GetMapping("/member/{memberNo}")
     @ResponseBody
     public List<ProdRate> getMemberRates(@PathVariable Integer memberNo) {
-        //在 Service 有寫 getAllByMemberNo，如果沒有，可用 findAll 搭配 filter
-        return prodRateService.getAll().stream()
-                .filter(r -> r.getMemberNo().equals(memberNo))
-                .collect(Collectors.toList());
+        // 直接從資料庫依據 memberNo 查詢
+        List<ProdRate> filteredList = prodRateService.getByMember(memberNo);
+
+        System.out.println("====== 評價狀態查詢 ======");
+        System.out.println("查詢會員編號: " + memberNo);
+        System.out.println("查得記錄筆數: " + (filteredList != null ? filteredList.size() : 0));
+        return filteredList;
     }
 
     // 獲取所有評價記錄 (供前端查詢用)

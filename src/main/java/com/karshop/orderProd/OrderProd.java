@@ -81,7 +81,7 @@ public class OrderProd {
     @Column(name = "payout_status", length = 20)
     private String payoutStatus = "未撥款"; // 預設值
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.LAZY)
     @JsonManagedReference
     @JoinColumn(name = "ord_no", referencedColumnName = "ord_no", insertable = false, updatable = false)
     private List<OrderProdDetail> ordDetails; // 變數名為 OrderProdDetail

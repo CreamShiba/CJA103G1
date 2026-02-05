@@ -44,43 +44,40 @@ public class AdminController {
     return "back-end/admin_index";
   }
 
-  // 搜尋頁面
-  @GetMapping("/selectPage")
-  public String showSelectPage(Model model) {
-    model.addAttribute("currentPage", "accounts");
-    model.addAttribute("currentPage2", "adminSelect");
-    return "back-end/admin_selectPage";
-  }
+//  // 搜尋頁面
+//  @GetMapping("/selectPage")
+//  public String showSelectPage(Model model) {
+//    return "back-end/admin_selectPage";
+//  }
 
-  // 顯示查詢結果（多筆）—— 單一條件
-  @GetMapping("/search")
-  public String search(@RequestParam(required = false) String adminNo,
-                       @RequestParam(required = false) String adminName, Model model) {
-
-    List<AdminVO> results = new ArrayList<>();
-
-    if (adminNo != null && !adminNo.isBlank()) {
-      // 依 ID 精確查一筆
-      if (adminNo.matches("\\d+")) {
-        AdminVO a = adminService.getById(Integer.valueOf(adminNo));
-        if (a != null) {
-          results.add(a);
-        }
-      } else {
-        // 非數字就跳回查詢頁並帶錯誤訊息
-        model.addAttribute("errorMsg", "管理員編號必須是數字");
-        return "back-end/admin_selectPage"; // 查詢表單頁面
-      }
-
-    } else if (adminName != null && !adminName.isBlank()) {
-      // 依名稱模糊查詢
-      results = adminService.findByNameLike(adminName);
-    }
-
-    model.addAttribute("admins", results);
-    model.addAttribute("currentPage", "accounts");
-    return "back-end/admin_search";
-  }
+//  // 顯示查詢結果（多筆）—— 單一條件
+//  @GetMapping("/search")
+//  public String search(@RequestParam(required = false) String adminNo,
+//                       @RequestParam(required = false) String adminName, Model model) {
+//
+//    List<AdminVO> results = new ArrayList<>();
+//
+//    if (adminNo != null && !adminNo.isBlank()) {
+//      // 依 ID 精確查一筆
+//      if (adminNo.matches("\\d+")) {
+//        AdminVO a = adminService.getById(Integer.valueOf(adminNo));
+//        if (a != null) {
+//          results.add(a);
+//        }
+//      } else {
+//        // 非數字就跳回查詢頁並帶錯誤訊息
+//        model.addAttribute("errorMsg", "管理員編號必須是數字");
+//        return "back-end/admin_selectPage"; // 查詢表單頁面
+//      }
+//
+//    } else if (adminName != null && !adminName.isBlank()) {
+//      // 依名稱模糊查詢
+//      results = adminService.findByNameLike(adminName);
+//    }
+//
+//    model.addAttribute("admins", results);
+//    return "back-end/admin_search";
+//  }
 
   @GetMapping("/listAll")
   public String listAll(
@@ -107,8 +104,7 @@ public class AdminController {
 
     model.addAttribute("adminPage", adminPage);
     model.addAttribute("admins", admins);
-    model.addAttribute("currentPage", "accounts");
-    model.addAttribute("currentPage2", "adminList");
+    model.addAttribute("activePage", "listAll");
     return "back-end/admin_listAll";
   }
 
@@ -117,8 +113,6 @@ public class AdminController {
   public String showAddForm(Model model) {
     model.addAttribute("form", new AdminDTO());
     model.addAttribute("allFunctions", adminAuthListService.getAll());
-    model.addAttribute("currentPage", "accounts");
-    model.addAttribute("currentPage2", "adminAdd");
     return "back-end/admin_add";
   }
 
@@ -136,8 +130,7 @@ public class AdminController {
       List<String> errorMsgs = result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
       model.addAttribute("errorMsgs", errorMsgs);
       model.addAttribute("allFunctions", adminAuthListService.getAll());
-      model.addAttribute("currentPage", "accounts");
-      model.addAttribute("currentPage2", "adminAdd");
+
       return "back-end/admin_add";
     }
 
@@ -201,7 +194,7 @@ public class AdminController {
     // 2. 把 DTO 和 allFunctions 放入 Model
     model.addAttribute("form", form);
     model.addAttribute("allFunctions", adminAuthListService.getAll());
-    model.addAttribute("currentPage", "accounts");
+
 
     return "back-end/admin_edit";
   }
@@ -223,7 +216,6 @@ public class AdminController {
               .toList();
       model.addAttribute("errorMsgs", errorMsgs);
       model.addAttribute("allFunctions", adminAuthListService.getAll());
-      model.addAttribute("currentPage", "accounts");
       return "back-end/admin_edit";
     }
 

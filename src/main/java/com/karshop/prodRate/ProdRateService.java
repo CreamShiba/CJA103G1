@@ -11,7 +11,6 @@ public class ProdRateService {
     @Autowired
     private ProdRateRepository repository;
 
-
     public void submitRate(ProdRate prodRate) {
         // 首次提交：直接設為 1（已評價一次，可再編輯一次）
         prodRate.setRateStatus(1);
@@ -65,6 +64,8 @@ public class ProdRateService {
         return rateStatus != null && rateStatus < 2;
     }
 
-
+    public List<ProdRate> getByMember(Integer memberNo) {
+        return repository.findByMemberNo(memberNo);
+    }
 
 }
