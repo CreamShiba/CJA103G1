@@ -217,13 +217,52 @@
 
 
 <!--<script th:src="@{/js/front-end/index.js}"></script>-->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-<script>
-    // 1. 初始化與頁面載入
-    window.onload = function() {
-        fetchOrders();
+<script th:inline="javascript">
+    const memberNo = /*[[${session.member?.memNo}]]*/ null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        console.log('✅ 頁面載入完成，會員編號:', memberNo);
         initUserDropdown();
-    };
+        if (memberNo) {
+            initPage();
+        } else {
+            console.warn('⚠️ 未登入，無法載入訂單');
+            window.location.href = '/members/login';
+        }
+    });
+    // ✅ 新增: 全域變數
+    let allRates = [];
+
+    // ✅ 新增: 初始化函數
+    async function initPage() {
+        try {
+            console.log('📡 開始載入評價資料...');
+            const rateRes = await fetch(`/prodRate/member/${memberNo}`, {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (rateRes.ok) {
+                allRates = await rateRes.json();
+                console.log("✅ 評價載入成功，數量:", allRates.length);
+                console.log("評價資料:", allRates);
+            } else {
+                console.warn('⚠️ 評價載入失敗:', rateRes.status);
+                allRates = [];
+            }
+
+            await fetchOrders();
+        } catch (err) {
+            console.error("❌ 初始化失敗:", err);
+            allRates = [];
+            await fetchOrders();
+        }
+    }
+
+    // window.onload = function() {
+    //     fetchOrders();
+    //     initUserDropdown();
+    // };
 
     function initUserDropdown() {
         const userIcon = document.getElementById('user-icon');
@@ -254,7 +293,7 @@
         });
     }
 
-    // 2. 獲取訂單清單 (修復版)
+    // 2. 獲取訂單清單
     async function fetchOrders() {
         const body = document.getElementById('orderBody');
         const noOrderDiv = document.getElementById('noOrder');
@@ -279,18 +318,6 @@
 
             const orders = await orderRes.json();
 
-            // 2. 獲取評價資料 (此 API 需回傳該會員的所有 ProdRate 紀錄)
-            let allRates = [];
-            try {
-                const rateRes = await fetch('/prodRate/member-all?t=' + new Date().getTime(), {
-                    credentials: 'same-origin',
-                    headers: { 'Accept': 'application/json' }
-                });
-                if (rateRes.ok) allRates = await rateRes.json();
-            } catch (rateErr) {
-                console.warn('載入評價資料失敗，請確認後端 /prodRate/member-all 介面是否正常:', rateErr);
-            }
-
             body.innerHTML = '';
             noOrderDiv.style.display = 'none';
 
@@ -309,26 +336,34 @@
 
                 // --- 評價按鈕邏輯 (對應 prorate 欄位) ---
                 let ratingBtn = `<span style="color: #ccc;"> </span>`;
+                const ordRates = allRates.filter(r => {
+                    const rateOrdNo = Number(r.ordNo || r.ord_no);
+                    const currentOrdNo = Number(ord.ordNo);
+                    return rateOrdNo === currentOrdNo;
+                });
 
-                // 只有「已完成」的訂單才允許評價或修改評價
-                if (ord.ordStatus === '已完成') {
-                    const ordRates = allRates.filter(r => r.ordNo === ord.ordNo);
-                    const hasRated = ordRates.length > 0;
+                console.log(`📝 訂單 #${ord.ordNo} 的評價數量:`, ordRates.length);  // ✅ 移到這裡
 
-                    // 只要有一筆 status 是 1，就代表還在「可修改」階段
-                    const canEdit = hasRated && ordRates.some(r => Number(r.rateStatus) === 1);
+                if (ordRates.length === 0) {
+                    // 沒有評價資料 - 顯示「去評價」
+                    ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
+                } else {
+                    // 有評價資料 - 檢查狀態
+                    const statusList = ordRates.map(r => Number(r.rateStatus));
+                    const allLocked = statusList.every(s => s === 2);
+                    const hasDraft = statusList.some(s => s === 1);
 
-                    // 必須「所有」項目的狀態都是 2，才顯示「查看」
-                    const allLocked = hasRated && ordRates.every(r => Number(r.rateStatus) === 2);
+                    console.log(`  狀態列表:`, statusList, `全部鎖定:${allLocked}, 有草稿:${hasDraft}`);  // ✅ 新增除錯訊息
 
-                    if (!hasRated) {
-                        ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
-                    } else if (canEdit) {
-                        // 狀態 1：顯示黃色修改按鈕
+                    if (allLocked) {
+                        // 全部都是狀態2 - 已評價完成(鎖定)
+                        ratingBtn = `<button class="btn-rate" style="background-color:#28a745;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">查看評價</button>`;
+                    } else if (hasDraft) {
+                        // 有狀態1 - 可修改
                         ratingBtn = `<button class="btn-rate" style="background-color:#ffc107; color:black;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
-                    } else if (allLocked) {
-                        // 狀態 2：顯示綠色查看按鈕
-                        ratingBtn = `<button class="btn-rate" style="background-color:#28a745;" onclick="location.href='/prodRate/view-page?ordNo=${ord.ordNo}'">查看評價</button>`;
+                    } else {
+                        // ✅ 新增: 其他狀態(例如null) - 顯示「去評價」
+                        ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
                     }
                 }
 
@@ -400,14 +435,18 @@
                 order.ordDetails.forEach(item => {
                     // 同步後端屬性名稱：若商品物件在 Java 是 productProd，這裡請對應修改
                     const pName =  item.productProd ? item.productProd.productName : `商品#${item.prodNo}`;
+                    const imgSrc = `/favorite/showImage?prodNo=${item.prodNo}`;
+
                     detailBody.innerHTML += `
-                        <tr>
-                            <td><img src="/favorite/showImage?prodNo=${item.prodNo}" onerror="this.src='/images/no-image.png'"></td>
-                            <td style="text-align:left;">${pName}</td>
-                            <td>$${item.price}</td>
-                            <td>${item.qty}</td>
-                            <td>$${item.price * item.qty}</td>
-                        </tr>`;
+                    <tr>
+                        <td><img src="${imgSrc}"
+                            onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\\'width:80px;height:80px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border-radius:4px;\\'>無圖片</div>'">
+                        </td>
+                        <td style="text-align:left;">${pName}</td>
+                        <td>$${item.price}</td>
+                        <td>${item.qty}</td>
+                        <td>$${item.price * item.qty}</td>
+                    </tr>`;
                 });
             }
             document.getElementById('detailModal').style.display = 'block';

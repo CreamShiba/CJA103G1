@@ -47,12 +47,23 @@
                     <div class="product-header">
                         <img th:if="${productImgMap[rate.prodNo] != null}"
                              th:src="@{/prodRate/productImage/DBGifReader(imgNo=${productImgMap[rate.prodNo]})}"
-                             alt="商品圖片" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                             alt="商品圖片"
+                             style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"
+                             onerror="this.onerror=null; this.src='/images/default-product.png';">
+
+                        <!-- 新增:無圖片時的預設佔位圖 -->
+                        <div th:unless="${productImgMap[rate.prodNo] != null}"
+                             style="width: 80px; height: 80px; background: #f0f0f0; border-radius: 8px;
+                             display: flex; align-items: center; justify-content: center; color: #999;">
+                            <span style="font-size: 10px;">無圖片</span>
+                        </div>
+
                         <div>
                             <h4 th:text="${productMap[rate.prodNo].productName}" style="margin:0; color:#333;">商品名稱</h4>
                             <small style="color: #888;">商品編號：<span th:text="${rate.prodNo}"></span></small>
                         </div>
                     </div>
+
 
                     <div class="row">
                         <label>商品評分</label>
