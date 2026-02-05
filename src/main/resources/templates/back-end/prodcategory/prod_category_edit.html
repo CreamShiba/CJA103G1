@@ -6,27 +6,13 @@
     <title>編輯車種類別 - Autopile Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/back-end/prodcategory/prod_category.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/admin_sidebar.css}">
 </head>
 <body>
 
 <div class="app-container">
 
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-icon"></div>
-            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
-        </div>
-        <nav class="sidebar-nav">
-            <ul>
-                <li class="menu-item has-submenu open">
-                    <a class="submenu-toggle"><span><i class="fas fa-car"></i> 車輛資料管理</span></a>
-                    <ul class="submenu">
-                        <li><a href="#" class="active">車種類別管理</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-    </aside>
+    <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='prodcate')}"></aside>
 
     <main class="main-content">
         <header class="top-bar">

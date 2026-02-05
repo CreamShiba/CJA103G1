@@ -6,39 +6,13 @@
     <title>商品類別管理 - 卡爾夏 Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/back-end/prodcategory/prod_category.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/admin_sidebar.css}">
 </head>
 <body>
 
 <div class="app-container">
 
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-icon"></div>
-            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
-        </div>
-
-        <nav class="sidebar-nav">
-            <ul>
-                <li class="menu-item">
-                    <a href="#"><i class="fas fa-tachometer-alt"></i> 儀錶板</a>
-                </li>
-                <li class="menu-item has-submenu open">
-                    <a class="submenu-toggle">
-                        <span><i class="fas fa-car"></i> 分類管理</span>
-                        <i class="fas fa-chevron-down arrow"></i>
-                    </a>
-                    <ul class="submenu">
-                        <li><a href="#">車種類別管理</a></li>
-                        <li><a href="#" class="active">商品類別管理</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-
-        <div class="sidebar-footer">
-            <a href="#"><i class="fas fa-sign-out-alt"></i> 登出 (Logout)</a>
-        </div>
-    </aside>
+    <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='prodcate')}"></aside>
 
     <main class="main-content">
         <header class="top-bar">
