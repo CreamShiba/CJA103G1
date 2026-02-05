@@ -54,7 +54,7 @@ public class ReportsController {
         if ("productDetail".equals(source) && report.getProdNo() != null) {
             // 如果是從商品頁來的，就導回該商品的詳情頁
             System.out.println("✅ 從商品頁檢舉，返回商品編號：" + report.getProdNo());
-            return "redirect:/product/" + report.getProdNo();
+            return "redirect:/product/detail?prodNo=" + report.getProdNo();
         }
 
         // 預設行為：顯示檢舉成功頁面（原本的邏輯）

@@ -95,15 +95,15 @@
                         <li class="menu-item has-sub-item open">
                             <a class="sub-toggle"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <li><a href="/appeals/admin/list?status=PENDING" th:classappend="${appeal.status != '已結案'} ? 'active'">尚未處理</a></li>
-                                <li><a href="/appeals/admin/list?status=已結案" th:classappend="${appeal.status == '已結案'} ? 'active'">已結案</a></li>
+                                <li><a href="/appeals/admin/list?status=待處理" th:classappend="${appeal.status == '待處理'} ? 'active' : ''">待處理</a></li>
+                                <li><a href="/appeals/admin/list?status=已處理" th:classappend="${appeal.status == '已處理'} ? 'active' : ''">已處理</a></li>
                             </ul>
                         </li>
                         <li class="menu-item has-sub-item">
                             <a class="sub-toggle"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
                             <ul class="sub-submenu">
-                                <li><a href="/reports/admin/list?status=PENDING">尚未處理</a></li>
-                                <li><a href="/reports/admin/list?status=已結案">已結案</a></li>
+                                <li><a href="/reports/admin/list?status=待處理">待處理</a></li>
+                                <li><a href="/reports/admin/list?status=已處理">已處理</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -119,19 +119,17 @@
 
     <main class="main-content">
         <header class="top-bar">
-            <h2 class="page-title" th:text="${appeal.status == '已結案'} ? '案件查看' : '案件處理'">案件處理</h2>
+            <h2 class="page-title" th:text="${appeal.status == '已處理'} ? '案件查看' : '案件處理'">案件處理</h2>
             <div class="user-profile"><span>Admin</span><div class="avatar"><i class="fas fa-user"></i></div></div>
         </header>
 
         <div class="content-area">
             <div class="case-card">
-                <!-- 案件編號（兩種申訴都有） -->
                 <div class="info-row">
                     <div class="info-label">案件編號：</div>
                     <div class="info-text" th:text="${appeal.appealsNo}">5</div>
                 </div>
 
-                <!-- 💡 訂單編號：根據類型顯示不同欄位 -->
                 <div class="info-row" th:if="${type == 'install'}">
                     <div class="info-label">訂單編號：</div>
                     <div class="info-text" th:text="'#' + ${appeal.installOrderNo}">#123</div>
@@ -142,7 +140,6 @@
                     <div class="info-text" th:text="'#' + ${appeal.ordNo}">#112</div>
                 </div>
 
-                <!-- 💡 修正：申訴標題兩種類型都顯示 -->
                 <div class="info-row">
                     <div class="info-label">申訴標題：</div>
                     <div class="info-text" id="categoriesBox">
@@ -150,13 +147,11 @@
                     </div>
                 </div>
 
-                <!-- 詳細內容（兩種申訴都有） -->
                 <div class="info-row">
                     <div class="info-label">詳細內容：</div>
                     <div class="info-text" id="descriptionText" th:text="${appeal.description}">12345</div>
                 </div>
 
-                <!-- 💡 附件圖片：安裝申訴顯示多張圖 -->
                 <div class="info-row" th:if="${type == 'install' && images != null and !images.isEmpty()}">
                     <div class="info-label">附件圖片：</div>
                     <div class="info-text">
@@ -170,7 +165,6 @@
                     </div>
                 </div>
 
-                <!-- 💡 附件圖片：商品申訴也顯示多張圖 -->
                 <div class="info-row" th:if="${type == 'product' && images != null and !images.isEmpty()}">
                     <div class="info-label">附件圖片：</div>
                     <div class="info-text">
@@ -184,19 +178,17 @@
                     </div>
                 </div>
 
-                <!-- 管理員回覆（兩種申訴都有） -->
                 <div style="margin-top: 12px;">
                     <div class="info-label">管理員回覆：</div>
                     <textarea id="replyMsg"
                               th:text="${appeal.response == '尚未回覆'} ? '' : ${appeal.response}"
-                              th:readonly="${appeal.status == '已結案'}"
-                              th:placeholder="${appeal.status == '已結案'} ? '' : '請在此輸入對會員的回覆內容...'"></textarea>
+                              th:readonly="${appeal.status == '已處理'}"
+                              th:placeholder="${appeal.status == '已處理'} ? '' : '請在此輸入對會員的回覆內容...'"></textarea>
                 </div>
 
-                <!-- 按鈕組 -->
                 <div class="btn-group">
-                    <a th:href="@{/appeals/admin/list(status=${appeal.status == '已結案' ? '已結案' : 'PENDING'})}" class="btn-back">返回列表</a>
-                    <button th:if="${appeal.status != '已結案'}" class="btn-send" onclick="sendReply()">送出</button>
+                    <a th:href="@{/appeals/admin/list(status=${appeal.status == '已處理' ? '已處理' : '待處理'})}" class="btn-back">返回列表</a>
+                    <button th:if="${appeal.status != '已處理'}" class="btn-send" onclick="sendReply()">送出</button>
                 </div>
             </div>
         </div>
@@ -263,7 +255,7 @@
         const params = new URLSearchParams({
             id: id,
             response: reply,
-            status: '已結案',
+            status: '已處理', // 💡 統一存為「已處理」
             admNo: 10
         });
 
@@ -279,9 +271,10 @@
             .then(res => res.text())
             .then(msg => {
                 if (msg === 'success') {
-                    showModal('卡爾夏Karshop', '處理成功！案件已移至「已結案」');
+                    showModal('卡爾夏Karshop', '處理成功！案件已移至「已處理」');
                     setTimeout(() => {
-                        window.location.href = '/appeals/admin/list?status=已結案';
+                        // 💡 成功後導向已處理，幽靈頁面正式消失
+                        window.location.href = '/appeals/admin/list?status=已處理';
                     }, 1500);
                 } else {
                     showModal('卡爾夏Karshop', '處理失敗：' + msg);
