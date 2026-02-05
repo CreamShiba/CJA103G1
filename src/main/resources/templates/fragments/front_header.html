@@ -50,9 +50,9 @@
 							</span>
 
                         <a th:href="@{/members/view}">編輯個人資料</a>
-                        <a href="#">我的優惠券</a>
-                        <a href="#">我的收藏</a>
-                        <a href="#">訂單查詢</a>
+                        <a th:href="@{/pages/my-coupons}">我的優惠券</a>
+                        <a th:href="@{/favorite/list-page}">我的收藏</a>
+                        <a th:href="@{/pages/my-orders}">訂單查詢</a>
                         <form th:action="@{/members/logout}" method="post" id="logoutForm">
                             <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
                                 登出 (Logout)
