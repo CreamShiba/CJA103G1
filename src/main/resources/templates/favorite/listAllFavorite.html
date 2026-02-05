@@ -86,7 +86,8 @@
                                 <img th:src="@{/favorite/showImage(prodNo=${fav.productProd.prodNo})}"
                                      alt="商品圖片"
                                      style="width: 100%; height: 100%; object-fit: cover;"
-                                     onerror="this.src='/images/no-image.png';"> </div>
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border-radius:4px;color:#999;font-size:14px;&quot;>無圖片</div>';">
+                            </div>
 
                             <div class="item-details">
                                 <h4 th:text="${fav.productProd.productName}">商品名稱</h4>
