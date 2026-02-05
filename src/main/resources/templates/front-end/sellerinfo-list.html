@@ -24,9 +24,12 @@
             </h1>
             <p>管理您的店鋪資訊與帳號設定</p>
 
-            <!-- 狀態徽章 - 修正為三種狀態 -->
+            <!-- ✅ 狀態徽章 - 新增「未通過」狀態 -->
             <span th:class="'status-badge status-' + ${seller.status}"
-                  th:text="${seller.status == 'pending' ? '待審核' : (seller.status == 'approved' ? '已核准' : (seller.status == 'suspended' ? '停權' : '未知狀態'))}">
+                  th:text="${seller.status == 'pending' ? '待審核' :
+                           (seller.status == 'approved' ? '已核准' :
+                           (seller.status == 'rejected' ? '未通過' :
+                           (seller.status == 'suspended' ? '停權' : '未知狀態')))}">
             </span>
 
             <!-- 評價顯示 -->
@@ -48,9 +51,25 @@
         <div th:if="${error}" class="alert alert-error">
             <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
         </div>
+
+        <!-- ✅ 待審核提示 -->
         <div th:if="${seller.status == 'pending'}" class="alert alert-info">
             <i class="fas fa-info-circle"></i> 您的賣家申請正在審核中,審核通過後即可開始販售商品
         </div>
+
+        <!-- ✅ 未通過提示（新增） -->
+        <div th:if="${seller.status == 'rejected'}" class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>您的賣家申請未通過審核</strong><br>
+            請根據以下原因修改資料後重新提交：<br>
+            <span style="color: #d32f2f; font-weight: bold;">
+                <!-- 這裡可以加入後台設定的未通過原因，如果有的話 -->
+                <!-- th:text="${seller.rejection_reason}" -->
+                請確認店鋪資料完整、聯絡資訊正確、銀行帳戶無誤。修改後點擊「儲存變更」，系統將自動重新送出審核。
+            </span>
+        </div>
+
+        <!-- ✅ 停權提示 -->
         <div th:if="${seller.status == 'suspended'}" class="alert alert-error">
             <i class="fas fa-ban"></i> 您的賣家帳號已被停權,如有疑問請聯繫客服
         </div>
@@ -81,8 +100,12 @@
                     </div>
                     <div class="form-group">
                         <label>審核狀態</label>
+                        <!-- ✅ 狀態對應文字 -->
                         <input type="text"
-                               th:value="${seller.status == 'pending' ? '待審核' : (seller.status == 'approved' ? '已核准' : (seller.status == 'suspended' ? '停權' : '未知狀態'))}"
+                               th:value="${seller.status == 'pending' ? '待審核' :
+                                         (seller.status == 'approved' ? '已核准' :
+                                         (seller.status == 'rejected' ? '未通過' :
+                                         (seller.status == 'suspended' ? '停權' : '未知狀態')))}"
                                readonly>
                     </div>
                 </div>
@@ -195,7 +218,9 @@
                     <i class="fas fa-arrow-left"></i> 返回首頁
                 </button>
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> 儲存變更
+                    <i class="fas fa-save"></i>
+                    <!-- ✅ 根據狀態顯示不同按鈕文字 -->
+                    <span th:text="${seller.status == 'rejected' ? '修改並重新送審' : '儲存變更'}">儲存變更</span>
                 </button>
             </div>
         </form>
@@ -206,33 +231,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -72,9 +72,7 @@
 </div>
 
 <!-- Footer -->
-<footer>
     <footer th:replace="~{fragments/footer :: Footer}"></footer>
-</footer>
 
 <!--<script th:src="@{/js/front-end/index.js}"></script>-->
 <script>
@@ -223,27 +221,23 @@
 
             // 前端校驗用的 helper：拿到每筆券的「有效狀態」
             // 若後端 status = 0 但 couponEnd 已過期，視為 2
-            function getEffectiveStatus(item) {
-                if (item.couponStatus === 0 && item.coupon && item.coupon.couponEnd) {
-                    if (new Date() > new Date(item.coupon.couponEnd)) {
-                        return 2;
-                    }
-                }
-                return item.couponStatus;
-            }
+            // function getEffectiveStatus(item) {
+            //     if (item.couponStatus === 0 && item.coupon && item.coupon.couponEnd) {
+            //         if (new Date() > new Date(item.coupon.couponEnd)) {
+            //             return 2;
+            //         }
+            //     }
+            //     return item.couponStatus;
+            // }
 
             // --- 前端過濾邏輯 ---
             let filteredData;
             if (type === 'all') {
-                // 「全部」標籤：顯示未使用 (status = 0) 的券
-                filteredData = data.filter(item => getEffectiveStatus(item) === 0);
+                // 「全部」標籤：只顯示 coupon_status = 0 (未使用) 的券
+                filteredData = data.filter(item => item.couponStatus === 0);
             } else if (type === 'expired') {
-                // ✅ 修正重點：「已過期/已使用」標籤
-                // 顯示已使用 (status = 1) 或已過期 (status = 2) 的券
-                filteredData = data.filter(item => {
-                    const s = getEffectiveStatus(item);
-                    return s === 1 || s === 2;
-                });
+                // 「已過期/已使用」標籤：顯示 coupon_status = 1 (已使用) 或 2 (已過期) 的券
+                filteredData = data.filter(item => item.couponStatus === 1 || item.couponStatus === 2);
             } else {
                 filteredData = data;
             }
@@ -260,22 +254,12 @@
             body.innerHTML = '';
 
             filteredData.forEach(item => {
+                const couponObj = item.coupon || {};
+
+                // ✅ 完全依賴後端的 coupon_status，不做任何前端判斷或修改
                 let statusClass = '';
                 let statusText = '';
-                const couponObj = item.coupon || {};
-                const now = new Date();
 
-                // 前端校驗過期：後端排程可能遲到，
-                // 所以當 status = 0（未使用）但 coupon.couponEnd 已經超過當前時間，
-                // 前端直接視為已過期 (2)
-                let effectiveStatus = item.couponStatus;
-                if (effectiveStatus === 0 && couponObj.couponEnd) {
-                    if (now > new Date(couponObj.couponEnd)) {
-                        effectiveStatus = 2;
-                    }
-                }
-
-                // 根據 couponStatus 設定狀態（0:未使用, 1:已使用, 2:已過期）
                 if (item.couponStatus === 0) {
                     statusClass = 'status-unused';
                     statusText = '未使用';

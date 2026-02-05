@@ -52,14 +52,27 @@
                     </ul>
                 </li>
 
-                <li class="menu-item has-submenu">
+                <li class="menu-item has-submenu"
+                    th:classappend="${activePage == 'announcement' || activePage == 'faq'} ? 'open' : ''">
+
                     <a class="submenu-toggle">
-                        <span><i class="fas fa-bullhorn"></i> 公告管理</span>
+                        <span><i class="fas fa-edit"></i> 內容管理</span>
                         <i class="fas fa-chevron-down arrow"></i>
                     </a>
+
                     <ul class="submenu">
-                        <li><a href="/admins/announcement">公告列表</a></li>
-                        <li><a href="/admins/faq">FAQ 列表</a></li>
+                        <li>
+                            <a th:href="@{/admins/announcement}"
+                               th:classappend="${activePage == 'announcement'} ? 'active' : ''">
+                                公告列表
+                            </a>
+                        </li>
+                        <li>
+                            <a th:href="@{/admins/faq}"
+                               th:classappend="${activePage == 'faq'} ? 'active' : ''">
+                                FAQ 列表
+                            </a>
+                        </li>
                     </ul>
                 </li>
                 <li class="menu-item has-submenu">
