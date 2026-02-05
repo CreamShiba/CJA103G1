@@ -35,7 +35,7 @@ public class ProductAppealsService {
         return repository.findById(id).orElse(null);
     }
 
-    // 💡 修正：根據會員編號取得商品申訴紀錄 (用於前台申訴紀錄頁面)
+    // 💡 根據會員編號取得商品申訴紀錄 (用於前台申訴紀錄頁面)
     public List<ProductAppeals> getByMemberNo(Integer memberNo) {
         return repository.findByMemberNo(memberNo);
     }
