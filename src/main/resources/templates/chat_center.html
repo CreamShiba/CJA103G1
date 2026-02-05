@@ -91,34 +91,7 @@
 
 <body>
 
-<header>
-    <div class="top-bar">
-        <div>Kar爾夏 Car Life Center</div>
-        <div class="top-icons">👤 🛒</div>
-    </div>
-    <div class="main-header">
-        <div class="logo">卡爾夏</div>
-        <nav class="nav-links">
-            <a href="#">商城</a><a href="#">安裝區</a>
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="forum-center-trigger">論壇 ▾</a>
-                <div id="forum-dropdown" class="dropdown-menu">
-                    <a th:href="@{/forum}">論壇首頁</a>
-                    <a th:href="@{/chat}" style="color: #ff3333" class="active">私訊中心</a>
-                </div>
-            </div>
-            <a href="#">公告</a>
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
-                <div id="member-dropdown" class="dropdown-menu">
-                    <a href="#">我的優惠券</a>
-                    <a href="#">我的收藏</a>
-                    <a href="/chat" style="color: #ff3333">私訊中心</a>
-                </div>
-            </div>
-        </nav>
-    </div>
-</header>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
 
 <div class="main-container">
     <div class="main-split-area">
@@ -168,19 +141,19 @@
     /*<![CDATA[*/
     var socket,
         selfName = [[${userName}]],
-        // 🟢 修正 2：將 member.memId 修改為 member.memNo
         selfId = [[${member.memNo}]],
         currentTarget,
         currentTargetId;
 
+    // 💡 下拉選單開關邏輯 (對接 Fragment ID)
     document.getElementById('member-center-trigger').onclick = (e) => {
         e.stopPropagation();
-        document.getElementById('forum-dropdown').classList.remove('show');
+        if(document.getElementById('forum-dropdown')) document.getElementById('forum-dropdown').classList.remove('show');
         document.getElementById('member-dropdown').classList.toggle('show');
     };
     document.getElementById('forum-center-trigger').onclick = (e) => {
         e.stopPropagation();
-        document.getElementById('member-dropdown').classList.remove('show');
+        if(document.getElementById('member-dropdown')) document.getElementById('member-dropdown').classList.remove('show');
         document.getElementById('forum-dropdown').classList.toggle('show');
     };
 
