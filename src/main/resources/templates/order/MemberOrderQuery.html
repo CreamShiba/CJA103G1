@@ -337,37 +337,45 @@
 
                 // --- 評價按鈕邏輯 (對應 prorate 欄位) ---
                 let ratingBtn = `<span style="color: #ccc;"> </span>`;
+
                 const ordRates = allRates.filter(r => {
                     const rateOrdNo = Number(r.ordNo || r.ord_no);
                     const currentOrdNo = Number(ord.ordNo);
                     return rateOrdNo === currentOrdNo;
                 });
 
-                console.log(`📝 訂單 #${ord.ordNo} 的評價數量:`, ordRates.length);  // ✅ 移到這裡
+                if  (ord.ordStatus === '已完成') {
+                    const ordRates = allRates.filter(r => {
+                        const rateOrdNo = Number(r.ordNo || r.ord_no);
+                        const currentOrdNo = Number(ord.ordNo);
+                        return rateOrdNo === currentOrdNo;
+                    });
 
-                if (ordRates.length === 0) {
-                    // 沒有評價資料 - 顯示「去評價」
-                    ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
-                } else {
-                    // 有評價資料 - 檢查狀態
-                    const statusList = ordRates.map(r => Number(r.rateStatus));
-                    const allLocked = statusList.every(s => s === 2);
-                    const hasDraft = statusList.some(s => s === 1);
+                    console.log(`📝 訂單 #${ord.ordNo} 的評價數量:`, ordRates.length);  // ✅ 移到這裡
 
-                    console.log(`  狀態列表:`, statusList, `全部鎖定:${allLocked}, 有草稿:${hasDraft}`);  // ✅ 新增除錯訊息
-
-                    if (allLocked) {
-                        // 全部都是狀態2 - 已評價完成(鎖定)
-                        ratingBtn = `<button class="btn-rate" style="background-color:#28a745;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">查看評價</button>`;
-                    } else if (hasDraft) {
-                        // 有狀態1 - 可修改
-                        ratingBtn = `<button class="btn-rate" style="background-color:#ffc107; color:black;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
-                    } else {
-                        // ✅ 新增: 其他狀態(例如null) - 顯示「去評價」
+                    if (ordRates.length === 0) {
+                        // 沒有評價資料 - 顯示「去評價」
                         ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
+                    } else {
+                        // 有評價資料 - 檢查狀態
+                        const statusList = ordRates.map(r => Number(r.rateStatus));
+                        const allLocked = statusList.every(s => s === 2);
+                        const hasDraft = statusList.some(s => s === 1);
+
+                        console.log(`  狀態列表:`, statusList, `全部鎖定:${allLocked}, 有草稿:${hasDraft}`);  // ✅ 新增除錯訊息
+
+                        if (allLocked) {
+                            // 全部都是狀態2 - 已評價完成(鎖定)
+                            ratingBtn = `<button class="btn-rate" style="background-color:#28a745;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">查看評價</button>`;
+                        } else if (hasDraft) {
+                            // 有狀態1 - 可修改
+                            ratingBtn = `<button class="btn-rate" style="background-color:#ffc107; color:black;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
+                        } else {
+                            // ✅ 新增: 其他狀態(例如null) - 顯示「去評價」
+                            ratingBtn = `<button class="btn-rate" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">去評價</button>`;
+                        }
                     }
                 }
-
                 // --- 動作按鈕邏輯 (詳情 / 確認收貨) ---
                 let actionBtn = `<button class="btn-detail" onclick="viewDetail(${ord.ordNo})">詳情</button>`;
 

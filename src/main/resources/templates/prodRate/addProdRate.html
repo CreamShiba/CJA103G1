@@ -156,11 +156,12 @@
         const memberTrigger = document.getElementById('member-center-trigger');
         const memberDropdown = document.getElementById('member-dropdown');
 
+        // 只有在元素存在時才綁定點擊事件
         if (userIcon && userDropdown) {
             userIcon.onclick = function(e) {
                 e.stopPropagation();
                 userDropdown.classList.toggle('show');
-                memberDropdown.classList.remove('show');
+                if(memberDropdown) memberDropdown.classList.remove('show');
             };
         }
 
@@ -181,11 +182,12 @@
             const isUserDropdown = event.target.closest('#user-dropdown');
             const isMemberDropdown = event.target.closest('#member-dropdown');
 
-            if (!isUserIcon && !isUserDropdown) {
+            // 使用選用鏈結 (Optional Chaining) 或直接檢查
+            if (!isUserIcon && !isUserDropdown && userDropdown) {
                 userDropdown.classList.remove('show');
             }
 
-            if (!isMemberTrigger && !isMemberDropdown) {
+            if (!isMemberTrigger && !isMemberDropdown && memberDropdown) {
                 memberDropdown.classList.remove('show');
             }
         });
