@@ -28,25 +28,33 @@ public class ReportsController {
     @PostMapping("/submit")
     public String handleReport(
             @ModelAttribute Reports report,
-            @RequestParam(required = false) String source,  // ← 新增：接收來源標記
-            @RequestParam(required = false) Integer prodNo, // ← 新增：接收商品編號
-            RedirectAttributes redirectAttributes,           // ← 新增：用於傳遞訊息
+            @RequestParam(required = false) String source,  // ← 接收來源標記
+            RedirectAttributes redirectAttributes,           // ← 用於傳遞訊息
             Model model) {
 
         report.setReportsTimestamp(LocalDateTime.now());
         report.setStatus("待處理"); // ✅ 統一使用「待處理」
         report.setMemberNo(1);
         report.setAdmNo(1);
+
+        // ✅ 核心修改：prodNo 現在會自動透過 @ModelAttribute 綁定到 report.prodNo
+        // 所以不需要額外的 @RequestParam 接收！
+        // 表單的 name="prodNo" 會自動對應到 Reports 物件的 setProdNo() 方法
+
+        // ✅ 儲存檢舉資料（包含商品編號）
         reportsService.submitReport(report);
+
+        System.out.println("✅ 檢舉已儲存 - 商品編號：" + report.getProdNo() +
+                "，賣家編號：" + report.getSellerNo());
 
         // ✅ 設定成功提示訊息
         redirectAttributes.addFlashAttribute("message", "檢舉已送出，我們會盡快審核！");
 
         // ✅ 關鍵邏輯：判斷要跳轉去哪裡
-        if ("productDetail".equals(source) && prodNo != null) {
+        if ("productDetail".equals(source) && report.getProdNo() != null) {
             // 如果是從商品頁來的，就導回該商品的詳情頁
-            System.out.println("✅ 從商品頁檢舉，返回商品編號：" + prodNo);
-            return "redirect:/product/" + prodNo;
+            System.out.println("✅ 從商品頁檢舉，返回商品編號：" + report.getProdNo());
+            return "redirect:/product/detail?prodNo=" + report.getProdNo();
         }
 
         // 預設行為：顯示檢舉成功頁面（原本的邏輯）

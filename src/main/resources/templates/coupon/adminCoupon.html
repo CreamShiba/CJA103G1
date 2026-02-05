@@ -14,7 +14,7 @@
 <div class="app-container">
 
     <!-- 側邊欄 -->
-    <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='memberInfo')}"></aside>
+    <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='coupon')}"></aside>
 <!--    <aside class="sidebar scrollbar-styled">-->
 <!--        <div class="sidebar-header">-->
 <!--            <div class="logo-icon"></div>-->
@@ -377,6 +377,24 @@
             }
         });
     });
+
+    // 跳轉頁面
+    function handleRouting() {
+        const showAddSection = [[${showAddSection ?: false}]];
+        const hash = window.location.hash;
+
+        if (showAddSection) {
+            switchToSection('#coupon-add');
+            history.replaceState(null, null, '#coupon-add'); // 優雅更換 Hash 不觸發 reload
+        } else if (hash) {
+            switchToSection(hash);
+        } else {
+            switchToSection('#coupon-list');
+        }
+    }
+
+    window.addEventListener('load', handleRouting);
+    window.addEventListener('hashchange', () => switchToSection(window.location.hash || '#coupon-list'));
 
 </script>
 </body>

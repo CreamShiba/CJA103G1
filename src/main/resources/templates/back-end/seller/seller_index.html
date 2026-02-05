@@ -40,8 +40,13 @@
                 </div>
                 <div class="dropdown-menu" id="userDropdown">
                     <a href="#" class="dropdown-item">個人資料</a>
-                    <a href="#" class="dropdown-item" style="color: var(--accent-purple);">切換為會員</a>
-                    <a href="#" class="dropdown-item">登出</a>
+                    <a th:href="@{/shop}" class="dropdown-item" style="color: var(--accent-purple);">切換為會員</a>
+
+                    <form th:action="@{/members/logout}" method="post" id="sellerLogoutForm" style="display: none;"></form>
+
+                    <a href="#" class="dropdown-item" onclick="document.getElementById('sellerLogoutForm').submit(); return false;">
+                        登出
+                    </a>
                 </div>
             </div>
         </header>
