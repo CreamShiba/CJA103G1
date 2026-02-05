@@ -48,12 +48,8 @@
 4. 若功能完成  
     commit + push  
     再開 PR（選 master 為目標）
-5. 組長負責 Review  
-    Approve 允許  
-    Request Changes 退回
-    *免費版：只能用留言留下意見
-6. 管理員 負責 Merge PR
-7. 若 PR 無法合併（conflict）  
+5. 管理員 負責 Merge PR
+6. 若 PR 無法合併（conflict）  
     PR 發起人需再次 rebase main  
     解決衝突後重新 push
 
