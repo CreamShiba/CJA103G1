@@ -46,7 +46,7 @@ public class MembersController {
 
   @GetMapping("/home")
   public String showIndex() {
-    return "front-end/index";
+    return "redirect:/shop";
   }
 
   // 顯示註冊會員頁面
