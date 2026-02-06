@@ -25,7 +25,7 @@ public class CouponService {
             List<Predicate> predicates = new ArrayList<>();
 
             //  強制加入狀態過濾：只顯示狀態為 1 (有效) 的資料
-            predicates.add(cb.equal(root.get("couponStatus"), 1));
+//            predicates.add(cb.equal(root.get("couponStatus"), 1));
 
             //  標題模糊查詢 (LIKE %...%)
             if (title != null && !title.trim().isEmpty()) {
