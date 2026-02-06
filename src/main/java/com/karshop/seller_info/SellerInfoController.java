@@ -183,6 +183,7 @@ public class SellerInfoController {
         } catch (RuntimeException e) {
             System.out.println("❌ 找不到賣家資料: " + e.getMessage());
 
+
             // ✅ 清除 session 中的 seller
             session.removeAttribute("sellerInfo");
 
