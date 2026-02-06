@@ -1,6 +1,11 @@
 package com.karshop.cart;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.karshop.coupon.CouponService;
+import com.karshop.members.model.MembersVO;
+import com.karshop.ord.model.OrdService;
+import com.karshop.ord.model.OrdVO;
+import com.karshop.orddetail.model.OrdDetailVO;
 import com.karshop.product.model.ProductService;
 import com.karshop.product.model.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,206 +29,187 @@ public class cartservice {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private OrdService ordService;
+
+    @Autowired
+    private CouponService couponService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Object orderLock = new Object(); // 防止併發下單導致庫存錯誤
 
     private static final String REDIS_CART_PREFIX = "cart:member:";
     private static final long REDIS_EXPIRE_DAYS = 7;
 
     /*
      * ═══════════════════════════════════════════════════════════════
-     *  基本功能
+     * 1. 核心結帳邏輯 (處理訂單、扣庫存、同步 Redis)
+     * ═══════════════════════════════════════════════════════════════
+     */
+    @Transactional
+    public void processCheckout(Integer memberNo, String prodNos, String paymentMethod, String deliveryMethod,
+                                String receiverName, String receiverPhone, String receiverAddress,
+                                String couponNoStr, Integer discount, MembersVO memberVO) {
+
+        // 使用鎖確保在扣除庫存到存入訂單期間，其他執行緒不能干擾
+        synchronized (orderLock) {
+            // A. 取得該會員購物車並篩選出勾選的商品
+            List<cart> allItems = repository.findByMember_no(memberNo);
+            List<Integer> buyIds = Arrays.stream(prodNos.split(","))
+                    .map(String::trim)
+                    .map(Integer::parseInt)
+                    .toList();
+
+            List<cart> buyItems = allItems.stream()
+                    .filter(item -> buyIds.contains(item.getProd_no()))
+                    .toList();
+
+            if (buyItems.isEmpty()) throw new RuntimeException("結帳商品無效或購物車已空");
+
+            // B. 初始化訂單物件 (OrdVO)
+            OrdVO ordVO = new OrdVO();
+            ordVO.setMember(memberVO);
+            ordVO.setOrdDate(LocalDateTime.now());
+            ordVO.setOrdStatus("待出貨");
+            ordVO.setOrdPaymentMethod(paymentMethod); // 信用卡, 轉帳, 超商代收
+            ordVO.setOrdShipMethod(deliveryMethod);   // 宅配, 超取, 自取
+            ordVO.setOrdRecipient(receiverName);
+            // 合併電話至地址欄位以符合資料庫設計
+            ordVO.setOrdAddress(receiverAddress + " (Tel: " + receiverPhone + ")");
+            ordVO.setOrdPaymentStatus("信用卡".equals(paymentMethod) ? "已付款" : "未付款");
+            ordVO.setPayoutStatus("未撥款");
+
+            // C. 處理商品明細與庫存扣除
+            int subtotal = 0;
+            List<OrdDetailVO> detailList = new ArrayList<>();
+
+            for (cart item : buyItems) {
+                ProductVO product = productService.getOneProduct(item.getProd_no());
+                if (product == null || "下架中".equals(product.getProdStatus())) {
+                    throw new RuntimeException("商品 [" + (product != null ? product.getProdName() : "未知") + "] 已下架");
+                }
+                if (item.getQuantity() > product.getProdQty()) {
+                    throw new RuntimeException("商品 [" + product.getProdName() + "] 庫存不足，剩餘：" + product.getProdQty());
+                }
+
+                // 🔥 核心操作：扣除庫存並更新
+                product.setProdQty(product.getProdQty() - item.getQuantity());
+                productService.updateProduct(product);
+
+                subtotal += product.getProdPrice() * item.getQuantity();
+
+                OrdDetailVO detail = new OrdDetailVO();
+                detail.setOrder(ordVO);
+                detail.setProduct(product);
+                detail.setQuantity(item.getQuantity());
+                detail.setPrice(product.getProdPrice());
+                detailList.add(detail);
+            }
+
+            // D. 計算運費邏輯
+            int shippingFee = 0;
+            if ("宅配".equals(deliveryMethod)) shippingFee = 100;
+            else if ("超取".equals(deliveryMethod)) shippingFee = 60;
+
+            // E. 完善訂單金額與折價券資訊
+            // 這裡抓取第一件商品的賣家作為訂單賣家 (假設購物車內為同一賣家)
+            ordVO.setSeller(productService.getOneProduct(buyItems.get(0).getProd_no()).getSeller());
+            ordVO.setOriginPrice(subtotal);
+            ordVO.setDiscountPrice(discount != null ? discount : 0);
+            ordVO.setOrdPrice(Math.max(0, subtotal + shippingFee - (discount != null ? discount : 0)));
+            ordVO.setOrderDetail(detailList);
+
+//            if (couponNoStr != null && !couponNoStr.isEmpty()) {
+//                ordVO.setCoupon_no(Integer.parseInt(couponNoStr));
+//            }
+
+            // F. 存檔與清空購物車
+            ordService.addOrd(ordVO);
+            removeItemsFromCart(memberNo, buyIds);
+        }
+    }
+
+    /*
+     * ═══════════════════════════════════════════════════════════════
+     * 2. 購物車基本操作 (MySQL & Redis 同步)
      * ═══════════════════════════════════════════════════════════════
      */
 
     @Transactional
-    public cart addToCart(Integer member_no, Integer prod_no) {
-        return addToCart(member_no, prod_no, 1);
-    }
-
-    @Transactional
     public cart addToCart(Integer member_no, Integer prod_no, Integer quantity) {
-        System.out.println("🛒 [新增] 會員 " + member_no + " 加入商品 " + prod_no + " 數量: " + quantity);
-
         Optional<cart> existing = repository.findByMember_noAndProd_no(member_no, prod_no);
-
+        cart result;
         if (existing.isPresent()) {
             cart existingCart = existing.get();
             existingCart.setQuantity(existingCart.getQuantity() + quantity);
-            cart saved = repository.save(existingCart);
-            System.out.println("✅ [更新數量] 新數量: " + saved.getQuantity());
-            updateRedisCache(member_no);
-            return saved;
+            result = repository.save(existingCart);
+        } else {
+            cart newCart = new cart();
+            newCart.setMember_no(member_no);
+            newCart.setProd_no(prod_no);
+            newCart.setQuantity(quantity);
+            newCart.setAdded_time(LocalDateTime.now());
+            result = repository.save(newCart);
         }
-
-        cart newCart = new cart();
-        newCart.setMember_no(member_no);
-        newCart.setProd_no(prod_no);
-        newCart.setQuantity(quantity);
-        newCart.setAdded_time(LocalDateTime.now());
-
-        cart saved = repository.save(newCart);
-        System.out.println("✅ [MySQL] 已儲存");
-
-        try {
-            updateRedisCache(member_no);
-            System.out.println("✅ [Redis] 快取已更新");
-        } catch (Exception e) {
-            System.err.println("⚠️  [Redis] 更新失敗: " + e.getMessage());
-        }
-
-        return saved;
-    }
-
-    @Transactional
-    public cart buyNow(Integer member_no, Integer prod_no, Integer quantity) {
-        System.out.println("🚀 [立即購買] 會員 " + member_no + " 商品 " + prod_no + " 數量: " + quantity);
-
-        Optional<cart> existing = repository.findByMember_noAndProd_no(member_no, prod_no);
-        if (existing.isPresent()) {
-            repository.deleteByMember_noAndProd_no(member_no, prod_no);
-        }
-
-        return addToCart(member_no, prod_no, quantity);
+        updateRedisCache(member_no);
+        return result;
     }
 
     @Transactional
     public cart updateQuantity(Integer member_no, Integer prod_no, Integer quantity) {
-        System.out.println("🔄 [更新數量] 會員 " + member_no + " 商品 " + prod_no + " → " + quantity);
-
         Optional<cart> existing = repository.findByMember_noAndProd_no(member_no, prod_no);
-
         if (existing.isPresent()) {
             cart cartItem = existing.get();
             cartItem.setQuantity(quantity);
             cart saved = repository.save(cartItem);
-
             updateRedisCache(member_no);
-            System.out.println("✅ [更新成功]");
             return saved;
         }
-
         throw new RuntimeException("購物車中找不到該商品");
     }
 
     public List<cart> getCartByMember(Integer member_no) {
-        System.out.println("🔍 [查詢] 取得會員 " + member_no + " 的購物車");
-
         String redisKey = REDIS_CART_PREFIX + member_no;
-
         try {
             String cachedJson = redisTemplate.opsForValue().get(redisKey);
-
             if (cachedJson != null) {
-                List<cart> cachedCart = objectMapper.readValue(
-                        cachedJson,
-                        objectMapper.getTypeFactory().constructCollectionType(List.class, cart.class)
-                );
-                System.out.println("✅ [Redis] 從快取取得 " + cachedCart.size() + " 項商品");
-                return cachedCart;
+                return objectMapper.readValue(cachedJson, objectMapper.getTypeFactory().constructCollectionType(List.class, cart.class));
             }
-        } catch (Exception e) {
-            System.err.println("⚠️  [Redis] 讀取失敗: " + e.getMessage());
-        }
+        } catch (Exception e) { System.err.println("Redis 讀取失敗: " + e.getMessage()); }
 
-        System.out.println("💾 [MySQL] 從資料庫查詢...");
         List<cart> cartItems = repository.findByMember_no(member_no);
-        System.out.println("✅ [MySQL] 找到 " + cartItems.size() + " 項商品");
-
-        if (!cartItems.isEmpty()) {
-            try {
-                String json = objectMapper.writeValueAsString(cartItems);
-                redisTemplate.opsForValue().set(redisKey, json, REDIS_EXPIRE_DAYS, TimeUnit.DAYS);
-                System.out.println("✅ [Redis] 已快取");
-            } catch (Exception e) {
-                System.err.println("⚠️  [Redis] 快取失敗: " + e.getMessage());
-            }
-        }
-
+        if (!cartItems.isEmpty()) updateRedisCache(member_no);
         return cartItems;
     }
 
-    // ✅ 取得購物車對應的商品 Map
     public Map<Integer, ProductVO> getProductsForCart(List<cart> cartItems) {
         Map<Integer, ProductVO> productMap = new HashMap<>();
         for (cart item : cartItems) {
-            try {
-                ProductVO product = productService.getOneProduct(item.getProd_no());
-                if (product != null) {
-                    productMap.put(item.getProd_no(), product);
-                }
-            } catch (Exception e) {
-                System.err.println("⚠️  查詢商品 " + item.getProd_no() + " 失敗: " + e.getMessage());
-            }
+            ProductVO product = productService.getOneProduct(item.getProd_no());
+            if (product != null) productMap.put(item.getProd_no(), product);
         }
         return productMap;
     }
 
-    // ✅ 單獨查詢一個商品（controller 用於庫存檢查）
-    public ProductVO getOneProduct(Integer prodNo) {
-        return productService.getOneProduct(prodNo);
-    }
-
     @Transactional
     public void removeFromCart(Integer member_no, Integer prod_no) {
-        System.out.println("🗑️  [刪除] 會員 " + member_no + " 移除商品 " + prod_no);
         repository.deleteByMember_noAndProd_no(member_no, prod_no);
-        System.out.println("✅ [MySQL] 已刪除");
-        try {
-            updateRedisCache(member_no);
-            System.out.println("✅ [Redis] 快取已更新");
-        } catch (Exception e) {
-            System.err.println("⚠️  [Redis] 更新失敗: " + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public void clearCart(Integer member_no) {
-        System.out.println("🧹 [清空] 會員 " + member_no);
-        repository.deleteByMember_no(member_no);
-        System.out.println("✅ [MySQL] 已清空");
-
-        String redisKey = REDIS_CART_PREFIX + member_no;
-        try {
-            redisTemplate.delete(redisKey);
-            System.out.println("✅ [Redis] 快取已刪除");
-        } catch (Exception e) {
-            System.err.println("⚠️  [Redis] 刪除失敗: " + e.getMessage());
-        }
-    }
-
-    @Transactional
-    public int syncFromLocalStorage(Integer member_no, List<Integer> localCartItems) {
-        System.out.println("🔄 [同步] 會員 " + member_no);
-        int syncCount = 0;
-
-        for (Integer prodNo : localCartItems) {
-            try {
-                Optional<cart> existing = repository.findByMember_noAndProd_no(member_no, prodNo);
-                if (existing.isEmpty()) {
-                    cart newCart = new cart();
-                    newCart.setMember_no(member_no);
-                    newCart.setProd_no(prodNo);
-                    newCart.setQuantity(1);
-                    newCart.setAdded_time(LocalDateTime.now());
-                    repository.save(newCart);
-                    syncCount++;
-                }
-            } catch (Exception e) {
-                System.err.println("❌ 同步商品 " + prodNo + " 失敗");
-            }
-        }
-
         updateRedisCache(member_no);
-        return syncCount;
     }
 
-    public long getCartCount(Integer member_no) {
-        return repository.countByMember_no(member_no);
+    @Transactional
+    public void removeItemsFromCart(Integer memberNo, List<Integer> prodNos) {
+        for (Integer prodNo : prodNos) {
+            repository.deleteByMember_noAndProd_no(memberNo, prodNo);
+        }
+        updateRedisCache(memberNo);
     }
 
-    public boolean isInCart(Integer member_no, Integer prod_no) {
-        return repository.findByMember_noAndProd_no(member_no, prod_no).isPresent();
-    }
+    /*
+     * ═══════════════════════════════════════════════════════════════
+     * 3. 輔助方法 (Redis 快取管理與工具)
+     * ═══════════════════════════════════════════════════════════════
+     */
 
     private void updateRedisCache(Integer member_no) {
         try {
@@ -232,35 +218,12 @@ public class cartservice {
             if (latestCart.isEmpty()) {
                 redisTemplate.delete(redisKey);
             } else {
-                String json = objectMapper.writeValueAsString(latestCart);
-                redisTemplate.opsForValue().set(redisKey, json, REDIS_EXPIRE_DAYS, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set(redisKey, objectMapper.writeValueAsString(latestCart), REDIS_EXPIRE_DAYS, TimeUnit.DAYS);
             }
-        } catch (Exception e) {
-            System.err.println("⚠️  Redis 更新失敗: " + e.getMessage());
-        }
+        } catch (Exception e) { System.err.println("Redis 更新失敗: " + e.getMessage()); }
     }
 
-    public Map<String, Object> getRedisStatus(Integer member_no) {
-        Map<String, Object> status = new HashMap<>();
-        String redisKey = REDIS_CART_PREFIX + member_no;
-        try {
-            Boolean exists = redisTemplate.hasKey(redisKey);
-            status.put("exists", exists);
-            if (Boolean.TRUE.equals(exists)) {
-                String cachedJson = redisTemplate.opsForValue().get(redisKey);
-                if (cachedJson != null) {
-                    List<cart> cachedCart = objectMapper.readValue(
-                            cachedJson,
-                            objectMapper.getTypeFactory().constructCollectionType(List.class, cart.class)
-                    );
-                    status.put("itemCount", cachedCart.size());
-                }
-                Long ttl = redisTemplate.getExpire(redisKey, TimeUnit.SECONDS);
-                status.put("ttl_seconds", ttl);
-            }
-        } catch (Exception e) {
-            status.put("error", e.getMessage());
-        }
-        return status;
+    public long getCartCount(Integer member_no) {
+        return repository.countByMember_no(member_no);
     }
 }
