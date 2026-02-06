@@ -69,7 +69,7 @@
         .filter-btn.active { background: #ff3333; border-color: #ff3333; color: #fff; }
 
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.05); padding: 12px 15px; border: 1px solid #444; border-bottom: none; border-radius: 8px 8px 0 0; }
-        .action-btn.primary { background: #ff3333; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .action-btn primary { background: #ff3333; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
         .thread-list { border: 1px solid #444; background: rgba(0,0,0,.4); border-radius: 0 0 8px 8px; }
         .thread-row { display: flex; flex-direction: column; border-bottom: 1px solid #333; cursor: pointer; transition: 0.2s; }
@@ -257,28 +257,43 @@
     const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : "";
 
     var userName = /*[[${userName}]]*/ 'Guest';
-    var socket;
+    var socket = null; // 🟢 初始化為 null
 
-    // 💡 下拉選單開關邏輯 (對接 Fragment 中的 ID)
-    document.getElementById('member-center-trigger').onclick = (e) => {
-        e.stopPropagation();
-        if(document.getElementById('forum-dropdown')) document.getElementById('forum-dropdown').classList.remove('show');
-        document.getElementById('member-dropdown').classList.toggle('show');
-    };
+    // 💡 修正 1：改用 DOMContentLoaded 確保 Fragment 元素已載入，並增加安全檢查 (Null Check)
+    document.addEventListener('DOMContentLoaded', function() {
+        const memberTrigger = document.getElementById('member-center-trigger');
+        const memberDropdown = document.getElementById('member-dropdown');
+        const forumTrigger = document.getElementById('forum-center-trigger');
+        const forumDropdown = document.getElementById('forum-dropdown');
 
-    document.getElementById('forum-center-trigger').onclick = (e) => {
-        e.stopPropagation();
-        if(document.getElementById('member-dropdown')) document.getElementById('member-dropdown').classList.remove('show');
-        document.getElementById('forum-dropdown').classList.toggle('show');
-    };
+        if (memberTrigger && memberDropdown) {
+            memberTrigger.onclick = (e) => {
+                e.stopPropagation();
+                if(forumDropdown) forumDropdown.classList.remove('show');
+                memberDropdown.classList.toggle('show');
+            };
+        }
+
+        if (forumTrigger && forumDropdown) {
+            forumTrigger.onclick = (e) => {
+                e.stopPropagation();
+                if(memberDropdown) memberDropdown.classList.remove('show');
+                forumDropdown.classList.toggle('show');
+            };
+        }
+
+        // 🟢 修正 2：在 DOM 載入後安全啟動 WebSocket 連線
+        connect();
+    });
 
     window.onclick = () => {
-        if(document.getElementById('member-dropdown')) document.getElementById('member-dropdown').classList.remove('show');
-        if(document.getElementById('forum-dropdown')) document.getElementById('forum-dropdown').classList.remove('show');
+        const memberDropdown = document.getElementById('member-dropdown');
+        const forumDropdown = document.getElementById('forum-dropdown');
+        if(memberDropdown) memberDropdown.classList.remove('show');
+        if(forumDropdown) forumDropdown.classList.remove('show');
         document.querySelectorAll('.post-dropdown').forEach(d => d.classList.remove('show'));
     };
 
-    // 其他論壇邏輯、點讚、WebSocket、留言... 全部完整保留
     function filterCategory(cat) {
         document.querySelectorAll('.filter-btn, .category-list li').forEach(el => {
             el.classList.toggle('active', el.innerText.trim().includes(cat) || (cat === '全部主題' && el.innerText.trim().includes('所有文章')));
@@ -383,20 +398,24 @@
         };
     }
 
+    // 💡 修正 3：傳送前增加 socket 狀態檢查
     function sendMessage() {
         var input = document.getElementById('chat-input');
-        if (input.value.trim() && socket.readyState === 1) {
-            var chatData = {
-                type: "chat",
-                sender: userName,
-                receiver: "all",
-                message: input.value
-            };
-            socket.send(JSON.stringify(chatData));
-            input.value = '';
-        } else if (socket.readyState !== 1) {
-            console.error("❌ WebSocket 尚未連線。");
-            alert("連線已中斷，請重新整理頁面。");
+        if (socket && socket.readyState === 1) {
+            if (input.value.trim()) {
+                var chatData = {
+                    type: "chat",
+                    sender: userName,
+                    receiver: "all",
+                    message: input.value
+                };
+                socket.send(JSON.stringify(chatData));
+                input.value = '';
+            }
+        } else {
+            console.error("❌ WebSocket 尚未連線或已被中斷。");
+            alert("通訊連線尚未就緒，請稍候。");
+            connect(); // 嘗試自動重新連線
         }
     }
 
@@ -404,10 +423,10 @@
         if (e.key === 'Enter') { sendMessage(); }
     });
 
-    window.onload = function() { connect(); };
     function showLightbox(src, e) { e.stopPropagation(); document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').style.display = 'flex'; }
     /*]]>*/
 </script>
 <style> @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } } </style>
 </body>
 </html>
+
