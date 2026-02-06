@@ -61,9 +61,21 @@ public class CouponController {
 
         // 呼叫 Service 的複合查詢方法
         List<Coupon> list = couponService.findByCompositeQuery(title, content, startDateTime, endDateTime);
+
         model.addAttribute("coupons", list);
         model.addAttribute("coupon", new Coupon());
-        model.addAttribute("queryResults", true); // 標記為查詢結果頁面
+
+        // --- 關鍵修正部分 ---
+        // 1. 指定側邊欄的主選單分類為優惠券
+        model.addAttribute("activePage", "coupon");
+
+        // 2. 指定子選單的高亮項目為「查詢」
+        model.addAttribute("activeTab", "query");
+
+        // 3. 確保分頁物件存在，避免 adminCoupon.html 的 th:if="${couponPage.totalPages > 1}" 噴錯
+        // 如果查詢結果不分頁，建議給一個空的 Page 物件或在 HTML 加入 null 檢查
+        model.addAttribute("queryResults", true);
+        // ------------------
 
         return "coupon/adminCoupon";
     }
