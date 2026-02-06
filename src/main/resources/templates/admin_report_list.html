@@ -6,7 +6,7 @@
     <title>論壇檢舉管理 - 卡爾夏 Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* 🟢 100% 完整保留原始樣式 */
+        /* 🟢 原始樣式 100% 保留 */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f5f7fa; color: #333; height: 100vh; overflow: hidden; }
         .app-container { display: flex; height: 100%; }
@@ -46,7 +46,7 @@
     <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='report')}"></aside>
     <main class="main-content">
         <header class="top-bar">
-            <h2 class="page-title">論壇檢舉管理 (綜合系統)</h2>
+            <h2 class="page-title">論壇檢舉管理</h2>
             <div class="user-profile">
                 <span>Admin User</span>
                 <div class="avatar"><i class="fas fa-user"></i></div>
@@ -67,32 +67,34 @@
                 <tbody>
                 <tr th:each="report : ${reportList}">
                     <td th:text="${report.reportsNo}"></td>
-                    <td th:text="${report.forumPost != null ? '#' + report.forumPost.postId : 'N/A'}"></td>
+
+                    <td>
+                        <span th:if="${report.forumPost != null}" th:text="'#' + ${report.forumPost.postId}"></span>
+                        <span th:if="${report.forumPost == null}" th:text="${report.reportsTarget != null ? report.reportsTarget : 'N/A'}" style="color: #999;"></span>
+                    </td>
+
                     <td th:text="${report.reportsReason}"></td>
                     <td>
                         <span th:text="${report.status}"
+                              th:id="'status-text-' + ${report.reportsNo}"
                               th:style="${report.status == '待處理' ? 'color: #d9534f; font-weight: bold;' : 'color: #666;'}">
                         </span>
                     </td>
                     <td>
-                        <div class="action-group" th:if="${report.status == '待處理'}">
-                            <form th:action="@{/admin/forum/report/process}" method="post" onsubmit="return confirm('確定下架此文章？')">
-                                <input type="hidden" name="reportsNo" th:value="${report.reportsNo}" />
-                                <input type="hidden" name="status" value="已下架" />
-                                <button type="submit" class="btn-mini btn-take-down">
+                        <div class="action-container" th:id="'action-cell-' + ${report.reportsNo}">
+                            <div class="action-group" th:if="${report.status == '待處理'}">
+                                <button type="button" class="btn-mini btn-take-down"
+                                        th:onclick="|handleProcess(${report.reportsNo}, '已下架')|">
                                     <i class="fas fa-arrow-down"></i> 下架
                                 </button>
-                            </form>
 
-                            <form th:action="@{/admin/forum/report/process}" method="post" onsubmit="return confirm('確定駁回此檢舉？')">
-                                <input type="hidden" name="reportsNo" th:value="${report.reportsNo}" />
-                                <input type="hidden" name="status" value="已駁回" />
-                                <button type="submit" class="btn-mini btn-reject">
+                                <button type="button" class="btn-mini btn-reject"
+                                        th:onclick="|handleProcess(${report.reportsNo}, '已駁回')|">
                                     <i class="fas fa-times"></i> 駁回
                                 </button>
-                            </form>
+                            </div>
+                            <span th:unless="${report.status == '待處理'}" style="color: #999; font-size: 12px;">處理完畢</span>
                         </div>
-                        <span th:unless="${report.status == '待處理'}" style="color: #999; font-size: 12px;">處理完畢</span>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(reportList)}">
@@ -103,12 +105,43 @@
         </div>
     </main>
 </div>
-<script>
-    function toggleMenu(element) {
-        const parentLi = element.closest('.has-submenu');
-        if (parentLi) { parentLi.classList.toggle('open'); }
+
+<script th:inline="javascript">
+    function handleProcess(reportsNo, status) {
+        if (!confirm('確定要執行「' + status + '」嗎？')) return;
+
+        fetch('/admin/forum/report_mock/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'reportsNo=' + reportsNo + '&status=' + status
+        })
+            .then(response => response.text())
+            .then(result => {
+                if (result === 'success') {
+                    const statusSpan = document.getElementById('status-text-' + reportsNo);
+                    if (statusSpan) {
+                        statusSpan.innerText = status;
+                        statusSpan.style.color = '#666';
+                        statusSpan.style.fontWeight = 'normal';
+                    }
+                    const actionCell = document.getElementById('action-cell-' + reportsNo);
+                    if (actionCell) {
+                        actionCell.innerHTML = '<span style="color: #999; font-size: 12px; animation: fadeIn 0.5s;">處理完畢</span>';
+                    }
+                } else {
+                    alert('伺服器處理失敗');
+                }
+            });
     }
 </script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
 <script th:src="@{/js/back-end/admin_index.js}"></script>
 </body>
 </html>
