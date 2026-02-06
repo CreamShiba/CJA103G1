@@ -113,8 +113,8 @@
                 <h1><i class="fas fa-list"></i> 優惠券列表</h1>
 
                 <div class="page-actions">
-                    <a href="#coupon-query" class="btn btn-query">🔍 查詢優惠券</a>
-                    <a href="#coupon-add" class="btn btn-add">➕ 新增優惠券</a>
+                    <a th:href="@{/coupon/admin#coupon-query}" class="btn btn-query">🔍 查詢優惠券</a>
+                    <a th:href="@{/coupon/admin#coupon-add}" class="btn btn-add">➕ 新增優惠券</a>
                 </div>
 
                 <table>
@@ -170,6 +170,11 @@
                     </ul>
                 </div>
             </section>
+<!--            <div class="page-actions" style="margin-top: 20px; display: flex; justify-content: center;">-->
+<!--                <button type="button" class="btn-cancel" onclick="history.back()">-->
+<!--                    <i class="fas fa-arrow-left"></i> 返回前頁-->
+<!--                </button>-->
+<!--            </div>-->
 
             <!-- 複合查詢 -->
             <section id="coupon-query" class="page-section" style="display:none;">
@@ -353,27 +358,54 @@
 
     // 頁面切換函數 (保持你原本的邏輯)
     function switchToSection(targetId) {
-        document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
         const target = document.querySelector(targetId);
-        if (target) {
-            target.style.display = 'block';
-        }
 
-        // 更新側邊欄 active 狀態
-        document.querySelectorAll('.submenu a').forEach(a => a.classList.remove('active'));
-        // 這裡建議用包含選擇器，因為 href 可能是 #coupon-list
-        const activeLink = document.querySelector(`.submenu a[href*="${targetId}"]`);
-        if (activeLink) activeLink.classList.add('active');
+        if (target) {
+            // 如果在當前 DOM 找到目標 (表示在 /coupon/admin 頁面)
+            document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
+            target.style.display = 'block';
+
+            // 更新側邊欄與按鈕的 active 狀態
+            updateActiveStatus(targetId);
+        } else {
+            // 如果找不到目標 (表示在 /listByCompositeQuery 或其他頁面)
+            // 強制導回主管理頁面並帶上 hash
+            window.location.href = '/coupon/admin' + targetId;
+        }
+    }
+
+    function updateActiveStatus(targetId) {
+        const couponLinks = document.querySelectorAll('.menu-item.has-submenu .submenu a[href*="coupon"]');
+
+        couponLinks.forEach(a => {
+            a.classList.remove('active');
+            const href = a.getAttribute('href');
+
+            // 判斷連結是否匹配當前的 targetId (例如 #coupon-query)
+            if (href.includes(targetId)) {
+                a.classList.add('active');
+            }
+            // 如果是回到列表頁且沒有 hash
+            else if (targetId === '#coupon-list' && !href.includes('#')) {
+                a.classList.add('active');
+            }
+        });
     }
 
     // 點擊事件監聽 (確保取消按鈕也被處理)
     document.querySelectorAll('.submenu a, .page-actions a, .btn-cancel, .back-link a').forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
-            if (href && href.startsWith('#')) {
-                e.preventDefault();
-                switchToSection(href);
-                window.location.hash = href;
+            if (href && href.includes('#')) {
+                const hash = href.substring(href.indexOf('#'));
+                if (hash.startsWith('#coupon-')) {
+                    // 如果在主頁面，執行切換
+                    if (window.location.pathname.endsWith('/coupon/admin')) {
+                        e.preventDefault();
+                        switchToSection(hash);
+                        window.location.hash = hash;
+                    }
+                }
             }
         });
     });
@@ -394,7 +426,77 @@
     }
 
     window.addEventListener('load', handleRouting);
-    window.addEventListener('hashchange', () => switchToSection(window.location.hash || '#coupon-list'));
+    window.addEventListener('hashchange', function() {
+        const hash = window.location.hash || '#coupon-list';
+        switchToSection(hash);
+    });
+    document.addEventListener('click', function(e) {
+        const link = e.target.closest('a[href*="#"]');
+        if (link) {
+            const href = link.getAttribute('href');
+            const hashIndex = href.indexOf('#');
+            const hash = href.substring(hashIndex);
+
+            // 如果是內部錨點跳轉
+            if (hash.startsWith('#coupon-')) {
+                // 判斷當前 URL 路徑
+                if (window.location.pathname.includes('listByCompositeQuery')) {
+                    // 如果在查詢結果頁，不執行預防行為，讓瀏覽器直接跳轉回 /coupon/admin#...
+                    return;
+                } else {
+                    // 如果在主頁面，執行平滑切換
+                    e.preventDefault();
+                    switchToSection(hash);
+                    window.location.hash = hash;
+                }
+            }
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const couponLinks = document.querySelectorAll('.menu-item.has-submenu .submenu a[href*="coupon"]');
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+
+        function setActive(targetHashOrPath) {
+            couponLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                link.classList.remove('active');
+
+                // 判斷邏輯：如果連結的 href 包含當前的 Hash，或是當前在查詢結果頁且連結是「查詢」
+                if (currentHash && href.includes(currentHash)) {
+                    link.classList.add('active');
+                } else if (currentPath.includes('listByCompositeQuery') && href.includes('#coupon-query')) {
+                    link.classList.add('active');
+                } else if (!currentHash && !currentPath.includes('listByCompositeQuery') && href.endsWith('/coupon/admin')) {
+                    // 預設列表亮起
+                    if (href.indexOf('#') === -1) link.classList.add('active');
+                }
+            });
+        }
+
+        setActive();
+
+        // 監聽點擊
+        couponLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                couponLinks.forEach(item => item.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    });
+
+        // 2. 處理頁面重新整理時，根據網址 Hash 自動選取
+        const currentHash = window.location.hash;
+        if (currentHash) {
+            couponLinks.forEach(link => {
+                if (link.getAttribute('href').includes(currentHash)) {
+                    couponLinks.forEach(item => item.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        }
+
 
 </script>
 </body>

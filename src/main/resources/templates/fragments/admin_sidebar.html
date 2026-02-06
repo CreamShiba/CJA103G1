@@ -150,19 +150,19 @@
                 <ul class="submenu">
                     <li>
                         <a th:href="@{/coupon/admin}"
-                           th:classappend="${activePage == 'coupon'} ? 'active' : ''">
+                           th:classappend="${activePage == 'coupon' && activeTab == 'list'} ? 'active' : ''">
                             優惠券列表
                         </a>
                     </li>
                     <li>
                         <a th:href="@{/coupon/admin#coupon-query}"
-                           th:classappend="${activePage == 'coupon'} ? 'active' : ''">
+                           th:classappend="${activePage == 'coupon' && activeTab == 'query'} ? 'active' : ''">
                             查詢優惠券
                         </a>
                     </li>
                     <li>
                         <a th:href="@{/coupon/admin#coupon-add}"
-                           th:classappend="${activePage == 'coupon'} ? 'active' : ''">
+                           th:classappend="${activePage == 'coupon' && activeTab == 'add'} ? 'active' : ''">
                             新增優惠券
                         </a>
                     </li>

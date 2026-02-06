@@ -82,6 +82,7 @@
                 <tbody id="product-table-body" class="tab-content active">
                 <tr th:each="fav : ${favorites}" th:id="'prod-row-' + ${fav.productProd.prodNo}">
                     <td>
+                        <a th:href="@{/product/detail(prodNo=${fav.productProd.prodNo})}" style="text-decoration: none; color: inherit; display: block;">
                         <div class="item-info">
                             <div class="item-image-container" style="width: 80px; height: 80px; margin-right: 15px; overflow: hidden; border-radius: 5px;">
                                 <img th:src="@{/favorite/showImage(prodNo=${fav.productProd.prodNo})}"
