@@ -81,23 +81,23 @@ public class MemberCouponController {
 //    }
 
     //前端 checkout.html 按下「套用」時，透過 AJAX 詢問後端這張券能抵扣多少錢
-    @GetMapping("/validate-usage")
-    public ResponseEntity<?> validateCouponUsage(
-            @RequestParam Integer couponNo,
-            @RequestParam Double orderAmount) {
-
-        MembersVO member = loginUserHolder.get(); //
-        if (member == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("請先登入");
-
-        try {
-            MemberCoupon mc = memberCouponService.validateAndGetCoupon(member.getMemNo(), couponNo, orderAmount);
-            // 如果通過，回傳折扣金額
-            return ResponseEntity.ok(mc.getCoupon().getDiscountValue());
-        } catch (RuntimeException e) {
-            // 如果失敗（例如超過 20%），回傳錯誤訊息
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
+//    @GetMapping("/validate-usage")
+//    public ResponseEntity<?> validateCouponUsage(
+//            @RequestParam Integer couponNo,
+//            @RequestParam Double orderAmount) {
+//
+//        MembersVO member = loginUserHolder.get(); //
+//        if (member == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("請先登入");
+//
+//        try {
+//            MemberCoupon mc = memberCouponService.validateAndGetCoupon(member.getMemNo(), couponNo, orderAmount);
+//            // 如果通過，回傳折扣金額
+//            return ResponseEntity.ok(mc.getCoupon().getDiscountValue());
+//        } catch (RuntimeException e) {
+//            // 如果失敗（例如超過 20%），回傳錯誤訊息
+//            return ResponseEntity.badRequest().body(e.getMessage());
+//        }
+//    }
 
 
 }

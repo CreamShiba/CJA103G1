@@ -82,3 +82,52 @@ function hideModal() {
 window.onload = function() {
     render();
 };
+
+
+//優惠券:更新訂單總額計算 (小計 + 運費 - 折扣)
+
+function updateOrderTotal() {
+    // 1. 取得商品小計 (移除逗號轉數字)
+    const subtotalText = document.getElementById('display-subtotal').innerText.replace(/,/g, '');
+    const subtotal = parseInt(subtotalText) || 0;
+
+    // 2. 取得運費邏輯
+    const deliveryMethod = document.getElementById('delivery-method').value;
+    let shippingFee = 0;
+    if (deliveryMethod === '宅配') shippingFee = 100;
+    else if (deliveryMethod === '超取') shippingFee = 60;
+
+    document.getElementById('display-shipping').innerText = 'NT$ ' + shippingFee;
+
+    // 3. 取得選中的優惠券資訊
+    const couponSelect = document.getElementById('couponSelect');
+    const selectedOption = couponSelect.options[couponSelect.selectedIndex];
+
+    // 💡 修正重點：在這裡加上 const 宣告變數
+    const discount = (selectedOption && selectedOption.dataset.discount) ? parseInt(selectedOption.dataset.discount) : 0;
+    const couponNo = (selectedOption) ? selectedOption.value : ""; // 👈 加上這行宣告
+
+    // ✅ 將數值填入隱藏欄位 (id 必須與 HTML 中的一致)
+    // 根據您的 HTML，id 可能是 'coupon_no' 和 'discount_price'
+    if (document.getElementById('coupon_no')) {
+        document.getElementById('coupon_no').value = couponNo;
+    }
+    if (document.getElementById('discount_price')) {
+        document.getElementById('discount_price').value = discount;
+    }
+
+    // 4. 更新畫面顯示
+    document.getElementById('display-discount').innerText = discount;
+
+    // 5. 計算總額
+    const finalTotal = Math.max(0, subtotal + shippingFee - discount);
+
+    const formattedTotal = new Intl.NumberFormat().format(finalTotal);
+    document.getElementById('display-total').innerText = formattedTotal;
+    document.getElementById('modal-amount').innerText = formattedTotal;
+}
+
+// 綁定物流變更事件 (原本 HTML 已有 onchange="updateShipping()")
+function updateShipping() {
+    updateOrderTotal();
+}

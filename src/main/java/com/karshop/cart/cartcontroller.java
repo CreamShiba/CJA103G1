@@ -1,5 +1,7 @@
 package com.karshop.cart;
 
+import com.karshop.memberCoupon.MemberCoupon;
+import com.karshop.memberCoupon.MemberCouponService;
 import com.karshop.members.model.MembersVO;
 import com.karshop.product.model.ProductService;
 import com.karshop.product.model.ProductVO;
@@ -19,6 +21,9 @@ public class cartcontroller {
 
     @Autowired
     private cartservice service;
+
+    @Autowired
+    private MemberCouponService memberCouponService;
 
     // ===================================================================
     // 1. 購物車基本列表與操作
@@ -87,6 +92,9 @@ public class cartcontroller {
         List<cart> checkoutItems = allItems.stream()
                 .filter(item -> targetIds.contains(item.getProd_no())).toList();
 
+        // 優惠券: 獲取該會員目前可用的優惠券清單 (供下拉選單使用)
+        List<MemberCoupon> availableCoupons = memberCouponService.getAvailableCoupons(memberNo);
+
         if (checkoutItems.isEmpty()) return "redirect:/cart/list";
 
         Map<Integer, ProductVO> productMap = service.getProductsForCart(checkoutItems);
@@ -99,6 +107,8 @@ public class cartcontroller {
         model.addAttribute("subtotal", subtotal);
         model.addAttribute("prodNos", prodNos);
         model.addAttribute("member", member); // 供前端自動帶入收件人資訊
+        model.addAttribute("availableCoupons", availableCoupons); // 優惠券: 傳給前端
+
 
         return "front-end/checkout";
     }
@@ -115,17 +125,28 @@ public class cartcontroller {
             @RequestParam("receiverPhone") String receiverPhone, // ⚡ 新增：接收手機號碼
             @RequestParam("ord_address") String receiverAddress,
             @RequestParam("ord_ship_method") String deliveryMethod,
-            @RequestParam(required = false) String coupon_title, // ⚡ 接收代碼字串
+            @RequestParam(required = false) Integer couponNo, // 優惠券: 接收優惠券編號
+            @RequestParam(defaultValue = "0") Integer discountPrice, // 優惠券:對應 HTML 的 name="discount_price"
             HttpSession session, RedirectAttributes ra) {
 
         MembersVO member = (MembersVO) session.getAttribute("member");
         if (member == null) return "redirect:/members/login";
 
         try {
+            //  先計算「小計+運費」總額，用來檢查 20% 限制
+            int currentSubtotal = service.calculateCurrentSubtotal(member.getMemNo(), prodNos);
+
+            // 呼叫 memberCouponService 進行校驗
+            Integer actualDiscount = 0;
+            if (couponNo != null && couponNo > 0) {
+                // 這裡的 currentSubtotal 會被 membercouponservice 拿去 * 0.2 作為上限
+                actualDiscount = memberCouponService.validateAndCalculateDiscount(member.getMemNo(), couponNo, currentSubtotal);
+            }
+
             // 呼叫 Service：注意參數順序需與 cartservice 的 processCheckout 一致
             // 最後一個 0 代表折扣預設，Service 會根據 coupon_title 再去 couponRepository 抓正確金額
             service.processCheckout(member.getMemNo(), prodNos, paymentMethod, deliveryMethod,
-                    receiverName, receiverPhone, receiverAddress, coupon_title, 0, member);
+                    receiverName, receiverPhone, receiverAddress, couponNo, actualDiscount, member);
 
             ra.addFlashAttribute("success", "🎉 訂單已成功建立！");
             return "redirect:/cart/list";
@@ -133,6 +154,8 @@ public class cartcontroller {
             ra.addFlashAttribute("error", "❌ 結帳失敗：" + e.getMessage());
             return "redirect:/cart/checkout?prodNos=" + prodNos;
         }
+
+
     }
 
     // ===================================================================
