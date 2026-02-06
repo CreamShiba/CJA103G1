@@ -57,7 +57,7 @@ public class SellerInfoController {
             System.out.println("✅ 找到現有賣家資料: " + existingSeller.getShop_name());
 
             // ✅ 將賣家資訊放入 session
-            session.setAttribute("seller", existingSeller);
+            session.setAttribute("sellerInfo", existingSeller);
 
             model.addAttribute("seller", existingSeller);
             model.addAttribute("isAlreadySeller", true);
@@ -105,7 +105,7 @@ public class SellerInfoController {
                 SellerInfo existingSeller = service.getSellerByMemberId(memberId);
                 System.out.println("⚠️ 已申請過,導向編輯頁面");
 
-                session.setAttribute("seller", existingSeller);
+                session.setAttribute("sellerInfo", existingSeller);
 
                 redirectAttributes.addFlashAttribute("info", "您已經申請過賣家,請到賣家中心編輯資料");
                 return "redirect:/members/seller/sellerinfo";
@@ -114,13 +114,13 @@ public class SellerInfoController {
                 // 未申請過,新增申請
                 System.out.println("ℹ️ 首次申請,建立新賣家資料");
 
-                seller.setStatus("pending");
+                seller.setStatus("待審核");
                 seller.setIsverified(false);
 
                 SellerInfo savedSeller = service.addSeller(seller);
                 System.out.println("✅ 賣家資料已儲存,編號: " + savedSeller.getSeller_no());
 
-                session.setAttribute("seller", savedSeller);
+                session.setAttribute("sellerInfo", savedSeller);
 
                 redirectAttributes.addFlashAttribute("success",
                         "申請已送出!我們將在 3-5 個工作天內完成審核,請留意您的電子郵件。");
@@ -165,7 +165,7 @@ public class SellerInfoController {
             System.out.println("   評分: " + seller.getRating_star() + " / " + seller.getRating_amount());
 
             // ✅ 更新 session
-            session.setAttribute("seller", seller);
+            session.setAttribute("sellerInfo", seller);
 
             model.addAttribute("seller", seller);
 
@@ -221,7 +221,7 @@ public class SellerInfoController {
             // ===================================================================
             // ✅ 關鍵邏輯：如果原本是「停權」(suspended)，無法變動
             // ===================================================================
-            if ("suspended".equals(existingSeller.getStatus())) {
+            if ("停權".equals(existingSeller.getStatus())) {
                 System.out.println("⛔ 帳號已被停權，拒絕更新請求");
                 redirectAttributes.addFlashAttribute("error", "您的賣家帳號已被停權，無法修改資料。如有疑問請聯繫管理員。");
                 return "redirect:/members/seller/sellerinfo";
@@ -230,9 +230,9 @@ public class SellerInfoController {
             // ===================================================================
             // ✅ 關鍵邏輯：如果原本是「未通過」(rejected)，更新後改為「待審核」(pending)
             // ===================================================================
-            if ("rejected".equals(existingSeller.getStatus())) {
+            if ("未通過".equals(existingSeller.getStatus())) {
                 System.out.println("🔄 狀態從「未通過」改為「待審核」，等待管理員重新審核");
-                seller.setStatus("pending");
+                seller.setStatus("待審核");
                 seller.setIsverified(false);  // 重新審核時取消驗證狀態
             } else {
                 // 其他狀態保持不變
@@ -258,7 +258,7 @@ public class SellerInfoController {
             System.out.println("   新狀態: " + updatedSeller.getStatus());
 
             // ✅ 更新 session 中的賣家資訊
-            session.setAttribute("seller", updatedSeller);
+            session.setAttribute("sellerInfo", updatedSeller);
 
             // ===================================================================
             // ✅ 根據狀態顯示不同的提示訊息

@@ -14,7 +14,7 @@ public class faqservice {
      * 取得所有已發布的 FAQ（前台用）
      */
     public List<faq> getPublishedFaqs() {
-        return repository.findByStatusOrderBycreate_dateDesc("發佈");
+        return repository.findByStatusOrderBycreate_dateDesc("已發佈");
     }
 
     /**
