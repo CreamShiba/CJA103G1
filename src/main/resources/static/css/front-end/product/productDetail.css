@@ -60,7 +60,7 @@ ul { list-style: none; }
 /* --- 右側資訊區 --- */
 /* 設定 min-height 確保高度足夠 */
 .product-info-section {
-    flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 15px; min-height: 500px;
+    flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 15px; min-height: auto;
 }
 .breadcrumb { color: #888; font-size: 14px; margin-bottom: 10px; }
 .product-title { font-size: 2rem; font-weight: bold; }
@@ -73,7 +73,7 @@ ul { list-style: none; }
     background: rgba(255,255,255,0.03);
     padding: 20px;
     border-radius: 12px;
-    margin-top: auto; /* 推到底部 */
+    margin-top: 20px;
     border: 1px solid #333;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
@@ -262,6 +262,11 @@ select.form-input {
     transition: 0.3s;
     font-size: 16px;
     padding: 0 20px;
+    /* 🔥 新增這幾行來修復跑版 */
+    white-space: nowrap; /* 強制文字不換行 */
+    flex-shrink: 0;      /* 禁止按鈕被壓縮 */
+    width: auto;         /* 讓寬度依照內容自動撐開 */
+    min-width: 120px;    /* (選用) 設定一個最小寬度，確保按鈕不會太小 */
 }
 .add-cart-btn:hover {
     background: var(--accent-purple, #7c4dff);
