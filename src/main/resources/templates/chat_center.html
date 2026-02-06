@@ -139,39 +139,61 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    var socket,
+    var socket = null,
         selfName = [[${userName}]],
         selfId = [[${member.memNo}]],
         currentTarget,
         currentTargetId;
 
-    // 💡 下拉選單開關邏輯 (對接 Fragment ID)
-    document.getElementById('member-center-trigger').onclick = (e) => {
-        e.stopPropagation();
-        if(document.getElementById('forum-dropdown')) document.getElementById('forum-dropdown').classList.remove('show');
-        document.getElementById('member-dropdown').classList.toggle('show');
-    };
-    document.getElementById('forum-center-trigger').onclick = (e) => {
-        e.stopPropagation();
-        if(document.getElementById('member-dropdown')) document.getElementById('member-dropdown').classList.remove('show');
-        document.getElementById('forum-dropdown').classList.toggle('show');
-    };
+    // 💡 修正核心：防呆保護與 DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', function() {
+        const memberTrigger = document.getElementById('member-center-trigger');
+        const memberDropdown = document.getElementById('member-dropdown');
+        const forumTrigger = document.getElementById('forum-center-trigger');
+        const forumDropdown = document.getElementById('forum-dropdown');
+
+        if (memberTrigger && memberDropdown) {
+            memberTrigger.onclick = (e) => {
+                e.stopPropagation();
+                if(forumDropdown) forumDropdown.classList.remove('show');
+                memberDropdown.classList.toggle('show');
+            };
+        }
+
+        if (forumTrigger && forumDropdown) {
+            forumTrigger.onclick = (e) => {
+                e.stopPropagation();
+                if(memberDropdown) memberDropdown.classList.remove('show');
+                forumDropdown.classList.toggle('show');
+            };
+        }
+
+        // 🟢 確保 UI 設定完（或找不到元素）後，依然啟動私訊連線
+        connect();
+    });
 
     function toggleChatMenu(e) {
         e.stopPropagation();
-        document.getElementById('chat-dropdown').classList.toggle('show');
+        const chatDropdown = document.getElementById('chat-dropdown');
+        if (chatDropdown) chatDropdown.classList.toggle('show');
     }
 
     window.onclick = () => {
-        if(document.getElementById('member-dropdown')) document.getElementById('member-dropdown').classList.remove('show');
-        if(document.getElementById('forum-dropdown')) document.getElementById('forum-dropdown').classList.remove('show');
-        if(document.getElementById('chat-dropdown')) document.getElementById('chat-dropdown').classList.remove('show');
+        const memberDropdown = document.getElementById('member-dropdown');
+        const forumDropdown = document.getElementById('forum-dropdown');
+        const chatDropdown = document.getElementById('chat-dropdown');
+        if(memberDropdown) memberDropdown.classList.remove('show');
+        if(forumDropdown) forumDropdown.classList.remove('show');
+        if(chatDropdown) chatDropdown.classList.remove('show');
     };
 
     function connect() {
         var host = window.location.host;
         var url = (window.location.protocol==='https:'?'wss://':'ws://') + host + "/FriendWS/" + encodeURIComponent(selfName) + "/chat";
         socket = new WebSocket(url);
+
+        socket.onopen = function() { console.log("✅ WebSocket 已連接 (一對一)"); };
+
         socket.onmessage = function(e) {
             var data = JSON.parse(e.data);
             if (data.type === "history") {
@@ -183,6 +205,8 @@
                 }
             }
         };
+
+        socket.onclose = function() { console.warn("❌ WebSocket 已斷開 (一對一)"); };
     }
 
     function switchChatTarget(n, id) {
@@ -195,6 +219,7 @@
         document.getElementById('header-name').innerText = n;
         document.getElementById('header-avatar').src = "https://api.dicebear.com/7.x/avataaars/svg?seed=" + id;
         document.getElementById('chat-menu-container').style.display = 'flex';
+
         if (socket && socket.readyState === 1) {
             socket.send(JSON.stringify({type: "history", sender: selfName, receiver: n}));
         }
@@ -205,6 +230,8 @@
         if (i.value.trim() !== "" && currentTarget && socket && socket.readyState === 1) {
             socket.send(JSON.stringify({type: "private", sender: selfName, receiver: currentTarget, message: i.value.trim()}));
             i.value = "";
+        } else if (!socket || socket.readyState !== 1) {
+            alert("通訊連線尚未就緒。");
         }
     }
 
@@ -238,7 +265,7 @@
     }
 
     window.onload = function() {
-        connect();
+        // connect() 已經移到 DOMContentLoaded 裡處理
         document.getElementById('msg-input').onkeypress = e => { if (e.key === 'Enter') sendPrivateMessage(); };
     };
     /*]]>*/
