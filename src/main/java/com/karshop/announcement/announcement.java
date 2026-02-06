@@ -6,7 +6,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@Entity(name = "announcement")
+@Entity(name = "Announcement")
 @Table(name = "announcement")
 public class announcement {
 
