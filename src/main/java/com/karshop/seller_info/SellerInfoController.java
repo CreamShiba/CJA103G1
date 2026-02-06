@@ -184,7 +184,7 @@ public class SellerInfoController {
             System.out.println("❌ 找不到賣家資料: " + e.getMessage());
 
             // ✅ 清除 session 中的 seller
-            session.removeAttribute("seller");
+            session.removeAttribute("sellerInfo");
 
             redirectAttributes.addFlashAttribute("error",
                     "您尚未申請成為賣家,請先到「申請成為賣家」頁面提交申請");
