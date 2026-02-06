@@ -22,7 +22,7 @@ public class faqcontroller {
      * 前台 FAQ 列表頁
      * 路徑：GET /faq
      */
-    @GetMapping("/members/faq")
+    @GetMapping("/faq")
     public String faqListPage(Model model) {
         List<faq> faqs = service.getPublishedFaqs();
         model.addAttribute("faqs", faqs);

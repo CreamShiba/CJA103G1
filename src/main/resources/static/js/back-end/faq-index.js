@@ -1,6 +1,6 @@
 
-    // 開啟新增 Modal
-    function openAddModal() {
+// 開啟新增 Modal
+function openAddModal() {
     document.getElementById('modal-title').textContent = '新增 FAQ';
     document.getElementById('add-form').style.display = 'block';
     document.getElementById('edit-form').style.display = 'none';
@@ -8,8 +8,8 @@
     document.getElementById('modal-overlay').classList.add('active');
 }
 
-    // 開啟編輯 Modal
-    function openEditModal(btn) {
+// 開啟編輯 Modal
+function openEditModal(btn) {
     document.getElementById('modal-title').textContent = '編輯 FAQ';
     document.getElementById('add-form').style.display = 'none';
     document.getElementById('edit-form').style.display = 'block';
@@ -22,21 +22,21 @@
     document.getElementById('modal-overlay').classList.add('active');
 }
 
-    // 關閉 Modal
-    function closeModal() {
+// 關閉 Modal
+function closeModal() {
     document.getElementById('modal-overlay').classList.remove('active');
 }
 
-    // 點擊背景關閉
-    document.getElementById('modal-overlay').addEventListener('click', function(e) {
+// 點擊背景關閉
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
     if (e.target.id === 'modal-overlay') {
-    closeModal();
-}
+        closeModal();
+    }
 });
 
-    // ESC 鍵關閉
-    document.addEventListener('keydown', function(e) {
+// ESC 鍵關閉
+document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-    closeModal();
-}
+        closeModal();
+    }
 });
