@@ -45,7 +45,7 @@
                 我們找不到符合您搜尋條件的商品，請嘗試更換關鍵字或調整價格範圍。
             </p>
 
-            <a th:href="@{/shop(sellerNo=${sellerNo})}"
+            <a th:href="@{/shop(carCategoryNo=${carCategoryNo},sellerNo=${sellerNo})}"
                style="display: inline-block; padding: 10px 25px; background: #333; color: white; border-radius: 30px; text-decoration: none; font-size: 14px; transition: 0.3s;">
                 <i class="fas fa-undo"></i> 清除搜尋條件
             </a>
@@ -53,10 +53,10 @@
 
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px;">
 
-            <a th:each="product : ${productPage.content}"
-               th:href="@{/product/detail(prodNo=${product.prodNo})}"
-               class="product-card-link"
-               style="text-decoration: none; color: inherit;">
+            <div th:each="product : ${productPage.content}"
+                 class="product-card-link"
+                 style="text-decoration: none; color: inherit; cursor: pointer; position: relative;"
+                 th:onclick="|window.location.href='@{/product/detail(prodNo=${product.prodNo})}'|">
 
                 <div class="product-card">
 
@@ -67,6 +67,12 @@
                              class="product-img-skeleton"
                              alt="商品圖片"
                              onload="this.style.animation='none'; this.style.backgroundImage='none'; this.style.backgroundColor='transparent';">
+
+                        <a th:href="@{/shop(productCategoryNo=${product.productCategory.productCategoryNo}, carCategoryNo=${product.carCategory != null ? product.carCategory.carCategoryNo : ''})}"
+                           class="find-similar-btn"
+                           onclick="event.stopPropagation();">
+                            找相似
+                        </a>
                     </div>
 
                     <div style="padding: 15px 20px 20px 20px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
@@ -91,7 +97,7 @@
                     </div>
 
                 </div>
-            </a>
+            </div>
         </div>
 
         <div class="pagination-area" th:if="${productPage.totalPages > 0}" style="margin-top: 40px; text-align: center;">
