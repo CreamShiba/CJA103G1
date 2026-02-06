@@ -2,6 +2,7 @@ package com.karshop.cart;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karshop.coupon.CouponService;
+import com.karshop.memberCoupon.MemberCouponService;
 import com.karshop.members.model.MembersVO;
 import com.karshop.ord.model.OrdService;
 import com.karshop.ord.model.OrdVO;
@@ -35,6 +36,9 @@ public class cartservice {
     @Autowired
     private CouponService couponService;
 
+    @Autowired
+    private MemberCouponService memberCouponService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final Object orderLock = new Object(); // 防止併發下單導致庫存錯誤
 
@@ -49,7 +53,7 @@ public class cartservice {
     @Transactional
     public void processCheckout(Integer memberNo, String prodNos, String paymentMethod, String deliveryMethod,
                                 String receiverName, String receiverPhone, String receiverAddress,
-                                String couponNoStr, Integer discount, MembersVO memberVO) {
+                                Integer couponNo, Integer discountPrice, MembersVO memberVO) {
 
         // 使用鎖確保在扣除庫存到存入訂單期間，其他執行緒不能干擾
         synchronized (orderLock) {
@@ -115,13 +119,16 @@ public class cartservice {
             // 這裡抓取第一件商品的賣家作為訂單賣家 (假設購物車內為同一賣家)
             ordVO.setSeller(productService.getOneProduct(buyItems.get(0).getProd_no()).getSeller());
             ordVO.setOriginPrice(subtotal);
-            ordVO.setDiscountPrice(discount != null ? discount : 0);
-            ordVO.setOrdPrice(Math.max(0, subtotal + shippingFee - (discount != null ? discount : 0)));
+            ordVO.setCouponNo(couponNo);
+            ordVO.setDiscountPrice(discountPrice != null ? discountPrice : 0);
+            ordVO.setOrdPrice(Math.max(0, subtotal + shippingFee - (discountPrice != null ? discountPrice : 0)));
             ordVO.setOrderDetail(detailList);
 
-//            if (couponNoStr != null && !couponNoStr.isEmpty()) {
-//                ordVO.setCoupon_no(Integer.parseInt(couponNoStr));
-//            }
+          // 💡 關鍵：更新 member_coupon 狀態為 1 (已使用)
+        if (couponNo != null && couponNo > 0) {
+            // 直接呼叫 memberCouponService 的更新方法
+            memberCouponService.markAsUsed(memberNo, couponNo);
+        }
 
             // F. 存檔與清空購物車
             ordService.addOrd(ordVO);
@@ -226,4 +233,24 @@ public class cartservice {
     public long getCartCount(Integer member_no) {
         return repository.countByMember_no(member_no);
     }
+
+
+    // 優惠券：僅計算當前勾選商品的「小計總額」(不含運費)
+    public int calculateCurrentSubtotal(Integer memberNo, String prodNos) {
+        List<Integer> buyIds = Arrays.stream(prodNos.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .toList();
+
+        List<cart> allItems = repository.findByMember_no(memberNo);
+
+        // 加總所有勾選商品的 (單價 * 數量)
+        return allItems.stream()
+                .filter(item -> buyIds.contains(item.getProd_no()))
+                .mapToInt(item -> {
+                    ProductVO p = productService.getOneProduct(item.getProd_no());
+                    return (p != null) ? p.getProdPrice() * item.getQuantity() : 0;
+                }).sum();
+    }
+
 }

@@ -83,72 +83,51 @@ window.onload = function() {
     render();
 };
 
-//監聽物流、優惠券下拉
-// document.addEventListener('DOMContentLoaded', function() {
-//     // 1. 取得 DOM 元素
-//     const subtotal = parseInt(document.getElementById('display-subtotal').innerText.replace(/,/g, '')) || 0;
-//     const deliveryMethod = document.getElementById('delivery-method');
-//     const couponSelect = document.getElementById('couponSelect');
-//
-//     // 顯示用的元素
-//     const displayShipping = document.getElementById('display-shipping');
-//     const displayTotal = document.getElementById('display-total');
-//     const modalAmount = document.getElementById('modal-amount');
-//
-//     // 隱藏表單欄位 (用於送回後端)
-//     const inputDiscountPrice = document.getElementById('discount_price');
-//     const inputCouponNo = document.getElementById('coupon_no');
-//
-//     /**
-//      * 核心計算函式
-//      */
-//     function calculateTotal() {
-//         // A. 取得運費
-//         let shipFee = 0;
-//         const method = deliveryMethod.value;
-//         if (method === '宅配') shipFee = 100;
-//         else if (method === '超取') shipFee = 60;
-//         else if (method === '自取') shipFee = 0;
-//
-//         // B. 取得優惠券面額
-//         const selectedOption = couponSelect.options[couponSelect.selectedIndex];
-//         let discount = 0;
-//         let couponNo = "";
-//
-//         if (selectedOption && selectedOption.value !== "") {
-//             discount = parseInt(selectedOption.getAttribute('data-price')) || 0;
-//             couponNo = selectedOption.value;
-//         }
-//
-//         // C. 驗證 20% 限制邏輯
-//         // 公式：折扣金額不可超過 (小計 + 運費) 的 20%
-//         const maxDiscount = Math.floor((subtotal + shipFee) * 0.2);
-//
-//         if (discount > maxDiscount) {
-//             alert(`該優惠券不符合使用門檻！\n目前折扣金額 ($${discount}) 已超過訂單總額 20% (上限為 $${maxDiscount})`);
-//
-//             // 強制重置下拉選單
-//             couponSelect.value = "";
-//             discount = 0;
-//             couponNo = "";
-//         }
-//
-//         // D. 更新畫面與隱藏欄位
-//         const finalPrice = subtotal + shipFee - discount;
-//
-//         displayShipping.innerText = `NT$ ${shipFee}`;
-//         displayTotal.innerText = finalPrice.toLocaleString(); // 加上千分位
-//         modalAmount.innerText = finalPrice.toLocaleString();
-//
-//         // 寫入 Form 隱藏欄位以便送交後端
-//         inputDiscountPrice.value = discount;
-//         inputCouponNo.value = couponNo;
-//     }
-//
-//     // 2. 綁定監聽事件
-//     deliveryMethod.addEventListener('change', calculateTotal);
-//     couponSelect.addEventListener('change', calculateTotal);
-//
-//     // 3. 初始執行一次
-//     calculateTotal();
-// });
+
+//優惠券:更新訂單總額計算 (小計 + 運費 - 折扣)
+
+function updateOrderTotal() {
+    // 1. 取得商品小計 (移除逗號轉數字)
+    const subtotalText = document.getElementById('display-subtotal').innerText.replace(/,/g, '');
+    const subtotal = parseInt(subtotalText) || 0;
+
+    // 2. 取得運費邏輯
+    const deliveryMethod = document.getElementById('delivery-method').value;
+    let shippingFee = 0;
+    if (deliveryMethod === '宅配') shippingFee = 100;
+    else if (deliveryMethod === '超取') shippingFee = 60;
+
+    document.getElementById('display-shipping').innerText = 'NT$ ' + shippingFee;
+
+    // 3. 取得選中的優惠券資訊
+    const couponSelect = document.getElementById('couponSelect');
+    const selectedOption = couponSelect.options[couponSelect.selectedIndex];
+
+    // 💡 修正重點：在這裡加上 const 宣告變數
+    const discount = (selectedOption && selectedOption.dataset.discount) ? parseInt(selectedOption.dataset.discount) : 0;
+    const couponNo = (selectedOption) ? selectedOption.value : ""; // 👈 加上這行宣告
+
+    // ✅ 將數值填入隱藏欄位 (id 必須與 HTML 中的一致)
+    // 根據您的 HTML，id 可能是 'coupon_no' 和 'discount_price'
+    if (document.getElementById('coupon_no')) {
+        document.getElementById('coupon_no').value = couponNo;
+    }
+    if (document.getElementById('discount_price')) {
+        document.getElementById('discount_price').value = discount;
+    }
+
+    // 4. 更新畫面顯示
+    document.getElementById('display-discount').innerText = discount;
+
+    // 5. 計算總額
+    const finalTotal = Math.max(0, subtotal + shippingFee - discount);
+
+    const formattedTotal = new Intl.NumberFormat().format(finalTotal);
+    document.getElementById('display-total').innerText = formattedTotal;
+    document.getElementById('modal-amount').innerText = formattedTotal;
+}
+
+// 綁定物流變更事件 (原本 HTML 已有 onchange="updateShipping()")
+function updateShipping() {
+    updateOrderTotal();
+}
