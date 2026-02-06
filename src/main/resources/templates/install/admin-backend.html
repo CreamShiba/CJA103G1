@@ -104,7 +104,7 @@
                         <tbody>
                             <tr th:each="tech : ${pendingTechs}">
                                 <td th:text="${tech.realName}">Name</td>
-                                <td th:text="${tech.member.memName}">Applicant</td>
+                                <td th:text="${tech.member.memUsername}">Applicant</td>
                                 <td>
                                     <span class="badge" th:text="${tech.serviceArea}"
                                         style="background-color: #eee; color: #333;">Area</span>
@@ -167,7 +167,7 @@
                         <tbody>
                             <tr th:each="tech : ${pendingTechs}">
                                 <td th:text="${tech.realName}">Name</td>
-                                <td th:text="${tech.member.memName}">Applicant</td>
+                                <td th:text="${tech.member.memUsername}">Applicant</td>
                                 <td>
                                     <span class="badge" th:text="${tech.serviceArea}"
                                         style="background-color: #eee; color: #333;">Area</span>
@@ -679,6 +679,7 @@
         }
     </style>
 
+    <script th:src="@{/js/back-end/admin_index.js}"></script>
     <script>
         // Check for URL parameters for error messages
         const urlParams = new URLSearchParams(window.location.search);
