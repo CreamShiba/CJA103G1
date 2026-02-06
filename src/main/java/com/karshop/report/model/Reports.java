@@ -30,7 +30,7 @@ public class Reports {
     @Column(name = "reports_timestamp")
     private LocalDateTime reportsTimestamp; // 檢舉時間
 
-    @Column(name = "member_no", nullable = false)
+    @Column(name = "member_no", nullable = true)
     private Integer memberNo; // 會員編號
 
     @Column(name = "email", length = 100)

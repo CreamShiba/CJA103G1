@@ -181,7 +181,7 @@
                                 <span th:id="'fav-text-' + ${post.postId}" th:text="${myFavIds != null and #lists.contains(myFavIds, post.postId)} ? '取消收藏' : '收藏文章'"></span>
                             </div>
                             <div class="post-dropdown-item"
-                                 th:onclick="|location.href='@{/reports/add(reportsTarget=${post.postId})}'|">
+                                 th:onclick="|location.href='@{/reports/add(type='文章', targetID=${post.postId})}'|">
                                 <i class="fa-regular fa-flag"></i> 檢舉文章
                             </div>
                         </div>

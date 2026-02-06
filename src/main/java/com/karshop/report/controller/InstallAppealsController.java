@@ -5,6 +5,8 @@ import com.karshop.report.service.InstallAppealsService;
 import com.karshop.report.service.ProductAppealsService;
 import com.karshop.report.repository.OrdForReportRepository; // 💡 注入妳剛創的 Repository
 import com.karshop.report.repository.InstallOrderForReportRepository; // 💡 注入妳剛創的 Repository
+import com.karshop.members.model.MembersVO; // 💡 必須 import 組員的 VO 才能讀取 Session
+import com.karshop.members.model.MembersService; // 💡 注入 MembersService 以取得會員詳細資料
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,9 @@ public class InstallAppealsController {
     @Autowired
     private ProductAppealsService productAppealsService;
 
+    @Autowired
+    private MembersService membersService; // 💡 注入會員服務
+
     // 💡 注入妳自己創立的讀取 Repository，不影響組員進度
     @Autowired
     private OrdForReportRepository ordForReportRepository;
@@ -35,13 +40,20 @@ public class InstallAppealsController {
     // 💡 修改後的顯示新增申訴頁面：自動抓取會員的訂單
     @GetMapping("/add")
     public String showAddPage(HttpSession session, Model model) {
-        // 1. 從 Session 取得當前登入會員編號
-        Integer memberNo = (Integer) session.getAttribute("memberNo");
+        // 1. 從 Session 取得組員存入的 member 物件
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        Integer memberNo;
 
-        // 2. 測試模式：如果沒登入，預設使用 memberNo = 8 (對應 SQL 假資料)
-        if (memberNo == null) {
-            System.out.println("⚠️ 頁面載入測試：未偵測到 Session，自動載入會員 8 的訂單資料");
-            memberNo = 8;
+        // 2. 判斷與測試模式
+        if (member != null) {
+            // 正常流程：從物件中拿到會員編號
+            memberNo = member.getMemNo();
+            System.out.println("✅ 偵測到登入身分：" + member.getMemName() + " (ID: " + memberNo + ")");
+        } else {
+            // 測試模式：如果沒登入，強迫導向登入頁面，並記錄原本想去的位子
+            System.out.println("⚠️ 頁面載入測試：未偵測到 Session，自動導向登入頁面");
+            session.setAttribute("location", "/appeals/add");
+            return "redirect:/members/login";
         }
 
         // 3. 自動抓取該會員所有的商品訂單與安裝訂單
@@ -67,15 +79,17 @@ public class InstallAppealsController {
 
         String categories = (types != null) ? String.join(",", types) : "";
 
-        // 💡 從 Session 取得當前登入會員編號
-        Integer memberNo = (Integer) session.getAttribute("memberNo");
+        // 💡 從 Session 取得當前登入會員物件
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        Integer memberNo;
 
-        // 💡 測試模式：如果沒登入，使用假資料 memberNo = 4
-        if (memberNo == null) {
-            System.out.println("⚠️ 測試模式：未從 Session 取得會員編號，使用假資料 memberNo = 4");
-            memberNo = 4;
+        // 💡 登入狀態判斷
+        if (member != null) {
+            memberNo = member.getMemNo();
+            System.out.println("✅ 提交申訴 - 偵測到會員編號：" + memberNo);
         } else {
-            System.out.println("✅ 從 Session 取得會員編號：" + memberNo);
+            System.out.println("⚠️ 提交申訴 - 未偵測到登入，導向登入頁面");
+            return "redirect:/members/login";
         }
 
         if ("install".equals(appealType)) {
@@ -167,14 +181,16 @@ public class InstallAppealsController {
     // ===== 前台申訴紀錄 =====
     @GetMapping("/history")
     public String showAppealHistory(HttpSession session, Model model) {
-        Integer memberNo = (Integer) session.getAttribute("memberNo");
+        // 1. 同步抓取 member 物件
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        Integer memberNo = (member != null) ? member.getMemNo() : null;
 
         // 測試模式：如果沒登入，顯示所有假資料
         boolean testMode = (memberNo == null);
         if (testMode) {
-            System.out.println("⚠️ 測試模式：未從 Session 取得會員編號，顯示所有申訴紀錄");
+            System.out.println("⚠️ 測試模式：未從 Session 取得會員物件，顯示所有申訴紀錄");
         } else {
-            System.out.println("✅ 會員模式：顯示會員 " + memberNo + " 的申訴紀錄");
+            System.out.println("✅ 會員模式：顯示會員 " + member.getMemName() + " 的申訴紀錄");
         }
 
         List<Map<String, Object>> allAppeals = new ArrayList<>();
@@ -276,7 +292,7 @@ public class InstallAppealsController {
             for (InstallAppeals appeal : installList) {
                 // 向後兼容以前改過的狀態字串
                 String currentStatus = appeal.getStatus();
-                if ("已結案".equals(currentStatus)) currentStatus = "已處理";
+                if ("已結案".equals(currentStatus)) currentStatus = "檢舉";
 
                 if (currentStatus.equals(finalStatus)) {
                     Map<String, Object> map = new HashMap<>();
@@ -411,6 +427,15 @@ public class InstallAppealsController {
             model.addAttribute("appeal", appeal);
             model.addAttribute("images", images);
             model.addAttribute("type", "product");
+
+            // 💡 取得申訴會員資訊
+            if (appeal.getMemberNo() != null) {
+                MembersVO m = membersService.getOneMember(appeal.getMemberNo());
+                model.addAttribute("memberName", m != null ? m.getMemUsername() : "不明會員");
+            } else {
+                model.addAttribute("memberName", "訪客");
+            }
+
             return "templates-report/handle-appeal";
         } else {
             InstallAppeals appeal = installAppealsService.getAppealById(id);
@@ -418,6 +443,15 @@ public class InstallAppealsController {
             model.addAttribute("appeal", appeal);
             model.addAttribute("images", images);
             model.addAttribute("type", "install");
+
+            // 💡 取得申訴會員資訊
+            if (appeal.getMemberNo() != null) {
+                MembersVO m = membersService.getOneMember(appeal.getMemberNo());
+                model.addAttribute("memberName", m != null ? m.getMemUsername() : "不明會員");
+            } else {
+                model.addAttribute("memberName", "訪客");
+            }
+
             return "templates-report/handle-appeal";
         }
     }
