@@ -76,7 +76,7 @@
           </div>
           <input type="hidden" name="ord_payment_method" id="ord_payment_method" value="信用卡">
           <input type="hidden" name="discount_price" id="discount_price" value="0">
-          <input type="hidden" name="coupon_no" id="coupon_no" value="">
+<!--          <input type="hidden" name="coupon_no" id="coupon_no" value="">-->
           <input type="hidden" name="prodNos" th:value="${prodNos}">
         </div>
       </form>
@@ -99,9 +99,16 @@
           <span>運費費率</span>
           <span id="display-shipping">NT$ 0</span>
         </div>
-        <div class="summary-row" id="row-discount" style="display:none; color:#4CAF50;">
-          <span>折價券折抵</span>
-          <span id="display-discount">- NT$ 0</span>
+        <div class="coupon-section">
+          <label>使用優惠券：</label>
+          <select name="couponNo" id="couponSelect">
+            <option value="">請選擇優惠券 (不使用)</option>
+            <th:block th:each="mc : ${memberCoupons}">
+              <option th:value="${mc.couponNo}" th:data-price="${mc.discountValue}"
+                      th:text="${mc.couponName} + ' - 折抵$' + ${mc.discountValue}">
+              </option>
+            </th:block>
+          </select>
         </div>
         <div class="summary-row total">
           <span>實付金額 (ord_price)</span>
