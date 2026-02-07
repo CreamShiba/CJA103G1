@@ -2,6 +2,7 @@ package com.karshop.shop.controller;
 
 import com.karshop.favoriteProduct.FavoriteProduct;
 import com.karshop.favoriteProduct.FavoriteProductService;
+import com.karshop.favoriteStore.FavoriteStoreService;
 import com.karshop.membercar.model.MemberCarService;
 import com.karshop.membercar.model.MemberCarVO;
 import com.karshop.members.model.MembersVO;
@@ -37,6 +38,9 @@ public class ShopController {
 
     @Autowired
     private FavoriteProductService favoriteProductService; // 收藏 Service
+
+    @Autowired
+    private FavoriteStoreService favoriteStoreService; // 收藏 Service
 
     //  商城首頁
     @GetMapping("/shop")
@@ -77,6 +81,22 @@ public class ShopController {
              List<MemberCarVO> myCars = memberCarService.getCarsByMemberId(memberNo);
              model.addAttribute("myCars", myCars);
         }
+
+        // --- 收藏賣場判斷邏輯開始 ---
+        boolean isFavoriteStore = false; // 預設為未收藏
+
+        if (sellerNo != null) {
+            SellerVO currentSeller = sellerService.getOneSeller(sellerNo);
+            model.addAttribute("currentSeller", currentSeller);
+
+            // 如果會員已登入，檢查是否已收藏此賣場
+            if (member != null) {
+                isFavoriteStore = favoriteStoreService.isExists(member.getMemberNo(), sellerNo);
+            }
+        }
+        // 將收藏狀態傳給 index2.html
+        model.addAttribute("isFavorite", isFavoriteStore);
+        // --- 收藏賣場判斷邏輯結束 ---
 
         return "front-end/index2";
     }

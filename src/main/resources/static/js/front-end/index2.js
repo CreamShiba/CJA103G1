@@ -69,3 +69,53 @@ function navigateTo(page) {
             console.warn("未知的頁面跳轉: " + page);
     }
 }
+
+// 收藏功能
+document.addEventListener('DOMContentLoaded', function() {
+    const favStoreBtn = document.getElementById('favStoreBtn');
+
+    if (favStoreBtn) {
+        favStoreBtn.addEventListener('click', function() {
+            const btn = this;
+            if (btn.disabled) return;
+            btn.disabled = true;
+
+            const sellerNo = btn.getAttribute('data-sellerno');
+            const isActive = btn.classList.contains('active');
+            const url = isActive ? '/favoriteStore/deleteAjax' : '/favoriteStore/addAjax';
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `sellerNo=${sellerNo}`
+            })
+                .then(response => {
+                    if (response.status === 401) {
+                        alert("請先登入後再進行收藏操作");
+                        window.location.href = "/members/login";
+                        return;
+                    }
+                    return response.json();
+                })
+                .then(res => {
+                    if (res && res.status === "success") {
+                        // 1. 切換背景顏色與邊框 (active class)
+                        btn.classList.toggle('active');
+
+                        // 2. 僅切換文字內容
+                        const textSpan = btn.querySelector('span');
+                        if (textSpan) {
+                            textSpan.textContent = btn.classList.contains('active') ? '已收藏' : '收藏賣場';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("系統忙碌中，請稍後再試");
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                });
+        });
+    }
+});
