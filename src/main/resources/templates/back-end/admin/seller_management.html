@@ -55,7 +55,10 @@
         <tr th:each="seller : ${sellerList}">
           <td th:text="${seller.sellerNo}">101</td>
 
-          <td th:text="${seller.shopName != null ? seller.shopName : '未設定'}" style="font-weight:bold;">Karshop</td>
+          <td th:text="${seller.shopName != null && seller.shopName != '' ? seller.shopName : seller.sellerName}"
+              style="font-weight:bold;">
+            Karshop
+          </td>
 
           <td th:text="${seller.sellerName}">王小明</td>
 
@@ -70,13 +73,13 @@
           <td>
             <button type="button" class="btn btn-sm btn-info"
                     th:data-id="${seller.sellerNo}"
-                    th:data-shop="${seller.shopName}"
+                    th:data-shop="${seller.shopName != null && seller.shopName != '' ? seller.shopName : seller.sellerName}"
                     th:data-contact="${seller.sellerName}"
                     th:data-email="${seller.sellerEmail}"
                     th:data-phone="${seller.phone}"
                     th:data-address="${seller.address}"
                     th:data-desc="${seller.description}"
-                    th:data-image="${seller.imagePath}"
+                    th:data-image="${seller.imagePath != null && seller.imagePath != '' ? seller.imagePath : 'https://ui-avatars.com/api/?name=' + (seller.shopName != null && seller.shopName != '' ? seller.shopName : seller.sellerName) + '&background=random'}"
                     th:data-tax="${seller.sellerTaxId}"
                     th:data-bank="${seller.bankAccount}"
                     th:data-status="${seller.sellerStatus}"
