@@ -36,7 +36,7 @@ public class CouponController {
     }
 
     /**
-     * 取得所有優惠券 (用於重新整理列表)
+     * 取得所有優惠券
      */
     @GetMapping("/list")
     public String listPage(Model model) {
@@ -65,15 +65,15 @@ public class CouponController {
         model.addAttribute("coupons", list);
         model.addAttribute("coupon", new Coupon());
 
-        // --- 關鍵修正部分 ---
-        // 1. 指定側邊欄的主選單分類為優惠券
+        // 指定側邊欄的主選單分類為優惠券
         model.addAttribute("activePage", "coupon");
 
-        // 2. 指定子選單的高亮項目為「查詢」
+        // 指定子選單的高亮項目為「查詢」
         model.addAttribute("activeTab", "query");
 
-        // 3. 確保分頁物件存在，避免 adminCoupon.html 的 th:if="${couponPage.totalPages > 1}" 噴錯
+        // 確保分頁物件存在，避免 adminCoupon.html 的 th:if="${couponPage.totalPages > 1}" 噴錯
         // 如果查詢結果不分頁，建議給一個空的 Page 物件或在 HTML 加入 null 檢查
+        model.addAttribute("couponPage", org.springframework.data.domain.Page.empty());
         model.addAttribute("queryResults", true);
         // ------------------
 
@@ -96,24 +96,31 @@ public class CouponController {
     public String insert(
             @Valid @ModelAttribute("coupon") Coupon coupon,
             BindingResult result,
-            Model model) {
+            Model model,
+            @RequestParam(value = "p", defaultValue = "0") Integer page) {
 
-        // 1. 檢查校驗結果
+        // 檢查校驗結果
         if (result.hasErrors()) {
-            // 發生錯誤，除了回傳列表資料，還要傳遞「顯示新增區塊」的訊號
-            List<Coupon> coupons = couponService.getAll();
-            model.addAttribute("coupons", coupons);
-            model.addAttribute("showAddSection", true); // 關鍵：告訴前端要打開新增表單
+            // 必須補回列表資料，否則表格會變空白
+            int pageSize = 3;
+            Page<Coupon> couponPage = couponService.getAllPaged(page, pageSize);
+            model.addAttribute("couponPage", couponPage);
+            model.addAttribute("coupons", couponPage.getContent());
+
+            model.addAttribute("showAddSection", true);
             return "coupon/adminCoupon";
         }
 
-        // 2. 邏輯驗證
         if (coupon.getCouponEnd() != null && coupon.getCouponStart() != null) {
             if (coupon.getCouponEnd().isBefore(coupon.getCouponStart())) {
-                List<Coupon> coupons = couponService.getAll();
-                model.addAttribute("coupons", coupons);
-                model.addAttribute("errorMessage", "結束時間不可早於開始時間");
-                model.addAttribute("showAddSection", true); // 關鍵訊號
+                // 將錯誤掛在特定欄位上，Thymeleaf 才能用 th:errors 顯示
+                result.rejectValue("couponEnd", "error.date", "結束時間不可早於開始時間");
+
+                int pageSize = 3;
+                Page<Coupon> couponPage = couponService.getAllPaged(page, pageSize);
+                model.addAttribute("couponPage", couponPage);
+                model.addAttribute("coupons", couponPage.getContent());
+                model.addAttribute("showAddSection", true);
                 return "coupon/adminCoupon";
             }
         }
@@ -151,7 +158,7 @@ public class CouponController {
                          BindingResult result,
                          Model model) { // 加上 Model 以防萬一需要補資料
 
-        // 1. 邏輯驗證：結束時間不可早於開始時間
+        // 邏輯驗證：結束時間不可早於開始時間
         if (coupon.getCouponStart() != null && coupon.getCouponEnd() != null) {
             if (coupon.getCouponEnd().isBefore(coupon.getCouponStart())) {
                 // 將自定義錯誤加入 BindingResult，對應 couponEnd 欄位
@@ -159,7 +166,7 @@ public class CouponController {
             }
         }
 
-        // 2. 檢查所有錯誤（包含 @Valid 產生的與自定義的）
+        // 檢查所有錯誤（包含 @Valid 產生的與自定義的）
         if (result.hasErrors()) {
             // 不需要重新 getOne，因為 @ModelAttribute 會把使用者剛輸入的資料帶回頁面
             return "coupon/updateCoupon";
