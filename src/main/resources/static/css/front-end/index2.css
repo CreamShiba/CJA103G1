@@ -255,3 +255,41 @@ aside {
     transform: scale(1.05);
     transition: transform 0.5s ease;
 }
+
+
+/* =========================================
+   收藏功能
+   ========================================= */
+.fav-btn {
+    margin-left: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 25px; /* 圓角樣式 */
+    border: 1px solid #ff3333;
+    background-color: transparent;
+    color: #ff3333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 滑鼠移入效果 */
+.fav-btn:hover {
+    background-color: #fff5f5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 51, 51, 0.15);
+}
+
+/* 已收藏狀態 (Active) */
+.fav-btn.active {
+    background-color: #ff3333;
+    color: #ffffff;
+}
+
+.fav-btn i {
+    font-size: 15px;
+}

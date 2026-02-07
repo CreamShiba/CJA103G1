@@ -34,6 +34,12 @@
                   style="font-weight: bold; margin: 0 5px; color: white; border-bottom: 1px dashed #ff3333; font-size: 1.1em;">
             </span>
             的專屬賣場
+                <!--收藏功能-->
+                <button id="favStoreBtn"
+                        th:data-sellerno="${currentSeller.sellerNo}"
+                        th:class="${isFavorite} ? 'fav-btn active' : 'fav-btn'">
+                    <span th:text="${isFavorite} ? '已收藏' : '收藏賣場'"></span>
+                </button>
         </span>
             </div>
 
