@@ -8,7 +8,7 @@
 <aside th:fragment="memberCenterSidebar">
   <div class="sidebar-section">
     <h3 class="sidebar-title">會員中心</h3>
-    <ul class="category-list">
+    <ul class="category-list" id="sidebar-menu">
       <li class="active">個人資料</li>
       <li><a th:href="@{/pages/my-coupons}">我的優惠券</a></li>
       <li><a th:href="@{/favorite/list-page}">我的收藏</a></li>
@@ -16,6 +16,30 @@
       <li><a th:href="@{/members/cars}">個人汽車</a></li>
     </ul>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 取得目前網址的路徑
+      const currentPath = window.location.pathname;
+
+      // 抓取側邊欄所有的連結
+      const menuLinks = document.querySelectorAll('#sidebar-menu a');
+
+      menuLinks.forEach(link => {
+        // 取得 a 標籤的 href 屬性路徑
+        const linkPath = link.getAttribute('href');
+
+        // 比對路徑是否一致
+        if (currentPath.includes(linkPath)) {
+          // 移除其他 li 的 active
+          document.querySelectorAll('#sidebar-menu li').forEach(li => li.classList.remove('active'));
+
+          // 為當前連結的父層 li 加上 active
+          link.parentElement.classList.add('active');
+        }
+      });
+    });
+  </script>
 </aside>
 
 </body>
