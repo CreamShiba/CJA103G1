@@ -77,15 +77,15 @@
 
                 <div class="seller-info-box" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 20px;">
                     <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}">
-                        <img th:src="@{/seller/reader(sellerNo=${productVO.seller.sellerNo})}"
-                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Seller&background=random&color=fff';"
+                        <img th:src="${productVO.seller.imagePath != null && productVO.seller.imagePath != '' ? productVO.seller.imagePath : 'https://ui-avatars.com/api/?name=' + (productVO.seller.shopName != null && productVO.seller.shopName != '' ? productVO.seller.shopName : productVO.seller.sellerName) + '&background=random'}"
+                             alt="賣家頭像"
                              style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #333;" />
                     </a>
                     <div style="flex: 1;">
                         <div style="font-size: 11px; color: #888;">SELLER</div>
                         <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}"
-                           th:text="${productVO.seller.sellerName}"
-                           style="font-size: 15px; font-weight: bold; color: #fff;">賣家名稱</a>
+                           th:text="${productVO.seller.shopName != null && productVO.seller.shopName != '' ? productVO.seller.shopName : productVO.seller.sellerName}"
+                           style="font-size: 15px; font-weight: bold; color: #fff;">賣場名稱</a>
                     </div>
                     <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}"
                        style="font-size: 13px; background: #333; color: white; padding: 6px 15px; border-radius: 20px;">

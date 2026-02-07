@@ -9,6 +9,8 @@ import com.karshop.product.model.ProductService;
 import com.karshop.product.model.ProductVO;
 import com.karshop.productcategorytest.model.ProductCategoryService;
 import com.karshop.productcategorytest.model.ProductCategoryVO;
+import com.karshop.sellertest.model.SellerService;
+import com.karshop.sellertest.model.SellerVO;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +28,9 @@ public class ShopController {
 
     @Autowired
     private ProductCategoryService productCategoryService;
+
+    @Autowired
+    private SellerService sellerService;
 
     @Autowired
     private MemberCarService memberCarService;
@@ -49,22 +54,9 @@ public class ShopController {
         model.addAttribute("productPage", productPage);
         model.addAttribute("currentPage", page);
 
-        // 如果是在逛特定賣場，要抓出賣家名稱
         if (sellerNo != null) {
-            String sellerName = "Unknown Seller"; // 預設值
-
-            // 方法 A: 如果搜尋結果有商品，直接拿第一筆的賣家名字 (最快)
-            if (productPage.hasContent()) {
-                sellerName = productPage.getContent().get(0).getSeller().getSellerName();
-            }
-            // 方法 B: 如果搜尋結果沒東西 (例如搜尋關鍵字查無)，我們還是要去資料庫撈該賣家的其他商品來抓名字
-            else {
-                List<ProductVO> sellerProducts = productService.getProductsBySellerNo(sellerNo);
-                if (sellerProducts != null && !sellerProducts.isEmpty()) {
-                    sellerName = sellerProducts.get(0).getSeller().getSellerName();
-                }
-            }
-            model.addAttribute("sellerName", sellerName);
+            SellerVO currentSeller = sellerService.getOneSeller(sellerNo);
+            model.addAttribute("currentSeller", currentSeller);
         }
 
 //      搜尋條件存回去

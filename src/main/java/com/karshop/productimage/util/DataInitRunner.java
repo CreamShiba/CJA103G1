@@ -55,7 +55,7 @@ public class DataInitRunner implements CommandLineRunner {
                     Integer prodNo = Integer.parseInt(prodNoStr);
 
                     // 2. 只處理設定的 2001 ~ 2020 範圍
-                    if (prodNo >= 2001 && prodNo <= 2020) {
+                    if (prodNo >= 2001 && prodNo <= 2030) {
 
                         // 3. 封裝成 ProductImageVO 物件
                         ProductImageVO piVO = new ProductImageVO();
