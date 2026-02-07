@@ -299,104 +299,108 @@
 
 <body>
 
-    <header th:replace="fragments/front_header :: frontHeader"></header>
+<header th:replace="fragments/front_header :: frontHeader"></header>
 
-    <div class="container">
-        <aside>
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Browse by</h3>
-                <ul class="category-list">
-                    <li onclick="location.href='/appeals/add'">提交申訴</li>
-                    <li onclick="location.href='/reports/add'">提交檢舉</li>
-                    <li onclick="location.href='/appeals/history'">申訴紀錄</li>
-                    <li class="active" onclick="location.href='/reports/history'">檢舉紀錄</li>
-                </ul>
-            </div>
-        </aside>
+<div class="container">
+    <aside>
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Browse by</h3>
+            <ul class="category-list">
+                <li onclick="location.href='/appeals/add'">提交申訴</li>
+                <li onclick="location.href='/reports/add'">提交檢舉</li>
+                <li onclick="location.href='/appeals/history'">申訴紀錄</li>
+                <li class="active" onclick="location.href='/reports/history'">檢舉紀錄</li>
+            </ul>
+        </div>
+    </aside>
 
-        <div class="detail-container">
-            <div class="detail-card">
-                <h1 class="detail-title">REPORT DETAILS</h1>
+    <div class="detail-container">
+        <div class="detail-card">
+            <h1 class="detail-title">REPORT DETAILS</h1>
 
-                <div class="info-section">
-                    <div class="info-row">
-                        <div class="info-label">案件編號</div>
-                        <div class="info-value" th:text="${report.reportsNo}">#001</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">檢舉對象</div>
-                        <div class="info-value" th:text="${report.reportsTarget}">123</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">檢舉類型</div>
-                        <div class="info-value" th:text="${report.reportsType}">商品</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">檢舉時間</div>
-                        <div class="info-value"
-                            th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}">2026-01-29</div>
-                    </div>
-
-                    <div class="content-label" style="margin-top: 30px;">檢舉詳細描述</div>
-                    <div class="content-box" th:text="${report.reportsDescription}">這裡顯示詳細描述內容...</div>
-
-                    <div class="response-card">
-                        <div class="response-title">管理員處理回覆</div>
-                        <div class="response-text"
-                            th:text="${(report.response != null && report.response != '') ? report.response : '案件處理中，請耐心等候。'}">
-                            尚未回覆
-                        </div>
-                    </div>
+            <div class="info-section">
+                <div class="info-row">
+                    <div class="info-label">案件編號</div>
+                    <div class="info-value" th:text="${report.reportsNo}">#001</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">檢舉對象</div>
+                    <div class="info-value" th:text="${targetDisplay}">商品名稱</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">檢舉類型</div>
+                    <div class="info-value" th:text="${report.reportsType}">商品</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">檢舉時間</div>
+                    <div class="info-value"
+                         th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}">2026-01-29</div>
                 </div>
 
-                <a th:href="@{/reports/history}" class="back-btn">返回紀錄清單</a>
+                <div class="content-label" style="margin-top: 30px;">檢舉詳細描述</div>
+                <div class="content-box" th:text="${report.reportsDescription}">這裡顯示詳細描述內容...</div>
+
+                <div class="response-card">
+                    <div class="response-title">管理員處理回覆</div>
+                    <div class="response-text"
+                         th:text="${(report.response != null && report.response != '') ? report.response : '案件處理中，請耐心等候。'}">
+                        尚未回覆
+                    </div>
+                </div>
             </div>
+
+            <a th:href="@{/reports/history}" class="back-btn">返回紀錄清單</a>
         </div>
     </div>
+</div>
 
-    <footer>
-        <div class="footer-col">
-            <div class="logo">卡爾夏</div>
-        </div>
-        <div class="footer-col">
-            <h4>Shop</h4>
-            <ul>
-                <li>Shop Parts</li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>Company</h4>
-            <ul>
-                <li>About Us</li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>Contact</h4>
-            <ul>
-                <li>info@karshop.com</li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>Follow</h4>
-            <ul>
-                <li>Instagram</li>
-            </ul>
-        </div>
-    </footer>
+<footer>
+    <div class="footer-col">
+        <div class="logo">卡爾夏</div>
+    </div>
+    <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+            <li>Shop Parts</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+            <li>About Us</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+            <li>info@karshop.com</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Follow</h4>
+        <ul>
+            <li>Instagram</li>
+        </ul>
+    </div>
+</footer>
 
-    <script>
-        // 下拉選單 JS
-        window.onload = function () {
-            const userIcon = document.getElementById('user-icon');
-            const userDropdown = document.getElementById('user-dropdown');
-            const memberTrigger = document.getElementById('member-center-trigger');
-            const memberDropdown = document.getElementById('member-dropdown');
+<script>
+    // 下拉選單 JS
+    window.onload = function () {
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+        const memberTrigger = document.getElementById('member-center-trigger');
+        const memberDropdown = document.getElementById('member-dropdown');
 
-            userIcon.onclick = (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); memberDropdown.classList.remove('show'); };
-            memberTrigger.onclick = (e) => { e.stopPropagation(); memberDropdown.classList.toggle('show'); userDropdown.classList.remove('show'); };
-            document.onclick = () => { userDropdown.classList.remove('show'); memberDropdown.classList.remove('show'); };
-        };
-    </script>
+        if (userIcon) {
+            userIcon.onclick = (e) => { e.stopPropagation(); userDropdown.classList.toggle('show'); if (memberDropdown) memberDropdown.classList.remove('show'); };
+        }
+        if (memberTrigger) {
+            memberTrigger.onclick = (e) => { e.stopPropagation(); memberDropdown.classList.toggle('show'); if (userDropdown) userDropdown.classList.remove('show'); };
+        }
+        document.onclick = () => { if (userDropdown) userDropdown.classList.remove('show'); if (memberDropdown) memberDropdown.classList.remove('show'); };
+    };
+</script>
 </body>
 
 </html>
