@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>結帳 - 卡爾夏汽車百貨</title>
-  <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" th:href="@{/css/front-end/checkout.css}">
+  <link rel="stylesheet" th:href="@{/css/front-end/index2.css}">
+  <link rel="stylesheet" th:href="@{/css/fragments/front_header.css}">
 </head>
 <body>
 
-<header th:replace="~{front-end/index :: header}"></header>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
 
 <div class="checkout-main">
   <div class="checkout-steps">
@@ -63,17 +64,20 @@
           <div class="payment-methods">
             <div class="payment-option selected" id="pay-credit" onclick="selectPayment('信用卡')">
               <div class="pay-icon"><i class="fas fa-credit-card"></i></div>
-              <div><span class="pay-label">信用卡支付</span><span class="pay-desc">支持多款信用卡</span></div>
+              <div><span class="pay-label">信用卡支付</span><span class="pay-desc">線上即時刷卡</span></div>
             </div>
+
             <div class="payment-option" id="pay-atm" onclick="selectPayment('轉帳')">
               <div class="pay-icon"><i class="fas fa-university"></i></div>
-              <div><span class="pay-label">網路銀行 / ATM 轉帳</span><span class="pay-desc">手動轉帳核帳</span></div>
+              <div><span class="pay-label">銀行轉帳</span><span class="pay-desc">實體/網路 ATM</span></div>
             </div>
-            <div class="payment-option" id="pay-convenience" onclick="selectPayment('超商代收')">
-              <div class="pay-icon"><i class="fas fa-store"></i></div>
-              <div><span class="pay-label">超商代收</span><span class="pay-desc">代碼繳費</span></div>
+
+            <div class="payment-option" id="pay-cod" onclick="selectPayment('貨到付款')">
+              <div class="pay-icon"><i class="fas fa-hand-holding-usd"></i></div>
+              <div><span class="pay-label">貨到付款</span><span class="pay-desc">簽收時支付現金</span></div>
             </div>
           </div>
+
           <input type="hidden" name="ord_payment_method" id="ord_payment_method" value="信用卡">
           <input type="hidden" name="discount_price" id="discount_price" value="0">
           <input type="hidden" name="coupon_no" id="coupon_no" value="">
@@ -129,13 +133,15 @@
     <h2 style="color:#fff">確認訂單內容？</h2>
     <div style="color:#ff3333; font-size:32px; font-weight:bold; margin:20px 0;">NT$ <span id="modal-amount">0</span></div>
     <div style="display:flex; gap:10px; justify-content:center;">
-      <button onclick="document.getElementById('checkout-form').submit()" style="background:#ff3333; color:#fff; border:none; padding:10px 30px; border-radius:6px; cursor:pointer;">確認結帳</button>
+      <button onclick="submitFinalOrder()" style="background:#ff3333; color:#fff; border:none; padding:10px 30px; border-radius:6px; cursor:pointer;">
+        確認結帳
+      </button>
       <button onclick="hideModal()" style="background:#333; color:#fff; border:none; padding:10px 30px; border-radius:6px; cursor:pointer;">取消</button>
     </div>
   </div>
 </div>
 
-<div class="summary-row">
+<div class="summary-row" style="display: none">
   <span>商品小計</span>
   <span>NT$ <span id="display-subtotal" th:text="${subtotal}">0</span></span>
 </div>

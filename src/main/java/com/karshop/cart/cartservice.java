@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -251,6 +252,63 @@ public class cartservice {
                     ProductVO p = productService.getOneProduct(item.getProd_no());
                     return (p != null) ? p.getProdPrice() * item.getQuantity() : 0;
                 }).sum();
+    }
+    // ✅ 無需 SDK 的綠界表單產生器
+    public String genEcpayForm(String orderNo, Integer amount, String method) {
+        String mId = "2000132"; // 測試商號
+        String date = new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new java.util.Date());
+        String payment = "Credit".equals(method) || "信用卡".equals(method) ? "Credit" : "ATM";
+
+        // 1. 準備參數 (TreeMap 會自動依照字典順序排序 A-Z)
+        Map<String, String> params = new TreeMap<>();
+        params.put("MerchantID", mId);
+        params.put("MerchantTradeNo", orderNo + "T" + System.currentTimeMillis());
+        params.put("MerchantTradeDate", date);
+        params.put("PaymentType", "aio");
+        params.put("TotalAmount", amount.toString());
+        params.put("TradeDesc", "CarShopOrder");
+        params.put("ItemName", "汽車百貨商品一批");
+        params.put("ReturnURL", "https://yourdomain.com/callback"); // 扣款成功通知
+        params.put("OrderResultURL", "http://localhost:8080/cart/list"); // 付完跳回哪
+        params.put("ChoosePayment", payment);
+        params.put("EncryptType", "1");
+
+        // 2. 計算簽章 (CheckMacValue)
+        String checkMacValue = makeMac(params);
+
+        // 3. 生成自動 Submit 的 Form
+        StringBuilder sb = new StringBuilder();
+        sb.append("<form id='ecPay' action='https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5' method='post'>");
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            sb.append("<input type='hidden' name='").append(entry.getKey()).append("' value='").append(entry.getValue()).append("'>");
+        }
+        sb.append("<input type='hidden' name='CheckMacValue' value='").append(checkMacValue).append("'>");
+        sb.append("</form><script>document.getElementById('ecPay').submit();</script>");
+        return sb.toString();
+    }
+
+    // 🔐 手寫簽章邏輯 (面試亮點：懂 SHA256 與 URL Encode)
+    private String makeMac(Map<String, String> params) {
+        String key = "5294y06JbISpM5x9"; // 測試 Key
+        String iv = "v77hoKGq4kWxNNIS";  // 測試 IV
+        StringBuilder sb = new StringBuilder("HashKey=" + key);
+        for (Map.Entry<String, String> e : params.entrySet()) {
+            sb.append("&").append(e.getKey()).append("=").append(e.getValue());
+        }
+        sb.append("&HashIV=" + iv);
+        String urlEn = java.net.URLEncoder.encode(sb.toString(), java.nio.charset.StandardCharsets.UTF_8).toLowerCase();
+        urlEn = urlEn.replace("%21", "!").replace("%2a", "*").replace("%28", "(").replace("%29", ")");
+        return hashSHA256(urlEn).toUpperCase();
+    }
+
+    private String hashSHA256(String s) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(s.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder();
+            for (byte b : hash) hex.append(String.format("%02x", b));
+            return hex.toString();
+        } catch (Exception e) { return ""; }
     }
 
 }

@@ -6,60 +6,13 @@
   <title>購物車 - 卡爾夫汽車百貨</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" th:href="@{/css/front-end/cart-list.css}">
-  <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
+  <link rel="stylesheet" th:href="@{/css/front-end/index2.css}">
+  <link rel="stylesheet" th:href="@{/css/fragments/front_header.css}">
+
 </head>
 <body>
 
-<header>
-  <div class="top-bar">
-    <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
-    <div class="top-icons">
-      <div class="search-box">
-        <input type="text" id="search-input" placeholder="Search..."
-               style="background: transparent; border: none; color: white; width: 100%; outline: none;">
-        <span>🔍</span>
-      </div>
-      <div class="user-dropdown-container">
-        <span id="user-icon" style="cursor: pointer;">👤</span>
-        <div id="user-dropdown" class="dropdown-menu">
-
-          <th:block th:if="${session.member == null}">
-            <a th:href="@{/members/login}">登入</a>
-            <a th:href="@{/members/register}">註冊</a>
-          </th:block>
-
-          <th:block th:if="${session.member != null}">
-                      <span style="display:block; padding: 12px 16px; color: #888; font-size: 14px; border-bottom: 1px solid #333;"
-                            th:text="'Hi, ' + ${session.member.memUsername}">
-                         Hi, 會員
-                      </span>
-
-            <a th:href="@{/members/view}">編輯個人資料</a>
-            <a href="#">我的訂單</a>
-            <form th:action="@{/members/logout}" method="post" id="logoutForm">
-              <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
-                登出 (Logout)
-              </a>
-            </form>
-          </th:block>
-        </div>
-      </div>
-      <span id="cart-icon" th:onclick="|window.location.href='@{/cart/list}'|" style="cursor: pointer; position: relative;"> 🛒
-      </span>
-    </div>
-  </div>
-
-  <div class="main-header">
-    <div class="logo" th:onclick="|window.location.href='@{/shop}'|" style="cursor: pointer;">卡爾夫</div>
-    <nav class="nav-links">
-      <a th:href="@{/shop}">商城</a>
-      <a href="#">安裝廠</a>
-      <a href="#">論壇</a>
-      <a th:href="@{/members/announcement}">公告</a>
-      <a th:href="@{/members/faq}">常見問題</a>
-    </nav>
-  </div>
-</header>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
 
 <div class="cart-main">
   <a th:href="@{/shop}" class="back-link">
@@ -154,7 +107,7 @@
 
 <!-- ✅ 引入修正後的 JS -->
 <script th:src="@{/js/front-end/cart-list.js}"></script>
-<script th:src="@{/js/front-end/index.js}"></script>
+<script th:src="@{/js/front-end/index2.js}"></script>
 
 </body>
 </html>

@@ -11,14 +11,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
+@RequestMapping("/members/seller") // 統一抽取父路徑，減少出錯
 public class SellerInfoController {
 
     @Autowired
     private SellerInfoService service;
 
-    /**
-     * 從 Session 取得會員 ID (Debug 加強版)
-     */
     private Integer getMemberIdFromSession(HttpSession session) {
         MembersVO member = (MembersVO) session.getAttribute("member");
 

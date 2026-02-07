@@ -195,4 +195,46 @@ public class cartcontroller {
         MembersVO member = (MembersVO) session.getAttribute("member");
         return (member != null) ? member.getMemNo() : null;
     }
+
+    @PostMapping("/checkout-with-ecpay")
+    @ResponseBody
+    public String checkoutWithEcpay(
+            @RequestParam String prodNos,
+            @RequestParam("ord_payment_method") String paymentMethod,
+            @RequestParam("ord_recipient") String receiverName,
+            @RequestParam("receiverPhone") String receiverPhone,
+            @RequestParam("ord_address") String receiverAddress,
+            @RequestParam("ord_ship_method") String deliveryMethod,
+            @RequestParam(required = false) Integer couponNo,
+            @RequestParam(defaultValue = "0") Integer discountPrice,
+            HttpSession session) {
+
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        if (member == null) return "請先登入";
+
+        try {
+            // 1. 必須先計算金額，後面金流才拿得到數據
+            int subtotal = service.calculateCurrentSubtotal(member.getMemNo(), prodNos);
+
+            // 2. 建立訂單 (請確保參數順序與你的 Service 一致)
+            service.processCheckout(member.getMemNo(), prodNos, paymentMethod, deliveryMethod,
+                    receiverName, receiverPhone, receiverAddress, couponNo, discountPrice, member);
+
+            // 3. 根據付款方式決定回傳內容
+            if ("貨到付款".equals(paymentMethod) || "轉帳".equals(paymentMethod)) {
+                // 貨到付款與轉帳不走綠界，直接跳轉到訂單查詢頁面
+                String msg = "貨到付款".equals(paymentMethod) ? "訂單已成功建立 (貨到付款)" : "訂單已建立，請於 24 小時內完成轉帳";
+                return "<script>alert('" + msg + "'); location.href='/pages/my-orders';</script>";
+            } else {
+                // 信用卡：計算總額並產生綠界表單
+                int ship = "宅配".equals(deliveryMethod) ? 100 : ("超取".equals(deliveryMethod) ? 60 : 0);
+                int finalAmount = subtotal + ship - discountPrice;
+
+                // 呼叫產製綠界自動提交表單的方法
+                return service.genEcpayForm("ORD", finalAmount, "Credit");
+            }
+        } catch (Exception e) {
+            return "結帳失敗：" + e.getMessage();
+        }
+    }
 }

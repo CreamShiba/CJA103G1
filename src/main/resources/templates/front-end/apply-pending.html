@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>審核中 - 卡爾夏汽車百貨</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #ffc107; --dark: #333; }
+        body { background: #f4f7f6; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+
+        .card {
+            background: white; padding: 40px; border-radius: 20px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 450px; width: 90%;
+            border-top: 5px solid var(--primary);
+        }
+
+        .icon-box {
+            width: 80px; height: 80px; background: #fff9e6; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px; animation: pulse 2s infinite;
+        }
+
+        .icon-box i { font-size: 40px; color: var(--primary); }
+
+        h2 { color: var(--dark); margin: 0 0 15px; }
+        p { color: #666; line-height: 1.6; margin-bottom: 25px; }
+
+        .btn {
+            display: inline-block; padding: 12px 30px; background: var(--dark);
+            color: white; text-decoration: none; border-radius: 50px;
+            font-weight: bold; transition: 0.3s;
+        }
+        .btn:hover { background: #000; transform: translateY(-2px); }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(255, 193, 7, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="icon-box">
+        <i class="fas fa-clock"></i>
+    </div>
+    <h2>資料審核中</h2>
+    <p>
+        謝謝您的申請！<br>
+        我們的專員正快馬加鞭審核您的資料。<br>
+        預計 <strong>3 個工作天</strong> 內會完成開通。
+    </p>
+    <a href="/members/home" class="btn">返回會員中心</a>
+</div>
+
+</body>
+</html>
