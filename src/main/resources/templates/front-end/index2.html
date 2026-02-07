@@ -19,18 +19,26 @@
 <aside th:replace="~{fragments/front_sidebar :: frontSidebar}"></aside>
     <main style="flex: 1;">
 
-        <div th:if="${sellerNo != null}"
+        <div th:if="${currentSeller != null}"
              style="background: rgba(255, 51, 51, 0.1); border: 1px solid #ff3333; color: #ff3333; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
 
-        <span style="font-size: 15px; font-weight: 500; display: flex; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img th:src="${currentSeller.imagePath != null && currentSeller.imagePath != '' ? currentSeller.imagePath : 'https://ui-avatars.com/api/?name=' + (currentSeller.shopName != null && currentSeller.shopName != '' ? currentSeller.shopName : currentSeller.sellerName) + '&background=random'}"
+                     alt="賣家頭像"
+                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 51, 51, 0.5);">
+
+                <span style="font-size: 15px; font-weight: 500; display: flex; align-items: center;">
             <i class="fas fa-store-alt" style="margin-right: 8px; font-size: 18px;"></i>
             您正在瀏覽
-            <span th:text="${sellerName}" style="font-weight: bold; margin: 0 5px; color: white; border-bottom: 1px dashed #ff3333;"></span>
+            <span th:text="${currentSeller.shopName != null && currentSeller.shopName != '' ? currentSeller.shopName : currentSeller.sellerName}"
+                  style="font-weight: bold; margin: 0 5px; color: white; border-bottom: 1px dashed #ff3333; font-size: 1.1em;">
+            </span>
             的專屬賣場
         </span>
+            </div>
 
             <a th:href="@{/shop}"
-               style="background: #ff3333; color: white; padding: 6px 15px; border-radius: 4px; font-size: 13px; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: 0.3s;">
+               style="background: #ff3333; color: white; padding: 8px 20px; border-radius: 30px; font-size: 13px; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);">
                 <i class="fas fa-home"></i> 返回商城首頁
             </a>
         </div>
