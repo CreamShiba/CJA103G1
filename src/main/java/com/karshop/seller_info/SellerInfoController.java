@@ -11,12 +11,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-@RequestMapping("/members/seller") // 統一抽取父路徑，減少出錯
 public class SellerInfoController {
 
     @Autowired
     private SellerInfoService service;
 
+    /**
+     * 從 Session 取得會員 ID (Debug 加強版)
+     */
     private Integer getMemberIdFromSession(HttpSession session) {
         MembersVO member = (MembersVO) session.getAttribute("member");
 
@@ -182,7 +184,7 @@ public class SellerInfoController {
             System.out.println("❌ 找不到賣家資料: " + e.getMessage());
 
             // ✅ 清除 session 中的 seller
-            session.removeAttribute("seller");
+            session.removeAttribute("sellerInfo");
 
             redirectAttributes.addFlashAttribute("error",
                     "您尚未申請成為賣家,請先到「申請成為賣家」頁面提交申請");
