@@ -276,4 +276,15 @@ body {
     .form-content {
         padding: 30px 20px;
     }
+    .apply-header.bg-danger { background: linear-gradient(135deg, #d9534f 0%, #c9302c 100%); }
+    .apply-header.bg-warning { background: linear-gradient(135deg, #f0ad4e 0%, #ec971f 100%); }
+    header-content h1, .header-content p {
+        color: #ffffff;
+        text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6);
+    }
+    .alert-box { padding: 20px; border-radius: 10px; margin-bottom: 25px; border-left: 6px solid; }
+    .alert-banned { background: #fff1f0; border-color: #f5222d; color: #333; }
+    .alert-rejected { background: #fffbe6; border-color: #faad14; color: #555; }
+    .reason-tag { color: #d43f3a; font-weight: bold; background: #fff; padding: 5px 10px; border-radius: 4px; border: 1px solid #d43f3a; }
+    .preview-img { max-width: 200px; border-radius: 8px; margin: 10px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 }

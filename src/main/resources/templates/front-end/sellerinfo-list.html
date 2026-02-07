@@ -75,6 +75,7 @@
         </div>
 
         <form th:action="@{/members/seller/update}" th:object="${seller}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{seller_no}" />
 
             <!-- 店鋪資料 -->
             <div class="form-section">
@@ -186,7 +187,8 @@
                 <div class="image-section">
                     <!-- 現有圖片 -->
                     <div class="current-image" th:if="${seller.image_path != null and seller.image_path != ''}">
-                        <img th:src="@{'/' + ${seller.image_path}}" alt="店鋪圖片" id="current-img">
+                        <img th:src="@{/{path}(path=${seller.image_path}, v=${#dates.createNow().getTime()})}"
+                             alt="店鋪圖片" id="current-img">
                         <p style="margin-top: 10px; color: #666; font-size: 14px;">目前圖片</p>
                     </div>
 
@@ -214,12 +216,20 @@
 
             <!-- 按鈕 -->
             <div class="btn-group">
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='/members/home'">
-                    <i class="fas fa-arrow-left"></i> 返回首頁
+                <button th:if="${seller.status == '已開通'}"
+                        type="button" class="btn btn-info"
+                        onclick="window.location.href='/product/dashboard'">
+                    <i class="fas fa-tachometer-alt"></i> 返回賣家中心
                 </button>
+
+                <button th:if="${seller.status != '已開通'}"
+                        type="button" class="btn btn-secondary"
+                        onclick="window.location.href='/members/home'">
+                    <i class="fas fa-home"></i> 返回商城首頁
+                </button>
+
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i>
-                    <!-- ✅ 根據狀態顯示不同按鈕文字 -->
                     <span th:text="${seller.status == '待審核' ? '修改並重新送審' : '儲存變更'}">儲存變更</span>
                 </button>
             </div>

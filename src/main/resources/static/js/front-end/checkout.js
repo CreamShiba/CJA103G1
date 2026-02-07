@@ -6,21 +6,24 @@ let disc = 0;
 
 // 1. 付款方式選擇邏輯 (解決不能按的問題)
 function selectPayment(method) {
-    // 更新隱藏的 input 值
+    // 1. 更新隱藏欄位的值，讓 Form 送出正確的付款方式
     document.getElementById('ord_payment_method').value = method;
 
-    // 切換 CSS 樣式
-    // 先移除所有選項的 selected 類別
-    document.querySelectorAll('.payment-option').forEach(opt => {
-        opt.classList.remove('selected');
-    });
+    // 2. 移除所有選項的 'selected' 樣式
+    const options = document.querySelectorAll('.payment-option');
+    options.forEach(opt => opt.classList.remove('selected'));
 
-    // 根據點擊的內容增加 selected 類別 (利用 ID 判斷或根據傳入文字)
-    if (method === '信用卡') document.getElementById('pay-credit').classList.add('selected');
-    if (method === '轉帳') document.getElementById('pay-atm').classList.add('selected');
-    if (method === '超商代收') document.getElementById('pay-convenience').classList.add('selected');
+    // 3. 根據點擊的選項加入 'selected' 樣式
+    // 使用內容文字或 ID 來判斷
+    if (method === '信用卡') {
+        document.getElementById('pay-credit').classList.add('selected');
+    } else if (method === '轉帳') {
+        document.getElementById('pay-atm').classList.add('selected');
+    } else if (method === '貨到付款') {
+        document.getElementById('pay-cod').classList.add('selected');
+    }
 
-    console.log("當前付款方式:", method);
+    console.log("當前選擇付款方式：" + method);
 }
 
 // 2. 物流方式變動：更新運費
@@ -130,4 +133,22 @@ function updateOrderTotal() {
 // 綁定物流變更事件 (原本 HTML 已有 onchange="updateShipping()")
 function updateShipping() {
     updateOrderTotal();
+}
+
+
+
+function submitFinalOrder() {
+    const form = document.getElementById('checkout-form');
+    const paymentMethod = document.getElementById('ord_payment_method').value;
+
+    // 根據付款方式決定路徑
+    if (paymentMethod === '信用卡') {
+        // 走綠界金流
+        form.action = '/cart/checkout-with-ecpay';
+    } else {
+        // 走一般後端處理 (轉帳、貨到付款)
+        form.action = '/cart/process-payment';
+    }
+
+    form.submit();
 }
