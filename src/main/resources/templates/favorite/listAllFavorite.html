@@ -54,9 +54,9 @@
         <button class="tab-btn active" onclick="switchTab('products', this)">
             <i class="fas fa-shopping-bag"></i> 商品收藏
         </button>
-<!--        <button class="tab-btn" onclick="switchTab('stores', this)">-->
-<!--            <i class="fas fa-store"></i> 賣場收藏-->
-<!--        </button>-->
+        <button class="tab-btn" onclick="switchTab('stores', this)">
+            <i class="fas fa-store"></i> 賣場收藏
+        </button>
     </div>
 
     <!-- 商品收藏區域 -->
@@ -122,55 +122,55 @@
 
 
     <!-- 賣場收藏區域 -->
-<!--    <div id="stores-section" style="display: none;">-->
-<!--        <div th:if="${not #lists.isEmpty(favoriteStores)}" class="table-wrapper">-->
-<!--            <div class="table-title">-->
-<!--                <i class="fas fa-store"></i>-->
-<!--                收藏賣場 (<span th:text="${favoriteStores.size()}"></span>)-->
-<!--            </div>-->
-<!--            <table>-->
-<!--                <thead>-->
-<!--                <tr>-->
-<!--                    <th>賣場信息</th>-->
-<!--                    <th></th>-->
-<!--                </tr>-->
-<!--                </thead>-->
-<!--                <tbody id="store-table-body">-->
-<!--                <tr th:each="storeFav : ${favoriteStores}" th:id="'store-row-' + ${storeFav.sellerNo}">-->
-<!--                    <td>-->
-<!--                        <div class="item-info">-->
-<!--                            <div class="item-icon">-->
-<!--                                <i class="fas fa-shop"></i>-->
-<!--                            </div>-->
-<!--                            <div class="item-details">-->
-<!--                                <h4 th:text="${storeFav.sellerName != null ? storeFav.sellerName : '賣家名稱'}">賣家名稱</h4>-->
-<!--&lt;!&ndash;                                <p th:text="'#' + ${storeFav.sellerNo}">賣家編號</p>&ndash;&gt;-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </td>-->
-<!--                    <td>-->
-<!--                        <button type="button"-->
-<!--                                class="btn btn-delete"-->
-<!--                                th:onclick="'deleteStore(' + ${storeFav.sellerNo} + ')'">-->
-<!--                            <i class="fas fa-trash"></i> 取消-->
-<!--                        </button>-->
-<!--                    </td>-->
-<!--                </tr>-->
-<!--                </tbody>-->
-<!--            </table>-->
-<!--        </div>-->
+    <div id="stores-section" style="display: none;">
+        <div th:if="${not #lists.isEmpty(favoriteStores)}" class="table-wrapper">
+            <div class="table-title">
+                <i class="fas fa-store"></i>
+                收藏賣場 (<span th:text="${favoriteStores.size()}"></span>)
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>賣場信息</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody id="store-table-body">
+                <tr th:each="storeFav : ${favoriteStores}" th:id="'store-row-' + ${storeFav.sellerNo}">
+                    <td>
+                        <div class="item-info">
+                            <div class="item-icon">
+                                <i class="fas fa-shop"></i>
+                            </div>
+                            <div class="item-details">
+                                <h4 th:text="${storeFav.sellerName != null ? storeFav.sellerName : '賣家名稱'}">賣家名稱</h4>
+<!--                                <p th:text="'#' + ${storeFav.sellerNo}">賣家編號</p>-->
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button"
+                                class="btn btn-delete"
+                                th:onclick="'deleteStore(' + ${storeFav.sellerNo} + ')'">
+                            <i class="fas fa-trash"></i> 取消
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
-<!--        <div th:if="${#lists.isEmpty(favoriteStores)}" class="empty-state">-->
-<!--            <div class="empty-icon">-->
-<!--                <i class="fas fa-store"></i>-->
-<!--            </div>-->
-<!--            <div class="empty-title">沒有收藏的賣場</div>-->
-<!--            <div class="empty-description">您還沒有收藏任何賣場，探索更多優質賣家吧！</div>-->
-<!--            <a href="/shop" class="btn-back">-->
-<!--                <i class="fas fa-search"></i> 尋找賣場-->
-<!--            </a>-->
-<!--        </div>-->
-<!--    </div>-->
+        <div th:if="${#lists.isEmpty(favoriteStores)}" class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-store"></i>
+            </div>
+            <div class="empty-title">沒有收藏的賣場</div>
+            <div class="empty-description">您還沒有收藏任何賣場，探索更多優質賣家吧！</div>
+            <a href="/shop" class="btn-back">
+                <i class="fas fa-search"></i> 尋找賣場
+            </a>
+        </div>
+    </div>
 
     <!-- 返回按鈕 -->
     <div style="text-align: center; margin-top: 40px;">
