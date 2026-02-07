@@ -42,20 +42,20 @@
             <div class="stat-number" th:text="${favorites.size()}">0</div>
             <div class="stat-label">收藏商品</div>
         </div>
-<!--        <div class="stat-card">-->
-<!--            <div class="stat-number" th:text="${favoriteStores.size()}">0</div>-->
-<!--            <div class="stat-label">收藏賣場</div>-->
-<!--        </div>-->
+        <div class="stat-card">
+            <div class="stat-number" th:text="${favoriteStores.size()}">0</div>
+            <div class="stat-label">收藏賣場</div>
+        </div>
 
     </div>
 
     <!-- 標籤頁 -->
     <div class="tab-container">
         <button class="tab-btn active" onclick="switchTab('products', this)">
-            <i class="fas fa-shopping-bag"></i> 商品收藏
+            <i class="fas fa-shopping-bag"></i> 商品
         </button>
         <button class="tab-btn" onclick="switchTab('stores', this)">
-            <i class="fas fa-store"></i> 賣場收藏
+            <i class="fas fa-store"></i> 賣場
         </button>
     </div>
 
@@ -87,11 +87,13 @@
                             </div>
 
                             <div class="item-details">
-                                <h4 th:text="${fav.productProd.productName}" style="font-size: 1.2em;">商品名稱</h4>
+                                <h4 th:text="${fav.productProd.productName}" >商品名稱</h4>
                                 <p th:text="'#' + ${fav.productProd.prodNo}" style="color: #888; font-size: 0.8em;text-align: left;"></p>
                             </div>
                         </div>
+                        </a>
                     </td>
+
                     <td>
                         <div class="price">
                             $<span th:text="${fav.productProd.prodPrice}">0</span>
@@ -114,7 +116,7 @@
             <div class="empty-title">沒有收藏的商品</div>
             <div class="empty-description">您還沒有收藏任何商品，前往商城瀏覽精選好物吧！</div>
             <a href="/shop" class="empty-btn">
-                <i class="fas fa-shopping-cart"></i> 逛逛商城
+                逛逛商城
             </a>
         </div>
     </div>
@@ -122,37 +124,37 @@
 
 
     <!-- 賣場收藏區域 -->
-    <div id="stores-section" style="display: none;">
-        <div th:if="${not #lists.isEmpty(favoriteStores)}" class="table-wrapper">
-            <div class="table-title">
-                <i class="fas fa-store"></i>
-                收藏賣場 (<span th:text="${favoriteStores.size()}"></span>)
-            </div>
+    <div id="stores-section" class="tab-content" style="display: none;">
+        <div th:if="${not #lists.isEmpty(favoriteStores)}" class="stat-card">
             <table>
                 <thead>
                 <tr>
-                    <th>賣場信息</th>
+                    <th>賣場</th>
                     <th></th>
                 </tr>
                 </thead>
                 <tbody id="store-table-body">
                 <tr th:each="storeFav : ${favoriteStores}" th:id="'store-row-' + ${storeFav.sellerNo}">
                     <td>
+                        <a th:href="@{/shop(sellerNo=${storeFav.sellerNo})}" style="text-decoration: none; color: inherit; display: block;">
                         <div class="item-info">
-                            <div class="item-icon">
-                                <i class="fas fa-shop"></i>
+                            <div class="item-image-container" style="margin-right: 15px;">
+                                <img th:with="shopName=${storeFav.seller != null and storeFav.seller.shop_name != null ? storeFav.seller.shop_name : 'User'}"
+                                     th:src="'https://ui-avatars.com/api/?name=' + ${shopName} + '&background=random&size=128'"
+                                     th:alt="${shopName} + '的頭像'"
+                                     style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 51, 51, 0.5);">
                             </div>
                             <div class="item-details">
-                                <h4 th:text="${storeFav.sellerName != null ? storeFav.sellerName : '賣家名稱'}">賣家名稱</h4>
-<!--                                <p th:text="'#' + ${storeFav.sellerNo}">賣家編號</p>-->
+                                <h4 th:text="${storeFav.seller != null and storeFav.seller.shop_name != null ? storeFav.seller.shop_name : '賣家名稱'}">賣家名稱</h4>
                             </div>
                         </div>
+                        </a>
                     </td>
                     <td>
                         <button type="button"
                                 class="btn btn-delete"
                                 th:onclick="'deleteStore(' + ${storeFav.sellerNo} + ')'">
-                            <i class="fas fa-trash"></i> 取消
+                            <i class="fas fa-trash"></i> 取消收藏
                         </button>
                     </td>
                 </tr>
@@ -166,8 +168,8 @@
             </div>
             <div class="empty-title">沒有收藏的賣場</div>
             <div class="empty-description">您還沒有收藏任何賣場，探索更多優質賣家吧！</div>
-            <a href="/shop" class="btn-back">
-                <i class="fas fa-search"></i> 尋找賣場
+            <a href="/shop" class="empty-btn">
+                逛逛商城
             </a>
         </div>
     </div>

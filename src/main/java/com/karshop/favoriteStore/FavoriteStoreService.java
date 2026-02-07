@@ -1,6 +1,7 @@
 package com.karshop.favoriteStore;
 
 
+import com.karshop.favoriteProduct.FavoriteProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,28 +18,9 @@ public class FavoriteStoreService {
         return favoriteStoreRepository.findByMemberNo(memberNo);
     }
 
-    // 根據會員編號與商品編號取得單一收藏
-    public FavoriteStore getOne(Integer memberNo, Integer sellerNo) {
-        FavoriteStore.FavoriteStoreId id = new FavoriteStore.FavoriteStoreId();
-        id.setMemberNo(memberNo);
-        id.setSellerNo(sellerNo);
-        return favoriteStoreRepository.findById(id).orElse(null);
-    }
-
     // 新增收藏賣家
-    public void addFavorite(Integer memberNo, Integer sellerNo) {
-        FavoriteStore fav = new FavoriteStore();
-        fav.setMemberNo(memberNo);
-        fav.setSellerNo(sellerNo);
-        favoriteStoreRepository.save(fav);
-    }
-
-    // 刪除收藏賣家
-    public void deleteFavorite(Integer memberNo, Integer sellerNo) {
-        FavoriteStore.FavoriteStoreId id = new FavoriteStore.FavoriteStoreId();
-        id.setMemberNo(memberNo);
-        id.setSellerNo(sellerNo);
-        favoriteStoreRepository.deleteById(id);
+    public void insert(FavoriteStore favoriteStore) {
+        favoriteStoreRepository.save(favoriteStore);
     }
 
     // 檢查是否已收藏 (回傳 boolean)
@@ -47,5 +29,12 @@ public class FavoriteStoreService {
         id.setMemberNo(memberNo);
         id.setSellerNo(sellerNo);
         return favoriteStoreRepository.existsById(id);
+    }
+
+    public void delete(Integer memberNo, Integer sellerNo) {
+        FavoriteStore.FavoriteStoreId id = new FavoriteStore.FavoriteStoreId();
+        id.setMemberNo(memberNo);
+        id.setSellerNo(sellerNo); // 對應 IdClass 裡的屬性名稱為 product
+        favoriteStoreRepository.deleteById(id);
     }
 }
