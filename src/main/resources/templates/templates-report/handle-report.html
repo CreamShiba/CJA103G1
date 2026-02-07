@@ -125,13 +125,13 @@
                     <div class="info-label">管理員回覆：</div>
                     <textarea id="replyMsg"
                               th:text="${report.response}"
-                              th:readonly="${report.status == '已結案' || report.status == '已處理' || report.status == '駁回'}"
-                              th:placeholder="${report.status == '已結案' || report.status == '已處理' || report.status == '駁回'} ? '' : '請在此輸入處理結果或說明...'"></textarea>
+                              th:readonly="${report.status == '已結案' || report.status == '已處理'}"
+                              th:placeholder="${report.status == '已結案' || report.status == '已處理'} ? '' : '請在此輸入處理結果或說明...'"></textarea>
                 </div>
 
                 <div class="btn-group">
                     <a th:href="@{/reports/admin/list(status=${(report.status == '已處理' || report.status == '已結案') ? '已處理' : '待處理'})}" class="btn-back">返回列表</a>
-                    <button th:if="${report.status == '待處理' || report.status == '處理中'}" class="btn-send" onclick="sendReply()">送出</button>
+                    <button th:if="${report.status != '已處理' && report.status != '已結案'}" class="btn-send" onclick="sendReply()">送出</button>
                 </div>
             </div>
 

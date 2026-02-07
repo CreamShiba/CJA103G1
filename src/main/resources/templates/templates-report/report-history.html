@@ -307,116 +307,116 @@
 
 <body>
 
-    <header th:replace="fragments/front_header :: frontHeader"></header>
+<header th:replace="fragments/front_header :: frontHeader"></header>
 
-    <div class="container">
-        <aside>
-            <div class="sidebar-section">
-                <h3 class="sidebar-title">Browse by</h3>
-                <ul class="category-list">
-                    <li onclick="location.href='/appeals/add'">提交申訴</li>
-                    <li onclick="location.href='/reports/add'">提交檢舉</li>
-                    <li onclick="location.href='/appeals/history'">申訴紀錄</li>
-                    <li class="active" onclick="location.href='/reports/history'">檢舉紀錄</li>
-                </ul>
-            </div>
-        </aside>
+<div class="container">
+    <aside>
+        <div class="sidebar-section">
+            <h3 class="sidebar-title">Browse by</h3>
+            <ul class="category-list">
+                <li onclick="location.href='/appeals/add'">提交申訴</li>
+                <li onclick="location.href='/reports/add'">提交檢舉</li>
+                <li onclick="location.href='/appeals/history'">申訴紀錄</li>
+                <li class="active" onclick="location.href='/reports/history'">檢舉紀錄</li>
+            </ul>
+        </div>
+    </aside>
 
-        <div class="history-card">
-            <h1 class="history-title">REPORT LOGS</h1>
-            <p class="history-subtitle">系統正在追蹤處理進度。結果將發送至您的 Email。</p>
+    <div class="history-card">
+        <h1 class="history-title">REPORT LOGS</h1>
+        <p class="history-subtitle">系統正在追蹤處理進度。結果將發送至您的 Email。</p>
 
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th style="width: 10%;">編號</th>
-                        <th style="width: 20%;">檢舉對象</th>
-                        <th style="width: 15%;">類型</th>
-                        <th style="width: 25%;">檢舉時間</th>
-                        <th style="width: 15%;">狀態</th>
-                        <th style="width: 15%;">檢視</th>
-                    </tr>
-                </thead>
-                <tbody id="reportLogBody">
-                    <tr th:each="report : ${reports}">
-                        <td th:text="${report.reportsNo}"></td>
-                        <td th:text="${report.reportsTarget != null ? report.reportsTarget : 'N/A'}"></td>
-                        <td th:text="${report.reportsType != null ? report.reportsType : '未分類'}"></td>
-                        <td th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}"></td>
-                        <td>
+        <table class="history-table">
+            <thead>
+            <tr>
+                <th style="width: 10%;">編號</th>
+                <th style="width: 20%;">檢舉對象</th>
+                <th style="width: 15%;">類型</th>
+                <th style="width: 25%;">檢舉時間</th>
+                <th style="width: 15%;">狀態</th>
+                <th style="width: 15%;">檢視</th>
+            </tr>
+            </thead>
+            <tbody id="reportLogBody">
+            <tr th:each="report : ${reports}">
+                <td th:text="${report.reportsNo}"></td>
+                <td th:text="${report.reportsTarget != null ? report.reportsTarget : 'N/A'}"></td>
+                <td th:text="${report.reportsType != null ? report.reportsType : '未分類'}"></td>
+                <td th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}"></td>
+                <td>
                             <span
-                                th:class="${report.status == '已處理' || report.status == '已結案' ? 'status-badge status-closed' : 'status-badge status-pending'}"
-                                th:text="${report.status}">
+                                    th:class="${report.status == '已處理' || report.status == '已結案' ? 'status-badge status-closed' : 'status-badge status-pending'}"
+                                    th:text="${report.status}">
                             </span>
-                        </td>
-                        <td>
-                            <a th:href="@{/reports/history/detail(id=${report.reportsNo})}" class="view-btn">查看案件</a>
-                        </td>
-                    </tr>
-                    <tr th:if="${#lists.isEmpty(reports)}">
-                        <td colspan="6" style="text-align:center; padding: 80px; color: #444;">DATABASE EMPTY / 無檢舉紀錄
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                </td>
+                <td>
+                    <a th:href="@{/reports/history/detail(id=${report.reportsNo})}" class="view-btn">查看案件</a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(reports)}">
+                <td colspan="6" style="text-align:center; padding: 80px; color: #444;">DATABASE EMPTY / 無檢舉紀錄
+                </td>
+            </tr>
+            </tbody>
+        </table>
 
-            <div class="pagination-container" id="paginationControls">
-            </div>
+        <div class="pagination-container" id="paginationControls">
         </div>
     </div>
+</div>
 
-    <footer>
-        <div class="footer-col">
-            <div class="logo">卡爾夏</div>
-        </div>
-        <div class="footer-col">
-            <h4>Shop</h4>
-            <ul>
-                <li>Parts</li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>Company</h4>
-            <ul>
-                <li>About Us</li>
-                <li>FAQ</li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>Contact</h4>
-            <ul>
-                <li>Email</li>
-            </ul>
-        </div>
-        <div class="footer-col">
-            <h4>Follow</h4>
-            <ul>
-                <li>Instagram</li>
-            </ul>
-        </div>
-    </footer>
+<footer>
+    <div class="footer-col">
+        <div class="logo">卡爾夏</div>
+    </div>
+    <div class="footer-col">
+        <h4>Shop</h4>
+        <ul>
+            <li>Parts</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+            <li>About Us</li>
+            <li>FAQ</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Contact</h4>
+        <ul>
+            <li>Email</li>
+        </ul>
+    </div>
+    <div class="footer-col">
+        <h4>Follow</h4>
+        <ul>
+            <li>Instagram</li>
+        </ul>
+    </div>
+</footer>
 
-    <script th:inline="javascript">
-        // 💡 僅保留下拉選單等基礎交互 JS
-        window.onload = function () {
-            initDropdowns();
-        };
+<script th:inline="javascript">
+    // 💡 僅保留下拉選單等基礎交互 JS
+    window.onload = function () {
+        initDropdowns();
+    };
 
-        function initDropdowns() {
-            const trigger = document.getElementById('member-center-trigger');
-            const menu = document.getElementById('member-dropdown');
-            const userIcon = document.getElementById('user-icon');
-            const userMenu = document.getElementById('user-dropdown');
+    function initDropdowns() {
+        const trigger = document.getElementById('member-center-trigger');
+        const menu = document.getElementById('member-dropdown');
+        const userIcon = document.getElementById('user-icon');
+        const userMenu = document.getElementById('user-dropdown');
 
-            if (trigger && menu) {
-                trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); if (userMenu) userMenu.classList.remove('show'); };
-            }
-            if (userIcon && userMenu) {
-                userIcon.onclick = (e) => { e.stopPropagation(); userMenu.classList.toggle('show'); if (menu) menu.classList.remove('show'); };
-            }
-            document.onclick = () => { if (menu) menu.classList.remove('show'); if (userMenu) userMenu.classList.remove('show'); };
+        if (trigger && menu) {
+            trigger.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('show'); if (userMenu) userMenu.classList.remove('show'); };
         }
-    </script>
+        if (userIcon && userMenu) {
+            userIcon.onclick = (e) => { e.stopPropagation(); userMenu.classList.toggle('show'); if (menu) menu.classList.remove('show'); };
+        }
+        document.onclick = () => { if (menu) menu.classList.remove('show'); if (userMenu) userMenu.classList.remove('show'); };
+    }
+</script>
 </body>
 
 </html>
