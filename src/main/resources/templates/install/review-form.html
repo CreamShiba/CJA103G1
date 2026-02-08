@@ -8,21 +8,30 @@
     <link rel="stylesheet" th:href="@{/install/back-end/css/index.css}">
     <link rel="stylesheet" th:href="@{/install/front-end/css/index.css}">
     <style>
+        body {
+            background-color: #111;
+            color: #ddd;
+            font-family: sans-serif;
+        }
+
         .review-container {
             max-width: 600px;
             margin: 50px auto;
-            background: white;
+            background: #222;
+            /* Dark Gray */
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
         }
 
         .order-summary {
-            background: #f8fafc;
+            background: #333;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #444;
+            color: #ccc;
         }
 
         .rating-group {
@@ -40,7 +49,7 @@
         .rating-group label {
             cursor: pointer;
             font-size: 40px;
-            color: #ccc;
+            color: #555;
             transition: color 0.2s;
         }
 
@@ -53,64 +62,45 @@
         textarea {
             width: 100%;
             padding: 12px;
-            border: 1px solid #d1d5db;
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
             border-radius: 6px;
             margin-bottom: 20px;
             resize: vertical;
             min-height: 100px;
         }
 
+        textarea:focus {
+            outline: none;
+            border-color: #ff3333;
+        }
+
         .btn-submit {
             width: 100%;
             padding: 12px;
-            background: #2563eb;
+            background: #ff3333;
+            /* Red */
             color: white;
             border: none;
             border-radius: 6px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            transition: background 0.2s;
         }
 
         .btn-submit:hover {
-            background: #1d4ed8;
-        }
-
-        .page-header {
-            background-color: #fff;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-
-        .header-content {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2563eb;
-            text-decoration: none;
+            background: #cc0000;
         }
     </style>
 </head>
 
 <body>
-    <header class="page-header">
-        <div class="header-content">
-            <a th:href="@{/installation/home}" class="logo">Karshop Install</a>
-        </div>
-    </header>
+    <!-- Header Removed -->
     <main>
         <div class="review-container">
-            <h2 style="text-align: center; color: #1f2937; margin-bottom: 20px;">評價這次的服務</h2>
+            <h2 style="text-align: center; color: white; margin-bottom: 20px;">評價這次的服務</h2>
 
             <div class="order-summary">
                 <h3 th:text="${order.technician.realName} + ' 技師'">技師姓名</h3>
@@ -119,7 +109,7 @@
             </div>
 
             <form th:action="@{'/member/order/' + ${order.installOrderNo} + '/review'}" method="post">
-                <div style="text-align: center; margin-bottom: 10px; color: #4b5563;">請選擇評分</div>
+                <div style="text-align: center; margin-bottom: 10px; color: #ccc;">請選擇評分</div>
                 <div class="rating-group">
                     <input type="radio" id="star5" name="rating" value="5" required /><label for="star5">★</label>
                     <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>

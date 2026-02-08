@@ -25,5 +25,6 @@ public class OrderVO {
     private Integer venueFee;
     private Integer serviceFee;
     private String payoutStatus;
+    private Integer techPayout; // Added for technician net income
     private boolean isReviewed;
 }
