@@ -31,7 +31,7 @@
 
             <!-- 查詢區域 - 非編輯模式下顯示 -->
             <section id="member-query" class="page-section" th:if="${showEdit == null or !showEdit}">
-                <h1><i class="fas fa-search"></i> 查詢會員</h1>
+                <h3 style="color: #00796b; margin-bottom: 0.6em;"><i class="fas fa-search"></i> 查詢會員</h3>
                 <div class="search-box">
                     <form id="compositeQueryForm" th:action="@{/memberInfo/manage}" method="get">
                         <div class="row-group" style="display: flex; flex-wrap: wrap; gap: 20px;">
@@ -75,7 +75,7 @@
 
                         </div>
 
-                        <div class="btn-row" style="margin-top: 15px; text-align: right;">
+                        <div class="btn-row" style="text-align: right;">
                             <button type="submit"  class="btn-add">
                                 <i class="fas fa-filter"></i> 開始篩選
                             </button>
