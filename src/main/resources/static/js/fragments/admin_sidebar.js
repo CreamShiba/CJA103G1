@@ -1,35 +1,53 @@
 document.addEventListener("DOMContentLoaded", function() {
 
-    // 1. 處理側邊欄選單的展開/收合 (Accordion 效果)
+    /* =========================================
+       1. 第一層選單處理 (.submenu-toggle)
+       ========================================= */
     const menuToggles = document.querySelectorAll('.submenu-toggle');
 
     menuToggles.forEach(toggle => {
         toggle.addEventListener('click', function(e) {
-            e.preventDefault(); // 防止連結跳轉
+            e.preventDefault();
 
-            // 找到目前的父層 <li>
             const parentLi = this.closest('.menu-item');
 
-            // 檢查目前是否已經是展開狀態
-            const isOpen = parentLi.classList.contains('open');
-
-            // (選項 A) 手風琴效果：點擊一個時，關閉其他所有已展開的選單
-            // 如果您希望可以同時展開多個，請把這段註解掉
+            // 手風琴效果：關閉其他已展開的主選單
+            // (排除自己，也排除已經打開的子選單結構)
             document.querySelectorAll('.menu-item.has-submenu.open').forEach(item => {
                 if (item !== parentLi) {
                     item.classList.remove('open');
                 }
             });
 
-            // (選項 B) 切換目前的狀態
-            // 如果原本是開的 -> 關閉 (移除 open)
-            // 如果原本是關的 -> 展開 (加上 open)
             parentLi.classList.toggle('open');
         });
     });
 
-    // 2. 處理登出確認 (優化使用者體驗)
-    // 雖然您的 HTML 已經有 inline onclick，但在 JS 處理可以加入確認視窗
+    /* =========================================
+       2. 🔥 新增：第三層巢狀選單處理 (.sub-toggle)
+       ========================================= */
+    const subToggles = document.querySelectorAll('.sub-toggle');
+
+    subToggles.forEach(toggle => {
+        toggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            // 🛑 關鍵：阻止事件冒泡！
+            // 如果不加這行，點擊第三層時，事件會傳到第一層，導致外層選單以為被點擊而關閉。
+            e.stopPropagation();
+
+            // 找到包含這個 toggle 的父層 (has-sub-item)
+            const parentSubLi = this.closest('.has-sub-item');
+
+            // 切換 open 狀態
+            if (parentSubLi) {
+                parentSubLi.classList.toggle('open');
+            }
+        });
+    });
+
+    /* =========================================
+       3. 登出確認
+       ========================================= */
     const logoutBtn = document.querySelector('.sidebar-footer a');
     if (logoutBtn) {
         logoutBtn.onclick = function(e) {
