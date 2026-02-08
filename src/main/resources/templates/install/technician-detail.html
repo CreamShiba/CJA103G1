@@ -118,22 +118,33 @@
         }
 
         /* Custom Scrollbar for Reviews */
-        .review-scroll-container::-webkit-scrollbar {
+        .review-scroll-container::-webkit-scrollbar,
+        .scrollable-list::-webkit-scrollbar {
             width: 8px;
         }
 
-        .review-scroll-container::-webkit-scrollbar-track {
+        .review-scroll-container::-webkit-scrollbar-track,
+        .scrollable-list::-webkit-scrollbar-track {
             background: #1a1a1a;
             border-radius: 4px;
         }
 
-        .review-scroll-container::-webkit-scrollbar-thumb {
+        .review-scroll-container::-webkit-scrollbar-thumb,
+        .scrollable-list::-webkit-scrollbar-thumb {
             background: #444;
             border-radius: 4px;
         }
 
-        .review-scroll-container::-webkit-scrollbar-thumb:hover {
+        .review-scroll-container::-webkit-scrollbar-thumb:hover,
+        .scrollable-list::-webkit-scrollbar-thumb:hover {
             background: #555;
+        }
+
+        .scrollable-list {
+            max-height: 250px;
+            /* Approx 5 items */
+            overflow-y: auto;
+            padding-right: 5px;
         }
     </style>
 </head>
@@ -221,7 +232,7 @@
                         </div>
                         <hr style="border: 0; border-top: 1px solid #333; margin: 1rem 0;">
                         <h4 style="margin-bottom: 10px; color: white;">提供服務</h4>
-                        <ul style="list-style: none;">
+                        <ul class="scrollable-list" style="list-style: none;">
                             <li th:each="svc : ${technician.services}" class="service-item">
                                 <span th:text="${svc.serviceName}">服務</span>
                                 <strong th:text="'NT$ ' + ${svc.price}" style="color: #aaa;">500</strong>
@@ -232,7 +243,7 @@
                                 th:text="${technician.reviews != null ? technician.reviews.size() : 0}">0</span>)</h4>
 
                         <div class="review-scroll-container"
-                            style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                            style="max-height: 500px; overflow-y: auto; padding-right: 10px;">
                             <div th:if="${technician.reviews == null || technician.reviews.empty}"
                                 style="color: #666; font-style: italic;">
                                 暫無評價
@@ -282,14 +293,17 @@
                     <!-- 2. Select Services -->
                     <div class="form-group">
                         <label class="form-label">選擇服務 (可多選)</label>
-                        <div th:each="svc : ${technician.services}">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="selectedServiceIds" th:value="${svc.tsNo}"
-                                    th:data-price="${svc.price}" onchange="calculateTotal()"
-                                    style="margin-right: 10px;">
-                                <span th:text="${svc.serviceName}" style="color: #ddd;"></span>
-                                <span style="margin-left: auto; color: #888;" th:text="'NT$ ' + ${svc.price}"></span>
-                            </label>
+                        <div class="scrollable-list">
+                            <div th:each="svc : ${technician.services}">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" name="selectedServiceIds" th:value="${svc.tsNo}"
+                                        th:data-price="${svc.price}" onchange="calculateTotal()"
+                                        style="margin-right: 10px;">
+                                    <span th:text="${svc.serviceName}" style="color: #ddd;"></span>
+                                    <span style="margin-left: auto; color: #888;"
+                                        th:text="'NT$ ' + ${svc.price}"></span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
