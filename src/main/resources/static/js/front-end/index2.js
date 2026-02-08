@@ -1,49 +1,71 @@
-// index2.js - 修正版
+document.addEventListener("DOMContentLoaded", function() {
+    initHeaderDropdowns();
+});
 
-// 1. 確保頁面載入後才執行 (避免抓不到元素)
-window.onload = function() {
-    initUserDropdown();
-};
-
-function initUserDropdown() {
-    // 定義 ID (請確認 HTML 對應的 ID)
-    const userIcon = document.getElementById('user-icon');
-    const userDropdown = document.getElementById('user-dropdown');
-    const memberTrigger = document.getElementById('member-center-trigger');
-    const memberDropdown = document.getElementById('member-dropdown');
-
-    // --- 功能 A: 點擊頭像切換選單 ---
-    if (userIcon && userDropdown) {
-        userIcon.onclick = function (e) {
-            // 阻止冒泡，避免觸發 window 的點擊事件馬上又把它關掉
-            e.stopPropagation();
-            userDropdown.classList.toggle('show');
-
-            // 如果會員選單開著，順便關掉
-            if (memberDropdown) memberDropdown.classList.remove('show');
-        };
-    }
-
-    // --- 功能 B: 點擊畫面其他地方，關閉所有選單 ---
-    // (這段原本只寫在最上面，現在搬進來這裡才安全)
-    window.addEventListener('click', function() {
-        if (userDropdown && userDropdown.classList.contains('show')) {
-            userDropdown.classList.remove('show');
+function initHeaderDropdowns() {
+    // 1. 定義所有下拉選單的 Trigger (按鈕) 和 Content (內容)
+    const dropdowns = [
+        {
+            trigger: document.getElementById('user-icon'),      // 使用者頭像
+            menu: document.getElementById('user-dropdown')
+        },
+        {
+            trigger: document.getElementById('member-center-trigger'), // 會員中心
+            menu: document.getElementById('member-dropdown')
+        },
+        {
+            trigger: document.getElementById('forum-center-trigger'),  // 論壇中心
+            menu: document.getElementById('forum-dropdown')
         }
-        if (memberDropdown && memberDropdown.classList.contains('show')) {
-            memberDropdown.classList.remove('show');
+    ];
+
+    // 2. 為每個選單綁定點擊事件
+    dropdowns.forEach(item => {
+        // 只有當按鈕和選單都存在時才執行，避免報錯
+        if (item.trigger && item.menu) {
+            item.trigger.addEventListener('click', function(e) {
+                e.preventDefault(); // 防止連結跳轉 (#)
+                e.stopPropagation(); // 阻止事件冒泡到 window
+
+                // (A) 關閉「其他」所有已開啟的選單 (互斥效果：一次只開一個)
+                dropdowns.forEach(other => {
+                    if (other.menu && other.menu !== item.menu) {
+                        other.menu.classList.remove('show');
+                    }
+                });
+
+                // (B) 切換「自己」的開關狀態
+                item.menu.classList.toggle('show');
+            });
         }
     });
 
-    // --- 功能 C: 處理導航列中的「會員中心」(如果有) ---
-    if (memberTrigger && memberDropdown) {
-        memberTrigger.onclick = function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            memberDropdown.classList.toggle('show');
+    // 3. 全域點擊監聽：點擊畫面空白處，關閉所有選單
+    window.addEventListener('click', function() {
+        dropdowns.forEach(item => {
+            if (item.menu) {
+                item.menu.classList.remove('show');
+            }
+        });
+    });
+}
 
-            // 如果使用者選單開著，順便關掉
-            if (userDropdown) userDropdown.classList.remove('show');
-        };
+// 🔥 4. 補上頁面跳轉函式 (這是您 HTML onclick 呼叫的)
+function navigateTo(page) {
+    // 這裡定義基礎路徑，您可以依據需求修改
+    let baseUrl = "/members/";
+
+    switch(page) {
+        case 'coupons':
+            window.location.href = baseUrl + "coupons";
+            break;
+        case 'favorite':
+            window.location.href = baseUrl + "favorite";
+            break;
+        case 'orderInfo':
+            window.location.href = baseUrl + "orders"; // 或是 order/list
+            break;
+        default:
+            console.warn("未知的頁面跳轉: " + page);
     }
 }

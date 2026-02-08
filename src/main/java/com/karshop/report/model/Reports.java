@@ -36,7 +36,7 @@ public class Reports {
     @Column(name = "email", length = 100)
     private String email; // 電子信箱
 
-    @Column(name = "status", length = 10)
+    @Column(name = "status", length = 20)
     private String status; // 處理狀態
 
     @Column(name = "handled")
@@ -45,6 +45,26 @@ public class Reports {
     @Column(name = "adm_no", nullable = false)
     private Integer admNo; // 管理員編號
 
-    @Column(name = "reports_response")
+    @Column(name = "reports_response", length = 500)
     private String response; // 管理員回覆
+
+    // ✅ 新增：商品編號（用於檢舉商品）
+    @Column(name = "prod_no")
+    private Integer prodNo;
+
+    // ✅ 新增：訂單編號（用於檢舉訂單）
+    @Column(name = "ord_no")
+    private Integer ordNo;
+
+    // ✅ 新增：文章編號（用於檢舉文章）
+    @Column(name = "post_id")
+    private Integer postId;
+
+    // ✅ 新增：留言編號（用於檢舉留言）
+    @Column(name = "comment_id")
+    private Integer commentId;
+
+    // ✅ 新增：賣家編號（用於檢舉賣家）
+    @Column(name = "seller_no")
+    private Integer sellerNo;
 }

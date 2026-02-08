@@ -111,7 +111,7 @@ public class TechnicianBackendController {
         private OrderVO convertToVO(InstallOrder o) {
                 OrderVO vo = new OrderVO();
                 vo.setInstallOrderNo(o.getInstallOrderNo());
-                vo.setMemberName(o.getMember().getMemberName()); // Add this field to VO if needed
+                vo.setMemberName(o.getMember().getMemUsername()); // Add this field to VO if needed
                 vo.setLocationName(o.getLocation().getLocationName());
                 vo.setAppointDate(o.getAppointDate());
                 vo.setAppointTime(o.getAppointTime().getDescription());

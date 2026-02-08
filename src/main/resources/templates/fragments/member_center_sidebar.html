@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+</head>
+<body>
+
+<aside th:fragment="memberCenterSidebar">
+  <div class="sidebar-section">
+    <h3 class="sidebar-title">會員中心</h3>
+    <ul class="category-list">
+      <li class="active">個人資料</li>
+      <li><a th:href="@{/pages/my-coupons}">我的優惠券</a></li>
+      <li><a th:href="@{/favorite/list-page}">我的收藏</a></li>
+      <li><a th:href="@{/pages/my-orders}">訂單查詢</a></li>
+      <li><a th:href="@{/members/cars}">個人汽車</a></li>
+    </ul>
+  </div>
+</aside>
+
+</body>
+</html>

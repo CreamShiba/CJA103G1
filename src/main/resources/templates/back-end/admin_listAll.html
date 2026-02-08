@@ -6,88 +6,13 @@
     <title>Dashboard - Autopile Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/back-end/admin_listAll.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/admin_sidebar.css}">
 </head>
 <body>
 
     <div class="app-container">
-        
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-icon"></div>
-                <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
-            </div>
 
-            <nav class="sidebar-nav">
-                <ul>
-                    <li class="menu-item has-submenu">
-                        <a class="submenu-toggle">
-                            <span><i class="fas fa-users-cog"></i> 儀錶板</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="#">自訂</a></li>
-                            <li><a href="#">自訂</a></li>
-                        </ul>
-                    </li>
-                    <li class="menu-item has-submenu">
-                        <a class="submenu-toggle">
-                            <span><i class="fas fa-users-cog"></i> 消息管理</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="#">自訂</a></li>
-                            <li><a href="#">自訂</a></li>
-                        </ul>
-                    </li>
-                    
-                    <li class="menu-item has-submenu open">
-                        <a class="submenu-toggle">
-                            <span><i class="fas fa-users-cog"></i> 帳號管理</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="#">會員帳號管理</a></li>
-                            <li><a href="#" class="active">管理員帳號管理</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="menu-item has-submenu">
-                        <a class="submenu-toggle">
-                            <span><i class="fas fa-users-cog"></i> 商品訂單管理</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="#">自訂</a></li>
-                            <li><a href="#">自訂</a></li>
-                        </ul>
-                    </li>
-                    <li class="menu-item has-submenu">
-                        <a class="submenu-toggle">
-                            <span><i class="fas fa-users-cog"></i> 商品管理</span>
-                            <i class="fas fa-chevron-down arrow"></i>
-                        </a>
-                        <ul class="submenu">
-                            <li><a href="#">自訂</a></li>
-                            <li><a href="#">自訂</a></li>
-                        </ul>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#"><i class="fas fa-star"></i> 評論管理</a>
-                    </li>
-                    <li class="menu-item">
-                        <a href="#"><i class="fas fa-headset"></i> 客服管理</a>
-                    </li>
-                </ul>
-            </nav>
-
-            <div class="sidebar-footer">
-                <form th:action="@{/admins/logout}" method="post" id="logoutForm">
-                    <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
-                        <i class="fas fa-sign-out-alt"></i> 登出 (Logout)
-                    </a>
-                </form>
-            </div>
-        </aside>
+        <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='listAll')}"></aside>
 
         <main class="main-content">
             <header class="top-bar">
@@ -174,8 +99,6 @@
             </div>
         </main>
     </div>
-
-    <script src="js/admin-search.js"></script>
     <script th:src="@{/js/back-end/admin_index.js}"></script>
 </body>
 </html>

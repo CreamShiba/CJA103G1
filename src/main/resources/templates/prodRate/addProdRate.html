@@ -16,16 +16,17 @@
 
 
 <div class="container">
-    <aside>
-        <div class="sidebar-section">
-            <h3 class="sidebar-title">會員中心</h3>
-            <ul class="category-list" id="category-list">
-                <li><a th:href="@{/pages/my-coupons}" onclick="navigateTo('coupons')">我的優惠券</a></li>
-                <li><a th:href="@{/favorite/list-page}" onclick="navigateTo('favorite')">我的收藏</a></li>
-                <li><a th:href="@{/pages/my-orders}">訂單查詢</a></li>
-            </ul>
-        </div>
-    </aside>
+    <aside th:replace="~{fragments/member_center_sidebar :: memberCenterSidebar}"></aside>
+<!--    <aside>-->
+<!--        <div class="sidebar-section">-->
+<!--            <h3 class="sidebar-title">會員中心</h3>-->
+<!--            <ul class="category-list" id="category-list">-->
+<!--                <li><a th:href="@{/pages/my-coupons}" onclick="navigateTo('coupons')">我的優惠券</a></li>-->
+<!--                <li><a th:href="@{/favorite/list-page}" onclick="navigateTo('favorite')">我的收藏</a></li>-->
+<!--                <li><a th:href="@{/pages/my-orders}">訂單查詢</a></li>-->
+<!--            </ul>-->
+<!--        </div>-->
+<!--    </aside>-->
 
     <main class="content-area">
         <div class="form-container">
@@ -47,12 +48,23 @@
                     <div class="product-header">
                         <img th:if="${productImgMap[rate.prodNo] != null}"
                              th:src="@{/prodRate/productImage/DBGifReader(imgNo=${productImgMap[rate.prodNo]})}"
-                             alt="商品圖片" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                             alt="商品圖片"
+                             style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"
+                             onerror="this.onerror=null; this.src='/images/default-product.png';">
+
+                        <!-- 新增:無圖片時的預設佔位圖 -->
+                        <div th:unless="${productImgMap[rate.prodNo] != null}"
+                             style="width: 80px; height: 80px; background: #f0f0f0; border-radius: 8px;
+                             display: flex; align-items: center; justify-content: center; color: #999;">
+                            <span style="font-size: 10px;">無圖片</span>
+                        </div>
+
                         <div>
                             <h4 th:text="${productMap[rate.prodNo].productName}" style="margin:0; color:#333;">商品名稱</h4>
                             <small style="color: #888;">商品編號：<span th:text="${rate.prodNo}"></span></small>
                         </div>
                     </div>
+
 
                     <div class="row">
                         <label>商品評分</label>
@@ -144,11 +156,12 @@
         const memberTrigger = document.getElementById('member-center-trigger');
         const memberDropdown = document.getElementById('member-dropdown');
 
+        // 只有在元素存在時才綁定點擊事件
         if (userIcon && userDropdown) {
             userIcon.onclick = function(e) {
                 e.stopPropagation();
                 userDropdown.classList.toggle('show');
-                memberDropdown.classList.remove('show');
+                if(memberDropdown) memberDropdown.classList.remove('show');
             };
         }
 
@@ -169,11 +182,12 @@
             const isUserDropdown = event.target.closest('#user-dropdown');
             const isMemberDropdown = event.target.closest('#member-dropdown');
 
-            if (!isUserIcon && !isUserDropdown) {
+            // 使用選用鏈結 (Optional Chaining) 或直接檢查
+            if (!isUserIcon && !isUserDropdown && userDropdown) {
                 userDropdown.classList.remove('show');
             }
 
-            if (!isMemberTrigger && !isMemberDropdown) {
+            if (!isMemberTrigger && !isMemberDropdown && memberDropdown) {
                 memberDropdown.classList.remove('show');
             }
         });

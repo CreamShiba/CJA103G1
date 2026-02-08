@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>檢舉詳情 - 卡爾夏汽車百貨</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* --- 基礎設定 --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -86,7 +87,7 @@
         .back-btn {
             background-color: #ff3333; color: white; border: none; padding: 15px 40px;
             font-size: 16px; font-weight: bold; cursor: pointer; width: 200px;
-            transition: 0.3s; margin-top: 30px;
+            transition: 0.3s; margin-top: 30px; display: inline-block; text-align: center;
         }
         .back-btn:hover { background-color: #cc0000; transform: translateY(-2px); }
 
@@ -183,11 +184,14 @@
 
                 <div class="response-card">
                     <div class="response-title">管理員處理回覆</div>
-                    <div class="response-text" th:text="${report.response != null ? report.response : '案件處理中，請耐心等候。'}">尚未回覆</div>
+                    <div class="response-text"
+                         th:text="${(report.response != null && report.response != '') ? report.response : '案件處理中，請耐心等候。'}">
+                        尚未回覆
+                    </div>
                 </div>
             </div>
 
-            <button class="back-btn" onclick="location.href='/reports/history'">返回紀錄清單</button>
+            <a th:href="@{/reports/history}" class="back-btn">返回紀錄清單</a>
         </div>
     </div>
 </div>

@@ -11,10 +11,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class sellerinfocontroller {
+public class SellerInfoController {
 
     @Autowired
-    private sellerinfoservice service;
+    private SellerInfoService service;
 
     /**
      * 從 Session 取得會員 ID (Debug 加強版)
@@ -44,7 +44,7 @@ public class sellerinfocontroller {
         Integer memberId = getMemberIdFromSession(session);
         System.out.println("當前會員 ID: " + memberId);
 
-        // 檢查是否已登入 (測試模式下總是允許)
+        // 檢查是否已登入
         if (memberId == null) {
             System.out.println("❌ 未登入,重定向到首頁");
             redirectAttributes.addFlashAttribute("error", "請先登入會員");
@@ -53,7 +53,7 @@ public class sellerinfocontroller {
 
         // 檢查是否已經是賣家
         try {
-            sellerinfo existingSeller = service.getSellerByMemberId(memberId);
+            SellerInfo existingSeller = service.getSellerByMemberId(memberId);
             System.out.println("✅ 找到現有賣家資料: " + existingSeller.getShop_name());
 
             // ✅ 將賣家資訊放入 session
@@ -67,7 +67,7 @@ public class sellerinfocontroller {
 
             session.removeAttribute("seller");
 
-            model.addAttribute("seller", new sellerinfo());
+            model.addAttribute("seller", new SellerInfo());
             model.addAttribute("isAlreadySeller", false);
         }
 
@@ -77,7 +77,7 @@ public class sellerinfocontroller {
 
     @PostMapping("/members/seller/apply")
     public String submitApplication(
-            @ModelAttribute sellerinfo seller,
+            @ModelAttribute SellerInfo seller,
             HttpSession session,
             Model model,
             RedirectAttributes redirectAttributes) {
@@ -102,7 +102,7 @@ public class sellerinfocontroller {
         try {
             // 檢查是否已申請過
             try {
-                sellerinfo existingSeller = service.getSellerByMemberId(memberId);
+                SellerInfo existingSeller = service.getSellerByMemberId(memberId);
                 System.out.println("⚠️ 已申請過,導向編輯頁面");
 
                 session.setAttribute("seller", existingSeller);
@@ -117,7 +117,7 @@ public class sellerinfocontroller {
                 seller.setStatus("pending");
                 seller.setIsverified(false);
 
-                sellerinfo savedSeller = service.addSeller(seller);
+                SellerInfo savedSeller = service.addSeller(seller);
                 System.out.println("✅ 賣家資料已儲存,編號: " + savedSeller.getSeller_no());
 
                 session.setAttribute("seller", savedSeller);
@@ -159,7 +159,7 @@ public class sellerinfocontroller {
         }
 
         try {
-            sellerinfo seller = service.getSellerByMemberId(memberId);
+            SellerInfo seller = service.getSellerByMemberId(memberId);
             System.out.println("✅ 找到賣家資料: " + seller.getShop_name());
             System.out.println("   狀態: " + seller.getStatus());
             System.out.println("   評分: " + seller.getRating_star() + " / " + seller.getRating_amount());
@@ -194,7 +194,7 @@ public class sellerinfocontroller {
 
     @PostMapping("/members/seller/update")
     public String updateSeller(
-            @ModelAttribute sellerinfo seller,
+            @ModelAttribute SellerInfo seller,
             @RequestParam(required = false) MultipartFile file,
             HttpSession session,
             Model model,
@@ -212,19 +212,40 @@ public class sellerinfocontroller {
         }
 
         try {
-            sellerinfo existingSeller = service.getSellerByMemberId(memberId);
+            SellerInfo existingSeller = service.getSellerByMemberId(memberId);
             System.out.println("✅ 找到現有資料,準備更新");
+            System.out.println("   原狀態: " + existingSeller.getStatus());
 
             seller.setSeller_no(existingSeller.getSeller_no());
             seller.setMember_no(memberId);
-            seller.setStatus(existingSeller.getStatus());
-            seller.setIsverified(existingSeller.getIsverified());
+            // ===================================================================
+            // ✅ 關鍵邏輯：如果原本是「停權」(suspended)，無法變動
+            // ===================================================================
+            if ("suspended".equals(existingSeller.getStatus())) {
+                System.out.println("⛔ 帳號已被停權，拒絕更新請求");
+                redirectAttributes.addFlashAttribute("error", "您的賣家帳號已被停權，無法修改資料。如有疑問請聯繫管理員。");
+                return "redirect:/members/seller/sellerinfo";
+            }
+
+            // ===================================================================
+            // ✅ 關鍵邏輯：如果原本是「未通過」(rejected)，更新後改為「待審核」(pending)
+            // ===================================================================
+            if ("rejected".equals(existingSeller.getStatus())) {
+                System.out.println("🔄 狀態從「未通過」改為「待審核」，等待管理員重新審核");
+                seller.setStatus("pending");
+                seller.setIsverified(false);  // 重新審核時取消驗證狀態
+            } else {
+                // 其他狀態保持不變
+                seller.setStatus(existingSeller.getStatus());
+                seller.setIsverified(existingSeller.getIsverified());
+            }
+
             seller.setRating_amount(existingSeller.getRating_amount());
             seller.setRating_star(existingSeller.getRating_star());
 
             // 處理圖片上傳
             if (file != null && !file.isEmpty()) {
-                System.out.println("📷 上傳新圖片: " + file.getOriginalFilename());
+                System.out.println("🖼️ 上傳新圖片: " + file.getOriginalFilename());
                 String imagePath = service.uploadImage(file);
                 seller.setImage_path(imagePath);
                 System.out.println("✅ 圖片已儲存: " + imagePath);
@@ -232,13 +253,22 @@ public class sellerinfocontroller {
                 seller.setImage_path(existingSeller.getImage_path());
             }
 
-            sellerinfo updatedSeller = service.updateSeller(seller);
+            SellerInfo updatedSeller = service.updateSeller(seller);
             System.out.println("✅ 資料更新成功");
+            System.out.println("   新狀態: " + updatedSeller.getStatus());
 
             // ✅ 更新 session 中的賣家資訊
             session.setAttribute("seller", updatedSeller);
 
-            redirectAttributes.addFlashAttribute("success", "資料更新成功!");
+            // ===================================================================
+            // ✅ 根據狀態顯示不同的提示訊息
+            // ===================================================================
+            if ("pending".equals(updatedSeller.getStatus())) {
+                redirectAttributes.addFlashAttribute("success",
+                        "資料更新成功！您的申請已重新送出審核，我們將在 3-5 個工作天內完成審核。");
+            } else {
+                redirectAttributes.addFlashAttribute("success", "資料更新成功！");
+            }
 
             System.out.println("========== 更新完成 ==========\n");
             return "redirect:/members/seller/sellerinfo";

@@ -20,16 +20,17 @@
 
 <div class="container">
     <!-- 側邊欄 -->
-    <aside>
-        <div class="sidebar-section">
-            <h3 class="sidebar-title">會員中心</h3>
-            <ul class="category-list" id="category-list">
-                <li><a th:href="@{/pages/my-coupons}" onclick="navigateTo('coupons')">我的優惠券</a></li>
-                <li><a th:href="@{/favorite/list-page}" onclick="navigateTo('favorite')">我的收藏</a></li>
-                <li><a th:href="@{/pages/my-orders}">訂單查詢</a></li>
-            </ul>
-        </div>
-    </aside>
+    <aside th:replace="~{fragments/member_center_sidebar :: memberCenterSidebar}"></aside>
+<!--    <aside>-->
+<!--        <div class="sidebar-section">-->
+<!--            <h3 class="sidebar-title">會員中心</h3>-->
+<!--            <ul class="category-list" id="category-list">-->
+<!--                <li><a th:href="@{/pages/my-coupons}" onclick="navigateTo('coupons')">我的優惠券</a></li>-->
+<!--                <li><a th:href="@{/favorite/list-page}" onclick="navigateTo('favorite')">我的收藏</a></li>-->
+<!--                <li><a th:href="@{/pages/my-orders}">訂單查詢</a></li>-->
+<!--            </ul>-->
+<!--        </div>-->
+<!--    </aside>-->
 
     <main class="content-area">
     <!-- 頁面標題 -->
@@ -81,12 +82,14 @@
                 <tbody id="product-table-body" class="tab-content active">
                 <tr th:each="fav : ${favorites}" th:id="'prod-row-' + ${fav.productProd.prodNo}">
                     <td>
+                        <a th:href="@{/product/detail(prodNo=${fav.productProd.prodNo})}" style="text-decoration: none; color: inherit; display: block;">
                         <div class="item-info">
                             <div class="item-image-container" style="width: 80px; height: 80px; margin-right: 15px; overflow: hidden; border-radius: 5px;">
                                 <img th:src="@{/favorite/showImage(prodNo=${fav.productProd.prodNo})}"
                                      alt="商品圖片"
                                      style="width: 100%; height: 100%; object-fit: cover;"
-                                     onerror="this.src='/images/no-image.png';"> </div>
+                                     onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=&quot;width:100%;height:100%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border-radius:4px;color:#999;font-size:14px;&quot;>無圖片</div>';">
+                            </div>
 
                             <div class="item-details">
                                 <h4 th:text="${fav.productProd.productName}">商品名稱</h4>

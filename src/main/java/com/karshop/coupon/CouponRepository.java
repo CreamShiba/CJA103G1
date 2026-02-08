@@ -17,11 +17,15 @@ public interface CouponRepository extends JpaRepository<Coupon, Integer>, JpaSpe
     // 過期的優惠券狀態改為 0
     @Transactional
     @Modifying
-    @Query("UPDATE Coupon c SET c.couponStatus = 2 WHERE c.couponEnd < :now AND c.couponStatus = 1")
+    @Query("UPDATE Coupon c SET c.couponStatus = 0 WHERE c.couponEnd < :now AND c.couponStatus = 1")
     void updateExpiredStatus(LocalDateTime now);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE mc FROM member_coupon mc JOIN coupon c ON mc.coupon_no = c.coupon_no WHERE c.coupon_end < :now", nativeQuery = true)
-    void deleteExpiredMemberCoupons(LocalDateTime now);
+    @Query(value = "UPDATE member_coupon mc " +
+            "JOIN coupon c ON mc.coupon_no = c.coupon_no " +
+            "SET mc.coupon_status = 2 " +
+            "WHERE c.coupon_end < :now AND mc.coupon_status = 0", nativeQuery = true)
+    void updateExpiredMemberCoupons(LocalDateTime now);
+
 }
