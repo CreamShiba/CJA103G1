@@ -1,0 +1,82 @@
+
+     /* 佈局核心 CSS */
+ .main-layout {
+     display: flex;
+     gap: 20px;
+     padding: 20px;
+     align-items: flex-start;
+ }
+.left-panel {
+    flex: 0 0 380px; /* 左側固定寬度 */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.right-panel {
+    flex: 1; /* 右側自動填滿 */
+}
+.card-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.form-control {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th { background: #f8f9fa; padding: 12px; text-align: left; border-bottom: 2px solid #eee; }
+td { padding: 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
+
+/* 狀態標籤 */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+.status-unread { background: #ffebee; color: #ef5350; }
+.status-read { background: #e8f5e9; color: #4caf50; }
+
+     /* 設定容器高度與捲軸 */
+     .table-scroll-container {
+         max-height: 500px; /* 你可以根據畫面調整高度 */
+         overflow-y: auto;
+         overflow-x: hidden; /* 隱藏水平捲軸 */
+     }
+
+     /* 讓表頭固定在頂部，不會隨捲軸消失 */
+     .table-scroll-container thead th {
+         position: sticky;
+         top: 0;
+         background-color: #f8f9fa;
+         box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); /* 增加一點陰影區分 */
+         z-index: 2;
+     }
+
+     /* 美化滾輪樣式 (選配) */
+     .table-scroll-container::-webkit-scrollbar {
+         width: 6px;
+     }
+     .table-scroll-container::-webkit-scrollbar-thumb {
+         background: #ccc;
+         border-radius: 10px;
+     }
+     .table-scroll-container::-webkit-scrollbar-track {
+         background: #f1f1f1;
+     }
