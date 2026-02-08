@@ -208,7 +208,9 @@
         const id = /*[[${report.reportsNo}]]*/ 0;
         const params = new URLSearchParams();
         params.append('id', id);
-        params.append('status', '已處理'); // 💡 統一更新為「已處理」
+        // ✅ 修改點：依照組員共識，點擊送出即視為處理完成，狀態設為「已處理」
+        // 這樣案件會直接從待處理名單消失，並轉入已處理區
+        params.append('status', '已處理');
         params.append('admNo', 1);
         params.append('response', reply);
 
@@ -219,8 +221,9 @@
             .then(res => res.text())
             .then(msg => {
                 if (msg === 'success') {
-                    showModal('卡爾夏Karshop', '處理成功！案件已移至「已處理」');
+                    showModal('卡爾夏Karshop', '處理成功！案件已移至「已處理」區。');
                     setTimeout(() => {
+                        // ✅ 修改點：處理完畢後自動重定向到「已處理」清單
                         window.location.href = '/reports/admin/list?status=已處理';
                     }, 1500);
                 } else {

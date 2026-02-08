@@ -96,29 +96,32 @@ public class ReportsController {
     public String handleReportByAdmin(@RequestParam Integer id,
                                       @RequestParam String status,
                                       @RequestParam Integer admNo,
-                                      @RequestParam String response){
+                                      @RequestParam(required = false) String response){
         try{
-            // 💡 抓取該案件當前狀態以進行精準攔截
+            // 💡 抓取該案件當前狀態
             Reports currentReport = reportsService.getReportById(id);
-            String finalStatus = status;
 
-            // 💡 全域防線：處理文章/商品模組按鈕與總覽報表的連動衝突
-            // 如果目前的狀態是「待處理」，而收到的是「已處理」或「已結案」
-            if ("待處理".equals(currentReport.getStatus())) {
-                if (response != null && (response.contains("下架") || response.contains("違規"))) {
-                    finalStatus = "已下架"; // 💡 強制變黃色，留在未處理區供管理員最後檢視
-                } else if ("駁回".equals(status) || (response != null && response.contains("駁回"))) {
-                    finalStatus = "駁回";   // 💡 強制變紫色，留在未處理區，防止案件直接消失
-                }
+            // 💡 預設回覆文字
+            String finalResponse = (response == null || response.trim().isEmpty()) ? "案件已處理完畢。" : response;
+            String finalStatus = "已處理"; // 預設存為已處理
+
+            // 💡 核心修改邏輯：
+            // 1. 如果是「駁回」，資料庫狀態存「駁回」，回覆文字加上 [案件駁回]
+            // 2. 如果是「下架」，資料庫狀態存「已處理」(避開組員的標籤)，回覆文字加上 [商品下架]
+            if (status.equals("駁回") || (response != null && response.contains("駁回"))) {
+                finalStatus = "駁回";
+                finalResponse = "[案件駁回] " + finalResponse;
+                System.out.println("💡 案件 #" + id + " 處理動作：案件駁回，DB狀態設為：駁回");
+            } else if (status.equals("已下架") || status.contains("下架") || (response != null && (response.contains("下架") || response.contains("違規")))) {
+                finalStatus = "已處理"; // 💡 存成已處理，組員那邊就不會看到下架標籤
+                finalResponse = "[商品下架] " + finalResponse;
+                System.out.println("💡 案件 #" + id + " 處理動作：商品下架，DB狀態設為：已處理");
+            } else {
+                finalResponse = "[處理完成] " + finalResponse;
             }
 
-            // 💡 狀態校準：支援舊版傳入的「已結案」對齊為「已處理」
-            if ("已結案".equals(status)) {
-                finalStatus = "已處理";
-            }
-
-            reportsService.handleReport(id, finalStatus, admNo, response);
-            System.out.println("✅ 檢舉 #" + id + " 最終存檔狀態：" + finalStatus);
+            reportsService.handleReport(id, finalStatus, admNo, finalResponse);
+            System.out.println("✅ 檢舉 #" + id + " 結案存檔成功，最終狀態：" + finalStatus + "，回覆文字：" + finalResponse);
             return "success";
         }catch (Exception e){
             return "error: " + e.getMessage();
@@ -155,9 +158,9 @@ public class ReportsController {
             }
 
             // 💡 3. 傳遞狀態讓側邊欄 active 正常顯示
-            // 修正：當狀態為「待處理」、「駁回」、「已下架」時，側邊欄應維持「待處理」的高亮
+            // 修正：只有「待處理」狀態的會在高亮區
             String s = report.getStatus();
-            String currentStatus = (s.equals("待處理") || s.equals("處理中") || s.equals("駁回") || s.equals("已下架")) ? "待處理" : "已處理";
+            String currentStatus = ("待處理".equals(s)) ? "待處理" : "已處理";
             model.addAttribute("currentStatus", currentStatus);
 
             return "templates-report/handle-report";
@@ -241,13 +244,12 @@ public class ReportsController {
         Page<Reports> reportPage;
 
         // ✅ 核心調整：
-        // 1. 待處理清單：包含 待處理、處理中、駁回、已下架。這樣案件才不會消失，且能補填回覆。
-        // 2. 已處理清單：僅包含 真正結案的「已處理」。
+        // 1. 待處理清單：依照組員需求，目前僅顯示真正「待處理」的案件。
+        // 2. 已處理清單：顯示所有「已處理」及「駁回」的結案案件。
         if ("待處理".equals(finalStatus)) {
-            List<String> statuses = Arrays.asList("待處理", "處理中", "駁回", "已下架");
-            reportPage = reportsService.getReportsByMultipleStatuses(statuses, page, pageSize);
+            reportPage = reportsService.getReportsByStatusWithPagination("待處理", page, pageSize);
         } else {
-            // ✅ 已處理區僅抓取最終完案狀態
+            // ✅ 已處理區抓取結案狀態
             reportPage = reportsService.getReportsByStatusWithPagination("已處理", page, pageSize);
         }
 
