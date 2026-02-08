@@ -24,6 +24,7 @@
         a { text-decoration: none; color: inherit; transition: .3s; }
         a:hover { color: #ff3333; }
 
+        /* 這裡保留 Header 的基本樣式，確保 Fragment 載入後排版正確 */
         header { flex-shrink: 0; z-index: 1050; position: relative; }
         header .top-bar { display: flex; justify-content: space-between; padding: 10px 40px; font-size: 12px; color: #ccc; border-bottom: 1px solid #333; }
         .top-icons { display: flex; gap: 20px; align-items: center; }
@@ -36,7 +37,6 @@
         .nav-links { display: flex; gap: 30px; font-size: 14px; align-items: center; }
         .nav-links a.active { color: #ff3333; }
 
-        /* 下拉選單通用容器 */
         .user-dropdown-container { position: relative; display: inline-block; }
         .dropdown-menu {
             display: none;
@@ -69,7 +69,7 @@
         .filter-btn.active { background: #ff3333; border-color: #ff3333; color: #fff; }
 
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.05); padding: 12px 15px; border: 1px solid #444; border-bottom: none; border-radius: 8px 8px 0 0; }
-        .action-btn.primary { background: #ff3333; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .action-btn primary { background: #ff3333; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
         .thread-list { border: 1px solid #444; background: rgba(0,0,0,.4); border-radius: 0 0 8px 8px; }
         .thread-row { display: flex; flex-direction: column; border-bottom: 1px solid #333; cursor: pointer; transition: 0.2s; }
@@ -110,7 +110,10 @@
         .chat-header { background: linear-gradient(135deg, #a00, #500); color: white; padding: 15px; font-weight: bold; border-radius: 8px 8px 0 0; }
         .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background-color: #0a0a0a; display: flex; flex-direction: column; gap: 15px; }
         .msg-row { display: flex; gap: 10px; align-items: flex-start; }
-        .msg-bubble { background: #222; padding: 8px 12px; border-radius: 12px; font-size: 13px; max-width: 85%; word-break: break-all; }
+
+        /* 🟢 唯一 CSS 修正：移除 break-all，改用 word-wrap 並加入 min-width */
+        .msg-bubble { background: #222; padding: 8px 12px; border-radius: 12px; font-size: 13px; max-width: 85%; word-wrap: break-word; min-width: fit-content; }
+
         .msg-row.self { flex-direction: row-reverse; }
         .msg-row.self .msg-bubble { background: #800; border-top-right-radius: 0; }
         .chat-footer { padding: 10px; background: #111; border-top: 1px solid #333; display: flex; gap: 8px; border-radius: 0 0 8px 8px; }
@@ -125,41 +128,7 @@
 
 <body>
 
-<header>
-    <div class="top-bar">
-        <div>Kar爾夏 Car Life Center</div>
-        <div class="top-icons">
-            <div class="search-box"><input type="text" placeholder="Search...">🔍</div>
-            👤 🛒
-        </div>
-    </div>
-    <div class="main-header">
-        <div class="logo">卡爾夏</div>
-        <nav class="nav-links">
-            <a href="#">商城</a>
-            <a href="#">安裝區</a>
-
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="forum-center-trigger" class="active">論壇 ▾</a>
-                <div id="forum-dropdown" class="dropdown-menu">
-                    <a th:href="@{/forum}">論壇首頁</a>
-                    <a th:href="@{/chat}" style="color: #ff3333">私訊中心</a>
-                </div>
-            </div>
-
-            <a href="#">公告</a>
-
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
-                <div id="member-dropdown" class="dropdown-menu">
-                    <a href="#">我的優惠券</a>
-                    <a href="#">我的收藏</a>
-                    <a href="/chat" style="color: #ff3333">私訊中心</a>
-                </div>
-            </div>
-        </nav>
-    </div>
-</header>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
 
 <div class="main-container">
     <aside class="left-sidebar">
@@ -214,7 +183,8 @@
                                 <i th:id="'fav-icon-' + ${post.postId}" th:class="${myFavIds != null and #lists.contains(myFavIds, post.postId)} ? 'fa-solid fa-star text-warning' : 'fa-regular fa-star'"></i>
                                 <span th:id="'fav-text-' + ${post.postId}" th:text="${myFavIds != null and #lists.contains(myFavIds, post.postId)} ? '取消收藏' : '收藏文章'"></span>
                             </div>
-                            <div class="post-dropdown-item" onclick="alert('已收到您的檢舉，管理員將盡快處理。')">
+                            <div class="post-dropdown-item"
+                                 th:onclick="|location.href='@{/reports/add(type='文章', targetID=${post.postId})}'|">
                                 <i class="fa-regular fa-flag"></i> 檢舉文章
                             </div>
                         </div>
@@ -290,23 +260,37 @@
     const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : "";
 
     var userName = /*[[${userName}]]*/ 'Guest';
-    var socket;
+    var socket = null;
 
-    document.getElementById('member-center-trigger').onclick = (e) => {
-        e.stopPropagation();
-        document.getElementById('forum-dropdown').classList.remove('show');
-        document.getElementById('member-dropdown').classList.toggle('show');
-    };
+    document.addEventListener('DOMContentLoaded', function() {
+        const memberTrigger = document.getElementById('member-center-trigger');
+        const memberDropdown = document.getElementById('member-dropdown');
+        const forumTrigger = document.getElementById('forum-center-trigger');
+        const forumDropdown = document.getElementById('forum-dropdown');
 
-    document.getElementById('forum-center-trigger').onclick = (e) => {
-        e.stopPropagation();
-        document.getElementById('member-dropdown').classList.remove('show');
-        document.getElementById('forum-dropdown').classList.toggle('show');
-    };
+        if (memberTrigger && memberDropdown) {
+            memberTrigger.onclick = (e) => {
+                e.stopPropagation();
+                if(forumDropdown) forumDropdown.classList.remove('show');
+                memberDropdown.classList.toggle('show');
+            };
+        }
+
+        if (forumTrigger && forumDropdown) {
+            forumTrigger.onclick = (e) => {
+                e.stopPropagation();
+                if(memberDropdown) memberDropdown.classList.remove('show');
+                forumDropdown.classList.toggle('show');
+            };
+        }
+        connect();
+    });
 
     window.onclick = () => {
-        if(document.getElementById('member-dropdown')) document.getElementById('member-dropdown').classList.remove('show');
-        if(document.getElementById('forum-dropdown')) document.getElementById('forum-dropdown').classList.remove('show');
+        const memberDropdown = document.getElementById('member-dropdown');
+        const forumDropdown = document.getElementById('forum-dropdown');
+        if(memberDropdown) memberDropdown.classList.remove('show');
+        if(forumDropdown) forumDropdown.classList.remove('show');
         document.querySelectorAll('.post-dropdown').forEach(d => d.classList.remove('show'));
     };
 
@@ -401,11 +385,13 @@
             var data = JSON.parse(e.data);
             if(data.type === 'chat') {
                 var isSelf = (data.sender === userName);
+
+                // 🟢 唯一修正：在 JS 生成字串時，注入 style 確保 test 不斷行
                 var html = `<div class="msg-row ${isSelf?'self':''}" style="display:flex; ${isSelf?'flex-direction:row-reverse;':''} gap:10px; margin-bottom:12px;">
-                    <div class="msg-avatar" style="width:32px; height:32px; border-radius:50%; overflow:hidden;"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${data.sender}" style="width:100%"/></div>
-                    <div class="msg-content" style="display:flex; flex-direction:column; ${isSelf?'align-items:flex-end;':''}">
+                    <div class="msg-avatar" style="width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0;"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${data.sender}" style="width:100%"/></div>
+                    <div class="msg-content" style="display:flex; flex-direction:column; ${isSelf?'align-items:flex-end;':''} min-width: 0;">
                         <div class="msg-name" style="font-size:11px; color:#888;">${data.sender}</div>
-                        <div class="msg-bubble" style="background:${isSelf?'#800':'#222'}; padding:8px 12px; border-radius:12px;">${data.message}</div>
+                        <div class="msg-bubble" style="background:${isSelf?'#800':'#222'}; padding:8px 12px; border-radius:12px; word-break: normal !important; overflow-wrap: anywhere !important; min-width: fit-content;">${data.message}</div>
                     </div>
                 </div>`;
                 document.getElementById('chat-box').insertAdjacentHTML('beforeend', html);
@@ -414,20 +400,24 @@
         };
     }
 
+    // 💡 修正 3：傳送前增加 socket 狀態檢查
     function sendMessage() {
         var input = document.getElementById('chat-input');
-        if (input.value.trim() && socket.readyState === 1) {
-            var chatData = {
-                type: "chat",
-                sender: userName,
-                receiver: "all",
-                message: input.value
-            };
-            socket.send(JSON.stringify(chatData));
-            input.value = '';
-        } else if (socket.readyState !== 1) {
-            console.error("❌ WebSocket 尚未連線。");
-            alert("連線已中斷，請重新整理頁面。");
+        if (socket && socket.readyState === 1) {
+            if (input.value.trim()) {
+                var chatData = {
+                    type: "chat",
+                    sender: userName,
+                    receiver: "all",
+                    message: input.value
+                };
+                socket.send(JSON.stringify(chatData));
+                input.value = '';
+            }
+        } else {
+            console.error("❌ WebSocket 尚未連線或已被中斷。");
+            alert("通訊連線尚未就緒，請稍候。");
+            connect(); // 嘗試自動重新連線
         }
     }
 
@@ -435,7 +425,6 @@
         if (e.key === 'Enter') { sendMessage(); }
     });
 
-    window.onload = function() { connect(); };
     function showLightbox(src, e) { e.stopPropagation(); document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').style.display = 'flex'; }
     /*]]>*/
 </script>
