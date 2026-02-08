@@ -173,7 +173,8 @@ public class AdminController {
         try {
             technicianService.createServiceItem(serviceName, admin);
         } catch (Exception e) {
-            // 忽略重複名稱錯誤
+            return "redirect:/admin/dashboard?tab=services&error=" +
+                    java.net.URLEncoder.encode("服務名稱已存在或發生錯誤", java.nio.charset.StandardCharsets.UTF_8);
         }
         return "redirect:/admin/dashboard?tab=services";
     }

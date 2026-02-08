@@ -202,4 +202,5 @@ public class SellerVO implements Serializable {
     public void setOrder(List<OrdVO> order) {
         this.order = order;
     }
+
 }

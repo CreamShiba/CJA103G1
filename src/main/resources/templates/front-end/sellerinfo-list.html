@@ -219,7 +219,7 @@
                 <button th:if="${seller.status == '已開通'}"
                         type="button" class="btn btn-info"
                         onclick="window.location.href='/product/dashboard'">
-                    <i class="fas fa-tachometer-alt"></i> 返回賣家中心
+                    <i class="fas fa-tachometer-alt"></i> 前往賣家中心
                 </button>
 
                 <button th:if="${seller.status != '已開通'}"
@@ -230,7 +230,7 @@
 
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i>
-                    <span th:text="${seller.status == '待審核' ? '修改並重新送審' : '儲存變更'}">儲存變更</span>
+                    <span th:text="${seller.status == '未通過' ? '重新送審' : '儲存變更'}">儲存變更</span>
                 </button>
             </div>
         </form>

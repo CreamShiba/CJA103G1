@@ -126,7 +126,7 @@
 
             <form th:action="@{/installation/apply-technician}" method="post" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label class="form-label">真實姓名</label>
+                    <label class="form-label">技師姓名</label>
                     <input type="text" name="realName" class="form-control"
                         th:value="${existingTech != null ? existingTech.realName : member.memName}" required>
                 </div>

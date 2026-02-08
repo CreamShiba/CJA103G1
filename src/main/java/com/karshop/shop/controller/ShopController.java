@@ -120,6 +120,8 @@ public class ShopController {
             // 如果已登入，去資料庫查詢是否有收藏紀錄
             FavoriteProduct existing = favoriteProductService.getOne(member.getMemNo(), prodNo);
             isFavorite = (existing != null);
+            List<MemberCarVO> myCars = memberCarService.getCarsByMemberId(member.getMemNo());
+            model.addAttribute("myCars", myCars);
         }
 
         // 將狀態傳遞給前端 Thymeleaf
