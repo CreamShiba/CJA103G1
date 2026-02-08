@@ -53,6 +53,8 @@
                         <a th:href="@{/pages/my-coupons}">我的優惠券</a>
                         <a th:href="@{/favorite/list-page}">我的收藏</a>
                         <a th:href="@{/pages/my-orders}">訂單查詢</a>
+                        <a th:href="@{/appeals/add}">申訴/檢舉</a>
+                        <a th:href="@{/members/notifications}">系統通知</a>
                         <form th:action="@{/members/logout}" method="post" id="logoutForm">
                             <a href="#" onclick="document.getElementById('logoutForm').submit(); return false;">
                                 登出 (Logout)
@@ -62,7 +64,9 @@
                 </div>
             </div>
 
-            <span id="cart" style="cursor: pointer;">🛒</span>
+            <a th:href="@{/cart/list}" id="cart" style="text-decoration: none; color: inherit;">
+                <span style="cursor: pointer;">🛒</span>
+            </a>
         </div>
     </div>
 
@@ -70,7 +74,7 @@
         <a th:href="@{/shop}" class="logo">卡爾夏</a>
         <nav class="nav-links">
             <a th:href="@{/shop}">商城</a>
-            <a href="#">安裝區</a>
+            <a th:href="@{/installation/home}">安裝區</a>
             <div class="user-dropdown-container">
                 <a href="javascript:void(0)" id="forum-center-trigger">論壇 ▾</a>
                 <div id="forum-dropdown" class="dropdown-menu">
@@ -78,8 +82,8 @@
                     <a th:href="@{/chat}" style="color: #ff3333">私訊中心</a>
                 </div>
             </div>
-            <a href="#">公告</a>
-            <a href="#">常見問題</a>
+            <a th:href="@{/announcement}">公告</a>
+            <a th:href="@{/faq}">常見問題</a>
         </nav>
     </div>
 </header>

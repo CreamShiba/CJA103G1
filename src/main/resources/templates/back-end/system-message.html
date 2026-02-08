@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Autopile Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/back-end/admin_index.css" th:href="@{/css/back-end/admin_index.css}">
+    <link rel="stylesheet" href="/css/back-end/system-message.css">
+    <link rel="stylesheet" th:href="@{/css/fragments/admin_sidebar.css}">
+</head>
+<body>
+<div class="app-container">
+    <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='system-message')}"></aside>
+
+    <main class="main-content">
+        <header class="top-bar">
+            <h2 class="page-title">系統通知管理系統</h2>
+            <div class="user-profile">
+                <span>Admin</span>
+                <div class="avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <div class="left-panel">
+
+                <section class="card-box">
+                    <div class="card-title">
+                        <i class="fas" th:classappend="${isEdit ? 'fa-edit' : 'fa-plus-circle'}"></i>
+                        <span th:text="${isEdit ? '編輯系統通知' : '新增系統通知'}"></span>
+                    </div>
+
+                    <form th:action="${isEdit ? '/admins/system-message/update' : '/admins/system-message/create'}"
+                          method="post" th:object="${editMessage}">
+
+                        <input type="hidden" name="id" th:if="${isEdit}" th:value="*{message_no}">
+
+                        <label>發送對象 (會員名稱 - ID)</label>
+                        <select class="form-control" th:field="*{member_no}" th:disabled="${isEdit}" required>
+                            <option value="">-- 請選擇收件人 --</option>
+                            <option value="0" style="color: #3498db; font-weight: bold;">📢 發送給全體會員</option>
+                            <option th:each="m : ${members}"
+                                    th:value="${m.memNo}"
+                                    th:text="${m.memName + ' (ID: ' + m.memNo + ')'}">
+                            </option>
+                        </select>
+                        <input type="hidden" th:if="${isEdit}" name="member_no" th:value="*{member_no}">
+
+                        <label>通知內容</label>
+                        <textarea class="form-control" th:field="*{message_content}" rows="5" placeholder="請輸入通知內容..." required></textarea>
+
+                        <button type="submit" class="add-btn" style="width: 100%; height: 45px; background: #2c3e50; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
+                            <i class="fas fa-paper-plane"></i> <span th:text="${isEdit ? '儲存修改' : '立即發送'}"></span>
+                        </button>
+
+                        <a th:if="${isEdit}" th:href="@{/admins/system-message}" style="display: block; text-align: center; margin-top: 15px; color: #888; text-decoration: none; font-size: 14px;">
+                            <i class="fas fa-times"></i> 取消編輯
+                        </a>
+                    </form>
+                </section>
+
+                <section class="card-box" style="background: #fdfdfd; border-left: 4px solid #3498db;">
+                    <div class="card-title"><i class="fas fa-info-circle"></i> 管理指南</div>
+                    <ul style="font-size: 13px; color: #666; line-height: 2; padding-left: 20px; margin: 0;">
+                        <li><b>個別發送：</b>從列表選擇特定會員。</li>
+                        <li><b>全體發送：</b>選擇「📢 全體會員」，系統將為每位會員建立通知紀錄。</li>
+                        <li><b>內容：</b>支援純文字，上限 500 字。</li>
+                    </ul>
+                </section>
+            </div>
+
+            <div class="right-panel">
+                <section class="card-box">
+                    <div class="card-title"><i class="fas fa-list"></i> 通知記錄列表</div>
+
+                    <div class="table-scroll-container" style="max-height: 500px; overflow-y: auto; border: 1px solid #eee; border-radius: 4px;">
+                        <table>
+                            <thead>
+                            <tr style="position: sticky; top: 0; background: #f8f9fa; z-index: 1;">
+                                <th width="80">ID</th>
+                                <th width="120">收件會員</th>
+                                <th>內容摘要</th>
+                                <th width="100">狀態</th>
+                                <th width="100">操作</th>
+                            </tr>
+                            </thead>
+                        <tbody>
+                        <tr th:each="msg : ${messages}">
+                            <td th:text="${msg.message_no}"></td>
+                            <td>
+                                <i class="fas fa-user-circle" style="color: #ccc;"></i>
+                                <span th:text="${' ID: ' + msg.member_no}"></span>
+                            </td>
+                            <td th:text="${#strings.abbreviate(msg.message_content, 35)}"></td>
+                            <td>
+                                <span th:class="${msg.message_status ? 'status-badge status-read' : 'status-badge status-unread'}"
+                                      th:text="${msg.message_status ? '已讀' : '未讀'}"></span>
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 15px;">
+                                    <a th:href="@{/admins/system-message(editId=${msg.message_no})}" title="編輯" style="color: #3498db; font-size: 18px;"><i class="fas fa-edit"></i></a>
+                                    <form th:action="@{/admins/system-message/delete}" method="post" onsubmit="return confirm('確定要刪除此通知嗎？');">
+                                        <input type="hidden" name="id" th:value="${msg.message_no}">
+                                        <button type="submit" style="background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 18px;"><i class="fas fa-trash-alt"></i></button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(messages)}">
+                            <td colspan="5" style="text-align: center; color: #999; padding: 40px;">目前尚無通知記錄</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script th:src="@{/js/back-end/admin_index.js}"></script>
+<script th:src="@{/js/back-end/system-message.js}"></script>
+</body>
+</html>

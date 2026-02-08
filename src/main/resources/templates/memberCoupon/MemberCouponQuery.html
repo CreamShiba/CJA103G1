@@ -4,11 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>我的優惠券 | 卡爾夏汽車百貨</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
     <link rel="stylesheet" th:href="@{/css/memberCouponStyle.css}">
 
     <link rel="stylesheet" th:href="@{/css/fragments/front_header.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
+    <style>
+        .container{
+            max-width: 95% !important;
+            padding-right: 20px;
+        }
+    </style>
 </head>
 <body>
 
@@ -19,16 +26,6 @@
 <div class="container">
     <!-- 側邊欄 -->
     <aside th:replace="~{fragments/member_center_sidebar :: memberCenterSidebar}"></aside>
-<!--    <aside>-->
-<!--        <div class="sidebar-section">-->
-<!--            <h3 class="sidebar-title">會員中心</h3>-->
-<!--            <ul class="category-list" id="category-list">-->
-<!--                <li><a th:href="@{/pages/my-coupons}" onclick="navigateTo('coupons')">我的優惠券</a></li>-->
-<!--                <li><a th:href="@{/favorite/list-page}" onclick="navigateTo('favorite')">我的收藏</a></li>-->
-<!--                <li><a th:href="@{/pages/my-orders}">訂單查詢</a></li>-->
-<!--            </ul>-->
-<!--        </div>-->
-<!--    </aside>-->
 
     <!-- 主要內容區 -->
     <main class="content-area">

@@ -30,11 +30,13 @@ public class SellerInfoService {
         return repository.save(seller);
     }
 
+
     @Transactional
     public SellerInfo updateSeller(SellerInfo seller) {
         SellerInfo existingSeller = repository.findById(seller.getSeller_no())
                 .orElseThrow(() -> new RuntimeException("賣家不存在,編號:" + seller.getSeller_no()));
 
+        // 基本資料更新
         if (seller.getShop_name() != null) existingSeller.setShop_name(seller.getShop_name());
         if (seller.getSeller_name() != null) existingSeller.setSeller_name(seller.getSeller_name());
         if (seller.getPhone() != null) existingSeller.setPhone(seller.getPhone());
@@ -45,9 +47,17 @@ public class SellerInfoService {
         if (seller.getBank_code() != null) existingSeller.setBank_code(seller.getBank_code());
         if (seller.getBank_account() != null) existingSeller.setBank_account(seller.getBank_account());
         if (seller.getAccount_holder() != null) existingSeller.setAccount_holder(seller.getAccount_holder());
+        if (seller.getSeller_tax_id() != null) existingSeller.setSeller_tax_id(seller.getSeller_tax_id());
 
+        // ✅ 關鍵修正：必須把 Controller 傳過來的「待審核」狀態存進去
+        if (seller.getStatus() != null) {
+            existingSeller.setStatus(seller.getStatus());
+        }
 
-        if (seller.getImage_path() != null) existingSeller.setImage_path(seller.getImage_path());
+        // 圖片路徑更新
+        if (seller.getImage_path() != null) {
+            existingSeller.setImage_path(seller.getImage_path());
+        }
 
         return repository.save(existingSeller);
     }

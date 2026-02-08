@@ -19,18 +19,32 @@
 <aside th:replace="~{fragments/front_sidebar :: frontSidebar}"></aside>
     <main style="flex: 1;">
 
-        <div th:if="${sellerNo != null}"
+        <div th:if="${currentSeller != null}"
              style="background: rgba(255, 51, 51, 0.1); border: 1px solid #ff3333; color: #ff3333; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
 
-        <span style="font-size: 15px; font-weight: 500; display: flex; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img th:src="${currentSeller.imagePath != null && currentSeller.imagePath != '' ? currentSeller.imagePath : 'https://ui-avatars.com/api/?name=' + (currentSeller.shopName != null && currentSeller.shopName != '' ? currentSeller.shopName : currentSeller.sellerName) + '&background=random'}"
+                     alt="賣家頭像"
+                     style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 51, 51, 0.5);">
+
+                <span style="font-size: 15px; font-weight: 500; display: flex; align-items: center;">
             <i class="fas fa-store-alt" style="margin-right: 8px; font-size: 18px;"></i>
             您正在瀏覽
-            <span th:text="${sellerName}" style="font-weight: bold; margin: 0 5px; color: white; border-bottom: 1px dashed #ff3333;"></span>
+            <span th:text="${currentSeller.shopName != null && currentSeller.shopName != '' ? currentSeller.shopName : currentSeller.sellerName}"
+                  style="font-weight: bold; margin: 0 5px; color: white; border-bottom: 1px dashed #ff3333; font-size: 1.1em;">
+            </span>
             的專屬賣場
+                <!--收藏功能-->
+                <button id="favStoreBtn"
+                        th:data-sellerno="${currentSeller.sellerNo}"
+                        th:class="${isFavorite} ? 'fav-btn active' : 'fav-btn'">
+                    <span th:text="${isFavorite} ? '已收藏' : '收藏賣場'"></span>
+                </button>
         </span>
+            </div>
 
             <a th:href="@{/shop}"
-               style="background: #ff3333; color: white; padding: 6px 15px; border-radius: 4px; font-size: 13px; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 5px; transition: 0.3s;">
+               style="background: #ff3333; color: white; padding: 8px 20px; border-radius: 30px; font-size: 13px; font-weight: bold; text-decoration: none; display: flex; align-items: center; gap: 8px; transition: 0.3s; box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);">
                 <i class="fas fa-home"></i> 返回商城首頁
             </a>
         </div>
@@ -45,7 +59,7 @@
                 我們找不到符合您搜尋條件的商品，請嘗試更換關鍵字或調整價格範圍。
             </p>
 
-            <a th:href="@{/shop(sellerNo=${sellerNo})}"
+            <a th:href="@{/shop(carCategoryNo=${carCategoryNo},sellerNo=${sellerNo})}"
                style="display: inline-block; padding: 10px 25px; background: #333; color: white; border-radius: 30px; text-decoration: none; font-size: 14px; transition: 0.3s;">
                 <i class="fas fa-undo"></i> 清除搜尋條件
             </a>
@@ -53,10 +67,10 @@
 
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px;">
 
-            <a th:each="product : ${productPage.content}"
-               th:href="@{/product/detail(prodNo=${product.prodNo})}"
-               class="product-card-link"
-               style="text-decoration: none; color: inherit;">
+            <div th:each="product : ${productPage.content}"
+                 class="product-card-link"
+                 style="text-decoration: none; color: inherit; cursor: pointer; position: relative;"
+                 th:onclick="|window.location.href='@{/product/detail(prodNo=${product.prodNo})}'|">
 
                 <div class="product-card">
 
@@ -67,6 +81,12 @@
                              class="product-img-skeleton"
                              alt="商品圖片"
                              onload="this.style.animation='none'; this.style.backgroundImage='none'; this.style.backgroundColor='transparent';">
+
+                        <a th:href="@{/shop(productCategoryNo=${product.productCategory.productCategoryNo}, carCategoryNo=${product.carCategory != null ? product.carCategory.carCategoryNo : ''})}"
+                           class="find-similar-btn"
+                           onclick="event.stopPropagation();">
+                            找相似
+                        </a>
                     </div>
 
                     <div style="padding: 15px 20px 20px 20px; text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
@@ -91,7 +111,7 @@
                     </div>
 
                 </div>
-            </a>
+            </div>
         </div>
 
         <div class="pagination-area" th:if="${productPage.totalPages > 0}" style="margin-top: 40px; text-align: center;">

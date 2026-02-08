@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>檢舉中心 - 卡爾夏汽車百貨</title>
     <style>
         /* --- 基礎設定 --- */
@@ -547,43 +547,7 @@
 </head>
 <body>
 
-<header>
-    <div class="top-bar">
-        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
-        <div class="top-icons">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Search..."
-                       style="background: transparent; border: none; color: white; width: 100%; outline: none;">
-                <span>🔍</span>
-            </div>
-            <div class="user-dropdown-container">
-                <span id="user-icon" style="cursor: pointer;">👤</span>
-                <div id="user-dropdown" class="dropdown-menu">
-                    <a href="#">登入</a> <a href="#">註冊</a>
-                </div>
-            </div>
-            <span id="cart">🛒</span>
-        </div>
-    </div>
-
-    <div class="main-header">
-        <div class="logo">卡爾夏</div>
-        <nav class="nav-links">
-            <a href="#">商城</a> <a href="#">安裝區</a>
-            <a href="#">論壇</a> <a href="#">公告</a><a href="#">常見問題</a>
-
-            <div class="user-dropdown-container">
-                <a href="javascript:void(0)" id="member-center-trigger">會員中心 ▾</a>
-                <div id="member-dropdown" class="dropdown-menu">
-                    <a href="#" onclick="navigateTo('coupons')">我的優惠券</a>
-                    <a href="#" onclick="navigateTo('favorite')">我的收藏</a>
-                    <a href="#" onclick="navigateTo('orderInfo')">訂單查詢</a>
-                    <a href="/appeals/add">申訴/檢舉</a>
-                </div>
-            </div>
-        </nav>
-    </div>
-</header>
+<header th:replace="fragments/front_header :: frontHeader"></header>
 
 <div class="container">
 
@@ -607,7 +571,7 @@
             <form th:action="@{/reports/submit}" method="post" id="reportForm">
                 <div class="form-section">
                     <div class="form-group">
-                        <label for="reportsTarget">檢舉對象 (會員帳號/文章編號)</label>
+                        <label for="reportsTarget">檢舉對象 (商品名稱/文章標題/賣家名稱/評論)</label>
                         <input type="text" id="reportsTarget" name="reportsTarget"
                                placeholder="請輸入對象 ID">
                     </div>
@@ -749,6 +713,37 @@
     const selectedTags = document.getElementById('selectedTags');
     const hiddenInput = document.getElementById('reportsReason');
 
+    // 💡 論壇連動監測腳本 (關鍵新增)
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. 讀取網址參數
+        const urlParams = new URLSearchParams(window.location.search);
+        const typeFromUrl = urlParams.get('type');       // 預期拿到 '文章'
+        const idFromUrl = urlParams.get('targetID');     // 預期拿到 文章編號
+
+        const typeSelect = document.getElementById('reportsType');
+        const targetInput = document.getElementById('reportsTarget');
+        const reportForm = document.getElementById('reportForm');
+
+        // 2. 如果網址帶參數，執行自動防呆
+        if (typeFromUrl && idFromUrl) {
+            if (typeSelect && targetInput) {
+                // 自動選為「文章」並禁用選單 (防呆鎖死)
+                typeSelect.value = typeFromUrl;
+                typeSelect.disabled = true;
+                typeSelect.classList.add('has-value');
+
+                // 自動填入編號並設為唯讀
+                targetInput.value = idFromUrl;
+                targetInput.readOnly = true;
+
+                // 觸發一次類別變更事件，讓檢舉原因清單跑出來
+                typeSelect.dispatchEvent(new Event('change'));
+
+                console.log("✅ 論壇連動成功：已自動鎖定類別與編號");
+            }
+        }
+    });
+
     multiSelectDisplay.addEventListener('click', function(e) {
         if (e.target.classList.contains('multi-select-tag-remove')) return;
         multiSelectDropdown.classList.toggle('show');
@@ -844,8 +839,11 @@
     });
 
     document.getElementById('submitBtn').addEventListener('click', function(e) {
-        const target = document.getElementById('reportsTarget').value.trim();
-        const type = document.getElementById('reportsType').value;
+        const targetInput = document.getElementById('reportsTarget');
+        const typeSelect = document.getElementById('reportsType');
+
+        const target = targetInput.value.trim();
+        const type = typeSelect.value;
         const otherReason = document.getElementById('otherReasonInput').value.trim();
         const email = document.getElementById('email').value.trim();
         const description = document.getElementById('reportsDescription').value.trim();
@@ -860,6 +858,16 @@
         if (!description) { showModal('請填寫問題詳細描述!'); return; }
 
         if (type === "其他") hiddenInput.value = otherReason;
+
+        // 💡 關鍵修正：因 disabled 欄位不會被 submit，所以送出前補一個 hidden input 傳 reportsType
+        if (typeSelect.disabled) {
+            const hiddenTypeField = document.createElement('input');
+            hiddenTypeField.type = 'hidden';
+            hiddenTypeField.name = 'reportsType';
+            hiddenTypeField.value = type;
+            document.getElementById('reportForm').appendChild(hiddenTypeField);
+        }
+
         document.getElementById('reportForm').submit();
     });
 

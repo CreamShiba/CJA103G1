@@ -1,11 +1,12 @@
 package com.karshop.report.controller;
 
-import com.karshop.report.model.InstallAppeals;
-import com.karshop.report.model.ProductAppeals;
-import com.karshop.report.model.InstallAppealImage;
-import com.karshop.report.model.ProductAppealImage;
+import com.karshop.report.model.*;
 import com.karshop.report.service.InstallAppealsService;
 import com.karshop.report.service.ProductAppealsService;
+import com.karshop.report.repository.OrdForReportRepository; // 💡 注入妳剛創的 Repository
+import com.karshop.report.repository.InstallOrderForReportRepository; // 💡 注入妳剛創的 Repository
+import com.karshop.members.model.MembersVO; // 💡 必須 import 組員的 VO 才能讀取 Session
+import com.karshop.members.model.MembersService; // 💡 注入 MembersService 以取得會員詳細資料
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +27,43 @@ public class InstallAppealsController {
     @Autowired
     private ProductAppealsService productAppealsService;
 
-    // 顯示新增申訴的 HTML 頁面
+    @Autowired
+    private MembersService membersService; // 💡 注入會員服務
+
+    // 💡 注入妳自己創立的讀取 Repository，不影響組員進度
+    @Autowired
+    private OrdForReportRepository ordForReportRepository;
+
+    @Autowired
+    private InstallOrderForReportRepository installOrderForReportRepository;
+
+    // 💡 修改後的顯示新增申訴頁面：自動抓取會員的訂單
     @GetMapping("/add")
-    public String showAddPage() {
+    public String showAddPage(HttpSession session, Model model) {
+        // 1. 從 Session 取得組員存入的 member 物件
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        Integer memberNo;
+
+        // 2. 判斷與測試模式
+        if (member != null) {
+            // 正常流程：從物件中拿到會員編號
+            memberNo = member.getMemNo();
+            System.out.println("✅ 偵測到登入身分：" + member.getMemName() + " (ID: " + memberNo + ")");
+        } else {
+            // 測試模式：如果沒登入，強迫導向登入頁面，並記錄原本想去的位子
+            System.out.println("⚠️ 頁面載入測試：未偵測到 Session，自動導向登入頁面");
+            session.setAttribute("location", "/appeals/add");
+            return "redirect:/members/login";
+        }
+
+        // 3. 自動抓取該會員所有的商品訂單與安裝訂單
+        List<OrdForReport> productOrders = ordForReportRepository.findByMemberNo(memberNo);
+        List<InstallOrderForReport> installOrders = installOrderForReportRepository.findByMemberNo(memberNo);
+
+        // 4. 將訂單資料傳往前端 HTML
+        model.addAttribute("productOrders", productOrders);
+        model.addAttribute("installOrders", installOrders);
+
         return "templates-report/add-appeal";
     }
 
@@ -44,15 +79,17 @@ public class InstallAppealsController {
 
         String categories = (types != null) ? String.join(",", types) : "";
 
-        // 💡 從 Session 取得當前登入會員編號
-        Integer memberNo = (Integer) session.getAttribute("memberNo");
+        // 💡 從 Session 取得當前登入會員物件
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        Integer memberNo;
 
-        // 💡 測試模式：如果沒登入，使用假資料 memberNo = 4
-        if (memberNo == null) {
-            System.out.println("⚠️ 測試模式：未從 Session 取得會員編號，使用假資料 memberNo = 4");
-            memberNo = 4;
+        // 💡 登入狀態判斷
+        if (member != null) {
+            memberNo = member.getMemNo();
+            System.out.println("✅ 提交申訴 - 偵測到會員編號：" + memberNo);
         } else {
-            System.out.println("✅ 從 Session 取得會員編號：" + memberNo);
+            System.out.println("⚠️ 提交申訴 - 未偵測到登入，導向登入頁面");
+            return "redirect:/members/login";
         }
 
         if ("install".equals(appealType)) {
@@ -75,23 +112,35 @@ public class InstallAppealsController {
             System.out.println("✅ 新增安裝申訴成功！編號：" + appeal.getAppealsNo() + "，會員：" + memberNo + "，狀態：" + appeal.getStatus());
 
         } else if ("product".equals(appealType)) {
-            ProductAppeals productAppeal = new ProductAppeals();
-            productAppeal.setOrdNo(orderNo);
-            productAppeal.setCategories(categories);
-            productAppeal.setDescription(description);
-            productAppeal.setStatus("待處理"); // ✅ 統一使用「待處理」
-            productAppeal.setResponse("尚未回覆");
-            productAppeal.setPriority("一般");
-            productAppeal.setApplyDate(LocalDateTime.now());
-            productAppeal.setUpdatedDate(LocalDateTime.now());
-            productAppeal.setMemberNo(memberNo);
-            productAppeal.setAdmNo(10);
-            productAppeal.setTargetMemberNo(999);
+            // ✅ 加入 try-catch 處理訂單驗證錯誤
+            try {
+                ProductAppeals productAppeal = new ProductAppeals();
+                productAppeal.setOrdNo(orderNo);
+                productAppeal.setCategories(categories);
+                productAppeal.setDescription(description);
+                productAppeal.setStatus("待處理"); // ✅ 統一使用「待處理」
+                productAppeal.setResponse("尚未回覆");
+                productAppeal.setPriority("一般");
+                productAppeal.setApplyDate(LocalDateTime.now());
+                productAppeal.setUpdatedDate(LocalDateTime.now());
+                productAppeal.setMemberNo(memberNo);
+                productAppeal.setAdmNo(10);
+                productAppeal.setTargetMemberNo(999);
 
-            productAppealsService.insert(productAppeal);
-            saveProductImages(productAppeal.getAppealsNo(), images);
+                // ✅ 這裡會進行訂單驗證（訂單存在 + 申訴人是買家）
+                productAppealsService.insert(productAppeal);
+                saveProductImages(productAppeal.getAppealsNo(), images);
 
-            System.out.println("✅ 新增商品申訴成功！編號：" + productAppeal.getAppealsNo() + "，會員：" + memberNo + "，狀態：" + productAppeal.getStatus());
+                System.out.println("✅ 新增商品申訴成功！編號：" + productAppeal.getAppealsNo() + "，會員：" + memberNo + "，狀態：" + productAppeal.getStatus());
+
+            } catch (RuntimeException e) {
+                // ❌ 驗證失敗的錯誤處理
+                System.err.println("❌ 商品申訴提交失敗: " + e.getMessage());
+                model.addAttribute("error", e.getMessage());
+                model.addAttribute("orderNo", orderNo);
+                model.addAttribute("appealType", appealType);
+                return "templates-report/appeal-error"; // 顯示錯誤頁面
+            }
         }
 
         model.addAttribute("orderNo", orderNo);
@@ -132,14 +181,16 @@ public class InstallAppealsController {
     // ===== 前台申訴紀錄 =====
     @GetMapping("/history")
     public String showAppealHistory(HttpSession session, Model model) {
-        Integer memberNo = (Integer) session.getAttribute("memberNo");
+        // 1. 同步抓取 member 物件
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        Integer memberNo = (member != null) ? member.getMemNo() : null;
 
         // 測試模式：如果沒登入，顯示所有假資料
         boolean testMode = (memberNo == null);
         if (testMode) {
-            System.out.println("⚠️ 測試模式：未從 Session 取得會員編號，顯示所有申訴紀錄");
+            System.out.println("⚠️ 測試模式：未從 Session 取得會員物件，顯示所有申訴紀錄");
         } else {
-            System.out.println("✅ 會員模式：顯示會員 " + memberNo + " 的申訴紀錄");
+            System.out.println("✅ 會員模式：顯示會員 " + member.getMemName() + " 的申訴紀錄");
         }
 
         List<Map<String, Object>> allAppeals = new ArrayList<>();
@@ -223,51 +274,49 @@ public class InstallAppealsController {
         return "templates-report/appeal-detail";
     }
 
-    // ===== 後台申訴清單頁面（Thymeleaf 渲染）=====
+    // ===== 後台申訴清單頁面：修正幽靈頁面問題 =====
     @GetMapping("/admin/list")
     public String showInstallAdminPage(
             @RequestParam(value = "status", required = false, defaultValue = "待處理") String status,
             Model model) {
 
-        System.out.println("💡 後台申訴清單 - 查詢狀態：「" + status + "」");
+        // 💡 狀態校準器：只接受「待處理」與「已處理」，對齊字串防止幽靈頁面
+        final String finalStatus = (status.contains("處理") && !status.equals("待處理")) ? "已處理" : status;
+        System.out.println("💡 後台申訴清單 - 查詢狀態校準為：「" + finalStatus + "」");
 
         List<Map<String, Object>> allAppeals = new ArrayList<>();
 
         try {
             // 取得所有安裝申訴
             List<InstallAppeals> installList = installAppealsService.getAllInstallAppeals();
-            System.out.println("💡 總共查到 " + installList.size() + " 筆安裝申訴");
-
             for (InstallAppeals appeal : installList) {
-                System.out.println("💡 安裝申訴 #" + appeal.getAppealsNo() + " 狀態：「" + appeal.getStatus() + "」");
+                // 向後兼容以前改過的狀態字串
+                String currentStatus = appeal.getStatus();
+                if ("已結案".equals(currentStatus)) currentStatus = "檢舉";
 
-                // ✅ 只加入符合狀態的申訴
-                if (appeal.getStatus().equals(status)) {
+                if (currentStatus.equals(finalStatus)) {
                     Map<String, Object> map = new HashMap<>();
                     map.put("appealsNo", appeal.getAppealsNo());
                     map.put("orderNo", appeal.getInstallOrderNo());
                     map.put("type", "install");
                     map.put("title", appeal.getCategories() != null ? appeal.getCategories() : "其他");
-                    map.put("status", appeal.getStatus());
+                    map.put("status", currentStatus);
                     map.put("applyDate", appeal.getApplyDate());
+                    // 💡 把管理員手寫的回覆內容也塞進去
+                    map.put("adminResponse", appeal.getResponse() != null ? appeal.getResponse() : "尚未回覆");
                     allAppeals.add(map);
                 }
             }
-        } catch (Exception e) {
-            System.err.println("取得安裝申訴清單失敗: " + e.getMessage());
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
 
         try {
             // 取得所有商品申訴
             List<ProductAppeals> productList = productAppealsService.getAll();
-            System.out.println("💡 總共查到 " + productList.size() + " 筆商品申訴");
-
             for (ProductAppeals appeal : productList) {
-                System.out.println("💡 商品申訴 #" + appeal.getAppealsNo() + " 狀態：「" + appeal.getStatus() + "」");
+                String currentStatus = appeal.getStatus();
+                if ("已結案".equals(currentStatus)) currentStatus = "已處理";
 
-                // ✅ 只加入符合狀態的申訴
-                if (appeal.getStatus().equals(status)) {
+                if (currentStatus.equals(finalStatus)) {
                     Map<String, Object> map = new HashMap<>();
                     map.put("appealsNo", appeal.getAppealsNo());
                     map.put("orderNo", appeal.getOrdNo());
@@ -275,19 +324,16 @@ public class InstallAppealsController {
                     map.put("title", appeal.getCategories() != null && !appeal.getCategories().isEmpty()
                             ? appeal.getCategories()
                             : "[商品] 單號: " + appeal.getOrdNo());
-                    map.put("status", appeal.getStatus());
+                    map.put("status", currentStatus);
                     map.put("applyDate", appeal.getApplyDate());
+                    // 💡 把商品申訴的管理員回覆也塞進去
+                    map.put("adminResponse", appeal.getResponse() != null ? appeal.getResponse() : "尚未回覆");
                     allAppeals.add(map);
                 }
             }
-        } catch (Exception e) {
-            System.err.println("取得商品申訴清單失敗: " + e.getMessage());
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
 
-        System.out.println("💡 過濾狀態「" + status + "」後剩下 " + allAppeals.size() + " 筆");
-
-        // 按時間排序（最新的在前）
+        // 按時間排序
         allAppeals.sort((a, b) -> {
             LocalDateTime dateA = (LocalDateTime) a.get("applyDate");
             LocalDateTime dateB = (LocalDateTime) b.get("applyDate");
@@ -298,7 +344,7 @@ public class InstallAppealsController {
 
         // 傳遞資料到 Thymeleaf
         model.addAttribute("appeals", allAppeals);
-        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentStatus", finalStatus); // 💡 重要：傳回校準後的狀態
 
         return "templates-report/admin-install-list";
     }
@@ -308,7 +354,6 @@ public class InstallAppealsController {
     @ResponseBody
     public List<Map<String, Object>> showAllAppeals() {
         List<Map<String, Object>> result = new ArrayList<>();
-
         try {
             List<InstallAppeals> installList = installAppealsService.getAllInstallAppeals();
             for (InstallAppeals appeal : installList) {
@@ -317,34 +362,22 @@ public class InstallAppealsController {
                 map.put("orderNo", appeal.getInstallOrderNo());
                 map.put("type", "install");
                 map.put("title", appeal.getCategories() != null ? appeal.getCategories() : "其他");
-                map.put("status", appeal.getStatus()); // ✅ 直接使用資料庫的狀態
+                map.put("status", appeal.getStatus());
                 map.put("applyDate", appeal.getApplyDate());
                 result.add(map);
             }
-        } catch (Exception e) {
-            System.err.println("取得安裝申訴清單失敗: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        try {
             List<ProductAppeals> productList = productAppealsService.getAll();
             for (ProductAppeals appeal : productList) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("appealsNo", appeal.getAppealsNo());
                 map.put("orderNo", appeal.getOrdNo());
                 map.put("type", "product");
-                map.put("title", appeal.getCategories() != null && !appeal.getCategories().isEmpty()
-                        ? appeal.getCategories()
-                        : "[商品] 單號: " + appeal.getOrdNo());
-                map.put("status", appeal.getStatus()); // ✅ 直接使用資料庫的狀態
+                map.put("title", appeal.getCategories() != null && !appeal.getCategories().isEmpty() ? appeal.getCategories() : "[商品] 單號: " + appeal.getOrdNo());
+                map.put("status", appeal.getStatus());
                 map.put("applyDate", appeal.getApplyDate());
                 result.add(map);
             }
-        } catch (Exception e) {
-            System.err.println("取得商品申訴清單失敗: " + e.getMessage());
-            e.printStackTrace();
-        }
-
+        } catch (Exception e) { e.printStackTrace(); }
         return result;
     }
 
@@ -356,7 +389,9 @@ public class InstallAppealsController {
                                              @RequestParam String status,
                                              @RequestParam Integer admNo) {
         try {
-            installAppealsService.handleInstallAppeal(id, response, status, admNo);
+            // 💡 強制校準：處理完統一存為「已處理」
+            String finalStatus = "已處理";
+            installAppealsService.handleInstallAppeal(id, response, finalStatus, admNo);
             return "success";
         } catch (Exception e) {
             return "error: " + e.getMessage();
@@ -371,7 +406,9 @@ public class InstallAppealsController {
                                              @RequestParam String status,
                                              @RequestParam Integer admNo) {
         try {
-            productAppealsService.handleProductAppeal(id, response, status, admNo);
+            // 💡 強制校準：處理完統一存為「已處理」
+            String finalStatus = "已處理";
+            productAppealsService.handleProductAppeal(id, response, finalStatus, admNo);
             return "success";
         } catch (Exception e) {
             return "error: " + e.getMessage();
@@ -390,6 +427,15 @@ public class InstallAppealsController {
             model.addAttribute("appeal", appeal);
             model.addAttribute("images", images);
             model.addAttribute("type", "product");
+
+            // 💡 取得申訴會員資訊
+            if (appeal.getMemberNo() != null) {
+                MembersVO m = membersService.getOneMember(appeal.getMemberNo());
+                model.addAttribute("memberName", m != null ? m.getMemUsername() : "不明會員");
+            } else {
+                model.addAttribute("memberName", "訪客");
+            }
+
             return "templates-report/handle-appeal";
         } else {
             InstallAppeals appeal = installAppealsService.getAppealById(id);
@@ -397,6 +443,15 @@ public class InstallAppealsController {
             model.addAttribute("appeal", appeal);
             model.addAttribute("images", images);
             model.addAttribute("type", "install");
+
+            // 💡 取得申訴會員資訊
+            if (appeal.getMemberNo() != null) {
+                MembersVO m = membersService.getOneMember(appeal.getMemberNo());
+                model.addAttribute("memberName", m != null ? m.getMemUsername() : "不明會員");
+            } else {
+                model.addAttribute("memberName", "訪客");
+            }
+
             return "templates-report/handle-appeal";
         }
     }

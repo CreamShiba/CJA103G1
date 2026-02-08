@@ -210,3 +210,86 @@ aside {
     object-fit: contain;
     transition: transform 0.5s ease;
 }
+
+/* --- index2.css 新增內容 --- */
+
+/* 1. 確保圖片容器是相對定位，讓按鈕可以依據它定位 */
+.product-img-container {
+    position: relative; /* 關鍵 */
+    overflow: hidden;   /* 藏住滑下去的按鈕 */
+}
+
+/* 2. 找相似按鈕樣式 */
+.find-similar-btn {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 8px 0;
+    background-color: rgba(255, 87, 34, 0.95); /* 蝦皮橘紅色 */
+    color: white;
+
+    /* 🔥 新增這一行：文字陰影 */
+    /* 參數說明：X偏移 Y偏移 模糊半徑 顏色(黑色半透明) */
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    z-index: 10;
+
+    /* 動畫設定：預設往下推 100% (藏起來) */
+    transform: translateY(100%);
+    transition: transform 0.3s ease-in-out;
+}
+
+/* 3. 滑鼠移入卡片時的效果 */
+/* 注意：這裡要配合您 index2.html 的卡片 class */
+.product-card-link:hover .find-similar-btn {
+    transform: translateY(0); /* 滑上來 */
+}
+
+/* (選用) 讓圖片在 hover 時稍微放大 */
+.product-card-link:hover .product-img-skeleton {
+    transform: scale(1.05);
+    transition: transform 0.5s ease;
+}
+
+
+/* =========================================
+   收藏功能
+   ========================================= */
+.fav-btn {
+    margin-left: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 25px; /* 圓角樣式 */
+    border: 1px solid #ff3333;
+    background-color: transparent;
+    color: #ff3333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 滑鼠移入效果 */
+.fav-btn:hover {
+    background-color: #fff5f5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 51, 51, 0.15);
+}
+
+/* 已收藏狀態 (Active) */
+.fav-btn.active {
+    background-color: #ff3333;
+    color: #ffffff;
+}
+
+.fav-btn i {
+    font-size: 15px;
+}

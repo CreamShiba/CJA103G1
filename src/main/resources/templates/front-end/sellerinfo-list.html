@@ -26,10 +26,10 @@
 
             <!-- ✅ 狀態徽章 - 新增「未通過」狀態 -->
             <span th:class="'status-badge status-' + ${seller.status}"
-                  th:text="${seller.status == 'pending' ? '待審核' :
-                           (seller.status == 'approved' ? '已核准' :
-                           (seller.status == 'rejected' ? '未通過' :
-                           (seller.status == 'suspended' ? '停權' : '未知狀態')))}">
+                  th:text="${seller.status == '待審核' ? '待審核' :
+                           (seller.status == '已開通' ? '已開通' :
+                           (seller.status == '未通過' ? '未通過' :
+                           (seller.status == '停權' ? '停權' : '未知狀態')))}">
             </span>
 
             <!-- 評價顯示 -->
@@ -53,12 +53,12 @@
         </div>
 
         <!-- ✅ 待審核提示 -->
-        <div th:if="${seller.status == 'pending'}" class="alert alert-info">
+        <div th:if="${seller.status == '待審核'}" class="alert alert-info">
             <i class="fas fa-info-circle"></i> 您的賣家申請正在審核中,審核通過後即可開始販售商品
         </div>
 
         <!-- ✅ 未通過提示（新增） -->
-        <div th:if="${seller.status == 'rejected'}" class="alert alert-warning">
+        <div th:if="${seller.status == '未通過'}" class="alert alert-warning">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>您的賣家申請未通過審核</strong><br>
             請根據以下原因修改資料後重新提交：<br>
@@ -70,11 +70,12 @@
         </div>
 
         <!-- ✅ 停權提示 -->
-        <div th:if="${seller.status == 'suspended'}" class="alert alert-error">
+        <div th:if="${seller.status == '停權'}" class="alert alert-error">
             <i class="fas fa-ban"></i> 您的賣家帳號已被停權,如有疑問請聯繫客服
         </div>
 
         <form th:action="@{/members/seller/update}" th:object="${seller}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{seller_no}" />
 
             <!-- 店鋪資料 -->
             <div class="form-section">
@@ -102,10 +103,10 @@
                         <label>審核狀態</label>
                         <!-- ✅ 狀態對應文字 -->
                         <input type="text"
-                               th:value="${seller.status == 'pending' ? '待審核' :
-                                         (seller.status == 'approved' ? '已核准' :
-                                         (seller.status == 'rejected' ? '未通過' :
-                                         (seller.status == 'suspended' ? '停權' : '未知狀態')))}"
+                               th:value="${seller.status == '待審核' ? '待審核' :
+                                         (seller.status == '已開通' ? '已開通' :
+                                         (seller.status == '未通過' ? '未通過' :
+                                         (seller.status == '停權' ? '停權' : '未知狀態')))}"
                                readonly>
                     </div>
                 </div>
@@ -186,7 +187,8 @@
                 <div class="image-section">
                     <!-- 現有圖片 -->
                     <div class="current-image" th:if="${seller.image_path != null and seller.image_path != ''}">
-                        <img th:src="@{'/' + ${seller.image_path}}" alt="店鋪圖片" id="current-img">
+                        <img th:src="@{/{path}(path=${seller.image_path}, v=${#dates.createNow().getTime()})}"
+                             alt="店鋪圖片" id="current-img">
                         <p style="margin-top: 10px; color: #666; font-size: 14px;">目前圖片</p>
                     </div>
 
@@ -214,13 +216,21 @@
 
             <!-- 按鈕 -->
             <div class="btn-group">
-                <button type="button" class="btn btn-secondary" onclick="window.location.href='/members/home'">
-                    <i class="fas fa-arrow-left"></i> 返回首頁
+                <button th:if="${seller.status == '已開通'}"
+                        type="button" class="btn btn-info"
+                        onclick="window.location.href='/product/dashboard'">
+                    <i class="fas fa-tachometer-alt"></i> 前往賣家中心
                 </button>
+
+                <button th:if="${seller.status != '已開通'}"
+                        type="button" class="btn btn-secondary"
+                        onclick="window.location.href='/members/home'">
+                    <i class="fas fa-home"></i> 返回商城首頁
+                </button>
+
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i>
-                    <!-- ✅ 根據狀態顯示不同按鈕文字 -->
-                    <span th:text="${seller.status == 'rejected' ? '修改並重新送審' : '儲存變更'}">儲存變更</span>
+                    <span th:text="${seller.status == '未通過' ? '重新送審' : '儲存變更'}">儲存變更</span>
                 </button>
             </div>
         </form>

@@ -78,45 +78,11 @@
 </head>
 <body>
 <div class="app-container">
-    <aside class="sidebar">
-        <div class="sidebar-header"><div class="logo-icon"></div><h2>卡爾夏 <span class="badge">ADMIN</span></h2></div>
-        <nav class="sidebar-nav">
-            <ul>
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 A</a></li></ul></li>
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-users-cog"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 B</a></li></ul></li>
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-user-shield"></i> 帳號管理</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">會員帳號管理</a></li><li><a href="#">管理員帳號管理</a></li></ul></li>
-
-                <li class="menu-item has-submenu open">
-                    <a class="submenu-toggle"><span><i class="fas fa-exclamation-circle"></i> 申訴/檢舉管理</span><i class="fas fa-chevron-down arrow"></i></a>
-                    <ul class="submenu">
-                        <li class="menu-item has-sub-item">
-                            <a class="sub-toggle"><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
-                            <ul class="sub-submenu">
-                                <li><a th:href="@{/appeals/admin/list(status='PENDING')}">尚未處理</a></li>
-                                <li><a th:href="@{/appeals/admin/list(status='已結案')}">已結案</a></li>
-                            </ul>
-                        </li>
-                        <li class="menu-item has-sub-item open">
-                            <a class="sub-toggle"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
-                            <ul class="sub-submenu">
-                                <li><a th:href="@{/reports/admin/list(status='待處理')}" th:classappend="${currentStatus == '待處理' ? 'active' : ''}">尚未處理</a></li>
-                                <li><a th:href="@{/reports/admin/list(status='已結案')}" th:classappend="${currentStatus == '已結案' ? 'active' : ''}">已結案</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="menu-item has-submenu"><a class="submenu-toggle"><span><i class="fas fa-tools"></i> 自訂</span><i class="fas fa-chevron-down arrow"></i></a><ul class="submenu"><li><a href="#">功能 C</a></li></ul></li>
-                <li class="menu-item"><a href="#"><i class="fas fa-star"></i> 自訂</a></li>
-                <li class="menu-item"><a href="#"><i class="fas fa-headset"></i> 自訂</a></li>
-            </ul>
-        </nav>
-        <div class="sidebar-footer"><a href="#">登出 (Logout)</a></div>
-    </aside>
+    <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='reportss')}"></aside>
 
     <main class="main-content">
         <header class="top-bar">
-            <h2 class="page-title" th:text="${report.status != '待處理' && report.status != '處理中'} ? '檢舉查看' : '檢舉案件處理'">檢舉案件處理</h2>
+            <h2 class="page-title" th:text="${report.status == '已處理' || report.status == '已結案'} ? '檢舉查看' : '檢舉案件處理'">檢舉案件處理</h2>
             <div class="user-profile"><span>Admin</span><div class="avatar"><i class="fas fa-user"></i></div></div>
         </header>
 
@@ -131,7 +97,15 @@
                     </div>
                 </div>
 
-                <div class="info-row"><div class="info-label">檢舉對象：</div><div class="info-text" th:text="${report.reportsTarget}">1234</div></div>
+                <div class="info-row">
+                    <div class="info-label">檢舉對象：</div>
+                    <div class="info-text" th:text="${targetDisplay}">商品名稱 (編號: XXX)</div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-label">檢舉人：</div>
+                    <div class="info-text" th:text="${reporterDisplay}">會員姓名 (ID: XXX) 或 訪客</div>
+                </div>
 
                 <div class="info-row">
                     <div class="info-label">檢舉原因：</div>
@@ -151,13 +125,13 @@
                     <div class="info-label">管理員回覆：</div>
                     <textarea id="replyMsg"
                               th:text="${report.response}"
-                              th:readonly="${report.status == '已結案' || report.status == '已處理' || report.status == '駁回'}"
-                              th:placeholder="${report.status == '已結案' || report.status == '已處理' || report.status == '駁回'} ? '' : '請在此輸入處理結果或說明...'"></textarea>
+                              th:readonly="${report.status == '已結案' || report.status == '已處理'}"
+                              th:placeholder="${report.status == '已結案' || report.status == '已處理'} ? '' : '請在此輸入處理結果或說明...'"></textarea>
                 </div>
 
                 <div class="btn-group">
-                    <a th:href="@{/reports/admin/list(status=${(report.status == '待處理' || report.status == '處理中') ? '待處理' : '已結案'})}" class="btn-back">返回列表</a>
-                    <button th:if="${report.status == '待處理' || report.status == '處理中'}" class="btn-send" onclick="sendReply()">送出</button>
+                    <a th:href="@{/reports/admin/list(status=${(report.status == '已處理' || report.status == '已結案') ? '已處理' : '待處理'})}" class="btn-back">返回列表</a>
+                    <button th:if="${report.status != '已處理' && report.status != '已結案'}" class="btn-send" onclick="sendReply()">送出</button>
                 </div>
             </div>
 
@@ -234,7 +208,7 @@
         const id = /*[[${report.reportsNo}]]*/ 0;
         const params = new URLSearchParams();
         params.append('id', id);
-        params.append('status', '已結案');
+        params.append('status', '已處理'); // 💡 統一更新為「已處理」
         params.append('admNo', 1);
         params.append('response', reply);
 
@@ -245,9 +219,9 @@
             .then(res => res.text())
             .then(msg => {
                 if (msg === 'success') {
-                    showModal('卡爾夏Karshop', '處理成功！案件已移至「已結案」');
+                    showModal('卡爾夏Karshop', '處理成功！案件已移至「已處理」');
                     setTimeout(() => {
-                        window.location.href = '/reports/admin/list?status=已結案';
+                        window.location.href = '/reports/admin/list?status=已處理';
                     }, 1500);
                 } else {
                     showModal('卡爾夏Karshop', '處理失敗：' + msg);

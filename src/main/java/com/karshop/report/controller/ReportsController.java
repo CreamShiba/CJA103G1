@@ -2,14 +2,19 @@ package com.karshop.report.controller;
 
 import com.karshop.report.model.Reports;
 import com.karshop.report.service.ReportsService;
+import com.karshop.members.model.MembersVO; // 💡 導入會員 VO
+import com.karshop.members.model.MembersService; // 💡 導入會員 Service
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.jdbc.core.JdbcTemplate; // 💡 導入 JdbcTemplate 用於快速抓取商品名稱
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import jakarta.servlet.http.HttpSession; // 💡 導入 Session
 
 @Controller
 @RequestMapping("/reports")
@@ -17,6 +22,12 @@ public class ReportsController {
 
     @Autowired
     private ReportsService reportsService;
+
+    @Autowired
+    private MembersService membersService; // 💡 注入會員服務
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate; // 💡 注入 JDBC 工具
 
     // 顯示前台新增檢舉頁面
     @GetMapping("/add")
@@ -29,17 +40,27 @@ public class ReportsController {
     public String handleReport(
             @ModelAttribute Reports report,
             @RequestParam(required = false) String source,  // ← 接收來源標記
+            HttpSession session,                            // ← 💡 接收 Session 抓真實會員
             RedirectAttributes redirectAttributes,           // ← 用於傳遞訊息
             Model model) {
 
         report.setReportsTimestamp(LocalDateTime.now());
         report.setStatus("待處理"); // ✅ 統一使用「待處理」
-        report.setMemberNo(1);
-        report.setAdmNo(1);
 
-        // ✅ 核心修改：prodNo 現在會自動透過 @ModelAttribute 綁定到 report.prodNo
-        // 所以不需要額外的 @RequestParam 接收！
-        // 表單的 name="prodNo" 會自動對應到 Reports 物件的 setProdNo() 方法
+        // 💡 修正點：不再寫死。從 Session 抓取真實會員物件
+        MembersVO member = (MembersVO) session.getAttribute("member");
+        if (member != null) {
+            report.setMemberNo(member.getMemNo()); // 設定為當前登入者 ID
+            report.setEmail(member.getMemEmail()); // 💡 同步存入該會員的信箱
+            System.out.println("✅ 會員檢舉 - 檢舉人：" + member.getMemName() + "，信箱：" + member.getMemEmail());
+        } else {
+            // 💡 訪客檢舉：將 memberNo 設為 null
+            // 提醒：SQL 中的 member_no 必須拿掉 NOT NULL 否則存檔會失敗
+            report.setMemberNo(null);
+            System.out.println("⚠️ 訪客檢舉 - memberNo 設為空值");
+        }
+
+        report.setAdmNo(1);
 
         // ✅ 儲存檢舉資料（包含商品編號）
         reportsService.submitReport(report);
@@ -77,9 +98,27 @@ public class ReportsController {
                                       @RequestParam Integer admNo,
                                       @RequestParam String response){
         try{
-            // ✅ status 應該是「待處理」或「已處理」
-            reportsService.handleReport(id, status, admNo, response);
-            System.out.println("✅ 檢舉 #" + id + " 已更新為：" + status);
+            // 💡 抓取該案件當前狀態以進行精準攔截
+            Reports currentReport = reportsService.getReportById(id);
+            String finalStatus = status;
+
+            // 💡 全域防線：處理文章/商品模組按鈕與總覽報表的連動衝突
+            // 如果目前的狀態是「待處理」，而收到的是「已處理」或「已結案」
+            if ("待處理".equals(currentReport.getStatus())) {
+                if (response != null && (response.contains("下架") || response.contains("違規"))) {
+                    finalStatus = "已下架"; // 💡 強制變黃色，留在未處理區供管理員最後檢視
+                } else if ("駁回".equals(status) || (response != null && response.contains("駁回"))) {
+                    finalStatus = "駁回";   // 💡 強制變紫色，留在未處理區，防止案件直接消失
+                }
+            }
+
+            // 💡 狀態校準：支援舊版傳入的「已結案」對齊為「已處理」
+            if ("已結案".equals(status)) {
+                finalStatus = "已處理";
+            }
+
+            reportsService.handleReport(id, finalStatus, admNo, response);
+            System.out.println("✅ 檢舉 #" + id + " 最終存檔狀態：" + finalStatus);
             return "success";
         }catch (Exception e){
             return "error: " + e.getMessage();
@@ -92,6 +131,35 @@ public class ReportsController {
         Reports report = reportsService.getReportById(id);
         if (report != null) {
             model.addAttribute("report", report);
+
+            // 💡 1. 抓取檢舉人姓名 (人性化優化)
+            if (report.getMemberNo() != null && report.getMemberNo() > 0) {
+                MembersVO m = membersService.getOneMember(report.getMemberNo());
+                // 顯示：匿名 (ID)
+                model.addAttribute("reporterDisplay", (m != null ? m.getMemUsername() : "不明會員") + " (ID: " + report.getMemberNo() + ")");
+            } else {
+                model.addAttribute("reporterDisplay", "訪客");
+            }
+
+            // 💡 2. 核心共識：抓取被檢舉的商品名稱
+            if ("商品".equals(report.getReportsType()) && report.getProdNo() != null) {
+                try {
+                    String sql = "SELECT prod_name FROM product WHERE prod_no = ?";
+                    String prodName = jdbcTemplate.queryForObject(sql, String.class, report.getProdNo());
+                    model.addAttribute("targetDisplay", prodName + " (編號: " + report.getProdNo() + ")");
+                } catch (Exception e) {
+                    model.addAttribute("targetDisplay", "未知商品 (編號: " + report.getProdNo() + ")");
+                }
+            } else {
+                model.addAttribute("targetDisplay", report.getReportsTarget());
+            }
+
+            // 💡 3. 傳遞狀態讓側邊欄 active 正常顯示
+            // 修正：當狀態為「待處理」、「駁回」、「已下架」時，側邊欄應維持「待處理」的高亮
+            String s = report.getStatus();
+            String currentStatus = (s.equals("待處理") || s.equals("處理中") || s.equals("駁回") || s.equals("已下架")) ? "待處理" : "已處理";
+            model.addAttribute("currentStatus", currentStatus);
+
             return "templates-report/handle-report";
         } else {
             return "redirect:/reports/admin/list";
@@ -108,6 +176,19 @@ public class ReportsController {
         // 為了整合期測試，直接抓取資料庫所有檢舉，讓假資料全部現身
         List<Reports> list = reportsService.getAllReports();
 
+        // 💡 轉換檢舉對象名稱：如果是商品類型就轉換名稱
+        for (Reports report : list) {
+            if ("商品".equals(report.getReportsType()) && report.getProdNo() != null) {
+                try {
+                    String sql = "SELECT prod_name FROM product WHERE prod_no = ?";
+                    String prodName = jdbcTemplate.queryForObject(sql, String.class, report.getProdNo());
+                    report.setReportsTarget(prodName); // 暫存到 Target 欄位供前端顯示
+                } catch (Exception e) {
+                    report.setReportsTarget("商品編號: " + report.getProdNo());
+                }
+            }
+        }
+
         model.addAttribute("reports", list);
         return "templates-report/report-history";
     }
@@ -117,7 +198,19 @@ public class ReportsController {
     public String showReportHistoryDetail(@RequestParam("id") Integer id, Model model) {
         Reports report = reportsService.getReportById(id);
         if (report != null) {
+            // 💡 轉換詳情頁的對象名稱
+            String targetDisplay = report.getReportsTarget();
+            if ("商品".equals(report.getReportsType()) && report.getProdNo() != null) {
+                try {
+                    String sql = "SELECT prod_name FROM product WHERE prod_no = ?";
+                    targetDisplay = jdbcTemplate.queryForObject(sql, String.class, report.getProdNo());
+                } catch (Exception e) {
+                    targetDisplay = "商品編號: " + report.getProdNo();
+                }
+            }
+
             model.addAttribute("report", report);
+            model.addAttribute("targetDisplay", targetDisplay); // 💡 傳遞名稱到詳情頁
             return "templates-report/report-detail";
         } else {
             return "redirect:/reports/history";
@@ -126,7 +219,6 @@ public class ReportsController {
 
     /**
      * ✅ 核心修改：後台管理列表 (支援 Thymeleaf 與 分頁)
-     * 存取路徑範例: /reports/admin/list?status=待處理&page=0
      */
     @GetMapping("/admin/list")
     public String showReportAdminPage(
@@ -134,22 +226,38 @@ public class ReportsController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
 
-        System.out.println("💡 檢舉後台清單 - 查詢狀態：「" + status + "」，頁碼：" + page);
+        // 💡 狀態校準
+        String finalStatus = status;
+        if (status.equals("PENDING") || status.equals("尚未處理")) {
+            finalStatus = "待處理";
+        } else if (status.equals("已結案")) {
+            finalStatus = "已處理";
+        }
+
+        System.out.println("💡 檢舉後台清單 - 查詢狀態校準為：「" + finalStatus + "」，頁碼：「" + page + "」");
 
         // 強制每頁顯示 6 筆
         int pageSize = 6;
+        Page<Reports> reportPage;
 
-        // ✅ 呼叫 Service 取得分頁資料
-        Page<Reports> reportPage = reportsService.getReportsByStatusWithPagination(status, page, pageSize);
+        // ✅ 核心調整：
+        // 1. 待處理清單：包含 待處理、處理中、駁回、已下架。這樣案件才不會消失，且能補填回覆。
+        // 2. 已處理清單：僅包含 真正結案的「已處理」。
+        if ("待處理".equals(finalStatus)) {
+            List<String> statuses = Arrays.asList("待處理", "處理中", "駁回", "已下架");
+            reportPage = reportsService.getReportsByMultipleStatuses(statuses, page, pageSize);
+        } else {
+            // ✅ 已處理區僅抓取最終完案狀態
+            reportPage = reportsService.getReportsByStatusWithPagination("已處理", page, pageSize);
+        }
 
         System.out.println("💡 查詢到 " + reportPage.getTotalElements() + " 筆資料，當前頁有 " + reportPage.getNumberOfElements() + " 筆");
 
         // 將資料與當前狀態傳回前端
         model.addAttribute("reportPage", reportPage);
-        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentStatus", finalStatus);
         model.addAttribute("currentPage", page);
 
-        // 指向 templates/templates-report/ 目錄下的 admin-report-list.html
         return "templates-report/admin-report-list";
     }
 }

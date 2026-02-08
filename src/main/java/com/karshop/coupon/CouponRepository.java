@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -17,8 +18,8 @@ public interface CouponRepository extends JpaRepository<Coupon, Integer>, JpaSpe
     // 過期的優惠券狀態改為 0
     @Transactional
     @Modifying
-    @Query("UPDATE Coupon c SET c.couponStatus = 0 WHERE c.couponEnd < :now AND c.couponStatus = 1")
-    void updateExpiredStatus(LocalDateTime now);
+    @Query("UPDATE Coupon c SET c.couponStatus = 0 WHERE c.couponEnd <= :now AND c.couponStatus = 1")
+    int updateExpiredStatus(@Param("now") LocalDateTime now);  // 改為 int 返回值
 
     @Transactional
     @Modifying
@@ -26,6 +27,6 @@ public interface CouponRepository extends JpaRepository<Coupon, Integer>, JpaSpe
             "JOIN coupon c ON mc.coupon_no = c.coupon_no " +
             "SET mc.coupon_status = 2 " +
             "WHERE c.coupon_end < :now AND mc.coupon_status = 0", nativeQuery = true)
-    void updateExpiredMemberCoupons(LocalDateTime now);
+    int updateExpiredMemberCoupons(@Param("now") LocalDateTime now);
 
 }

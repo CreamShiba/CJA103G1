@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -45,7 +46,7 @@ public class ReportsService {
     }
 
     /**
-     * ✅ 核心優化：後台分頁查詢（簡化狀態判定）
+     * ✅ 核心優化：後台分頁查詢（強化攔截版）
      * @param status 篩選狀態（待處理/已處理）
      * @param page 目前頁碼
      * @param size 每頁幾筆
@@ -57,9 +58,23 @@ public class ReportsService {
 
         System.out.println("💡 Service 查詢狀態：「" + status + "」");
 
-        // ✅ 簡化邏輯：直接使用傳入的狀態值查詢
-        // 只接受「待處理」或「已處理」兩種狀態
+        // ✅ 核心修正：當查詢「待處理」時，強制包含所有未結案狀態，防止「駁回」或「已下架」案件消失
+        if ("待處理".equals(status)) {
+            List<String> statuses = Arrays.asList("待處理", "處理中", "駁回", "已下架");
+            return reportsRepository.findByStatusIn(statuses, pageable);
+        }
+
+        // 否則，按原邏輯進行單一狀態查詢（例如查詢「已處理」）
         return reportsRepository.findByStatus(status, pageable);
+    }
+
+    /**
+     * ✅ 新增：支援多種狀態的分頁查詢
+     * 用於將「待處理」、「處理中」、「駁回」、「已下架」合併顯示在同一個清單
+     */
+    public Page<Reports> getReportsByMultipleStatuses(List<String> statuses, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("reportsTimestamp").descending());
+        return reportsRepository.findByStatusIn(statuses, pageable);
     }
 
     /**
@@ -70,7 +85,7 @@ public class ReportsService {
         Reports report = reportsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("找不到編號為 " + id + " 的檢舉紀錄"));
 
-        // ✅ 更新狀態（應該是「待處理」或「已處理」）
+        // ✅ 更新狀態（應該是「待處理」、「已處理」、「駁回」或「已下架」）
         report.setStatus(status);
         report.setAdmNo(admNo);
         report.setResponse(response);

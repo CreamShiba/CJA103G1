@@ -47,6 +47,7 @@ public class CouponService {
 
             return cb.and(predicates.toArray(new Predicate[0]));
         });
+
     }
 
     /**
