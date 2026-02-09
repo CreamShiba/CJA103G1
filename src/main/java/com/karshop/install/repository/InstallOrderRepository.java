@@ -47,7 +47,7 @@ public interface InstallOrderRepository extends JpaRepository<InstallOrder, Inte
 
         @Query("SELECT o FROM InstallOrder o WHERE o.technician.techNo = :techNo " +
                         "AND o.appointDate = :appointDate AND o.appointTimeValue = :appointTimeValue " +
-                        "AND o.orderStatusValue NOT IN (4)")
+                        "AND o.orderStatusValue NOT IN (0, 4)")
         List<InstallOrder> findTechnicianActiveOrdersAtTime(
                         @Param("techNo") Integer techNo,
                         @Param("appointDate") LocalDate appointDate,
