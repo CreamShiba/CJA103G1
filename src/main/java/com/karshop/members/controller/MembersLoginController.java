@@ -38,7 +38,7 @@ public class MembersLoginController {
       return "redirect:/members/view";
     }
     String location = (String) session.getAttribute("location");
-    if (location != null && (location.contains("/admins") || location.contains("/login"))) {
+    if (location != null && (location.contains("/admins") || location.contains("/login") || location.contains("/verificationSent"))) {
       session.removeAttribute("location");
       location = null; // 重置為 null，讓下面的邏輯重新抓 Referer
     }

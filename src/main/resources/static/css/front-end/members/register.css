@@ -245,3 +245,62 @@ body {
 .file-input {
     margin-top: 5px;
 }
+/* 讓 Select 選單也是深色 */
+select.form-control {
+    appearance: none; /* 移除原生箭頭 */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 10px auto;
+}
+
+select.form-control option {
+    background-color: #222;
+    color: white;
+}
+/* --- Address Input Style Overrides (Matching Update Page) --- */
+
+/* 1. 定義共用的 form-control 樣式 (方框風格) */
+.form-control {
+    background-color: rgba(255, 255, 255, 0.08); /* 深色半透明背景 */
+    border: 1px solid #444;                     /* 完整邊框 */
+    padding: 12px 15px;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 5px; /* 稍微增加一點與 Label 的距離 */
+}
+
+/* 2. 針對 register 頁面，強制覆蓋原本 input 的底線樣式 */
+.form-group input.form-control {
+    border: 1px solid #444 !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    padding: 12px 15px !important;
+}
+
+/* 3. Focus 狀態 (紅色光暈) */
+.form-control:focus,
+.form-group input.form-control:focus {
+    border-color: #ff3333 !important;
+    box-shadow: 0 0 8px rgba(255, 51, 51, 0.3);
+    background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* 4. Select 下拉選單專屬樣式 (包含 SVG 箭頭) */
+select.form-control {
+    appearance: none; /* 移除原生箭頭 */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ffffff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 10px auto;
+    cursor: pointer;
+}
+
+/* 下拉選單展開後的選項背景色 */
+select.form-control option {
+    background-color: #222;
+    color: white;
+}

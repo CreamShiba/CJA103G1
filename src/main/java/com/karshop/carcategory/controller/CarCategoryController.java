@@ -6,11 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller; // 注意這裡不一樣
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.karshop.carcategory.model.CarCategoryVO;
 import com.karshop.carcategory.model.CarCategoryService;
@@ -33,14 +29,22 @@ public class CarCategoryController {
    * 網址: GET /car-category/list
    */
   @GetMapping("/carcate/list")
-  public String listAll(Model model) {
-    List<CarCategoryVO> list = carCategoryService.getAllCarCategories();
+  public String listAll(@RequestParam(required = false) String keyword, Model model) {
+    List<CarCategoryVO> list;
 
-    // 2. 將資料放入 Model，讓 Thymeleaf 可以在 HTML 中讀取 "carList"
+    // 判斷是否有搜尋關鍵字
+    if (keyword != null && !keyword.trim().isEmpty()) {
+      list = carCategoryService.getCarCategoriesByName(keyword);
+    } else {
+      list = carCategoryService.getAllCarCategories();
+    }
+
+    // 將資料放入 Model
     model.addAttribute("carList", list);
 
-    // 3. 回傳 HTML 檔案名稱 (不含 .html 副檔名)
-    // Spring 會去 src/main/resources/templates/ 下找 car_category_list.html
+    // [重要] 將 keyword 傳回前端，讓搜尋框能保留使用者輸入的字
+    model.addAttribute("keyword", keyword);
+
     return "back-end/carcategory/car_category_list";
   }
 
@@ -65,8 +69,14 @@ public class CarCategoryController {
   public String insert(@Valid @ModelAttribute("carCategoryVO") CarCategoryVO carCategoryVO,
                        BindingResult result,
                        Model model) {
+  // 1. 自定義重複驗證
+    // 檢查資料庫是否已經有完全一樣的 (廠商 + 車名 + 年份)
+    if (carCategoryService.checkDuplicate(carCategoryVO)) {
 
-    // 4. 錯誤驗證處理
+      // 我們將錯誤訊息掛在 'carName' 欄位下顯示，這樣使用者最容易看到
+      result.rejectValue("carName", "duplicate", "該車型資料已存在 (廠商、車名與年份完全重複)！");
+    }
+    // 2. 錯誤驗證處理
     // 如果 @Valid 驗證失敗 (例如名稱空白)，result 會包含錯誤訊息
     if (result.hasErrors()) {
       // 驗證失敗，直接返回原本的新增頁面，Thymeleaf 會顯示錯誤訊息
@@ -76,7 +86,7 @@ public class CarCategoryController {
     // 驗證成功，呼叫 Service 存檔
     carCategoryService.addCarCategory(carCategoryVO);
 
-    // 5. 使用 redirect 重導向到列表頁 (避免使用者按 F5 重複送出表單)
+    // 3. 使用 redirect 重導向到列表頁 (避免使用者按 F5 重複送出表單)
     return "redirect:/admins/carcate/list";
   }
 
@@ -102,7 +112,13 @@ public class CarCategoryController {
   public String update(@Valid @ModelAttribute("carCategoryVO") CarCategoryVO carCategoryVO,
                        BindingResult result,
                        Model model) {
+    // 1. 自定義重複驗證
+    // 檢查資料庫是否已經有完全一樣的 (廠商 + 車名 + 年份)
+    if (carCategoryService.checkDuplicate(carCategoryVO)) {
 
+      // 我們將錯誤訊息掛在 'carName' 欄位下顯示，這樣使用者最容易看到
+      result.rejectValue("carName", "duplicate", "該車型資料已存在 (廠商、車名與年份完全重複)！");
+    }
     if (result.hasErrors()) {
       // 驗證失敗，停留在修改頁面，並顯示錯誤
       return "back-end/carcategory/car_category_edit";

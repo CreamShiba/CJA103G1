@@ -2,6 +2,7 @@ package com.karshop.carcategory.model;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,14 @@ public class CarCategoryService {
     this.repository = repository;
   }
 
+  //模糊搜尋
+  public List<CarCategoryVO> getCarCategoriesByName(String keyword) {
+    if (keyword == null || keyword.trim().isEmpty()) {
+      return repository.findAll();
+    }
+    return repository.findByCarNameContaining(keyword);
+  }
+
   /**
    * 新增車種類別
    */
@@ -32,7 +41,14 @@ public class CarCategoryService {
 
     return repository.save(carCategory);
   }
-
+  //檢查車種類別是否重複
+  public boolean checkDuplicate(CarCategoryVO vo) {
+    return repository.existsByMakeAndCarNameAndProdInterval(
+            vo.getMake(),
+            vo.getCarName(),
+            vo.getProdInterval()
+    );
+  }
   /**
    * 修改車種類別
    */

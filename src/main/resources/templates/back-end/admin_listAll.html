@@ -26,24 +26,26 @@
             </header>
 
             <div class="content-body">
+                    <div class="card">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3>管理者列表</h3>
 
-                <div class="card">
-                    <div class="card-header">
-                        <h3>管理者列表</h3>
-                        <form th:action="@{/admins/search}" method="get" class="search-area">
-                            <input type="text" name="keyword" th:value="${keyword}" class="form-input" placeholder="輸入管理員名稱..." style="width: 250px;">
+                            <form th:action="@{/admins/search}" method="get" style="display: flex; gap: 10px;">
+                                <input type="text" name="keyword" th:value="${keyword}"
+                                       placeholder="輸入管理員名稱..."
+                                       class="form-input"
+                                       style="padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
 
-<!--                            <select name="status" class="form-input">-->
-<!--                                <option value="">&#45;&#45; 所有狀態 &#45;&#45;</option>-->
-<!--                                <option value="待審核" th:selected="${status == '0'}">停權</option>-->
-<!--                                <option value="已開通" th:selected="${status == '1'}">使用中</option>-->
-<!--                            </select>-->
+                                <button type="submit" class="btn-primary" style="padding: 5px 15px; cursor: pointer;">
+                                    <i class="fas fa-search"></i> 搜尋
+                                </button>
 
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> 搜尋</button>
-                            <a th:href="@{/admin/sellers}" class="btn" style="background:#ddd; color:#333; text-decoration:none;">重置</a>
-                        </form>
-                    </div>
-
+                                <a th:href="@{/admins/listAll}" class="btn"
+                                   style="background:#ddd; color:#333; text-decoration:none; padding: 5px 15px; border-radius: 4px; display: flex; align-items: center;">
+                                    重置
+                                </a>
+                            </form>
+                        </div>
                     <div class="table-container">
                         <table class="data-table">
                             <thead>
@@ -84,7 +86,7 @@
                             <ul class="pagination" style="list-style: none; display: flex; gap: 10px; padding: 0;">
 
                                 <li th:classappend="${adminPage.first} ? 'disabled'">
-                                    <a th:href="@{/admins/listAll(page=${adminPage.first ? 0 : adminPage.number - 1})}"
+                                    <a th:href="@{${keyword != null && keyword != '' ? '/admins/search' : '/admins/listAll'}(page=${adminPage.first ? 0 : adminPage.number - 1}, keyword=${keyword})}"
                                        style="text-decoration: none; padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px;">
                                         &laquo; 上一頁
                                     </a>
@@ -95,8 +97,7 @@
                                 </li>
 
                                 <li th:classappend="${adminPage.last} ? 'disabled'">
-
-                                    <a th:href="@{/admins/listAll(page=${adminPage.last ? adminPage.number : adminPage.number + 1})}"
+                                    <a th:href="@{${keyword != null && keyword != '' ? '/admins/search' : '/admins/listAll'}(page=${adminPage.last ? adminPage.number : adminPage.number + 1}, keyword=${keyword})}"
                                        style="text-decoration: none; padding: 5px 10px; border: 1px solid #ddd; border-radius: 4px;">
                                         下一頁 &raquo;
                                     </a>

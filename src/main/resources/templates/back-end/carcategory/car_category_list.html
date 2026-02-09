@@ -26,8 +26,24 @@
         <div class="content-body">
 
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h3>車種類別列表</h3>
+
+                    <form th:action="@{/admins/carcate/list}" method="get" style="display: flex; gap: 10px;">
+                        <input type="text" name="keyword" th:value="${keyword}"
+                               placeholder="輸入車名..."
+                               class="form-input"
+                               style="padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+
+                        <button type="submit" class="btn-primary" style="padding: 5px 15px; cursor: pointer;">
+                            <i class="fas fa-search"></i> 搜尋
+                        </button>
+
+                        <a th:href="@{/admins/carcate/list}" class="btn"
+                           style="background:#ddd; color:#333; text-decoration:none; padding: 5px 15px; border-radius: 4px; display: flex; align-items: center;">
+                            重置
+                        </a>
+                    </form>
                 </div>
 
                 <div class="table-container">
@@ -52,11 +68,6 @@
                                     <i class="fas fa-edit"></i> 編輯
                                 </a>
 
-                                <form th:action="@{/admins/carcate/delete/{id}(id=${car.carCategoryNo})}" method="post" style="display:inline;" onsubmit="return confirm('確定要刪除嗎？');">
-                                    <button type="submit" class="delete-btn-icon">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(carList)}">

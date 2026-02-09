@@ -26,8 +26,24 @@
         <div class="content-body">
 
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <h3>商品類別列表</h3>
+
+                    <form th:action="@{/admins/prodcate/list}" method="get" style="display: flex; gap: 10px;">
+                        <input type="text" name="keyword" th:value="${keyword}"
+                               placeholder="輸入類別名稱..."
+                               class="form-input"
+                               style="padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+
+                        <button type="submit" class="btn-primary" style="padding: 5px 15px; cursor: pointer;">
+                            <i class="fas fa-search"></i> 搜尋
+                        </button>
+
+                        <a th:href="@{/admins/prodcate/list}" class="btn"
+                           style="background:#ddd; color:#333; text-decoration:none; padding: 5px 15px; border-radius: 4px; display: flex; align-items: center;">
+                            重置
+                        </a>
+                    </form>
                 </div>
 
                 <div class="table-container">
@@ -36,6 +52,7 @@
                         <tr>
                             <th>編號</th>
                             <th>商品類別名稱</th>
+                            <th>操作</th>
                             <th style="width: 150px;"></th>
                         </tr>
                         </thead>
@@ -47,12 +64,6 @@
                                 <a th:href="@{/admins/prodcate/edit/{id}(id=${prod.productCategoryNo})}" class="action-link">
                                     <i class="fas fa-edit"></i> 編輯
                                 </a>
-
-                                <form th:action="@{/admins/prodcate/delete/{id}(id=${prod.productCategoryNo})}" method="post" style="display:inline;" onsubmit="return confirm('確定要刪除嗎？');">
-                                    <button type="submit" class="delete-btn-icon">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </form>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(prodList)}">

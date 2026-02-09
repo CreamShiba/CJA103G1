@@ -3,10 +3,12 @@ package com.karshop.admins.controller;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -54,40 +56,58 @@ public class AdminController {
             .anyMatch(auth -> auth.getAdminAuthList().getAuthNo() == authId);
   }
 
-
-//  // 搜尋頁面
-//  @GetMapping("/selectPage")
-//  public String showSelectPage(Model model) {
-//    return "back-end/admin_selectPage";
-//  }
-
-  // 顯示查詢結果（多筆）—— 單一條件
+// 顯示查詢結果 —— 整合搜尋 (支援分頁)
   @GetMapping("/search")
-  public String search(@RequestParam(required = false) String adminNo,
-                       @RequestParam(required = false) String adminName, Model model) {
+  public String search(@RequestParam(required = false) String keyword,
+                       @RequestParam(name = "page", defaultValue = "0") int page,
+                       Model model) {
 
-    List<AdminVO> results = new ArrayList<>();
-
-    if (adminNo != null && !adminNo.isBlank()) {
-      // 依 ID 精確查一筆
-      if (adminNo.matches("\\d+")) {
-        AdminVO a = adminService.getById(Integer.valueOf(adminNo));
-        if (a != null) {
-          results.add(a);
-        }
-      } else {
-        // 非數字就跳回查詢頁並帶錯誤訊息
-        model.addAttribute("errorMsg", "管理員編號必須是數字");
-        return "back-end/admin_selectPage"; // 查詢表單頁面
-      }
-
-    } else if (adminName != null && !adminName.isBlank()) {
-      // 依名稱模糊查詢
-      results = adminService.findByNameLike(adminName);
+    // 1. 如果關鍵字是空的，直接導回列表頁
+    if (keyword == null || keyword.trim().isEmpty()) {
+      return "redirect:/admins/listAll";
     }
 
-    model.addAttribute("admins", results);
-    return "back-end/admin_search";
+    // 2. 執行搜尋邏輯 (取得所有符合的結果)
+    List<AdminVO> searchResults = new ArrayList<>();
+
+    // 判斷關鍵字是否為數字 (如果是數字，嘗試用 ID 搜尋)
+    if (keyword.matches("\\d+")) {
+      AdminVO byId = adminService.getById(Integer.valueOf(keyword));
+      if (byId != null) {
+        searchResults.add(byId);
+      }
+      // 同時也搜尋名稱中包含該數字的情況 (可選)
+      searchResults.addAll(adminService.findByNameLike(keyword));
+
+      // 去除重複 (如果 ID 和 Name 搜尋到同一筆)
+      searchResults = searchResults.stream().distinct().toList();
+    } else {
+      // 非數字，僅搜尋名稱
+      searchResults = adminService.findByNameLike(keyword);
+    }
+
+    // 3. 手動執行分頁邏輯 (List -> Page)
+    // 因為 Service 的搜尋目前回傳 List，需轉為 Page 物件以配合前端 th:if="${adminPage.totalPages > 0}"
+    int pageSize = 5;
+    Pageable pageable = PageRequest.of(page, pageSize);
+
+    int start = (int) pageable.getOffset();
+    int end = Math.min((start + pageable.getPageSize()), searchResults.size());
+
+    Page<AdminVO> adminPage;
+    if (start > searchResults.size()) {
+      adminPage = new PageImpl<>(Collections.emptyList(), pageable, searchResults.size());
+    } else {
+      adminPage = new PageImpl<>(searchResults.subList(start, end), pageable, searchResults.size());
+    }
+
+    // 4. 將資料放入 Model
+    model.addAttribute("adminPage", adminPage); // 用於分頁與表格顯示
+    model.addAttribute("keyword", keyword);     // 將關鍵字傳回前端，讓搜尋框保留文字
+    model.addAttribute("activePage", "listAll"); // 保持側邊欄選中狀態
+
+    // 5. 回傳與 listAll 相同的視圖
+    return "back-end/admin_listAll";
   }
 
   @GetMapping("/listAll")
