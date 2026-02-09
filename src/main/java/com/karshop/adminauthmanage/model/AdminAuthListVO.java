@@ -26,9 +26,7 @@ public class AdminAuthListVO implements Serializable {
   @Column(name = "auth_no", updatable = false)
   private Integer authNo;
 
-  @Column(name = "auth_name", length = 50)
-  @NotEmpty(message = "功能名稱：請勿空白")
-  @Size(max = 50, message = "功能名稱最長 50 個字元")
+  @Column(name = "auth_name")
   private String authName;
 
   @OneToMany(mappedBy = "adminAuthList", cascade = CascadeType.ALL, orphanRemoval = true)

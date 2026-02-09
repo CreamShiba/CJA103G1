@@ -198,3 +198,49 @@ body {
     text-decoration: none; display: inline-block; font-size: 14px;
 }
 .btn-secondary:hover { background-color: #f0f0f0; color: #333; }
+
+/* --- 新增的時間選擇器樣式 --- */
+.interval-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap; /* 在手機版自動換行 */
+}
+
+.date-group {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0 5px;
+    transition: 0.2s;
+}
+
+.date-group:focus-within {
+    border-color: #0066cc;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.form-select {
+    border: none;
+    padding: 10px 5px;
+    font-size: 14px;
+    background-color: transparent;
+    cursor: pointer;
+    color: #333;
+    outline: none;
+}
+
+.label-tiny {
+    font-size: 12px;
+    color: #888;
+    padding-left: 8px;
+    font-weight: bold;
+}
+
+.separator {
+    color: #666;
+    font-weight: bold;
+    font-size: 14px;
+}

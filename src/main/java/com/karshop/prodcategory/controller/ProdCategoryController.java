@@ -6,11 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller; // 注意這裡不一樣
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import com.karshop.prodcategory.model.ProdCategoryVO;
 import com.karshop.prodcategory.model.ProdCategoryService;
@@ -33,14 +29,22 @@ public class ProdCategoryController {
    * 網址: GET /admins/prodcate/list
    */
   @GetMapping("/prodcate/list")
-  public String listAll(Model model) {
-    List<ProdCategoryVO> list = prodCategoryService.getAllProdCategories();
+  public String listAll(@RequestParam(required = false) String keyword, Model model) {
+    List<ProdCategoryVO> list;
 
-    // 2. 將資料放入 Model，讓 Thymeleaf 可以在 HTML 中讀取 "prodList"
+    // 判斷是否有搜尋關鍵字
+    if (keyword != null && !keyword.trim().isEmpty()) {
+      list = prodCategoryService.getProdCategoriesByName(keyword);
+    } else {
+      list = prodCategoryService.getAllProdCategories();
+    }
+
+    // 將資料放入 Model
     model.addAttribute("prodList", list);
 
-    // 3. 回傳 HTML 檔案名稱 (不含 .html 副檔名)
-    // Spring 會去 src/main/resources/templates/ 下找 prod_category_list.html
+    // [重要] 將 keyword 傳回前端，讓搜尋框能保留文字
+    model.addAttribute("keyword", keyword);
+
     return "back-end/prodcategory/prod_category_list";
   }
 
@@ -65,8 +69,13 @@ public class ProdCategoryController {
   public String insert(@Valid @ModelAttribute("prodCategoryVO") ProdCategoryVO prodCategoryVO,
                        BindingResult result,
                        Model model) {
+    // 1. 呼叫剛剛在 Service 新增的方法檢查重複
+    if (prodCategoryService.existsByProductCategoryName(prodCategoryVO.getProductCategoryName())) {
+      // 如果重複，手動加入錯誤
+      result.rejectValue("productCategoryName", "duplicate", "該類別名稱已存在，請勿重複新增！");
+    }
 
-    // 4. 錯誤驗證處理
+    // 2. 錯誤驗證處理
     // 如果 @Valid 驗證失敗 (例如名稱空白)，result 會包含錯誤訊息
     if (result.hasErrors()) {
       // 驗證失敗，直接返回原本的新增頁面，Thymeleaf 會顯示錯誤訊息
@@ -102,6 +111,11 @@ public class ProdCategoryController {
   public String update(@Valid @ModelAttribute("prodCategoryVO") ProdCategoryVO prodCategoryVO,
                        BindingResult result,
                        Model model) {
+
+    if (prodCategoryService.existsByProductCategoryName(prodCategoryVO.getProductCategoryName())) {
+      // 如果重複，手動加入錯誤
+      result.rejectValue("productCategoryName", "duplicate", "該類別名稱已存在，請勿重複新增！");
+    }
 
     if (result.hasErrors()) {
       // 驗證失敗，停留在修改頁面，並顯示錯誤

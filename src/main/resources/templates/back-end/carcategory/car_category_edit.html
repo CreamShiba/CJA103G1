@@ -6,27 +6,13 @@
     <title>編輯車種類別 - Autopile Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/back-end/carcategory/car_category.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/admin_sidebar.css}">
 </head>
 <body>
 
 <div class="app-container">
 
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo-icon"></div>
-            <h2>卡爾夏 <span class="badge">ADMIN</span></h2>
-        </div>
-        <nav class="sidebar-nav">
-            <ul>
-                <li class="menu-item has-submenu open">
-                    <a class="submenu-toggle"><span><i class="fas fa-car"></i> 車輛資料管理</span></a>
-                    <ul class="submenu">
-                        <li><a href="#" class="active">車種類別管理</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </nav>
-    </aside>
+    <aside th:replace="~{fragments/admin_sidebar :: adminSidebar(activePage='carcate')}"></aside>
 
     <main class="main-content">
         <header class="top-bar">
@@ -58,8 +44,30 @@
                         </div>
 
                         <div class="form-row">
-                            <label for="prodInterval">生產區間</label>
-                            <input type="text" id="prodInterval" th:field="*{prodInterval}">
+                            <label>生產區間 (Production Interval)</label>
+
+                            <input type="hidden" id="prodInterval" th:field="*{prodInterval}">
+
+                            <div class="interval-selector">
+                                <div class="date-group">
+                                    <span class="label-tiny">起</span>
+                                    <select id="startYear" class="form-select date-part"></select>
+                                    <select id="startMonth" class="form-select date-part"></select>
+                                </div>
+
+                                <span class="separator">至</span>
+
+                                <div class="date-group">
+                                    <span class="label-tiny">迄</span>
+                                    <select id="endYear" class="form-select date-part">
+                                        <option value="">仍在生產</option>
+                                    </select>
+                                    <select id="endMonth" class="form-select date-part">
+                                        <option value="">--</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <span class="error-msg" th:if="${#fields.hasErrors('prodInterval')}" th:errors="*{prodInterval}"></span>
                         </div>
 
@@ -73,5 +81,99 @@
         </div>
     </main>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startYearSelect = document.getElementById('startYear');
+        const startMonthSelect = document.getElementById('startMonth');
+        const endYearSelect = document.getElementById('endYear');
+        const endMonthSelect = document.getElementById('endMonth');
+        const hiddenInput = document.getElementById('prodInterval');
+
+        // --- 1. 設定年份範圍 ---
+        const currentYear = new Date().getFullYear();
+        const startYearRange = 1980;
+        const endYearRange = currentYear + 1;
+
+        function populateSelect(selectElement, start, end, isYear) {
+            for (let i = end; i >= start; i--) {
+                const option = document.createElement('option');
+                const text = isYear ? i : (i < 10 ? '0' + i : i);
+                option.value = text;
+                option.text = text + (isYear ? ' 年' : ' 月');
+                selectElement.appendChild(option);
+            }
+        }
+
+        // 產生選單選項
+        populateSelect(startYearSelect, startYearRange, endYearRange, true);
+        populateSelect(endYearSelect, startYearRange, endYearRange, true);
+        populateSelect(startMonthSelect, 1, 12, false);
+        populateSelect(endMonthSelect, 1, 12, false);
+
+        // --- 2. 核心邏輯：從隱藏欄位「回填」下拉選單 ---
+        function initFromHiddenValue() {
+            const val = hiddenInput.value; // 例如 "2015/01 - 2020/12"
+
+            if (!val) return; // 如果沒資料就維持預設
+
+            // 根據 " - " 切割字串
+            const parts = val.split(' - ');
+
+            if (parts.length >= 1) {
+                // 處理開始時間 "2015/01"
+                const startParts = parts[0].split('/');
+                if (startParts.length === 2) {
+                    startYearSelect.value = startParts[0];
+                    startMonthSelect.value = startParts[1];
+                }
+            }
+
+            if (parts.length >= 2) {
+                // 處理結束時間
+                const endString = parts[1]; // 可能為 "2020/12" 或 "至今"
+
+                if (endString.includes("至今") || endString === "") {
+                    endYearSelect.value = ""; // 選中「仍在生產」
+                    endMonthSelect.value = "";
+                } else {
+                    const endParts = endString.split('/');
+                    if (endParts.length === 2) {
+                        endYearSelect.value = endParts[0];
+                        endMonthSelect.value = endParts[1];
+                    }
+                }
+            }
+        }
+
+        // --- 3. 監聽變更並更新隱藏欄位 (與新增頁面相同) ---
+        function updateHiddenField() {
+            const sY = startYearSelect.value;
+            const sM = startMonthSelect.value;
+            const eY = endYearSelect.value;
+            const eM = endMonthSelect.value;
+
+            let result = "";
+
+            if (sY && sM) {
+                result += `${sY}/${sM}`;
+                if (eY && eM) {
+                    result += ` - ${eY}/${eM}`;
+                } else {
+                    result += ` - 至今`;
+                }
+            }
+            hiddenInput.value = result;
+        }
+
+        // 綁定事件
+        const allSelects = document.querySelectorAll('.date-part');
+        allSelects.forEach(select => {
+            select.addEventListener('change', updateHiddenField);
+        });
+
+        // --- 4. 頁面載入時執行回填 ---
+        initFromHiddenValue();
+    });
+</script>
 </body>
 </html>

@@ -12,46 +12,12 @@
 </head>
 <body>
 
-<header>
-    <div class="top-bar">
-        <div>XXXXXXXXXXXXXXXXXXXXXXXXXX</div>
-        <div class="top-icons">
-            <div class="search-box">
-                <input type="text" placeholder="Search..." style="background: transparent; border: none; color: white; width: 100%; outline: none;">
-                <span>🔍</span>
-            </div>
-            <div class="user-dropdown-container">
-                <span id="user-icon" style="cursor: pointer;">👤</span>
-            </div>
-            <span id="cart">🛒</span>
-        </div>
-    </div>
-    <div class="main-header">
-        <div class="logo">卡爾夏</div>
-        <nav class="nav-links">
-            <a href="#">商城</a> <a href="#">安裝區</a> <a href="#">論壇</a> <a href="#">公告</a>
-        </nav>
-    </div>
-</header>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
+
 
 <div class="container">
 
-    <aside>
-        <div class="sidebar-section">
-            <h3 class="sidebar-title">會員中心</h3>
-            <ul class="category-list">
-                <li><a th:href="@{/members/profile}">個人資料</a></li>
-                <li><a href="#">我的訂單</a></li>
-                <li><a href="#">預約紀錄</a></li>
-                <li class="active">個人汽車</li>
-                <li>
-                    <form th:action="@{/members/logout}" method="post" id="logoutForm" style="display: inline;">
-                        <a href="javascript:void(0);" onclick="document.getElementById('logoutForm').submit();">登出</a>
-                    </form>
-                </li>
-            </ul>
-        </div>
-    </aside>
+    <aside th:replace="~{fragments/member_center_sidebar :: memberCenterSidebar}"></aside>
 
     <main class="main-section">
         <div class="profile-container">
@@ -131,6 +97,7 @@
 <footer>
     <div class="footer-col"><div class="footer-logo logo">卡爾夏</div></div>
 </footer>
+<script th:src="@{/js/front-end/index.js}"></script>
 
 </body>
 </html>

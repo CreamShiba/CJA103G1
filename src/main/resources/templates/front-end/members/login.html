@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Autopile</title>
+    <title>登入|卡爾夏</title>
     <link rel="stylesheet" th:href="@{/css/front-end/members/login.css}">
 </head>
 <body>
@@ -14,7 +14,7 @@
             <p>Welcome back</p>
         </div>
         <div th:if="${successMsg}" class="md-card"
-             style="margin-bottom: 16px; padding: 16px; border-left: 4px solid var(--md-sys-color-primary-container);">
+             style="margin-bottom: 16px; padding: 16px; border-left: 4px solid;">
             <p th:text="${successMsg}"
                style="margin: 0; color:red;"></p>
         </div>
@@ -43,12 +43,11 @@
 
             <div class="form-footer">
                 <a th:href="@{/members/forgotPassword}">忘記密碼?</a>
-                <a onclick="history.back()">返回</a>
+                <a th:href="${session.location != null ? session.location : '/members/home'}">返回</a>
                 <a th:href="@{/members/register}">註冊帳號</a>
             </div>
         </form>
     </div>
 
-    <script src="login.js"></script>
 </body>
 </html>

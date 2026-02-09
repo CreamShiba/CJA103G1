@@ -73,11 +73,23 @@ public class ProdCategoryService {
     // 使用 Optional 避免 NullPointerException
     return repository.findById(id).orElse(null);
   }
-
+  //檢查類別名稱是否已存在
+  public boolean existsByProductCategoryName(String name) {
+    return repository.existsByProductCategoryName(name);
+  }
   /**
    * 查詢全部
    */
   public List<ProdCategoryVO> getAllProdCategories() {
     return repository.findAll();
   }
+
+  //搜尋功能
+  public List<ProdCategoryVO> getProdCategoriesByName(String keyword) {
+    if (keyword == null || keyword.trim().isEmpty()) {
+      return repository.findAll();
+    }
+    return repository.findByProductCategoryNameContaining(keyword);
+  }
 }
+

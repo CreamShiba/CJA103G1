@@ -145,6 +145,12 @@
 			<artifactId>bootstrap</artifactId>
 			<version>4.2.1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.mindrot</groupId>
+			<artifactId>jbcrypt</artifactId>
+			<version>0.4</version>
+		</dependency>
 	</dependencies>
 
 	<build>
