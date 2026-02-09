@@ -45,7 +45,7 @@
       <div class="item-image">
         <th:block th:with="product=${productMap.get(item.prod_no)}">
           <img th:if="${product != null and product.productImage != null}"
-               th:src="@{'/product/showImage/' + ${item.prod_no}}" alt="商品圖片">
+               th:src="@{/product/displayMain(prodNo=${item.prod_no})}" alt="商品圖片">
           <i th:if="${product == null || product.productImage == null}" class="fas fa-car"></i>
         </th:block>
       </div>
