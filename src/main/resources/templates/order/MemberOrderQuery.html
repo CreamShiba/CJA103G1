@@ -11,25 +11,61 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         .order-container { padding: 20px; max-width: 1200px; margin: 0 auto; }
-        .order-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em;}
-        .order-table th, .order-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .order-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 15px; /* 讓每一行之間有間距 */
+            background-color: transparent;
+        }
+        .order-table th {
+            display: none;
+        }
+        .order-table tr {
+            background-color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 輕微陰影 */
+            border-radius: 12px;
+        }
+        .order-table td {
+            padding: 20px;
+            border: none; /* 移除邊框 */
+            vertical-align: middle;
+        }
+        .order-table td:first-child {
+            border-top-left-radius: 12px;
+            border-bottom-left-radius: 12px;
+            font-weight: bold;
+            color: #333;
+        }
+        .order-table td:last-child {
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            text-align: right;
+        }
         .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            color: white;
-            display: inline-block;
-            white-space: nowrap;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-weight: 500;
         }
 
-        /* 綠色：進行中 */
-        .status-paid { background-color: #28a745; }
+        .status-paid {
+            background-color: #e7f0ff;
+            color: #007bff;
+        }
 
-        /* 灰色：已結案 (完成或取消) */
-        .status-completed, .status-cancel { background-color: #6c757d; }
+        .status-completed {
+            background-color: #e6f7ee;
+            color: #28a745;
+        }
 
-        /* 黃色：待處理 */
-        .status-pending { background-color: #ffc107; color: #000; }
+        .status-completed-cancel {
+            background-color: #dedede;
+            color: #333;
+        }
+
+        .status-pending {
+            background-color: #fff9e6;
+            color: #ffc107;
+        }
         .btn-complete {
             background-color: #28a745;
             color: white;
@@ -141,6 +177,21 @@
              max-width: 95% !important;
              padding-right: 20px;
          }
+
+        /* 訂單日期標籤文字 */
+        .order-date-label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        /* 價格加重顯示 */
+        .price-text {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+        }
 
     </style>
 </head>
@@ -325,7 +376,7 @@
                 // --- 狀態樣式邏輯 ---
                 let statusClass = '';
                 if (ord.ordStatus === '已完成' || ord.ordStatus === '已取消') {
-                    statusClass = 'status-completed'; // 灰色
+                    statusClass = 'status-completed-cancel'; // 灰色
                 } else if (ord.ordStatus === '待付款') {
                     statusClass = 'status-pending';   // 黃色
                 } else if (ord.ordStatus === '已出貨') {
@@ -365,7 +416,7 @@
 
                         if (allLocked) {
                             // 全部都是狀態2 - 已評價完成(鎖定)
-                            ratingBtn = `<button class="btn-rate" style="background-color:#28a745;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">查看評價</button>`;
+                            ratingBtn = `<button class="btn-rate" style="background-color:#ccc;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">查看評價</button>`;
                         } else if (hasDraft) {
                             // 有狀態1 - 可修改
                             ratingBtn = `<button class="btn-rate" style="background-color:#ffc107; color:black;" onclick="location.href='/prodRate/add-page?ordNo=${ord.ordNo}'">修改評價</button>`;
@@ -376,12 +427,12 @@
                     }
                 }
                 // --- 動作按鈕邏輯 (詳情 / 確認收貨) ---
-                let actionBtn = `<button class="btn-detail" onclick="viewDetail(${ord.ordNo})">詳情</button>`;
+                let actionBtn = `<button class="btn-detail" onclick="viewDetail(${ord.ordNo})">訂單詳情</button>`;
 
                 // 新增：若訂單狀態為「已發貨」，在詳情按鈕前增加「確認收貨」按鈕
                 if (ord.ordStatus === '已出貨') {
                     actionBtn = `
-                    <button class="btn-complete" style="margin-right:5px; background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;"
+                    <button class="btn-complete" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;font-size: 12px;"
                             onclick="confirmReceipt(${ord.ordNo})">
                         確認收貨
                     </button>
@@ -391,15 +442,35 @@
                 // 3. 渲染至表格
                 body.innerHTML += `
                 <tr>
-                    <td>#${ord.ordNo}</td>
-                    <td>${formatDate(ord.ordDate)}</td>
-                    <td>${ord.ordPaymentMethod || ' '}</td>
-                    <td>${ord.ordPaymentStatus || ' '}</td>
-                    <td><strong style="color:red;">$${ord.ordPrice}</strong></td>
-                    <td><span class="status-badge ${statusClass}">${ord.ordStatus}</span></td>
-                    <td>${ord.ordShipMethod || ' '}</td>
-                    <td>${ratingBtn}</td>
-                    <td>${actionBtn}</td>
+                    <td>
+                        <div style="display:flex; align-items:center;">
+                            <div style="display: ruby">
+                                <i class="fa-solid fa-box" style="color:#ccc;"></i
+                            </div>
+                            <div>
+                                <div style="font-size:12px; color:#888;">Order ID</div>
+                                <div style="font-weight:bold;">#${ord.ordNo}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="order-date-label">Date</span>
+                        <div style="font-weight:500; color: #333; font-size: 12px;">${formatDate(ord.ordDate)}</div>
+                    </td>
+                    <td>
+                        <span class="order-date-label">Status</span>
+                        <span class="status-badge ${statusClass}">${ord.ordStatus}</span>
+                    </td>
+                    <td>
+                        <span class="order-date-label">Price</span>
+                        <div class="price-text">$${ord.ordPrice}</div>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:10px; justify-content:flex-end; align-items:center;">
+                            ${ratingBtn}
+                            ${actionBtn}
+                        </div>
+                    </td>
                 </tr>`;
             });
         } catch (err) {
