@@ -77,6 +77,12 @@ public class MembersLoginController {
           HttpSession session,
           Model model) {
 
+    if (memAcc == null || memAcc.trim().isEmpty() || memPwd == null || memPwd.trim().isEmpty()) {
+      model.addAttribute("errorMsgs", List.of("帳號或密碼請勿空白"));
+      model.addAttribute("memAcc", memAcc); // 保留使用者輸入的帳號
+      return "front-end/members/login";
+    }
+
     // 1. 判斷帳號是否存在
     MembersVO member = membersService.getByMemAcc(memAcc);
     if (member == null) {

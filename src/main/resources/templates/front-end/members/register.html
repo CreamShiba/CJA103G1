@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Autopile</title>
+    <title>Register - 卡爾夏</title>
     <link rel="stylesheet" th:href="@{/css/front-end/members/register.css}">
 </head>
 <body>
@@ -28,49 +28,49 @@
         <div class="form-row">
             <div class="form-group half">
                 <label for="memAcc">Account *</label>
-                <input type="text" id="memAcc" th:field="*{memAcc}" placeholder="設定帳號 (6-10碼英數)" required>
+                <input type="text" id="memAcc" th:field="*{memAcc}" placeholder="設定帳號 (6-10碼英數)">
             </div>
             <div class="form-group half">
                 <label for="memPwd">Password *</label>
-                <input type="password" id="memPwd" th:field="*{memPwd}" placeholder="設定密碼 (4-10碼英數)" required>
+                <input type="password" id="memPwd" th:field="*{memPwd}" placeholder="設定密碼 (4-10碼英數)">
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group half">
                 <label for="memName">Name *</label>
-                <input type="text" id="memName" th:field="*{memName}" placeholder="真實姓名" required>
+                <input type="text" id="memName" th:field="*{memName}" placeholder="真實姓名">
             </div>
             <div class="form-group half">
                 <label for="memUsername">Nickname *</label>
-                <input type="text" id="memUsername" th:field="*{memUsername}" placeholder="顯示暱稱" required>
+                <input type="text" id="memUsername" th:field="*{memUsername}" placeholder="顯示暱稱">
             </div>
         </div>
 
         <div class="form-group">
             <label for="memEmail">Email *</label>
-            <input type="email" id="memEmail" th:field="*{memEmail}" placeholder="example@email.com" required>
+            <input type="email" id="memEmail" th:field="*{memEmail}" placeholder="example@email.com">
         </div>
 
         <div class="form-group">
             <label for="memMobile">Mobile Phone *</label>
-            <input type="text" id="memMobile" th:field="*{memMobile}" placeholder="09xxxxxxxx" required>
+            <input type="text" id="memMobile" th:field="*{memMobile}" placeholder="09xxxxxxxx">
         </div>
 
         <div class="form-group">
             <label>Address *</label>
 
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <select id="citySelect" class="form-control" style="flex: 1;" required>
+                <select id="citySelect" class="form-control" style="flex: 1;" >
                     <option value="">請選擇縣市</option>
                 </select>
 
-                <select id="areaSelect" class="form-control" style="flex: 1;" required>
+                <select id="areaSelect" class="form-control" style="flex: 1;" >
                     <option value="">請選擇區域</option>
                 </select>
             </div>
 
-            <input type="text" id="detailAddr" placeholder="請輸入街道、巷弄、門牌樓層" style="margin-bottom: 0;" required>
+            <input type="text" id="detailAddr" placeholder="請輸入街道、巷弄、門牌樓層" style="margin-bottom: 0;">
 
             <input type="hidden" id="memAddr" th:field="*{memAddr}">
         </div>

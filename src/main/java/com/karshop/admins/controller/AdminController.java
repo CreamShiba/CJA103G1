@@ -246,7 +246,8 @@ public class AdminController {
           HttpSession session,
           Model model,
           RedirectAttributes ra) {
-
+    AdminVO currentLoginAdmin = (AdminVO) session.getAttribute("admin");
+    boolean isCurrentUserSuper = hasAuth(currentLoginAdmin, SUPER_ADMIN_AUTH_ID);
     // 1. 驗證失敗 → 回到表單並補 allFunctions
     if (result.hasErrors()) {
       List<String> errorMsgs = result.getFieldErrors().stream()
@@ -254,15 +255,16 @@ public class AdminController {
               .toList();
       model.addAttribute("errorMsgs", errorMsgs);
       model.addAttribute("allFunctions", adminAuthListService.getAll());
+      model.addAttribute("isCurrentUserSuper", isCurrentUserSuper);
+      model.addAttribute("superAdminAuthId", SUPER_ADMIN_AUTH_ID);
+      model.addAttribute("adminEditAuthId", ADMIN_EDIT_AUTH_ID);
       return "back-end/admin_edit";
     }
 
     // 2. 先讀出原本的 VO，從 DTO 拿 adminNo
     AdminVO vo = adminService.getById(form.getadminNo());
-    AdminVO currentLoginAdmin = (AdminVO) session.getAttribute("admin");
     AdminVO originalTargetAdmin = adminService.getById(form.getadminNo()); // 從 DB 查出原始狀態
     //判斷當前使用者是不是超級管理員
-    boolean isCurrentUserSuper = hasAuth(currentLoginAdmin, SUPER_ADMIN_AUTH_ID);
 
     // ★★★ 權限防護邏輯開始 ★★★
 
