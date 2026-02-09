@@ -64,7 +64,16 @@ public class CouponService {
     }
 
     public void delete(Integer couponNo){
-        couponRepository.deleteById(couponNo);
+        // 1. 先找出該筆資料
+        Coupon coupon = couponRepository.findById(couponNo).orElse(null);
+
+        if (coupon != null) {
+            // 2. 將狀態改為 0 (註銷/刪除)
+            coupon.setCouponStatus(0);
+
+            // 3. 儲存回資料庫 (save 會自動判斷為 Update)
+            couponRepository.save(coupon);
+        }
     }
 
     public void insert(Coupon coupon){

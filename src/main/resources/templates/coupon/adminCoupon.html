@@ -9,6 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/couponStyle.css}">
 
     <link rel="stylesheet" th:href="@{/css/fragments/admin_sidebar.css}">
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css" rel="stylesheet">
 </head>
 <body>
 <div class="app-container">
@@ -70,9 +71,12 @@
                                style="background-color: #ffc107; color: black; padding: 5px 10px; text-decoration: none; border-radius: 4px;">修改</a>
 
                             <form th:action="@{/coupon/delete}" method="post" style="display:inline;"
-                                  onsubmit="return confirm('確定要刪除這筆優惠券嗎？');">
+                                  class="delete-form">
                                 <input type="hidden" name="couponNo" th:value="${c.couponNo}">
-                                <button type="submit" class="btn-delete" style="background-color: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer;font-size: 0.8em;">刪除</button>
+                                <button type="button" class="btn-delete btn-delete-confirm"
+                                        style="background-color: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8em;">
+                                    停用
+                                </button>
                             </form>
                         </td>
                     </tr>
@@ -200,6 +204,7 @@
     </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script th:inline="javascript">
     // 側邊欄子選單切換邏輯
     document.querySelectorAll('.submenu-toggle').forEach(toggle => {
@@ -334,48 +339,78 @@
     });
 
     document.addEventListener("DOMContentLoaded", function() {
+        // === 1. 側邊欄與頁面狀態邏輯 ===
         const couponLinks = document.querySelectorAll('.menu-item.has-submenu .submenu a[href*="coupon"]');
-        const currentPath = window.location.pathname;
-        const currentHash = window.location.hash;
 
-        function setActive(targetHashOrPath) {
+        function updateActiveSidebar() {
+            const currentPath = window.location.pathname;
+            const currentHash = window.location.hash;
+
             couponLinks.forEach(link => {
                 const href = link.getAttribute('href');
                 link.classList.remove('active');
 
-                // 判斷邏輯：如果連結的 href 包含當前的 Hash，或是當前在查詢結果頁且連結是「查詢」
+                // 條件 A: 匹配 Hash (例如 #coupon-add)
                 if (currentHash && href.includes(currentHash)) {
                     link.classList.add('active');
-                } else if (currentPath.includes('listByCompositeQuery') && href.includes('#coupon-query')) {
+                }
+                // 條件 B: 處理複合查詢結果頁面，讓「查詢」選項亮起
+                else if (currentPath.includes('listByCompositeQuery') && href.includes('#coupon-query')) {
                     link.classList.add('active');
-                } else if (!currentHash && !currentPath.includes('listByCompositeQuery') && href.endsWith('/coupon/admin')) {
-                    // 預設列表亮起
+                }
+                // 條件 C: 預設列表頁 (無 Hash 且路徑正確)
+                else if (!currentHash && !currentPath.includes('listByCompositeQuery') && href.endsWith('/coupon/admin')) {
                     if (href.indexOf('#') === -1) link.classList.add('active');
                 }
             });
         }
 
-        setActive();
+        // 初始化側邊欄狀態
+        updateActiveSidebar();
 
-        // 監聽點擊
+        // 監聽側邊欄點擊 (手動切換 active 類別)
         couponLinks.forEach(link => {
             link.addEventListener('click', function() {
                 couponLinks.forEach(item => item.classList.remove('active'));
                 this.classList.add('active');
             });
         });
-    });
 
-        // 2. 處理頁面重新整理時，根據網址 Hash 自動選取
-        const currentHash = window.location.hash;
-        if (currentHash) {
-            couponLinks.forEach(link => {
-                if (link.getAttribute('href').includes(currentHash)) {
-                    couponLinks.forEach(item => item.classList.remove('active'));
-                    link.classList.add('active');
-                }
-            });
-        }
+        // 監聽網址 Hash 變化 (當使用者點擊「取消」或「回列表」時自動更新側邊欄)
+        window.addEventListener('hashchange', updateActiveSidebar);
+
+
+        // === 2. SweetAlert2 刪除確認邏輯 ===
+        // 使用事件委派 (Event Delegation) 處理動態生成的按鈕或靜態按鈕
+        document.addEventListener('click', function(e) {
+            const deleteBtn = e.target.closest('.btn-delete-confirm');
+            if (deleteBtn) {
+                e.preventDefault(); // 阻止預設行為
+                const form = deleteBtn.closest('form');
+
+                Swal.fire({
+                    title: '確定要停用嗎？',
+                    text: "停用後該優惠券將無法被領取或使用！",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-trash-alt"></i> 確定停用',
+                    cancelButtonText: '取消',
+                    reverseButtons: true,
+                    background: '#fff',
+                    customClass: {
+                        confirmButton: 'swal-confirm-styled',
+                        cancelButton: 'swal-cancel-styled'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            }
+        });
+    });
 
 
 </script>

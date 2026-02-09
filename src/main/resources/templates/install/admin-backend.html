@@ -104,7 +104,7 @@
                         <tbody>
                             <tr th:each="tech : ${pendingTechs}">
                                 <td th:text="${tech.realName}">Name</td>
-                                <td th:text="${tech.member.memUsername}">Applicant</td>
+                                <td th:text="${tech.member.memName}">Applicant</td>
                                 <td>
                                     <span class="badge" th:text="${tech.serviceArea}"
                                         style="background-color: #eee; color: #333;">Area</span>
@@ -167,7 +167,7 @@
                         <tbody>
                             <tr th:each="tech : ${pendingTechs}">
                                 <td th:text="${tech.realName}">Name</td>
-                                <td th:text="${tech.member.memUsername}">Applicant</td>
+                                <td th:text="${tech.member.memName}">Applicant</td>
                                 <td>
                                     <span class="badge" th:text="${tech.serviceArea}"
                                         style="background-color: #eee; color: #333;">Area</span>
@@ -379,8 +379,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="svc : ${services}">
-                                <td th:text="'#' + ${svc.serviceNo}">#1</td>
+                            <tr th:each="svc, iterStat : ${services}">
+                                <td th:text="'#' + ${iterStat.count}">#1</td>
                                 <td>
                                     <!-- Display Mode -->
                                     <span th:id="'name-' + ${svc.serviceNo}" th:text="${svc.serviceName}">Service

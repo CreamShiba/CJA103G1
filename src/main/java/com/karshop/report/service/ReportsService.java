@@ -58,14 +58,16 @@ public class ReportsService {
 
         System.out.println("💡 Service 查詢狀態：「" + status + "」");
 
-        // ✅ 核心修正：當查詢「待處理」時，強制包含所有未結案狀態，防止「駁回」或「已下架」案件消失
+        // ✅ 核心修正：依照組員需求，待處理區僅顯示「待處理」案件。
         if ("待處理".equals(status)) {
-            List<String> statuses = Arrays.asList("待處理", "處理中", "駁回", "已下架");
-            return reportsRepository.findByStatusIn(statuses, pageable);
+            return reportsRepository.findByStatus("待處理", pageable);
         }
 
-        // 否則，按原邏輯進行單一狀態查詢（例如查詢「已處理」）
-        return reportsRepository.findByStatus(status, pageable);
+        // ✅ 核心修正：為了避免組員頁面出現「下架」標籤，已處理區查詢應排除「下架」字眼。
+        // 但為了確保「已處理」分頁能撈到所有結案資料，這裡必須包含所有結案狀態字眼（含 DB 現有的下架資料）。
+        // 這樣你在報表清單才看得到編號 #3 那些案件。
+        List<String> closedStatuses = Arrays.asList("已處理", "已結案", "駁回", "下架", "已下架");
+        return reportsRepository.findByStatusIn(closedStatuses, pageable);
     }
 
     /**

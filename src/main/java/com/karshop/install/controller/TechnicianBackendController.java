@@ -43,6 +43,7 @@ public class TechnicianBackendController {
                 if (tech.getIsActive() != 1)
                         return "redirect:/installation/home?error=pending";
 
+                model.addAttribute("technician", tech); // Add technician to model for realName display
                 model.addAttribute("currentTab", tab);
 
                 // 1. Pending Orders (待確認)
@@ -118,6 +119,7 @@ public class TechnicianBackendController {
                 vo.setTotalPrice(o.getTotalPrice());
                 vo.setOrderStatus(o.getOrderStatus().getDescription());
                 vo.setPayoutStatus(o.getPayoutStatus().getDescription());
+                vo.setTechPayout(o.getTechPayout());
                 return vo;
         }
 

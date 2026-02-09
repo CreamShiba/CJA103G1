@@ -88,13 +88,12 @@ window.onload = function() {
 
 
 //優惠券:更新訂單總額計算 (小計 + 運費 - 折扣)
-
-function updateOrderTotal() {
-    // 1. 取得商品小計 (移除逗號轉數字)
-    const subtotalText = document.getElementById('display-subtotal').innerText.replace(/,/g, '');
+// 優惠券：更新訂單總額計算 (加入後端 20% 驗證)
+async function updateOrderTotal() {
+    // 1. 取得商品小計與運費
+    const subtotalText = document.getElementById('display-subtotal').innerText.replace(/[^0-9]/g, '');
     const subtotal = parseInt(subtotalText) || 0;
 
-    // 2. 取得運費邏輯
     const deliveryMethod = document.getElementById('delivery-method').value;
     let shippingFee = 0;
     if (deliveryMethod === '宅配') shippingFee = 100;
@@ -102,29 +101,46 @@ function updateOrderTotal() {
 
     document.getElementById('display-shipping').innerText = 'NT$ ' + shippingFee;
 
-    // 3. 取得選中的優惠券資訊
+    // 2. 準備驗證參數
+    const currentTotal = subtotal + shippingFee; // 這是校驗 20% 的基準額
     const couponSelect = document.getElementById('couponSelect');
-    const selectedOption = couponSelect.options[couponSelect.selectedIndex];
+    const couponNo = couponSelect.value;
 
-    // 💡 修正重點：在這裡加上 const 宣告變數
-    const discount = (selectedOption && selectedOption.dataset.discount) ? parseInt(selectedOption.dataset.discount) : 0;
-    const couponNo = (selectedOption) ? selectedOption.value : ""; // 👈 加上這行宣告
+    let discount = 0;
 
-    // ✅ 將數值填入隱藏欄位 (id 必須與 HTML 中的一致)
-    // 根據您的 HTML，id 可能是 'coupon_no' 和 'discount_price'
-    if (document.getElementById('coupon_no')) {
-        document.getElementById('coupon_no').value = couponNo;
+    // 3. 如果有選擇優惠券，則向後端發起驗證
+    if (couponNo) {
+        try {
+            // 呼叫您在 MemberCouponController 寫的 API
+            const response = await fetch(`/member/coupons/validate-usage?couponNo=${couponNo}&orderAmount=${currentTotal}`);
+
+            if (!response.ok) {
+                const errorMsg = await response.text();
+                // 顯示在網頁元素上，而不是彈窗
+                document.getElementById('coupon-error').innerText = "⚠️ " + errorMsg;
+                couponSelect.value = "";
+                discount = 0;
+            } else {
+                // 驗證通過：後端會回傳折扣金額
+                document.getElementById('coupon-error').innerText = "";
+                discount = await response.json();
+            }
+        } catch (error) {
+            console.error("驗證發生錯誤:", error);
+            alert("優惠券驗證失敗，請稍後再試");
+            couponSelect.value = "";
+            discount = 0;
+        }
     }
-    if (document.getElementById('discount_price')) {
-        document.getElementById('discount_price').value = discount;
-    }
 
-    // 4. 更新畫面顯示
+    // 4. 更新隱藏欄位與 UI
+    if (document.getElementById('coupon_no')) document.getElementById('coupon_no').value = couponSelect.value;
+    if (document.getElementById('discount_price')) document.getElementById('discount_price').value = discount;
+
     document.getElementById('display-discount').innerText = discount;
 
-    // 5. 計算總額
-    const finalTotal = Math.max(0, subtotal + shippingFee - discount);
-
+    // 5. 計算並顯示最終金額
+    const finalTotal = Math.max(0, currentTotal - discount);
     const formattedTotal = new Intl.NumberFormat().format(finalTotal);
     document.getElementById('display-total').innerText = formattedTotal;
     document.getElementById('modal-amount').innerText = formattedTotal;

@@ -65,7 +65,8 @@ public class MemberInfoService {
         return repository.findById(no).orElse(null);
     }
 
-    public List<MemberInfo> findByCompositeQuery(Integer no, String kw, Integer status, Integer seller, Integer engineer) {
-        return repository.findByCompositeQuery(no, kw, status, seller, engineer);
+    public Page<MemberInfo> findByCompositeQuery(Integer no, String kw, Integer status, Integer seller, Integer engineer, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("memberNo").ascending());
+        return repository.findByCompositeQuery(no, kw, status, seller, engineer, pageable);
     }
 }

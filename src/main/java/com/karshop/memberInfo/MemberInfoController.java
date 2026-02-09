@@ -22,13 +22,35 @@ public class MemberInfoController {
     private MemberInfoService memberInfoService;
 
     @GetMapping("/manage")
-    public String showManagePage(@RequestParam(value = "p", defaultValue = "0") Integer page, Model model) {
+    public String showManagePage(
+            @RequestParam(value = "p", defaultValue = "0") Integer page,
+            @RequestParam(required = false) Integer memberNo,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Integer isSeller,
+            @RequestParam(required = false) Integer isEngineer,
+            Model model) {
         int pageSize = 5; // 設定每頁顯示 5 筆
-        Page<MemberInfo> memberPage = memberInfoService.getAll(page, pageSize);
+
+        Integer s = (status != null && status == -1) ? null : status;
+        Integer sel = (isSeller != null && isSeller == -1) ? null : isSeller;
+        Integer eng = (isEngineer != null && isEngineer == -1) ? null : isEngineer;
+        String kw = (keyword != null && keyword.trim().isEmpty()) ? null : keyword;
+
+//        Page<MemberInfo> memberPage = memberInfoService.getAll(page, pageSize);
+        Page<MemberInfo> memberPage = memberInfoService.findByCompositeQuery(memberNo, kw, s, sel, eng, page, pageSize);
 
         // 傳送 Page 物件到前端，它包含分頁資訊（總頁數、當前頁碼等）
         model.addAttribute("memberPage", memberPage);
         model.addAttribute("memberList", memberPage.getContent());
+
+        // 將搜尋條件傳回前端，以便分頁連結可以帶上這些參數
+        model.addAttribute("currentMemberNo", memberNo);
+        model.addAttribute("currentKeyword", keyword);
+        model.addAttribute("currentStatus", status);
+        model.addAttribute("currentIsSeller", isSeller);
+        model.addAttribute("currentIsEngineer", isEngineer);
+
         return "/memberInfo/adminMemberInfo";
     }
 
@@ -99,23 +121,4 @@ public class MemberInfoController {
         return org.springframework.http.ResponseEntity.notFound().build();
     }
 
-    //查詢
-    @GetMapping("/api/search")
-    @ResponseBody // 回傳 JSON 格式數據
-    public List<MemberInfo> searchMembers(
-            @RequestParam(required = false) Integer memberNo,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Integer isSeller,
-            @RequestParam(required = false) Integer isEngineer) {
-
-        // 處理前端傳來的 -1 (代表「全部」)，轉換為 null 供 Repository 判斷
-        Integer searchStatus = (status != null && status == -1) ? null : status;
-        Integer searchSeller = (isSeller != null && isSeller == -1) ? null : isSeller;
-        Integer searchEngineer = (isEngineer != null && isEngineer == -1) ? null : isEngineer;
-        String searchKw = (keyword != null && keyword.trim().isEmpty()) ? null : keyword;
-
-        //  Repository 的複合查詢方法
-        return memberInfoService.findByCompositeQuery(memberNo, searchKw, searchStatus, searchSeller, searchEngineer);
-    }
 }
