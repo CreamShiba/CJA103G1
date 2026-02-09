@@ -392,7 +392,6 @@
         const pageSize = 5; // 💡 每頁顯示 5 筆
 
         window.onload = function () {
-            initUserDropdown();
             renderTable(); // 初始渲染
         };
 
@@ -479,19 +478,49 @@
             window.scrollTo(0, 0);
         }
 
-        function initUserDropdown() {
+        document.addEventListener('DOMContentLoaded', function () {
             const userIcon = document.getElementById('user-icon');
             const userDropdown = document.getElementById('user-dropdown');
             const memberTrigger = document.getElementById('member-center-trigger');
             const memberDropdown = document.getElementById('member-dropdown');
+            const forumTrigger = document.getElementById('forum-center-trigger');
+            const forumDropdown = document.getElementById('forum-dropdown');
+
             if (userIcon) {
-                userIcon.onclick = function (e) { e.stopPropagation(); userDropdown.classList.toggle('show'); memberDropdown.classList.remove('show'); };
+                userIcon.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    if (userDropdown) userDropdown.classList.toggle('show');
+                    if (memberDropdown) memberDropdown.classList.remove('show');
+                    if (forumDropdown) forumDropdown.classList.remove('show');
+                });
             }
+
             if (memberTrigger) {
-                memberTrigger.onclick = function (e) { e.stopPropagation(); memberDropdown.classList.toggle('show'); userDropdown.classList.remove('show'); };
+                memberTrigger.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (memberDropdown) memberDropdown.classList.toggle('show');
+                    if (userDropdown) userDropdown.classList.remove('show');
+                    if (forumDropdown) forumDropdown.classList.remove('show');
+                });
             }
-            document.onclick = function () { userDropdown.classList.remove('show'); memberDropdown.classList.remove('show'); };
-        }
+
+            if (forumTrigger) {
+                forumTrigger.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (forumDropdown) forumDropdown.classList.toggle('show');
+                    if (userDropdown) userDropdown.classList.remove('show');
+                    if (memberDropdown) memberDropdown.classList.remove('show');
+                });
+            }
+
+            document.addEventListener('click', function (e) {
+                if (userDropdown) userDropdown.classList.remove('show');
+                if (memberDropdown) memberDropdown.classList.remove('show');
+                if (forumDropdown) forumDropdown.classList.remove('show');
+            });
+        });
     </script>
 </body>
 

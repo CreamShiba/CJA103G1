@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -320,7 +321,7 @@
             top: 100%;
             background-color: #1a1a1a;
             min-width: 150px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
             z-index: 100;
             border: 1px solid #333;
             border-radius: 4px;
@@ -542,340 +543,355 @@
             display: block;
         }
 
-        .hidden { display: none; }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
+
 <body>
 
-<header th:replace="fragments/front_header :: frontHeader"></header>
+    <header th:replace="fragments/front_header :: frontHeader"></header>
 
-<div class="container">
+    <div class="container">
 
-    <aside>
-        <div class="sidebar-section">
-            <h3 class="sidebar-title">Browse by</h3>
-            <ul class="category-list">
-                <li onclick="location.href='/appeals/add'">提交申訴</li>
-                <li class="active" onclick="location.href='/reports/add'">提交檢舉</li>
-                <li onclick="location.href='/appeals/history'">申訴紀錄</li>
-                <li onclick="location.href='/reports/history'">檢舉紀錄</li>
+        <aside>
+            <div class="sidebar-section">
+                <h3 class="sidebar-title">Browse by</h3>
+                <ul class="category-list">
+                    <li onclick="location.href='/appeals/add'">提交申訴</li>
+                    <li class="active" onclick="location.href='/reports/add'">提交檢舉</li>
+                    <li onclick="location.href='/appeals/history'">申訴紀錄</li>
+                    <li onclick="location.href='/reports/history'">檢舉紀錄</li>
+                </ul>
+            </div>
+        </aside>
+
+        <div class="report-container">
+            <div class="report-card">
+                <h1 class="report-title">REPORT CENTER</h1>
+                <p class="report-subtitle">維護社群秩序，檢舉違規行為。</p>
+
+                <form th:action="@{/reports/submit}" method="post" id="reportForm">
+                    <div class="form-section">
+                        <div class="form-group">
+                            <label for="reportsTarget">檢舉對象 (商品名稱/文章標題/賣家名稱/評論)</label>
+                            <input type="text" id="reportsTarget" name="reportsTarget" placeholder="請輸入對象 ID">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reportsType">檢舉類別</label>
+                            <select id="reportsType" name="reportsType">
+                                <option value="">-- 請選擇類別 --</option>
+                                <option value="商品">商品</option>
+                                <option value="賣家">賣家</option>
+                                <option value="評論">評論</option>
+                                <option value="文章">文章</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" id="reasonSelectField">
+                            <label for="reportsReason">檢舉原因 (可多選)</label>
+                            <div class="multi-select-wrapper">
+                                <div class="multi-select-display" id="multiSelectDisplay">
+                                    <div class="multi-select-placeholder">-- 請先選擇類別 --</div>
+                                    <div class="multi-select-tags" id="selectedTags"></div>
+                                    <span class="multi-select-arrow" id="multiSelectArrow">▼</span>
+                                </div>
+                                <div class="multi-select-dropdown" id="multiSelectDropdown"></div>
+                            </div>
+                            <input type="hidden" id="reportsReason" name="reportsReason">
+                        </div>
+
+                        <div class="form-group hidden" id="otherReasonField">
+                            <label for="otherReasonInput">自定義檢舉原因</label>
+                            <input type="text" id="otherReasonInput" placeholder="請手動輸入檢舉原因">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">聯絡信箱</label>
+                            <input type="email" id="email" name="email" placeholder="請輸入您的 E-mail，以便接收處理結果">
+                        </div>
+
+                        <div class="textarea-group">
+                            <label for="reportsDescription">問題詳細描述</label>
+                            <textarea id="reportsDescription" name="reportsDescription"
+                                placeholder="請詳細說明您遇到的問題..."></textarea>
+                        </div>
+                    </div>
+
+                    <button type="button" class="submit-btn" id="submitBtn">SUBMIT REPORT</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <div class="modal-icon">!</div>
+            <div class="modal-title">卡爾夏Karshop</div>
+            <div class="modal-message" id="modalMessage">請填寫問題詳細描述!</div>
+            <button class="modal-btn" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-col">
+            <div class="footer-logo logo">卡爾夏</div>
+        </div>
+        <div class="footer-col">
+            <h4>Shop</h4>
+            <ul>
+                <li>Shop Parts</li>
+                <li>Wholesale</li>
             </ul>
         </div>
-    </aside>
-
-    <div class="report-container">
-        <div class="report-card">
-            <h1 class="report-title">REPORT CENTER</h1>
-            <p class="report-subtitle">維護社群秩序，檢舉違規行為。</p>
-
-            <form th:action="@{/reports/submit}" method="post" id="reportForm">
-                <div class="form-section">
-                    <div class="form-group">
-                        <label for="reportsTarget">檢舉對象 (商品名稱/文章標題/賣家名稱/評論)</label>
-                        <input type="text" id="reportsTarget" name="reportsTarget"
-                               placeholder="請輸入對象 ID">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="reportsType">檢舉類別</label>
-                        <select id="reportsType" name="reportsType">
-                            <option value="">-- 請選擇類別 --</option>
-                            <option value="商品">商品</option>
-                            <option value="賣家">賣家</option>
-                            <option value="評論">評論</option>
-                            <option value="文章">文章</option>
-                            <option value="其他">其他</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" id="reasonSelectField">
-                        <label for="reportsReason">檢舉原因 (可多選)</label>
-                        <div class="multi-select-wrapper">
-                            <div class="multi-select-display" id="multiSelectDisplay">
-                                <div class="multi-select-placeholder">-- 請先選擇類別 --</div>
-                                <div class="multi-select-tags" id="selectedTags"></div>
-                                <span class="multi-select-arrow" id="multiSelectArrow">▼</span>
-                            </div>
-                            <div class="multi-select-dropdown" id="multiSelectDropdown"></div>
-                        </div>
-                        <input type="hidden" id="reportsReason" name="reportsReason">
-                    </div>
-
-                    <div class="form-group hidden" id="otherReasonField">
-                        <label for="otherReasonInput">自定義檢舉原因</label>
-                        <input type="text" id="otherReasonInput"
-                               placeholder="請手動輸入檢舉原因">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">聯絡信箱</label>
-                        <input type="email" id="email" name="email"
-                               placeholder="請輸入您的 E-mail，以便接收處理結果">
-                    </div>
-
-                    <div class="textarea-group">
-                        <label for="reportsDescription">問題詳細描述</label>
-                        <textarea id="reportsDescription" name="reportsDescription"
-                                  placeholder="請詳細說明您遇到的問題..."></textarea>
-                    </div>
-                </div>
-
-                <button type="button" class="submit-btn" id="submitBtn">SUBMIT REPORT</button>
-            </form>
+        <div class="footer-col">
+            <h4>The Company</h4>
+            <ul>
+                <li>About Us</li>
+                <li>FAQ</li>
+            </ul>
         </div>
-    </div>
+        <div class="footer-col">
+            <h4>Contact Us</h4>
+            <ul>
+                <li>info@mysite.com</li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <h4>Follow Us</h4>
+            <ul>
+                <li>Instagram</li>
+            </ul>
+        </div>
+    </footer>
 
-</div>
+    <script>
+        // 💡 下拉選單邏輯
+        window.onload = function () {
+            const userIcon = document.getElementById('user-icon');
+            const userDropdown = document.getElementById('user-dropdown');
+            const memberTrigger = document.getElementById('member-center-trigger');
+            const memberDropdown = document.getElementById('member-dropdown');
+            const forumTrigger = document.getElementById('forum-center-trigger');
+            const forumDropdown = document.getElementById('forum-dropdown');
 
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal-content">
-        <div class="modal-icon">!</div>
-        <div class="modal-title">卡爾夏Karshop</div>
-        <div class="modal-message" id="modalMessage">請填寫問題詳細描述!</div>
-        <button class="modal-btn" onclick="closeModal()">OK</button>
-    </div>
-</div>
-
-<footer>
-    <div class="footer-col">
-        <div class="footer-logo logo">卡爾夏</div>
-    </div>
-    <div class="footer-col">
-        <h4>Shop</h4>
-        <ul>
-            <li>Shop Parts</li>
-            <li>Wholesale</li>
-        </ul>
-    </div>
-    <div class="footer-col">
-        <h4>The Company</h4>
-        <ul>
-            <li>About Us</li>
-            <li>FAQ</li>
-        </ul>
-    </div>
-    <div class="footer-col">
-        <h4>Contact Us</h4>
-        <ul>
-            <li>info@mysite.com</li>
-        </ul>
-    </div>
-    <div class="footer-col">
-        <h4>Follow Us</h4>
-        <ul>
-            <li>Instagram</li>
-        </ul>
-    </div>
-</footer>
-
-<script>
-    // 💡 下拉選單邏輯
-    window.onload = function() {
-        const userIcon = document.getElementById('user-icon');
-        const userDropdown = document.getElementById('user-dropdown');
-        const memberTrigger = document.getElementById('member-center-trigger');
-        const memberDropdown = document.getElementById('member-dropdown');
-
-        if (userIcon) {
-            userIcon.onclick = function(e) {
-                e.stopPropagation();
-                userDropdown.classList.toggle('show');
-                if (memberDropdown) memberDropdown.classList.remove('show');
-            };
-        }
-
-        if (memberTrigger) {
-            memberTrigger.onclick = function(e) {
-                e.stopPropagation();
-                memberDropdown.classList.toggle('show');
-                if (userDropdown) userDropdown.classList.remove('show');
-            };
-        }
-
-        document.onclick = function() {
-            if(userDropdown) userDropdown.classList.remove('show');
-            if(memberDropdown) memberDropdown.classList.remove('show');
-        };
-    };
-
-    // 檢舉原因資料
-    const reasonData = {
-        "商品": ["廣告不實", "分類錯誤", "重覆刊登", "山寨品/高仿", "商品敘述與實物不符", "商品有瑕疵"],
-        "賣家": ["態度不佳", "出貨速度慢", "疑似詐騙行為"],
-        "評論": ["謾罵/人身攻擊", "評論不實", "惡意洗版", "侵害個人隱私"],
-        "文章": ["廣告洗版 / 商業廣告", "惡意攻擊 / 謾罵", "不實資訊 / 惡意誤導", "內容與標題不符", "侵害隱私 / 版權", "違禁品討論"]
-    };
-
-    let selectedReasons = [];
-    const multiSelectDisplay = document.getElementById('multiSelectDisplay');
-    const multiSelectDropdown = document.getElementById('multiSelectDropdown');
-    const multiSelectArrow = document.getElementById('multiSelectArrow');
-    const selectedTags = document.getElementById('selectedTags');
-    const hiddenInput = document.getElementById('reportsReason');
-
-    // 💡 論壇連動監測腳本 (關鍵新增)
-    document.addEventListener('DOMContentLoaded', function() {
-        // 1. 讀取網址參數
-        const urlParams = new URLSearchParams(window.location.search);
-        const typeFromUrl = urlParams.get('type');       // 預期拿到 '文章'
-        const idFromUrl = urlParams.get('targetID');     // 預期拿到 文章編號
-
-        const typeSelect = document.getElementById('reportsType');
-        const targetInput = document.getElementById('reportsTarget');
-        const reportForm = document.getElementById('reportForm');
-
-        // 2. 如果網址帶參數，執行自動防呆
-        if (typeFromUrl && idFromUrl) {
-            if (typeSelect && targetInput) {
-                // 自動選為「文章」並禁用選單 (防呆鎖死)
-                typeSelect.value = typeFromUrl;
-                typeSelect.disabled = true;
-                typeSelect.classList.add('has-value');
-
-                // 自動填入編號並設為唯讀
-                targetInput.value = idFromUrl;
-                targetInput.readOnly = true;
-
-                // 觸發一次類別變更事件，讓檢舉原因清單跑出來
-                typeSelect.dispatchEvent(new Event('change'));
-
-                console.log("✅ 論壇連動成功：已自動鎖定類別與編號");
+            if (userIcon) {
+                userIcon.onclick = function (e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                    if (memberDropdown) memberDropdown.classList.remove('show');
+                    if (forumDropdown) forumDropdown.classList.remove('show');
+                };
             }
+
+            if (memberTrigger) {
+                memberTrigger.onclick = function (e) {
+                    e.stopPropagation();
+                    memberDropdown.classList.toggle('show');
+                    if (userDropdown) userDropdown.classList.remove('show');
+                    if (forumDropdown) forumDropdown.classList.remove('show');
+                };
+            }
+
+            if (forumTrigger) {
+                forumTrigger.onclick = function (e) {
+                    e.stopPropagation();
+                    forumDropdown.classList.toggle('show');
+                    if (userDropdown) userDropdown.classList.remove('show');
+                    if (memberDropdown) memberDropdown.classList.remove('show');
+                };
+            }
+
+            document.onclick = function () {
+                if (userDropdown) userDropdown.classList.remove('show');
+                if (memberDropdown) memberDropdown.classList.remove('show');
+                if (forumDropdown) forumDropdown.classList.remove('show');
+            };
+        };
+
+        // 檢舉原因資料
+        const reasonData = {
+            "商品": ["廣告不實", "分類錯誤", "重覆刊登", "山寨品/高仿", "商品敘述與實物不符", "商品有瑕疵"],
+            "賣家": ["態度不佳", "出貨速度慢", "疑似詐騙行為"],
+            "評論": ["謾罵/人身攻擊", "評論不實", "惡意洗版", "侵害個人隱私"],
+            "文章": ["廣告洗版 / 商業廣告", "惡意攻擊 / 謾罵", "不實資訊 / 惡意誤導", "內容與標題不符", "侵害隱私 / 版權", "違禁品討論"]
+        };
+
+        let selectedReasons = [];
+        const multiSelectDisplay = document.getElementById('multiSelectDisplay');
+        const multiSelectDropdown = document.getElementById('multiSelectDropdown');
+        const multiSelectArrow = document.getElementById('multiSelectArrow');
+        const selectedTags = document.getElementById('selectedTags');
+        const hiddenInput = document.getElementById('reportsReason');
+
+        // 💡 論壇連動監測腳本 (關鍵新增)
+        document.addEventListener('DOMContentLoaded', function () {
+            // 1. 讀取網址參數
+            const urlParams = new URLSearchParams(window.location.search);
+            const typeFromUrl = urlParams.get('type');       // 預期拿到 '文章'
+            const idFromUrl = urlParams.get('targetID');     // 預期拿到 文章編號
+
+            const typeSelect = document.getElementById('reportsType');
+            const targetInput = document.getElementById('reportsTarget');
+            const reportForm = document.getElementById('reportForm');
+
+            // 2. 如果網址帶參數，執行自動防呆
+            if (typeFromUrl && idFromUrl) {
+                if (typeSelect && targetInput) {
+                    // 自動選為「文章」並禁用選單 (防呆鎖死)
+                    typeSelect.value = typeFromUrl;
+                    typeSelect.disabled = true;
+                    typeSelect.classList.add('has-value');
+
+                    // 自動填入編號並設為唯讀
+                    targetInput.value = idFromUrl;
+                    targetInput.readOnly = true;
+
+                    // 觸發一次類別變更事件，讓檢舉原因清單跑出來
+                    typeSelect.dispatchEvent(new Event('change'));
+
+                    console.log("✅ 論壇連動成功：已自動鎖定類別與編號");
+                }
+            }
+        });
+
+        multiSelectDisplay.addEventListener('click', function (e) {
+            if (e.target.classList.contains('multi-select-tag-remove')) return;
+            multiSelectDropdown.classList.toggle('show');
+            multiSelectArrow.classList.toggle('open');
+            multiSelectDisplay.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.multi-select-wrapper')) {
+                multiSelectDropdown.classList.remove('show');
+                multiSelectArrow.classList.remove('open');
+                multiSelectDisplay.classList.remove('active');
+            }
+        });
+
+        function updateSelectedTags() {
+            selectedTags.innerHTML = '';
+            const placeholder = multiSelectDisplay.querySelector('.multi-select-placeholder');
+            if (selectedReasons.length === 0) {
+                placeholder.style.display = 'block';
+            } else {
+                placeholder.style.display = 'none';
+                selectedReasons.forEach(reason => {
+                    const tag = document.createElement('div');
+                    tag.className = 'multi-select-tag';
+                    tag.innerHTML = `${reason}<span class="multi-select-tag-remove" data-reason="${reason}">×</span>`;
+                    selectedTags.appendChild(tag);
+                });
+            }
+            hiddenInput.value = selectedReasons.join(',');
         }
-    });
 
-    multiSelectDisplay.addEventListener('click', function(e) {
-        if (e.target.classList.contains('multi-select-tag-remove')) return;
-        multiSelectDropdown.classList.toggle('show');
-        multiSelectArrow.classList.toggle('open');
-        multiSelectDisplay.classList.toggle('active');
-    });
+        selectedTags.addEventListener('click', function (e) {
+            if (e.target.classList.contains('multi-select-tag-remove')) {
+                const reason = e.target.getAttribute('data-reason');
+                selectedReasons = selectedReasons.filter(r => r !== reason);
+                updateSelectedTags();
+                updateDropdownOptions();
+            }
+        });
 
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.multi-select-wrapper')) {
-            multiSelectDropdown.classList.remove('show');
-            multiSelectArrow.classList.remove('open');
-            multiSelectDisplay.classList.remove('active');
-        }
-    });
-
-    function updateSelectedTags() {
-        selectedTags.innerHTML = '';
-        const placeholder = multiSelectDisplay.querySelector('.multi-select-placeholder');
-        if (selectedReasons.length === 0) {
-            placeholder.style.display = 'block';
-        } else {
-            placeholder.style.display = 'none';
-            selectedReasons.forEach(reason => {
-                const tag = document.createElement('div');
-                tag.className = 'multi-select-tag';
-                tag.innerHTML = `${reason}<span class="multi-select-tag-remove" data-reason="${reason}">×</span>`;
-                selectedTags.appendChild(tag);
+        function updateDropdownOptions() {
+            const options = multiSelectDropdown.querySelectorAll('.multi-select-option');
+            options.forEach(option => {
+                const value = option.getAttribute('data-value');
+                option.classList.toggle('selected', selectedReasons.includes(value));
             });
         }
-        hiddenInput.value = selectedReasons.join(',');
-    }
 
-    selectedTags.addEventListener('click', function(e) {
-        if (e.target.classList.contains('multi-select-tag-remove')) {
-            const reason = e.target.getAttribute('data-reason');
-            selectedReasons = selectedReasons.filter(r => r !== reason);
+        function handleOptionClick(e) {
+            const value = e.currentTarget.getAttribute('data-value');
+            if (selectedReasons.includes(value)) {
+                selectedReasons = selectedReasons.filter(r => r !== value);
+            } else {
+                selectedReasons.push(value);
+            }
             updateSelectedTags();
             updateDropdownOptions();
         }
-    });
 
-    function updateDropdownOptions() {
-        const options = multiSelectDropdown.querySelectorAll('.multi-select-option');
-        options.forEach(option => {
-            const value = option.getAttribute('data-value');
-            option.classList.toggle('selected', selectedReasons.includes(value));
+        const reportsTypeSelect = document.getElementById('reportsType');
+        reportsTypeSelect.addEventListener('change', function () {
+            const type = this.value;
+            this.classList.toggle('has-value', type !== "");
+            selectedReasons = [];
+            updateSelectedTags();
+            multiSelectDropdown.innerHTML = '';
+
+            const reasonField = document.getElementById('reasonSelectField');
+            const otherField = document.getElementById('otherReasonField');
+
+            if (type === "其他") {
+                reasonField.classList.add('hidden');
+                otherField.classList.remove('hidden');
+            } else if (type && reasonData[type]) {
+                reasonField.classList.remove('hidden');
+                otherField.classList.add('hidden');
+                const placeholder = multiSelectDisplay.querySelector('.multi-select-placeholder');
+                placeholder.textContent = '-- 請選擇檢舉原因 --';
+                reasonData[type].forEach(reason => {
+                    const option = document.createElement('div');
+                    option.className = 'multi-select-option';
+                    option.setAttribute('data-value', reason);
+                    option.innerHTML = `<div class="multi-select-checkbox"></div><span>${reason}</span>`;
+                    option.addEventListener('click', handleOptionClick);
+                    multiSelectDropdown.appendChild(option);
+                });
+            } else {
+                reasonField.classList.remove('hidden');
+                otherField.classList.add('hidden');
+                multiSelectDisplay.querySelector('.multi-select-placeholder').textContent = '-- 請先選擇類別 --';
+            }
         });
-    }
 
-    function handleOptionClick(e) {
-        const value = e.currentTarget.getAttribute('data-value');
-        if (selectedReasons.includes(value)) {
-            selectedReasons = selectedReasons.filter(r => r !== value);
-        } else {
-            selectedReasons.push(value);
+        document.getElementById('submitBtn').addEventListener('click', function (e) {
+            const targetInput = document.getElementById('reportsTarget');
+            const typeSelect = document.getElementById('reportsType');
+
+            const target = targetInput.value.trim();
+            const type = typeSelect.value;
+            const otherReason = document.getElementById('otherReasonInput').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const description = document.getElementById('reportsDescription').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!target) { showModal('請輸入檢舉對象!'); return; }
+            if (!type) { showModal('請選擇檢舉類別!'); return; }
+            if (type !== "其他" && selectedReasons.length === 0) { showModal('請至少選擇一個檢舉原因!'); return; }
+            if (type === "其他" && !otherReason) { showModal('請填寫自定義檢舉原因!'); return; }
+            if (!email) { showModal('請輸入聯絡信箱!'); return; }
+            if (!emailRegex.test(email)) { showModal('請輸入正確的 Email 格式!'); return; }
+            if (!description) { showModal('請填寫問題詳細描述!'); return; }
+
+            if (type === "其他") hiddenInput.value = otherReason;
+
+            // 💡 關鍵修正：因 disabled 欄位不會被 submit，所以送出前補一個 hidden input 傳 reportsType
+            if (typeSelect.disabled) {
+                const hiddenTypeField = document.createElement('input');
+                hiddenTypeField.type = 'hidden';
+                hiddenTypeField.name = 'reportsType';
+                hiddenTypeField.value = type;
+                document.getElementById('reportForm').appendChild(hiddenTypeField);
+            }
+
+            document.getElementById('reportForm').submit();
+        });
+
+        function showModal(message) {
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('modalOverlay').classList.add('show');
         }
-        updateSelectedTags();
-        updateDropdownOptions();
-    }
-
-    const reportsTypeSelect = document.getElementById('reportsType');
-    reportsTypeSelect.addEventListener('change', function() {
-        const type = this.value;
-        this.classList.toggle('has-value', type !== "");
-        selectedReasons = [];
-        updateSelectedTags();
-        multiSelectDropdown.innerHTML = '';
-
-        const reasonField = document.getElementById('reasonSelectField');
-        const otherField = document.getElementById('otherReasonField');
-
-        if (type === "其他") {
-            reasonField.classList.add('hidden');
-            otherField.classList.remove('hidden');
-        } else if (type && reasonData[type]) {
-            reasonField.classList.remove('hidden');
-            otherField.classList.add('hidden');
-            const placeholder = multiSelectDisplay.querySelector('.multi-select-placeholder');
-            placeholder.textContent = '-- 請選擇檢舉原因 --';
-            reasonData[type].forEach(reason => {
-                const option = document.createElement('div');
-                option.className = 'multi-select-option';
-                option.setAttribute('data-value', reason);
-                option.innerHTML = `<div class="multi-select-checkbox"></div><span>${reason}</span>`;
-                option.addEventListener('click', handleOptionClick);
-                multiSelectDropdown.appendChild(option);
-            });
-        } else {
-            reasonField.classList.remove('hidden');
-            otherField.classList.add('hidden');
-            multiSelectDisplay.querySelector('.multi-select-placeholder').textContent = '-- 請先選擇類別 --';
-        }
-    });
-
-    document.getElementById('submitBtn').addEventListener('click', function(e) {
-        const targetInput = document.getElementById('reportsTarget');
-        const typeSelect = document.getElementById('reportsType');
-
-        const target = targetInput.value.trim();
-        const type = typeSelect.value;
-        const otherReason = document.getElementById('otherReasonInput').value.trim();
-        const email = document.getElementById('email').value.trim();
-        const description = document.getElementById('reportsDescription').value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!target) { showModal('請輸入檢舉對象!'); return; }
-        if (!type) { showModal('請選擇檢舉類別!'); return; }
-        if (type !== "其他" && selectedReasons.length === 0) { showModal('請至少選擇一個檢舉原因!'); return; }
-        if (type === "其他" && !otherReason) { showModal('請填寫自定義檢舉原因!'); return; }
-        if (!email) { showModal('請輸入聯絡信箱!'); return; }
-        if (!emailRegex.test(email)) { showModal('請輸入正確的 Email 格式!'); return; }
-        if (!description) { showModal('請填寫問題詳細描述!'); return; }
-
-        if (type === "其他") hiddenInput.value = otherReason;
-
-        // 💡 關鍵修正：因 disabled 欄位不會被 submit，所以送出前補一個 hidden input 傳 reportsType
-        if (typeSelect.disabled) {
-            const hiddenTypeField = document.createElement('input');
-            hiddenTypeField.type = 'hidden';
-            hiddenTypeField.name = 'reportsType';
-            hiddenTypeField.value = type;
-            document.getElementById('reportForm').appendChild(hiddenTypeField);
-        }
-
-        document.getElementById('reportForm').submit();
-    });
-
-    function showModal(message) {
-        document.getElementById('modalMessage').textContent = message;
-        document.getElementById('modalOverlay').classList.add('show');
-    }
-    function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
-</script>
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+    </script>
 </body>
+
 </html>
