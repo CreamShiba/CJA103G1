@@ -50,8 +50,9 @@
                                 <label>帳號狀態:</label>
                                 <select id="queryStatus" name="status">
                                     <option value="-1">全部</option>
-                                    <option value="1">正常</option>
-                                    <option value="0">停權</option>
+                                    <option value="0">⚪ 未認證</option>
+                                    <option value="1">🟢 已認證</option>
+                                    <option value="2">🔴 停權</option>
                                 </select>
                             </div>
 
@@ -108,8 +109,12 @@
                         <td th:text="${m.memberName}"></td>
                         <td th:text="${m.memberEmail}"></td>
                         <td>
-                            <span th:class="${m.accountStatus == 1 ? 'status-badge status-on' : 'status-badge status-off'}"
-                                  th:text="${m.accountStatus == 1 ? '正常' : '停權'}"></span>
+                            <span th:switch="${m.accountStatus}">
+                                <span th:case="0" class="status-badge status-unverified">未認證</span>
+                                <span th:case="1" class="status-badge status-on">已認證</span>
+                                <span th:case="2" class="status-badge status-off">停權</span>
+                                <span th:case="*" class="status-badge">未知</span>
+                            </span>
                         </td>
                         <td>
                             <span th:text="${m.sellerStatus == 1 ? '✅' : '❌'}"></span>
@@ -155,33 +160,33 @@
                             <div class="column">
                                 <div class="row">
                                     <label>會員編號 (不可修改):</label>
-                                    <input type="text" th:field="*{memberNo}" readonly class="readonly-input" style="background-color: #f0f0f0;">
+                                    <input type="text" th:field="*{m.memberNo}" readonly class="readonly-input" style="background-color: #f0f0f0;">
                                 </div>
 
                                 <div class="row">
                                     <label>會員帳號:</label>
-                                    <input type="text" th:field="*{memberAccount}" required>
+                                    <input type="text" th:field="*{m.memberAccount}" required>
                                 </div>
 
                                 <div class="row">
                                     <label>會員密碼:</label>
-                                    <input type="password" th:field="*{memberPassword}" placeholder="若不修改請留空">
+                                    <input type="password" th:field="*{m.memberPassword}" placeholder="若不修改請留空">
                                     <small style="color: gray;">* 更新時若填寫將覆蓋舊密碼</small>
                                 </div>
 
                                 <div class="row">
                                     <label>會員姓名:</label>
-                                    <input type="text" th:field="*{memberName}" required>
+                                    <input type="text" th:field="*{m.memberName}" required>
                                 </div>
 
                                 <div class="row">
                                     <label>會員信箱:</label>
-                                    <input type="email" th:field="*{memberEmail}" required>
+                                    <input type="email" th:field="*{m.memberEmail}" required>
                                 </div>
 
                                 <div class="row">
                                     <label>聯絡電話:</label>
-                                    <input type="text" th:field="*{memberPhone}">
+                                    <input type="text" th:field="*{m.memberPhone}">
                                 </div>
                             </div>
 
@@ -189,7 +194,7 @@
                                 <div class="row">
                                     <label>會員頭像:</label>
                                     <div class="avatar-edit-box">
-                                        <img th:src="@{/memberInfo/image/{no}(no=*{memberNo})}" id="editImagePreview" class="avatar-preview"
+                                        <img th:src="@{/memberInfo/image/{no}(no=*{m.memberNo})}" id="editImagePreview" class="avatar-preview"
                                              style="width:100px; height:100px; object-fit: cover; border-radius: 50%; border: 1px solid #ddd; margin-bottom: 10px;">
                                         <input type="file" name="imageFile" accept="image/*" onchange="previewImage(this)">
                                     </div>
@@ -203,15 +208,16 @@
 
                                 <div class="row">
                                     <label>帳號狀態:</label>
-                                    <select th:field="*{accountStatus}">
-                                        <option value="1">正常</option>
-                                        <option value="0">停權</option>
+                                    <select th:field="*{m.accountStatus}">
+                                        <option value="0">未認證</option>
+                                        <option value="1">已認證</option>
+                                        <option value="2">停權</option>
                                     </select>
                                 </div>
 
                                 <div class="row">
                                     <label>技師權限:</label>
-                                    <select th:field="*{engineerStatus}">
+                                    <select th:field="*{m.engineerStatus}">
                                         <option value="0">一般會員</option>
                                         <option value="1">認證技師</option>
                                     </select>
@@ -219,7 +225,7 @@
 
                                 <div class="row">
                                     <label>賣家權限:</label>
-                                    <select th:field="*{sellerStatus}">
+                                    <select th:field="*{m.sellerStatus}">
                                         <option value="0">否</option>
                                         <option value="1">是</option>
                                     </select>
@@ -229,17 +235,17 @@
 
                         <div class="row" style="margin-top: 20px;">
                             <label>住家地址:</label>
-                            <input type="text" th:field="*{address}" style="width: 100%;">
+                            <input type="text" th:field="*{m.address}" style="width: 100%;">
                         </div>
 
                         <div class="row-group" style="display: flex; gap: 30px; margin-top: 20px; padding: 15px; background: #f4f7f6; border-radius: 8px;">
                             <div>
                                 <label>評價總人數:</label>
-                                <strong th:text="*{ratingAmount}">0</strong> 人
+                                <strong th:text="*{m.ratingAmount}">0</strong> 人
                             </div>
                             <div>
                                 <label>評價總星數:</label>
-                                <strong th:text="*{ratingStar}">0</strong> ⭐️
+                                <strong th:text="*{m.ratingStar}">0</strong> ⭐️
                             </div>
                             <div>
                                 <label>平均評分:</label>
@@ -331,8 +337,18 @@
             }
 
             data.forEach(m => {
-                const statusText = m.accountStatus === 1 ? '正常' : '停權';
-                const statusClass = m.accountStatus === 1 ? 'status-on' : 'status-off';
+                // 定義狀態映射表
+                const statusMap = {
+                    0: { text: '未認證', className: 'status-pending' },
+                    1: { text: '已認證', className: 'status-on' },
+                    2: { text: '停權', className: 'status-off' }
+                };
+
+                // 取得對應狀態，若不在定義內則給予預設值
+                const statusInfo = statusMap[m.accountStatus] || { text: '未知', className: '' };
+
+                const statusText = statusInfo.text;
+                const statusClass = statusInfo.className;
                 const sellerIcon = m.sellerStatus === 1 ? '✅' : '❌';
                 const engineerIcon = m.engineerStatus === 1 ? '✅' : '❌';
 
