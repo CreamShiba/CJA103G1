@@ -147,9 +147,11 @@ public class MemberCouponService {
         Integer discountValue = coupon.getDiscountValue();
         double limit = currentTotal * 0.2;
 
-        if (discountValue > limit) {
-            throw new RuntimeException("不符合使用條件：折扣金額 ($" + discountValue +
-                    ") 超過訂單總額的 20% ($" + (int)limit + ")");
+        int requiredMinAmount = (int) Math.ceil(discountValue / 0.2);
+
+        if (currentTotal < requiredMinAmount) {
+            // 修改為您要求的錯誤訊息格式
+            throw new RuntimeException("需達到 NT$ " + requiredMinAmount + " 才可以使用此優惠券。");
         }
 
         return discountValue;
