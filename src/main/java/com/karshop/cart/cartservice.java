@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -79,9 +80,11 @@ public class cartservice {
             ordVO.setOrdPaymentMethod(paymentMethod); // 信用卡, 轉帳, 超商代收
             ordVO.setOrdShipMethod(deliveryMethod);   // 宅配, 超取, 自取
             ordVO.setOrdRecipient(receiverName);
+
+
             // 合併電話至地址欄位以符合資料庫設計
             ordVO.setOrdAddress(receiverAddress + " (Tel: " + receiverPhone + ")");
-            ordVO.setOrdPaymentStatus("信用卡".equals(paymentMethod) ? "已付款" : "未付款");
+            ordVO.setOrdPaymentStatus("未付款");
             ordVO.setPayoutStatus("未撥款");
 
             // C. 處理商品明細與庫存扣除
@@ -259,6 +262,9 @@ public class cartservice {
         String date = new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new java.util.Date());
         String payment = "Credit".equals(method) || "信用卡".equals(method) ? "Credit" : "ATM";
 
+//        obj.setReturnURL("https://your-domain.com/cart/ecpay-callback"); // 後端回調
+//        obj.setOrderResultURL("https://your-domain.com/cart/ecpay-return"); // 前端返回頁面
+
         // 1. 準備參數 (TreeMap 會自動依照字典順序排序 A-Z)
         Map<String, String> params = new TreeMap<>();
         params.put("MerchantID", mId);
@@ -309,6 +315,27 @@ public class cartservice {
             for (byte b : hash) hex.append(String.format("%02x", b));
             return hex.toString();
         } catch (Exception e) { return ""; }
+    }
+
+    /**
+     * 更新訂單付款狀態
+     */
+    @Transactional
+    public void updateOrderPaymentStatus(String merchantTradeNo, String status) {
+        // 從 MerchantTradeNo 反推回 OrdNo (因為你在 genEcpayForm 有加後綴)
+        // 假設你的編號規則是 ORD123T17123456...
+        try {
+            String ordNoStr = merchantTradeNo.split("T")[0].replaceAll("[^0-9]", "");
+            Integer ordNo = Integer.parseInt(ordNoStr);
+
+            OrdVO ord = ordService.getOneOrd(ordNo);
+            if (ord != null) {
+                ord.setOrdPaymentStatus(status);
+                ordService.updateOrd(ord);
+            }
+        } catch (Exception e) {
+            System.err.println("更新付款狀態失敗: " + e.getMessage());
+        }
     }
 
 }
