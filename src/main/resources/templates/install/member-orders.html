@@ -141,7 +141,11 @@
                                     class="btn btn-primary">
                                     綠界付款
                                 </a>
-
+                                <!-- 測試付款按鈕 -->
+                                <a th:href="@{'/payment/simulate-success/' + ${order.installOrderNo}}"
+                                    class="btn btn-secondary" style="background-color: #6c757d; color: white;">
+                                    測試付款
+                                </a>
                             </div>
 
                             <div th:if="${order.orderStatus == '已完成' && !order.reviewed}" style="margin-top: 10px;">
