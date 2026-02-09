@@ -39,13 +39,11 @@
         .report-table th { padding: 16px; text-align: left; font-weight: 600; color: #00796b; font-size: 15px; border-bottom: 2px solid #e0f2f1; background-color: #f8f9fa; }
         .report-table td { padding: 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
 
-        /* ✅ 狀態標籤顏色區分：支援駁回、下架、待處理、已處理 */
+        /* ✅ 狀態標籤顏色區分 */
         .status-badge { display: inline-block; padding: 5px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-        .status-pending { background-color: #e0e0e0; color: #666; } /* 待處理: 灰色 */
-        .status-closed { background-color: #4caf50; color: white; }  /* 已處理: 綠色 */
-        .status-rejected { background-color: #E0B0FF; color: #4B0082; } /* 💡 駁回: 淡紫色 */
-
-        /* ✅ 💡 下架: 淡黃色背景 + 橘色文字 */
+        .status-pending { background-color: #e0e0e0; color: #666; }
+        .status-closed { background-color: #4caf50; color: white; }
+        .status-rejected { background-color: #E0B0FF; color: #4B0082; }
         .status-down { background-color: #FFF9C4; color: #F57F17; border: 1px solid #FBC02D; }
 
         .btn-action { background-color: #00796b; color: white; border: none; padding: 8px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s; }
@@ -111,8 +109,8 @@
 
                         <td>
                             <a th:href="@{/reports/admin/handle(id=${report.reportsNo})}"
-                               th:class="${report.status == '已處理' || report.status == '已下架'} ? 'btn-action view-only' : 'btn-action'"
-                               th:text="${report.status == '已處理' || report.status == '已下架'} ? '查看' : '處理案件'">
+                               th:class="${report.status == '已處理' || report.status == '已下架' || report.status == '駁回'} ? 'btn-action view-only' : 'btn-action'"
+                               th:text="${report.status == '已處理' || report.status == '已下架' || report.status == '駁回'} ? '查看' : '處理案件'">
                                 處理案件
                             </a>
                         </td>
@@ -145,7 +143,6 @@
 </div>
 
 <script>
-    // ✅ 側邊欄展開/收合功能
     document.querySelectorAll('.submenu-toggle, .sub-toggle').forEach(toggle => {
         toggle.addEventListener('click', function(e) {
             if (e.currentTarget.tagName === 'A' && e.currentTarget.getAttribute('href') !== null && e.currentTarget.getAttribute('href') !== '#') {

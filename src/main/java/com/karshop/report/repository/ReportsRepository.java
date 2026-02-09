@@ -27,6 +27,12 @@ public interface ReportsRepository extends JpaRepository<Reports, Integer> {
     Page<Reports> findByStatusIn(List<String> statuses, Pageable pageable);
 
     /**
+     * 💡 新增：排除特定狀態的分頁查詢
+     * 用於抓取所有「不是待處理」的結案資料
+     */
+    Page<Reports> findByStatusNot(String status, Pageable pageable);
+
+    /**
      * 4. 💡 新增：為了連動組員的商品管理，根據商品名稱找編號
      * 由於 Reports 直接關聯了 Product，我們可以從這裡反查。
      * 如果你的 Product Entity 類別名稱不是 "Product"，請自行修改下方 JPQL

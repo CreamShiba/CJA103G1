@@ -76,11 +76,9 @@ public class ReportsService {
             return reportsRepository.findByStatus("待處理", pageable);
         }
 
-        // ✅ 核心修正：為了避免組員頁面出現「下架」標籤，已處理區查詢應排除「下架」字眼。
-        // 但為了確保「已處理」分頁能撈到所有結案資料，這裡必須包含所有結案狀態字眼（含 DB 現有的下架資料）。
-        // 這樣你在報表清單才看得到編號 #3 那些案件。
-        List<String> closedStatuses = Arrays.asList("已處理", "已結案", "駁回", "下架", "已下架");
-        return reportsRepository.findByStatusIn(closedStatuses, pageable);
+        // ✅ 核心修正：為了避免組員改狀態名稱導致資料消失，這裡改用「排除法」。
+        // 只要狀態不是「待處理」，通通都顯示在已處理分頁中（包含駁回、下架、已處理等）。
+        return reportsRepository.findByStatusNot("待處理", pageable);
     }
 
     /**
@@ -100,15 +98,26 @@ public class ReportsService {
         Reports report = reportsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("找不到編號為 " + id + " 的檢舉紀錄"));
 
-        // ✅ 更新狀態（應該是「待處理」、「已處理」、「駁回」或「已下架」）
-        report.setStatus(status);
+        // ✅ 邏輯優化：如果狀態是「駁回」，則不需要回覆內容也能直接結案
+        if ("駁回".equals(status)) {
+            report.setStatus("駁回");
+            if (response == null || response.trim().isEmpty()) {
+                report.setResponse("案件已駁回。");
+            } else {
+                report.setResponse(response);
+            }
+        } else {
+            // ✅ 更新狀態（應該是「待處理」、「已處理」或「已下架」）
+            report.setStatus(status);
+            report.setResponse(response);
+        }
+
         report.setAdmNo(admNo);
-        report.setResponse(response);
         report.setHandled(LocalDateTime.now());
 
         reportsRepository.save(report);
 
-        System.out.println("✅ 檢舉 #" + id + " 已更新為：" + status);
+        System.out.println("✅ 檢舉 #" + id + " 已結案，最終狀態為：" + status);
     }
 
     // ==========================================
