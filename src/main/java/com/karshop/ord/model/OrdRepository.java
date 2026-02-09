@@ -30,7 +30,7 @@ public interface OrdRepository extends JpaRepository<OrdVO, Integer> {
                                @Param("endDate") LocalDateTime endDate);
 //  管理員訂單的複合查詢
     @Query("SELECT o FROM OrdVO o WHERE " +
-            "(:keyword IS NULL OR CAST(o.ordNo AS string) LIKE %:keyword% OR o.seller.sellerName LIKE %:keyword%) " +
+            "(:keyword IS NULL OR CAST(o.ordNo AS string) LIKE %:keyword% OR o.seller.sellerName LIKE %:keyword% OR o.ordRecipient LIKE %:keyword%) " +
             "AND (:ordStatus IS NULL OR o.ordStatus = :ordStatus) " +
             "AND (:startDate IS NULL OR o.ordDate >= :startDate) " +
             "AND (:endDate IS NULL OR o.ordDate <= :endDate) " +
