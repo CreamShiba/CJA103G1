@@ -29,4 +29,9 @@ public interface CouponRepository extends JpaRepository<Coupon, Integer>, JpaSpe
             "WHERE c.coupon_end < :now AND mc.coupon_status = 0", nativeQuery = true)
     int updateExpiredMemberCoupons(@Param("now") LocalDateTime now);
 
+    @Transactional
+    @Modifying
+    @Query("UPDATE Coupon c SET c.couponStatus = 1 WHERE c.couponStart <= :now AND c.couponEnd > :now AND c.couponStatus = 0")
+    void startFutureCoupons(@Param("now") LocalDateTime now);
+
 }

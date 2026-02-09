@@ -12,8 +12,8 @@ public class CouponScheduler {
     @Autowired
     private CouponRepository couponRepository;
 
-    // 每20 min執行一次檢查
-    @Scheduled(cron = "0 0/20 * * * *")
+    // 每1 min執行一次檢查
+    @Scheduled(cron = "0 0/1 * * * *")
     public void checkExpiredCoupons() {
         LocalDateTime now = LocalDateTime.now();
 
@@ -22,6 +22,8 @@ public class CouponScheduler {
 
         couponRepository.updateExpiredStatus(now);
         couponRepository.updateExpiredMemberCoupons(now);
+        // 2. 處理新啟用的 (0 -> 1)
+        couponRepository.startFutureCoupons(now);
 
         System.out.println("排程執行完畢。");
 
