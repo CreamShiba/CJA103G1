@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Autopile Management</title>
+    <title>Admin Login - 卡爾夏 Management</title>
     <link rel="stylesheet" th:href="@{/css/back-end/admin_login.css}">
 </head>
 <body>
@@ -35,21 +35,16 @@
                 <label for="admin-username">Account (帳號)</label>
                 <input type="text" id="admin-username" name="adminAcc"
                        th:value="${adminAcc}" placeholder="請輸入管理員帳號"
-                       required autocomplete="off">
+                       autocomplete="off">
             </div>
 
             <div class="form-group">
                 <label for="admin-password">Password (密碼)</label>
                 <input type="password" id="admin-password" name="adminPwd"
-                       placeholder="請輸入密碼" required>
+                       placeholder="請輸入密碼">
             </div>
 
             <button type="submit" class="submit-btn">登入</button>
-
-            <!-- <div class="form-footer">
-                <a href="#">Forgot password?</a>
-                <a href="index.html" class="back-link">← Back to Main Store</a>
-            </div> -->
         </form>
     </div>
 

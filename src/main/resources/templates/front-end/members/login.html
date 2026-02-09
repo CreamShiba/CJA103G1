@@ -31,12 +31,12 @@
         <form method="post" th:action="@{/members/login}" id="login-form">
             <div class="form-group">
                 <label for="account">Account</label>
-                <input type="text" id="account" name="memAcc" placeholder="請輸入帳號" required th:value="${memAcc}">
+                <input type="text" id="account" name="memAcc" placeholder="請輸入帳號" th:value="${memAcc}">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="memPwd" placeholder="請輸入密碼" required>
+                <input type="password" id="password" name="memPwd" placeholder="請輸入密碼" >
             </div>
 
             <button type="submit" class="submit-btn">Login</button>
