@@ -115,13 +115,16 @@
             const isUserDropdown = event.target.closest('#user-dropdown');
             const isMemberDropdown = event.target.closest('#member-dropdown');
 
-            if (!isUserIcon && !isUserDropdown) {
+            // ✅ 增加「if (userDropdown)」安全檢查
+            if (userDropdown && !isUserIcon && !isUserDropdown) {
                 userDropdown.classList.remove('show');
             }
 
-            if (!isMemberTrigger && !isMemberDropdown) {
+            // ✅ 增加「if (memberDropdown)」安全檢查
+            if (memberDropdown && !isMemberTrigger && !isMemberDropdown) {
                 memberDropdown.classList.remove('show');
             }
+
         });
     }
 
