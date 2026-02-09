@@ -45,7 +45,6 @@ public class ForumPostController {
 
 		if (member != null) {
 			Integer memNo = member.getMemNo();
-			// 🟢 呼叫對齊後的 Repository 方法
 			myFavIds = postFavoriteRepository.findPostIdsByMemberNo(memNo);
 			myLikedIds = postLikeRepository.findLikedPostIdsByMemberNo(memNo);
 			model.addAttribute("userName", member.getMemUsername());
@@ -75,10 +74,8 @@ public class ForumPostController {
 		MembersVO member = (MembersVO) session.getAttribute("member");
 
 		if (member != null) {
-			// 🟢 傳入整個 member 物件
 			forumPost.setMember(member);
 		} else {
-			// 預設抓取 ID 1 的會員
 			MembersVO defaultMember = forumMemberRepository.findById(1).orElse(null);
 			forumPost.setMember(defaultMember);
 		}
@@ -114,7 +111,7 @@ public class ForumPostController {
 		return "redirect:/forum";
 	}
 
-	// 5. 收藏功能 (修正紅字重點)
+	// 5. 收藏功能
 	@PostMapping("/favorite/{postId}")
 	@ResponseBody
 	public String toggleFavorite(@PathVariable("postId") Integer postId, HttpSession session) {
@@ -122,11 +119,9 @@ public class ForumPostController {
 		if (member == null) return "login_required";
 
 		Integer memNo = member.getMemNo();
-		// 🟢 修正：將 MemId 改為 MemNo，與 Repository 對齊
 		boolean exists = postFavoriteRepository.existsByMember_MemNoAndForumPost_PostId(memNo, postId);
 
 		if (exists) {
-			// 🟢 修正：將 MemId 改為 MemNo
 			postFavoriteRepository.deleteByMember_MemNoAndForumPost_PostId(memNo, postId);
 			return "removed";
 		} else {
@@ -162,7 +157,6 @@ public class ForumPostController {
 		}
 
 		Integer memNo = member.getMemNo();
-		// 🟢 對齊 Repository 的方法名
 		boolean alreadyLiked = postLikeRepository.existsByMemberNoAndPostId(memNo, postId);
 
 		long currentLikes = (post.getPostLike() == null) ? 0L : post.getPostLike();
