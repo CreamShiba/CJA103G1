@@ -110,7 +110,7 @@ public class ProductController {
             productImageService.addImages(piVO);
         }
 
-        return "redirect:/product/dashboard";
+        return "redirect:/product/dashboard?tab=products";
     }
 
     @GetMapping("/getOne_For_Update")

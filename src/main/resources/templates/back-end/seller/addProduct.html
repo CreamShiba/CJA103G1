@@ -24,7 +24,7 @@
     <div class="form-card">
         <div class="form-header">
             <h2>新增商品 Add Product</h2>
-            <a th:href="@{/product/dashboard}" class="btn-back">← 返回列表</a>
+            <a th:href="@{/product/dashboard(tab=products)}" class="btn-back">← 返回列表</a>
         </div>
 
         <form th:action="@{/product/insert}" th:object="${productVO}" method="post" enctype="multipart/form-data">

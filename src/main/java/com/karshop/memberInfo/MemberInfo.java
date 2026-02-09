@@ -51,7 +51,7 @@ public class MemberInfo {
             columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private Timestamp registrationTime;
 
-    @Column(name = "account_status", columnDefinition = "TINYINT DEFAULT 1")
+    @Column(name = "account_status", columnDefinition = "TINYINT DEFAULT 0") //帳號狀態: 0未認證, 1已認證, 2停權
     private Integer accountStatus;
 
     @Lob

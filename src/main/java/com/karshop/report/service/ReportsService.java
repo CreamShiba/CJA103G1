@@ -26,12 +26,25 @@ public class ReportsService {
      * ✅ 會員送出檢舉表單時呼叫
      */
     public void submitReport(Reports report) {
+
+        // ✨ 新增連動邏輯：如果檢舉類型是「商品」，嘗試根據名稱自動填入 prod_no
+        // 這樣組員的「商品檢舉管理」才能抓到 ID 進行下架或駁回的操作
+        if ("商品".equals(report.getReportsType()) && report.getReportsTarget() != null) {
+            Integer foundNo = reportsRepository.findProdNoByProdName(report.getReportsTarget());
+            if (foundNo != null) {
+                report.setProdNo(foundNo);
+            }
+        }
+
         report.setReportsTimestamp(LocalDateTime.now());
         report.setStatus("待處理"); // ✅ 統一使用「待處理」
         report.setAdmNo(1);
         reportsRepository.save(report);
 
         System.out.println("✅ 新增檢舉成功！編號：" + report.getReportsNo() + "，狀態：" + report.getStatus());
+        if (report.getProdNo() != null) {
+            System.out.println("🔗 已自動關聯商品編號：" + report.getProdNo() + "，組員現在看得到這筆了！");
+        }
     }
 
     // ==========================================
