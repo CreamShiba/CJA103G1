@@ -30,16 +30,14 @@
                 <div class="card">
                     <div class="card-header">
                         <h3>管理者列表</h3>
-                        <form th:action="@{/admin/sellers}" method="get" class="search-area">
-                            <input type="text" name="keyword" th:value="${keyword}" class="form-input" placeholder="輸入賣家名稱或Email..." style="width: 250px;">
+                        <form th:action="@{/admins/search}" method="get" class="search-area">
+                            <input type="text" name="keyword" th:value="${keyword}" class="form-input" placeholder="輸入管理員名稱..." style="width: 250px;">
 
-                            <select name="status" class="form-input">
-                                <option value="">-- 所有狀態 --</option>
-                                <option value="待審核" th:selected="${status == '待審核'}">待審核</option>
-                                <option value="已開通" th:selected="${status == '已開通'}">已開通</option>
-                                <option value="未通過" th:selected="${status == '未通過'}">未通過</option>
-                                <option value="停權" th:selected="${status == '停權'}">停權</option>
-                            </select>
+<!--                            <select name="status" class="form-input">-->
+<!--                                <option value="">&#45;&#45; 所有狀態 &#45;&#45;</option>-->
+<!--                                <option value="待審核" th:selected="${status == '0'}">停權</option>-->
+<!--                                <option value="已開通" th:selected="${status == '1'}">使用中</option>-->
+<!--                            </select>-->
 
                             <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> 搜尋</button>
                             <a th:href="@{/admin/sellers}" class="btn" style="background:#ddd; color:#333; text-decoration:none;">重置</a>

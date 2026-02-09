@@ -44,40 +44,51 @@ public class AdminController {
     return "back-end/admin_index";
   }
 
+  // 定義特殊權限 ID
+  private static final int SUPER_ADMIN_AUTH_ID = 1; // 超級管理員
+  private static final int ADMIN_EDIT_AUTH_ID = 2;  // 管理員編輯權限
+
+  private boolean hasAuth(AdminVO admin, int authId) {
+    if (admin == null || admin.getAuths() == null) return false;
+    return admin.getAuths().stream()
+            .anyMatch(auth -> auth.getAdminAuthList().getAuthNo() == authId);
+  }
+
+
 //  // 搜尋頁面
 //  @GetMapping("/selectPage")
 //  public String showSelectPage(Model model) {
 //    return "back-end/admin_selectPage";
 //  }
 
-//  // 顯示查詢結果（多筆）—— 單一條件
-//  @GetMapping("/search")
-//  public String search(@RequestParam(required = false) String adminNo,
-//                       @RequestParam(required = false) String adminName, Model model) {
-//
-//    List<AdminVO> results = new ArrayList<>();
-//
-//    if (adminNo != null && !adminNo.isBlank()) {
-//      // 依 ID 精確查一筆
-//      if (adminNo.matches("\\d+")) {
-//        AdminVO a = adminService.getById(Integer.valueOf(adminNo));
-//        if (a != null) {
-//          results.add(a);
-//        }
-//      } else {
-//        // 非數字就跳回查詢頁並帶錯誤訊息
-//        model.addAttribute("errorMsg", "管理員編號必須是數字");
-//        return "back-end/admin_selectPage"; // 查詢表單頁面
-//      }
-//
-//    } else if (adminName != null && !adminName.isBlank()) {
-//      // 依名稱模糊查詢
-//      results = adminService.findByNameLike(adminName);
-//    }
-//
-//    model.addAttribute("admins", results);
-//    return "back-end/admin_search";
-//  }
+  // 顯示查詢結果（多筆）—— 單一條件
+  @GetMapping("/search")
+  public String search(@RequestParam(required = false) String adminNo,
+                       @RequestParam(required = false) String adminName, Model model) {
+
+    List<AdminVO> results = new ArrayList<>();
+
+    if (adminNo != null && !adminNo.isBlank()) {
+      // 依 ID 精確查一筆
+      if (adminNo.matches("\\d+")) {
+        AdminVO a = adminService.getById(Integer.valueOf(adminNo));
+        if (a != null) {
+          results.add(a);
+        }
+      } else {
+        // 非數字就跳回查詢頁並帶錯誤訊息
+        model.addAttribute("errorMsg", "管理員編號必須是數字");
+        return "back-end/admin_selectPage"; // 查詢表單頁面
+      }
+
+    } else if (adminName != null && !adminName.isBlank()) {
+      // 依名稱模糊查詢
+      results = adminService.findByNameLike(adminName);
+    }
+
+    model.addAttribute("admins", results);
+    return "back-end/admin_search";
+  }
 
   @GetMapping("/listAll")
   public String listAll(
@@ -160,7 +171,7 @@ public class AdminController {
 
   // 顯示編輯頁面
   @GetMapping("/edit")
-  public String showEditForm(@RequestParam("adminNo") Integer adminNo, Model model, RedirectAttributes ra) {
+  public String showEditForm(@RequestParam("adminNo") Integer adminNo, Model model, RedirectAttributes ra, HttpSession session) {
 
     // 防呆：若無 adminNo，就導回查詢頁並顯示錯誤
     if (adminNo == null) {
@@ -191,7 +202,14 @@ public class AdminController {
     }
     form.setManageFuncIds(selected);
 
+    // ★ 權限檢查邏輯
+    AdminVO currentLoginAdmin = (AdminVO) session.getAttribute("admin");
+    boolean isCurrentUserSuper = hasAuth(currentLoginAdmin, SUPER_ADMIN_AUTH_ID);
+
     // 2. 把 DTO 和 allFunctions 放入 Model
+    model.addAttribute("isCurrentUserSuper", isCurrentUserSuper);
+    model.addAttribute("superAdminAuthId", SUPER_ADMIN_AUTH_ID);
+    model.addAttribute("adminEditAuthId", ADMIN_EDIT_AUTH_ID);
     model.addAttribute("form", form);
     model.addAttribute("allFunctions", adminAuthListService.getAll());
 
@@ -221,9 +239,41 @@ public class AdminController {
 
     // 2. 先讀出原本的 VO，從 DTO 拿 adminNo
     AdminVO vo = adminService.getById(form.getadminNo());
+    AdminVO currentLoginAdmin = (AdminVO) session.getAttribute("admin");
+    AdminVO originalTargetAdmin = adminService.getById(form.getadminNo()); // 從 DB 查出原始狀態
+    //判斷當前使用者是不是超級管理員
+    boolean isCurrentUserSuper = hasAuth(currentLoginAdmin, SUPER_ADMIN_AUTH_ID);
+
+    // ★★★ 權限防護邏輯開始 ★★★
+
+    if (!isCurrentUserSuper) {
+      // --- 防護 A: 針對 Auth ID 1 (超級管理員) ---
+      // 規則：非超級管理員絕對不能讓表單包含 ID 1
+      if (form.getManageFuncIds().contains(SUPER_ADMIN_AUTH_ID)) {
+        form.getManageFuncIds().remove(Integer.valueOf(SUPER_ADMIN_AUTH_ID));
+      }
+
+      // --- 防護 B: 針對 Auth ID 2 (管理員編輯權限) ---
+      // 規則：非超級管理員不能修改此權限，必須維持「資料庫原本的狀態」
+
+      boolean targetHasAuth2Originally = hasAuth(originalTargetAdmin, ADMIN_EDIT_AUTH_ID);
+      boolean formHasAuth2 = form.getManageFuncIds().contains(ADMIN_EDIT_AUTH_ID);
+
+      if (targetHasAuth2Originally) {
+        // 情況 1: 原本有，但表單被拿掉了 (試圖剝奪權限) -> 強制加回去
+        if (!formHasAuth2) {
+          form.getManageFuncIds().add(ADMIN_EDIT_AUTH_ID);
+        }
+      } else {
+        // 情況 2: 原本沒有，但表單偷加了 (試圖賦予權限) -> 強制移除
+        if (formHasAuth2) {
+          form.getManageFuncIds().remove(Integer.valueOf(ADMIN_EDIT_AUTH_ID));
+        }
+      }
+    }
+    // ★★★ 權限防護邏輯結束 ★★★
 
     // 3. 更新基本欄位
-    vo.setAdminAcc(form.getAdminAcc());
     vo.setAdminPwd(form.getAdminPwd());
     vo.setAdminName(form.getAdminName());
     vo.setAdminStatus(form.getAdminStatus());
@@ -243,8 +293,6 @@ public class AdminController {
     // 5. 呼叫 Service 更新
     adminService.update(vo);
     ra.addFlashAttribute("successMsg", "更新成功！");
-   // 只有在修改「自己」時，才更新 Session ★★★
-    AdminVO currentLoginAdmin = (AdminVO) session.getAttribute("admin");
 
     // 進行比對 (防止空指針例外，先檢查 currentLoginAdmin 是否存在)
     if (currentLoginAdmin != null &&

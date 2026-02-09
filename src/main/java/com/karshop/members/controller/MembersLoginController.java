@@ -4,6 +4,7 @@ import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
@@ -31,15 +32,37 @@ public class MembersLoginController {
   private RedisTemplate<String, String> redisTemplate;
 
   @GetMapping("/login")
-  public String showLoginForm(HttpSession session, @RequestParam(required = false) String redirect) {
+  public String showLoginForm(HttpServletRequest request, HttpSession session, @RequestParam(required = false) String redirect) {
     // 如果已經有 member，就不用再看登入頁，直接導到 /members/view
     if (session.getAttribute("member") != null) {
       return "redirect:/members/view";
     }
+    String location = (String) session.getAttribute("location");
+    if (location != null && (location.contains("/admins") || location.contains("/login"))) {
+      session.removeAttribute("location");
+      location = null; // 重置為 null，讓下面的邏輯重新抓 Referer
+    }
+    // 判斷並決定「返回/登入後」的目標網址 (location)
 
-    // 如果有redirect參數，保存到session中
+    // 優先權 A: 網址參數帶有 redirect (例如從信件連結來: /login?redirect=/cart)
     if (redirect != null && !redirect.trim().isEmpty()) {
       session.setAttribute("location", redirect);
+    }
+    // 優先權 B: 如果 Session 裡還沒有 location (且沒有參數)，嘗試抓取「上一頁」
+    else if (session.getAttribute("location") == null) {
+      String referrer = request.getHeader("Referer");
+
+      // 過濾邏輯：確保 Referer 存在，且不是登入頁自己、不是註冊頁
+      if (referrer != null &&
+              !referrer.contains("/login") &&
+              !referrer.contains("/register") &&
+              !referrer.contains("/error")) {
+
+        session.setAttribute("location", referrer);
+      } else {
+        // 優先權 C: 真的都沒有，就預設回首頁
+        session.setAttribute("location", "/shop");
+      }
     }
 
     // 否則才顯示登入表單
@@ -103,6 +126,13 @@ public class MembersLoginController {
     String location = (String) session.getAttribute("location");
     if (location != null) {
       session.removeAttribute("location");
+      // --- 新增過濾邏輯 ---
+      // 假設後台路徑都以 /admins 開頭
+      // 同時也要防止跳轉回登入頁面本身 (避免死循環)
+      if (location.startsWith("/admins") || location.contains("login")) {
+        location = "/members/home"; // 強制導向回首頁或會員中心
+      }
+      // -------------------
       return "redirect:" + location;
     }
     return "redirect:/members/home";

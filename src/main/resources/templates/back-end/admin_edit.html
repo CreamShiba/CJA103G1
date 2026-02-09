@@ -48,7 +48,10 @@
 
                         <div class="form-row">
                             <label>帳號 (Account)</label>
-                            <input type="text" id="adminAcc" th:field="*{adminAcc}" placeholder="若不修改請保留原值" required>
+                            <input type="text"
+                                   th:field="*{adminAcc}"
+                                   readonly="readonly"
+                                   style="background-color: #e9ecef; cursor: not-allowed; color: #6c757d;" />
                         </div>
 
                         <div class="form-row">
@@ -74,8 +77,17 @@
                             <ul class="permission-list">
                                 <li th:each="func : ${allFunctions}" class="permission-item">
                                     <label>
-                                        <input type="checkbox" th:field="*{manageFuncIds}" th:value="${func.authNo}" />
+                                        <input type="checkbox"
+                                               th:field="*{manageFuncIds}"
+                                               th:value="${func.authNo}"
+                                               th:disabled="${!isCurrentUserSuper and (func.authNo == superAdminAuthId or func.authNo == adminEditAuthId)}" />
+
                                         <span th:text="${func.authName}">功能名稱</span>
+
+                                        <input type="hidden"
+                                               name="manageFuncIds"
+                                               th:value="${func.authNo}"
+                                               th:if="${(!isCurrentUserSuper and (func.authNo == superAdminAuthId or func.authNo == adminEditAuthId)) and #lists.contains(form.manageFuncIds, func.authNo)}" />
                                     </label>
                                 </li>
                             </ul>
