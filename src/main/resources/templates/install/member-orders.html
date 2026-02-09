@@ -136,12 +136,17 @@
                         <div style="display: flex; justify-content: flex-end; align-items: center; gap: 1rem;">
                             <span th:text="${order.payStatus}" style="color: #aaa; font-size: 13px;">未付款</span>
 
+
                             <div th:if="${order.orderStatus == '待付款'}" style="display: flex; gap: 8px;">
                                 <a th:href="@{'/member/order/' + ${order.installOrderNo} + '/pay'}" target="_blank"
                                     class="btn btn-primary">
                                     綠界付款
                                 </a>
-
+                                <!-- 測試用：模擬付款成功 -->
+                                <a th:href="@{'/payment/simulate-success/' + ${order.installOrderNo}}" class="btn"
+                                    style="background-color: #888; color: white;">
+                                    測試付款 (Test Pay)
+                                </a>
                             </div>
 
                             <div th:if="${order.orderStatus == '已完成' && !order.reviewed}" style="margin-top: 10px;">

@@ -38,6 +38,12 @@
         }
 
         /* --- 頂部導航 --- */
+        /* 💡 確保 Header 層級最高，且內部的圖示容器有相對定位參考 */
+        header {
+            position: relative;
+            z-index: 1000;
+        }
+
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -52,6 +58,7 @@
             display: flex;
             gap: 20px;
             align-items: center;
+            position: relative; /* 💡 讓選單能以這組圖示為基準定位 */
         }
 
         .search-box {
@@ -100,6 +107,8 @@
             padding: 40px;
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         aside {
@@ -265,16 +274,17 @@
             font-family: 'Arial', sans-serif;
         }
 
+        /* 💡 修正：下拉選單定位與 z-index */
         .dropdown-menu {
             display: none;
             position: absolute;
-            right: 0;
+            right: 0; /* 💡 對齊父層右側 */
             top: 100%;
             background-color: #1a1a1a;
             min-width: 150px;
             border: 1px solid #333;
-            z-index: 100;
-            margin-top: 10px;
+            z-index: 2000;
+            margin-top: 15px; /* 💡 稍微拉開距離 */
         }
 
         .dropdown-menu.show {
@@ -344,10 +354,10 @@
                 <td th:text="${report.reportsType != null ? report.reportsType : '未分類'}"></td>
                 <td th:text="${#temporals.format(report.reportsTimestamp, 'yyyy-MM-dd HH:mm')}"></td>
                 <td>
-                            <span
-                                    th:class="${report.status == '已處理' || report.status == '已結案' ? 'status-badge status-closed' : 'status-badge status-pending'}"
-                                    th:text="${report.status}">
-                            </span>
+                    <span
+                            th:class="${report.status == '已處理' || report.status == '已結案' ? 'status-badge status-closed' : 'status-badge status-pending'}"
+                            th:text="${report.status}">
+                    </span>
                 </td>
                 <td>
                     <a th:href="@{/reports/history/detail(id=${report.reportsNo})}" class="view-btn">查看案件</a>
@@ -408,6 +418,7 @@
 
         if (userIcon) {
             userIcon.addEventListener('click', function (e) {
+                e.preventDefault(); // 💡 防止點擊穿透或預設跳轉
                 e.stopPropagation();
                 if (userDropdown) userDropdown.classList.toggle('show');
                 if (memberDropdown) memberDropdown.classList.remove('show');
@@ -425,11 +436,10 @@
             });
         }
 
-        // ✅ 修正點：點擊「論壇」時應執行跳轉
+        // ✅ 點擊「論壇」時跳轉，下拉選單行為在點擊文字外的區域關閉
         if (forumTrigger) {
             forumTrigger.addEventListener('click', function (e) {
-                // 💡 注意：如果你希望點擊直接跳轉，不要攔截預設行為 e.preventDefault()
-                // 或是手動執行跳轉
+                // 如果是直接點擊主連結，執行跳轉
                 window.location.href = '/forum';
 
                 e.stopPropagation();
