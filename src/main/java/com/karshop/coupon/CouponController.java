@@ -124,9 +124,22 @@ public class CouponController {
                 return "coupon/adminCoupon";
             }
         }
+        LocalDateTime now = LocalDateTime.now();
+        if (coupon.getCouponStart() != null) {
+            if (coupon.getCouponStart().isAfter(now)) {
+                // 情況 A：開始時間在未來 -> 設為 0 (未啟用)，等待排程器
+                coupon.setCouponStatus(0);
+            } else if (coupon.getCouponEnd() != null && coupon.getCouponEnd().isBefore(now)) {
+                // 情況 B：結束時間已過 -> 設為 2 (已過期) 或 0
+                coupon.setCouponStatus(2);
+            } else {
+                // 情況 C：現在就在活動時間內 -> 設為 1 (有效)
+                coupon.setCouponStatus(1);
+            }
+        }
 
         // 新增成功
-        coupon.setCouponStatus(1);
+//        coupon.setCouponStatus(0);
         couponService.insert(coupon);
         return "redirect:/coupon/admin";
     }
@@ -166,11 +179,34 @@ public class CouponController {
             }
         }
 
+        if (coupon.getCouponStart() != null) {
+            if (coupon.getCouponStart().isAfter(LocalDateTime.now())) {
+                coupon.setCouponStatus(0);
+            } else {
+                coupon.setCouponStatus(1);
+            }
+        }
+
         // 檢查所有錯誤（包含 @Valid 產生的與自定義的）
         if (result.hasErrors()) {
             // 不需要重新 getOne，因為 @ModelAttribute 會把使用者剛輸入的資料帶回頁面
             return "coupon/updateCoupon";
         }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (coupon.getCouponStart() != null) {
+            if (coupon.getCouponStart().isAfter(now)) {
+                // 情況 A：開始時間在未來 -> 設為 0 (未啟用)，等待排程器
+                coupon.setCouponStatus(0);
+            } else if (coupon.getCouponEnd() != null && coupon.getCouponEnd().isBefore(now)) {
+                // 情況 B：結束時間已過 -> 設為 2 (已過期) 或 0
+                coupon.setCouponStatus(0);
+            } else {
+                // 情況 C：現在就在活動時間內 -> 設為 1 (有效)
+                coupon.setCouponStatus(1);
+            }
+        }
+
 
         couponService.update(coupon);
         return "redirect:/coupon/admin";

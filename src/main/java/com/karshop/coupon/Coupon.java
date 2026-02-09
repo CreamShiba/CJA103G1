@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -39,14 +40,15 @@ public class Coupon {
     private Integer discountValue;
 
     @Column(name = "coupon_start")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @NotNull(message = "開始時間不能空白")
     private LocalDateTime couponStart;
 
     @Column(name = "coupon_end")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @NotNull(message = "結束時間不能空白")
     private LocalDateTime couponEnd;
 
     @Column(name = "coupon_status")
-    @NotNull(message = "狀態不能空白")
-    private Integer couponStatus = 1; // 預設為 1 (有效)
+    private Integer couponStatus; // 預設為 1 (有效)
 }

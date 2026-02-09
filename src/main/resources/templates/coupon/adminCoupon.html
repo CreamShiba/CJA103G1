@@ -73,11 +73,15 @@
                             <form th:action="@{/coupon/delete}" method="post" style="display:inline;"
                                   class="delete-form">
                                 <input type="hidden" name="couponNo" th:value="${c.couponNo}">
-                                <button type="button" class="btn-delete btn-delete-confirm"
-                                        style="background-color: #dc3545; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8em;">
+                                <button type="button"
+                                        class="btn-delete"
+                                        th:classappend="${c.couponStatus == 0} ? 'btn-disabled' : 'btn-delete-confirm'"
+                                        th:disabled="${c.couponStatus == 0}"
+                                        th:style="${c.couponStatus == 0} ? 'background-color: #ccc; cursor: not-allowed;padding: 5px 10px;font-size: 0.8em;' : 'background-color: #dc3545; cursor: pointer;padding: 5px 10px;font-size: 0.8em;'">
                                     停用
                                 </button>
                             </form>
+
                         </td>
                     </tr>
                     </tbody>
@@ -411,7 +415,6 @@
             }
         });
     });
-
 
 </script>
 </body>
