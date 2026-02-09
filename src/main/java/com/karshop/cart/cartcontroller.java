@@ -262,6 +262,7 @@ public class cartcontroller {
     @PostMapping("/ecpay-callback")
     @ResponseBody
     public String ecpayCallback(@RequestParam Map<String, String> params) {
+        System.out.println(">>> 收到綠界回報: " + params); // 建議加上這行，測試時才看得到東西
         try {
             // 1. 驗證綠界回傳的檢查碼 (CheckMacValue)
             // String checkMacValue = params.get("CheckMacValue");
@@ -284,7 +285,7 @@ public class cartcontroller {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "0|系統錯誤";
+            return "0|System Error";
         }
     }
 
@@ -303,5 +304,18 @@ public class cartcontroller {
         }
 
         return "redirect:/pages/my-orders";
+    }
+
+    // 🛠️ 手動模擬 API：瀏覽器輸入 http://localhost:8080/cart/test-pay-success?orderNo=15
+    @GetMapping("/test-pay-success")
+    @ResponseBody
+    public String testPaySuccess(@RequestParam String orderNo) {
+        try {
+            // 直接呼叫 Service 更新狀態
+            service.updateOrderPaymentStatus(orderNo, "已付款");
+            return "✅ 測試成功！訂單 " + orderNo + " 狀態已手動更新為 [已付款]。";
+        } catch (Exception e) {
+            return "❌ 測試失敗：" + e.getMessage();
+        }
     }
 }

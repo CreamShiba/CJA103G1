@@ -274,8 +274,9 @@ public class cartservice {
         params.put("TotalAmount", amount.toString());
         params.put("TradeDesc", "CarShopOrder");
         params.put("ItemName", "汽車百貨商品一批");
-        params.put("ReturnURL", "https://yourdomain.com/callback"); // 扣款成功通知
-        params.put("OrderResultURL", "http://localhost:8080/cart/list"); // 付完跳回哪
+        params.put("ReturnURL", "https://yourdomain.com/cart/ecpay-callback"); // 扣款成功通知
+        params.put("OrderResultURL", "http://localhost:8080/cart/ecpay-return"); // 付完跳回哪
+//        params.put("ReturnURL", "https://www.shop.com/cart/ecpay-callback");
         params.put("ChoosePayment", payment);
         params.put("EncryptType", "1");
 
