@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/front_header.css}">
     <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         .order-container { padding: 20px; max-width: 1200px; margin: 0 auto; }
         .order-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.9em;}
@@ -214,7 +215,7 @@
 <!-- Footer -->
 <footer th:replace="~{fragments/footer :: Footer}"></footer>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!--<script th:src="@{/js/front-end/index.js}"></script>-->
 <script th:inline="javascript">
     const memberNo = /*[[${session.member?.memNo}]]*/ null;
@@ -465,26 +466,44 @@
 
     // 4. 確認收貨
     async function confirmReceipt(ordNo) {
-        if (!confirm('確認已收到商品並完成訂單嗎?')) return;
-        try {
-            const res = await fetch(`/member/orders/${ordNo}/complete`, {
-                method: 'PATCH',
-                headers: {
-                    'Accept': 'application/json'
+        // 使用 SweetAlert2 取代原生 confirm
+        Swal.fire({
+            title: '確定要確認收貨嗎？',
+            text: "點擊確認後，訂單狀態將更改為「已完成」。",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '是的，我已收到！',
+            cancelButtonText: '取消'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch(`/member/orders/${ordNo}/complete`, {
+                        method: 'PATCH',
+                        headers: { 'Accept': 'application/json' }
+                    });
+
+                    if (res.ok) {
+                        // 成功提示
+                        Swal.fire({
+                            title: '訂單完成！',
+                            text: '感謝您的購買，快去給商品評價吧！',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                        // 重新刷洗資料
+                        await initPage(); // 建議呼叫 initPage 同步評價與訂單
+                    } else {
+                        Swal.fire('發生錯誤', '更新失敗，請稍後再試。', 'error');
+                    }
+                } catch (err) {
+                    console.error('confirmReceipt 錯誤:', err);
+                    Swal.fire('網路錯誤', err.message, 'error');
                 }
-            });
-            if (res.ok) {
-                alert('訂單已完成!');
-                fetchOrders();
-            } else {
-                const errorText = await res.text();
-                console.error('更新失敗:', errorText);
-                alert('更新失敗: ' + res.status);
             }
-        } catch (err) {
-            console.error('confirmReceipt 錯誤:', err);
-            alert('網路錯誤: ' + err.message);
-        }
+        });
     }
 
     // 5. 輔助工具

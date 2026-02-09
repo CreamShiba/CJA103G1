@@ -1,5 +1,7 @@
 package com.karshop.memberInfo;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,11 +17,11 @@ public interface MemberInfoRepository extends JpaRepository<MemberInfo, Integer>
             "(:status IS NULL OR m.accountStatus = :status) AND " +
             "(:isSeller IS NULL OR m.sellerStatus = :isSeller) AND " +
             "(:isEngineer IS NULL OR m.engineerStatus = :isEngineer)")
-
-    List<MemberInfo> findByCompositeQuery(
+    Page<MemberInfo> findByCompositeQuery(
             @Param("memberNo") Integer memberNo,
             @Param("kw") String kw,
             @Param("status") Integer status,
             @Param("isSeller") Integer isSeller,
-            @Param("isEngineer") Integer isEngineer);
+            @Param("isEngineer") Integer isEngineer,
+            Pageable pageable); // 新增此參數
 }
