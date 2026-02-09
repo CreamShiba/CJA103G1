@@ -253,48 +253,70 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
+    // 1. CSRF Token 設定 (用於保護 POST 請求)
     const csrfMeta = document.querySelector("meta[name='_csrf']");
     const csrfHeaderMeta = document.querySelector("meta[name='_csrf_header']");
     const csrfToken = csrfMeta ? csrfMeta.content : "";
     const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.content : "";
 
+    // 2. 取得使用者名稱與 WebSocket 初始化
     var userName = /*[[${userName}]]*/ 'Guest';
     var socket = null;
 
+    // 3. 頁面載入完成後執行 (事件綁定)
     document.addEventListener('DOMContentLoaded', function() {
-        const memberTrigger = document.getElementById('member-center-trigger');
-        const memberDropdown = document.getElementById('member-dropdown');
+        // 🟢 [修正] 這裡改成抓取 header 裡的正確 ID (user-icon)
+        const memberTrigger = document.getElementById('user-icon');
+        const memberDropdown = document.getElementById('user-dropdown');
+
+        // 論壇選單 (原本就是對的)
         const forumTrigger = document.getElementById('forum-center-trigger');
         const forumDropdown = document.getElementById('forum-dropdown');
 
+        // 綁定頭像點擊事件
         if (memberTrigger && memberDropdown) {
             memberTrigger.onclick = (e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // 防止事件冒泡到 window
+                // 如果論壇選單是開的，先關掉
                 if(forumDropdown) forumDropdown.classList.remove('show');
+                // 切換自己的開關
                 memberDropdown.classList.toggle('show');
             };
+        } else {
+            console.warn("⚠️ 找不到 user-icon 或 user-dropdown，請確認 Header 是否載入");
         }
 
+        // 綁定論壇選單點擊事件
         if (forumTrigger && forumDropdown) {
             forumTrigger.onclick = (e) => {
                 e.stopPropagation();
+                // 如果會員選單是開的，先關掉
                 if(memberDropdown) memberDropdown.classList.remove('show');
                 forumDropdown.classList.toggle('show');
             };
         }
+
+        // 啟動 WebSocket 連線
         connect();
     });
 
+    // 4. 點擊頁面空白處，關閉所有選單
     window.onclick = () => {
-        const memberDropdown = document.getElementById('member-dropdown');
+        // 🟢 [修正] 這裡也要改成 user-dropdown
+        const memberDropdown = document.getElementById('user-dropdown');
         const forumDropdown = document.getElementById('forum-dropdown');
+
         if(memberDropdown) memberDropdown.classList.remove('show');
         if(forumDropdown) forumDropdown.classList.remove('show');
+
+        // 關閉文章的小選單 (編輯/檢舉那個)
         document.querySelectorAll('.post-dropdown').forEach(d => d.classList.remove('show'));
     };
 
+    // 5. 側邊欄分類篩選功能
     function filterCategory(cat) {
         document.querySelectorAll('.filter-btn, .category-list li').forEach(el => {
+            // 處理 "全部主題" 對應 "所有文章" 的文字差異
             el.classList.toggle('active', el.innerText.trim().includes(cat) || (cat === '全部主題' && el.innerText.trim().includes('所有文章')));
         });
         document.querySelectorAll('.thread-row').forEach(row => {
@@ -303,12 +325,24 @@
         });
     }
 
+    // 6. 展開/收合文章詳情
     function toggleDetail(el, e) {
+        // 如果點到按鈕、圖片或輸入框，不要展開/收合
         if (e.target.closest('.post-actions') || e.target.closest('.post-menu-container') || e.target.closest('.comment-section') || e.target.tagName === 'IMG') return;
         el.classList.toggle('is-open');
     }
-    function togglePostMenu(btn, e) { e.stopPropagation(); btn.nextElementSibling.classList.toggle('show'); }
 
+    // 7. 文章右上角選單 (檢舉/收藏)
+    function togglePostMenu(btn, e) {
+        e.stopPropagation();
+        // 先關閉其他打開的選單
+        document.querySelectorAll('.post-dropdown').forEach(d => {
+            if (d !== btn.nextElementSibling) d.classList.remove('show');
+        });
+        btn.nextElementSibling.classList.toggle('show');
+    }
+
+    // 8. 按讚功能
     function handleLike(el, id, e) {
         if(e) e.stopPropagation();
         let headers = {};
@@ -327,6 +361,7 @@
         });
     }
 
+    // 9. 收藏功能
     function handleFavorite(id, e) {
         if(e) e.stopPropagation();
         let headers = {};
@@ -340,9 +375,13 @@
             const t = document.getElementById('fav-text-' + id);
             if (data === "success") { i.className = 'fa-solid fa-star text-warning'; t.innerText = '取消收藏'; }
             else if (data === "removed") { i.className = 'fa-regular fa-star'; t.innerText = '收藏文章'; }
+            // 關閉選單
+            const dropdown = i.closest('.post-dropdown');
+            if(dropdown) dropdown.classList.remove('show');
         });
     }
 
+    // 10. 留言功能 (Enter 鍵與按鈕)
     function handleCommentSubmit(e, input) { if (e.key === 'Enter') submitComment(input.getAttribute('data-post-id'), input.value, input); }
     function submitCommentBtn(id) { const input = document.querySelector(`input[data-post-id='${id}']`); submitComment(id, input.value, input); }
 
@@ -377,15 +416,18 @@
             });
     }
 
+    // 11. WebSocket 聊天室功能
     function connect() {
         var host = window.location.host;
+        // 判斷是 ws 還是 wss
         socket = new WebSocket((window.location.protocol==='https:'?'wss://':'ws://') + host + "/FriendWS/" + userName + "/public_room");
+
         socket.onmessage = function(e) {
             var data = JSON.parse(e.data);
             if(data.type === 'chat') {
                 var isSelf = (data.sender === userName);
 
-                // 🟢 唯一修正：在 JS 生成字串時，注入 style 確保 test 不斷行與維持最小寬度
+                // 🟢 [保留] 這裡是你之前修好的樣式，確保文字不會斷行
                 var html = `<div class="msg-row ${isSelf?'self':''}" style="display:flex; ${isSelf?'flex-direction:row-reverse;':''} gap:10px; margin-bottom:12px;">
                     <div class="msg-avatar" style="width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0;"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${data.sender}" style="width:100%"/></div>
                     <div class="msg-content" style="display:flex; flex-direction:column; ${isSelf?'align-items:flex-end;':''} min-width: 0;">
@@ -393,8 +435,10 @@
                         <div class="msg-bubble" style="background:${isSelf?'#800':'#222'}; padding:8px 12px; border-radius:12px; word-break: normal !important; overflow-wrap: anywhere !important; min-width: fit-content;">${data.message}</div>
                     </div>
                 </div>`;
-                document.getElementById('chat-box').insertAdjacentHTML('beforeend', html);
-                document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
+
+                const chatBox = document.getElementById('chat-box');
+                chatBox.insertAdjacentHTML('beforeend', html);
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
         };
     }
@@ -414,16 +458,22 @@
             }
         } else {
             console.error("❌ WebSocket 尚未連線或已被中斷。");
-            alert("通訊連線尚未就緒，請稍候。");
-            connect();
+            // alert("通訊連線尚未就緒，請稍候。"); // 怕太吵可以註解掉
+            connect(); // 嘗試重新連線
         }
     }
 
+    // 綁定聊天室 Enter 發送
     document.getElementById('chat-input').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') { sendMessage(); }
     });
 
-    function showLightbox(src, e) { e.stopPropagation(); document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').style.display = 'flex'; }
+    // 12. 圖片燈箱效果
+    function showLightbox(src, e) {
+        e.stopPropagation();
+        document.getElementById('lightbox-img').src = src;
+        document.getElementById('lightbox').style.display = 'flex';
+    }
     /*]]>*/
 </script>
 <style> @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } } </style>
