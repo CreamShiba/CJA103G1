@@ -56,3 +56,33 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+/* --- admin_index.css 新增部分 --- */
+
+/* 讓歡迎區塊佔滿剩下的高度 */
+.welcome-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f5f7fa; /* 配合背景色 */
+    user-select: none; /* 讓文字不能被選取，更有質感 */
+}
+
+.welcome-text {
+    text-align: center;
+    color: #cbd5e0; /* 淺灰色，看起來比較高級 */
+}
+
+.welcome-text h1 {
+    font-size: 4rem; /* 大標題 */
+    margin-bottom: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.welcome-text p {
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
