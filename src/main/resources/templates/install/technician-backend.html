@@ -81,9 +81,10 @@
                     <span th:case="*">訂單管理中心</span>
                 </h2>
                 <div class="user-profile">
-                    <span th:text="${session.member != null ? session.member.memUsername : 'Tech'}">Technician</span>
+                    <span
+                        th:text="${technician != null ? technician.realName : (session.member != null ? session.member.memUsername : 'Tech')}">Technician</span>
                     <div class="avatar"
-                        th:text="${session.member != null ? #strings.substring(session.member.memUsername,0,1) : 'T'}">T
+                        th:text="${technician != null ? #strings.substring(technician.realName,0,1) : 'T'}">T
                     </div>
                 </div>
             </div>
@@ -231,6 +232,7 @@
                                 <th>預約時段</th>
                                 <th>地點</th>
                                 <th>總金額</th>
+                                <th>實收金額</th>
                                 <th>狀態</th>
                                 <th>撥款狀態</th>
                             </tr>
@@ -245,6 +247,8 @@
                                 </td>
                                 <td th:text="${order.locationName}">Loc</td>
                                 <td th:text="'$' + ${order.totalPrice}">$1000</td>
+                                <td th:text="'$' + ${order.techPayout}" style="color: #059669; font-weight: bold;">$950
+                                </td>
                                 <td>
                                     <span class="badge" style="background: #f3f4f6; color: #374151;">已完工</span>
                                 </td>

@@ -104,15 +104,10 @@ table {
     border-collapse: collapse;
 }
 
-thead {
-    background-color: #f8f9fa;
-}
-
 th {
     padding: 15px 20px;
-    text-align: left;
+    text-align: center;
     font-weight: 600;
-    color: #333;
     border-bottom: 2px solid #e0e0e0;
 }
 
@@ -122,7 +117,9 @@ td {
 }
 
 tbody tr:hover {
-    background-color: #fafafa;
+    transform: scale(1.01);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
 }
 
 tbody tr:last-child td {
@@ -142,8 +139,7 @@ tbody tr:last-child td {
 }
 
 .item-details h4 {
-    font-size: 15px;
-    color: #333;
+    font-size: 1.2em;
     margin-bottom: 4px;
 }
 

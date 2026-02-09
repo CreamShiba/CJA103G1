@@ -1,10 +1,10 @@
 package com.karshop.install.service;
 
 import com.karshop.install.dto.TechnicianOnboardingDTO;
-import com.karshop.members.model.MembersVO; // Updated import
+import com.karshop.members.model.MembersVO;
 import com.karshop.install.entity.Technician;
 import com.karshop.install.entity.TechnicianService;
-import com.karshop.members.model.MembersRepository; // Updated import
+import com.karshop.members.model.MembersRepository;
 import com.karshop.install.repository.TechnicianRepository;
 import com.karshop.install.repository.TechnicianServiceRepository;
 import com.karshop.install.vo.TechnicianCardVO;
@@ -16,12 +16,16 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * 技師管理服務 (Technician Management Service)
+ * 負責處理技師的資格申請、資料修改、服務項目設定、以及管理員審核與據點維護。
+ */
 @Service
 @RequiredArgsConstructor
 public class TechnicianManagementService {
 
     private final TechnicianRepository technicianRepository;
-    private final MembersRepository memberRepository; // Updated type
+    private final MembersRepository memberRepository;
     private final TechnicianServiceRepository technicianServiceRepository;
     private final com.karshop.install.repository.ServiceItemRepository serviceItemRepository;
     private final com.karshop.install.repository.TechnicianReviewRepository technicianReviewRepository;
@@ -29,39 +33,36 @@ public class TechnicianManagementService {
     private final com.karshop.install.repository.InstallOrderRepository orderRepository;
 
     /**
-     * 📋 取得所有可用服務項目
-     * 用於後台選單顯示
+     * 取得系統定義的所有基礎服務項目 (e.g. 輪胎更換, 機油保養)
      */
     public List<com.karshop.install.entity.ServiceItem> getAllServiceItems() {
         return serviceItemRepository.findAll();
     }
 
     /**
-     * 🔥 取得熱門服務項目 (前 10 筆)
-     * 用於前台側邊欄顯示
+     * 取得熱門服務項目 (用於前台側邊欄推薦)
      */
     public List<com.karshop.install.entity.ServiceItem> getTopServiceItems() {
-        // 暫時簡單實作：取得前 5 筆
         return serviceItemRepository.findAll().stream().limit(5).collect(Collectors.toList());
     }
 
     /**
-     * 📝 技師資格申請 (Apply as Technician)
-     * 建立一筆狀態為 PENDING (0) 的技師資料
-     *
-     * @param dto 包含申請表格資料 (姓名、電話、地區、銀行帳戶等)
-     * @return 儲存後的 Technician 實體
+     * 處理技師資格申請
+     * 支持「新申請」與「遭駁回後重新申請」兩種流程。
+     * 
+     * @param dto 申請資料載體
+     * @return 儲存後的技師實體
      */
     @Transactional
     public Technician applyAsTechnician(TechnicianOnboardingDTO dto) throws IOException {
         MembersVO member = memberRepository.findById(dto.getMemberNo())
                 .orElseThrow(() -> new IllegalArgumentException("會員不存在"));
 
-        // 檢查是否重複申請
+        // 1. 檢查是否已有申請紀錄
         java.util.Optional<Technician> existingTech = technicianRepository.findByMemberMemNo(dto.getMemberNo());
         if (existingTech.isPresent()) {
             Technician existing = existingTech.get();
-            // 如果狀態是 Rejected (2)，允許重新申請 (更新資料並設回 Pending 0)
+            // 若狀態為「被拒絕 (2)」，則更新舊有紀錄並重設為「待審核 (0)」
             if (existing.getIsActive() == 2) {
                 existing.setRealName(dto.getRealName());
                 existing.setPhone(dto.getPhone());
@@ -70,21 +71,22 @@ public class TechnicianManagementService {
                 existing.setRegionCodeValue(dto.getRegionCode());
                 existing.setBankCode(dto.getBankCode());
                 existing.setBankAccount(dto.getBankAccount());
-                existing.setIsActive(0); // 重設為待審核
+                existing.setIsActive(0);
 
+                // 處理大頭貼：若沒傳新的且舊的也是空的，則給予預設圖
                 if (dto.getProfilePhoto() != null && !dto.getProfilePhoto().isEmpty()) {
                     existing.setTechProfile(dto.getProfilePhoto().getBytes());
                 } else if (existing.getTechProfile() == null || existing.getTechProfile().length == 0) {
-                    // If no existing profile and no new one uploaded, set default
                     existing.setTechProfile(loadDefaultProfileImage());
                 }
 
                 return technicianRepository.save(existing);
             } else {
-                throw new IllegalStateException("您已經申請過技師資格");
+                throw new IllegalStateException("您已經申請過技師資格，或正在審核中");
             }
         }
 
+        // 2. 建立新技師紀錄
         Technician technician = new Technician();
         technician.setMember(member);
         technician.setRealName(dto.getRealName());
@@ -94,13 +96,11 @@ public class TechnicianManagementService {
         technician.setRegionCodeValue(dto.getRegionCode());
         technician.setBankCode(dto.getBankCode());
         technician.setBankAccount(dto.getBankAccount());
-        technician.setIsActive(0); // 預設為待審核
+        technician.setIsActive(0); // 初始狀態：待審核
 
-        // 若有上傳大頭貼，轉為 byte[] 存入
         if (dto.getProfilePhoto() != null && !dto.getProfilePhoto().isEmpty()) {
             technician.setTechProfile(dto.getProfilePhoto().getBytes());
         } else {
-            // Set default profile image
             technician.setTechProfile(loadDefaultProfileImage());
         }
 
@@ -109,6 +109,9 @@ public class TechnicianManagementService {
 
     private byte[] cachedDefaultProfileImage;
 
+    /**
+     * 載入預設的技師圖片檔
+     */
     private byte[] loadDefaultProfileImage() {
         if (cachedDefaultProfileImage != null) {
             return cachedDefaultProfileImage;
@@ -120,23 +123,14 @@ public class TechnicianManagementService {
                 cachedDefaultProfileImage = resource.getContentAsByteArray();
                 return cachedDefaultProfileImage;
             }
-            // Fallback: try file system
-            java.io.File file = new java.io.File("src/main/resources/static/images/user.png");
-            if (file.exists()) {
-                cachedDefaultProfileImage = java.nio.file.Files.readAllBytes(file.toPath());
-                return cachedDefaultProfileImage;
-            }
-            System.err.println("Default profile image not found!");
             return null;
         } catch (IOException e) {
-            e.printStackTrace();
             return null;
         }
     }
 
     /**
-     * 👤 更新技師基本資料 (Update Profile)
-     * 針對已存在的技師修改個人資訊
+     * 更新技師個人基本資料
      */
     @Transactional
     public void updateTechnicianProfile(TechnicianOnboardingDTO dto, Integer memberNo) throws IOException {
@@ -160,12 +154,11 @@ public class TechnicianManagementService {
     }
 
     /**
-     * 🛠️ 更新技師服務項目與價格
-     * 處理服務的勾選、取消勾選以及價格設定
-     *
+     * 更新技師所提供的服務項目及其報價
+     * 
      * @param memberNo           會員編號
-     * @param selectedServiceIds 被勾選的服務 ID 列表
-     * @param prices             每個服務對應的自訂價格 Map (ServiceID -> Price)
+     * @param selectedServiceIds 選中的基礎服務 ID
+     * @param prices             技師針對每個服務設定的價格
      */
     @Transactional
     public void updateTechnicianServices(Integer memberNo, List<Integer> selectedServiceIds,
@@ -178,7 +171,10 @@ public class TechnicianManagementService {
         }
     }
 
-    // 內部邏輯：同步資料庫中的 TechnicianService 紀錄
+    /**
+     * 核心過濾與同步邏輯：管理技師服務項目的增刪。
+     * 若原本勾選但後來取消，則實施「軟刪除」 (status=0) 以保留歷史訂單關聯。
+     */
     private void handleServiceUpdate(Technician technician, List<Integer> selectedServiceIds,
             java.util.Map<Integer, Integer> prices) {
         List<com.karshop.install.entity.ServiceItem> allItems = serviceItemRepository.findAll();
@@ -188,8 +184,9 @@ public class TechnicianManagementService {
         for (com.karshop.install.entity.ServiceItem item : allItems) {
             Integer serviceNo = item.getServiceNo();
             boolean isSelected = selectedServiceIds.contains(serviceNo);
-            Integer price = prices.getOrDefault(serviceNo, 500); // 預設價格 500
+            Integer price = prices.getOrDefault(serviceNo, 500);
 
+            // 檢查庫存中是否已存在此關聯
             TechnicianService ts = existingServices.stream()
                     .filter(s -> s.getServiceItem().getServiceNo().equals(serviceNo))
                     .findFirst()
@@ -197,7 +194,7 @@ public class TechnicianManagementService {
 
             if (isSelected) {
                 if (ts == null) {
-                    // 新增服務關聯
+                    // 新增技師個人的服務報價紀錄
                     ts = new TechnicianService();
                     ts.setTechnician(technician);
                     ts.setServiceItem(item);
@@ -205,14 +202,14 @@ public class TechnicianManagementService {
                     ts.setServiceStatus(1);
                     technicianServiceRepository.save(ts);
                 } else {
-                    // 更新現有服務 (價格/狀態)
+                    // 更新報價與狀態
                     ts.setPrice(price);
                     ts.setServiceStatus(1);
                     technicianServiceRepository.save(ts);
                 }
             } else {
                 if (ts != null) {
-                    // 取消勾選 (軟刪除 status=0)
+                    // 軟刪除：設為停用
                     ts.setServiceStatus(0);
                     technicianServiceRepository.save(ts);
                 }
@@ -220,57 +217,17 @@ public class TechnicianManagementService {
         }
     }
 
-    public List<TechnicianService> getTechnicianServices(Integer techNo) {
-        return technicianServiceRepository.findByTechnicianTechNo(techNo);
-    }
-
     /**
-     * ✅ 管理員審核通過
-     * 1. 將技師狀態設為 Active (1)
-     * 2. 將會員狀態設為 Engineer (1)
-     */
-    @Transactional
-    public void approveTechnician(Integer techNo) {
-        Technician technician = technicianRepository.findById(techNo)
-                .orElseThrow(() -> new IllegalArgumentException("技師不存在"));
-
-        technician.setIsActive(1);
-        technicianRepository.save(technician);
-
-        // Update member's engineer_status
-        MembersVO member = technician.getMember();
-        // member.setEngineerStatus(1); // TODO: Check if MembersVO has a corresponding
-        // status field
-        memberRepository.save(member);
-    }
-
-    /**
-     * ❌ 管理員駁回申請
-     * 修改狀態為 Rejected (2)，保留資料但不顯示於待審核清單
-     */
-    @Transactional
-    public void rejectTechnician(Integer techNo) {
-        Technician technician = technicianRepository.findById(techNo)
-                .orElseThrow(() -> new IllegalArgumentException("技師不存在"));
-        technician.setIsActive(2); // 2: Rejected
-        technicianRepository.save(technician);
-    }
-
-    /**
-     * 🔍 搜尋前台顯示的技師列表 (Get Active Technicians)
-     * 
-     * @param regionCode 地區篩選 (可選)
-     * @param serviceIds 服務項目篩選 (可選，多選)
+     * 前台搜尋技師的分頁邏輯
+     * 包含：地區篩選、服務複選 (需全數符合)、關鍵字搜尋、平均評分排序、圖片轉換
      */
     @Transactional(readOnly = true)
     public org.springframework.data.domain.Page<TechnicianCardVO> getAllActiveTechnicians(Integer regionCode,
             List<Integer> serviceIds, String keyword, int page, int size, String sort) {
         List<Technician> technicians;
 
+        // 1. 基於時段與地區的初步過濾
         if (serviceIds != null && !serviceIds.isEmpty()) {
-            // 邏輯修改：必須符合 "所有" 勾選的服務項目 (AND 邏輯)
-
-            // 1. 先取得所有候選技師 (Active)
             List<Technician> candidates;
             if (regionCode != null) {
                 candidates = technicianRepository.findByIsActiveAndRegionCodeValue(1, regionCode);
@@ -278,16 +235,13 @@ public class TechnicianManagementService {
                 candidates = technicianRepository.findByIsActive(1);
             }
 
-            // 2. 過濾技師：檢查每位技師是否擁有 "所有" 指定的 serviceIds
+            // 必須符合「所有」被選中的服務項目
             technicians = candidates.stream().filter(tech -> {
-                // 取得該技師目前提供的所有服務 ID
                 List<Integer> techServiceIds = technicianServiceRepository
                         .findByTechnicianTechNoAndServiceStatus(tech.getTechNo(), 1)
                         .stream()
                         .map(ts -> ts.getServiceItem().getServiceNo())
                         .collect(Collectors.toList());
-
-                // 檢查 serviceIds 是否為 techServiceIds 的子集 (即包含所有勾選項目)
                 return techServiceIds.containsAll(serviceIds);
             }).collect(Collectors.toList());
 
@@ -297,7 +251,7 @@ public class TechnicianManagementService {
             technicians = technicianRepository.findByIsActive(1);
         }
 
-        // Keyword Filtering
+        // 2. 關鍵字過濾 (姓名或服務地區名稱)
         if (keyword != null && !keyword.trim().isEmpty()) {
             String kw = keyword.trim().toLowerCase();
             technicians = technicians.stream()
@@ -306,22 +260,22 @@ public class TechnicianManagementService {
                     .collect(Collectors.toList());
         }
 
-        // Sorting Logic
+        // 3. 排序 (目前僅實作評分高低)
         if ("rating_desc".equals(sort)) {
             technicians.sort((t1, t2) -> {
                 double r1 = t1.getRatingAmount() > 0 ? (double) t1.getRatingStar() / t1.getRatingAmount() : 0.0;
                 double r2 = t2.getRatingAmount() > 0 ? (double) t2.getRatingStar() / t2.getRatingAmount() : 0.0;
-                return Double.compare(r2, r1); // Descending
+                return Double.compare(r2, r1);
             });
         }
 
-        // Pagination Logic
+        // 4. 手動分頁處理 (PageImpl)
         int totalElements = technicians.size();
         int start = Math.min(page * size, totalElements);
         int end = Math.min((page + 1) * size, totalElements);
         List<Technician> pagedTechnicians = technicians.subList(start, end);
 
-        // 轉換 Entity -> VO (包含評分計算與圖片處理)
+        // 5. Entity 轉 VO 並補充圖片/評分與服務詳情
         List<TechnicianCardVO> content = pagedTechnicians.stream().map(tech -> {
             TechnicianCardVO vo = new TechnicianCardVO();
             vo.setTechNo(tech.getTechNo());
@@ -329,13 +283,7 @@ public class TechnicianManagementService {
             vo.setPhone(tech.getPhone());
             vo.setEmail(tech.getEmail());
             vo.setServiceArea(tech.getServiceArea());
-
-            // 計算平均評分
-            if (tech.getRatingAmount() > 0) {
-                vo.setAvgRating((double) tech.getRatingStar() / tech.getRatingAmount());
-            } else {
-                vo.setAvgRating(0.0);
-            }
+            vo.setAvgRating(tech.getRatingAmount() > 0 ? (double) tech.getRatingStar() / tech.getRatingAmount() : 0.0);
 
             if (tech.getTechProfile() != null && tech.getTechProfile().length > 0) {
                 vo.setProfilePhotoFromBytes(tech.getTechProfile());
@@ -343,7 +291,6 @@ public class TechnicianManagementService {
                 vo.setProfilePhotoFromBytes(loadDefaultProfileImage());
             }
 
-            // 取得該技師提供的服務
             List<TechnicianService> services = technicianServiceRepository
                     .findByTechnicianTechNoAndServiceStatus(tech.getTechNo(), 1);
 
@@ -364,8 +311,7 @@ public class TechnicianManagementService {
     }
 
     /**
-     * 📄 取得技師詳細頁面資訊 (Detail Page)
-     * 包含基本資料、服務項目、評價列表
+     * 獲取技師詳細資料與所有過往留言評價
      */
     @Transactional(readOnly = true)
     public TechnicianCardVO getTechnicianDetail(Integer techNo) {
@@ -375,15 +321,10 @@ public class TechnicianManagementService {
         TechnicianCardVO vo = new TechnicianCardVO();
         vo.setTechNo(tech.getTechNo());
         vo.setRealName(tech.getRealName());
+        vo.setAvgRating(tech.getRatingAmount() > 0 ? (double) tech.getRatingStar() / tech.getRatingAmount() : 0.0);
         vo.setPhone(tech.getPhone());
         vo.setEmail(tech.getEmail());
         vo.setServiceArea(tech.getServiceArea());
-
-        if (tech.getRatingAmount() > 0) {
-            vo.setAvgRating((double) tech.getRatingStar() / tech.getRatingAmount());
-        } else {
-            vo.setAvgRating(0.0);
-        }
 
         if (tech.getTechProfile() != null && tech.getTechProfile().length > 0) {
             vo.setProfilePhotoFromBytes(tech.getTechProfile());
@@ -391,29 +332,25 @@ public class TechnicianManagementService {
             vo.setProfilePhotoFromBytes(loadDefaultProfileImage());
         }
 
+        // 帶出所有進行中的服務
         List<TechnicianService> services = technicianServiceRepository
                 .findByTechnicianTechNoAndServiceStatus(tech.getTechNo(), 1);
-
-        List<TechnicianCardVO.ServiceVO> serviceVOs = services.stream().map(ts -> {
+        vo.setServices(services.stream().map(ts -> {
             TechnicianCardVO.ServiceVO svo = new TechnicianCardVO.ServiceVO();
             svo.setTsNo(ts.getTsNo());
             svo.setServiceName(ts.getServiceItem().getServiceName());
             svo.setPrice(ts.getPrice());
             return svo;
-        }).collect(Collectors.toList());
-        vo.setServices(serviceVOs);
+        }).collect(Collectors.toList()));
 
-        // 取得評論列表
+        // 帶出評論
         List<com.karshop.install.entity.TechnicianReview> reviews = technicianReviewRepository
                 .findByTechnicianTechNo(tech.getTechNo());
-        List<TechnicianCardVO.ReviewVO> reviewVOs = reviews.stream().map(r -> {
-            return new TechnicianCardVO.ReviewVO(
-                    r.getMember().getMemberName(),
-                    r.getRatingStar(),
-                    r.getReviewContent(),
-                    r.getCreatedAt());
-        }).collect(Collectors.toList());
-        vo.setReviews(reviewVOs);
+        vo.setReviews(reviews.stream().map(r -> new TechnicianCardVO.ReviewVO(
+                r.getMember().getMemberName(),
+                r.getRatingStar(),
+                r.getReviewContent(),
+                r.getCreatedAt())).collect(Collectors.toList()));
 
         return vo;
     }
@@ -433,29 +370,55 @@ public class TechnicianManagementService {
     }
 
     /**
-     * ⛔ [Admin] 暫時停權技師 (退回審核狀態)
+     * 取得技師的所有服務項目
+     */
+    public List<TechnicianService> getTechnicianServices(Integer techNo) {
+        return technicianServiceRepository.findByTechnicianTechNo(techNo);
+    }
+
+    /**
+     * 管理員核准技師資格
      */
     @Transactional
-    public void suspendTechnician(Integer techNo) {
-        // 1. 檢查是否有未完成的訂單 (Pending, Awaiting Payment, Paid/Uninstalled)
-        long activeOrders = orderRepository.countActiveOrdersByTechnician(techNo);
-
+    public void approveTechnician(Integer techNo) {
         Technician technician = technicianRepository.findById(techNo)
                 .orElseThrow(() -> new IllegalArgumentException("技師不存在"));
-
-        if (activeOrders > 0) {
-            throw new IllegalStateException("該技師尚有未完成的訂單，無法停權");
-        }
-
-        technician.setIsActive(0); // Set back to PENDING (Audit/Suspended status)
+        technician.setIsActive(1); // 1: Active
         technicianRepository.save(technician);
     }
 
     /**
-     * ➕ [Admin] 新增服務項目
+     * 管理員駁回技師資格
      */
     @Transactional
-    public void createServiceItem(String serviceName, com.karshop.admins.model.AdminVO admin) { // Update to AdminVO
+    public void rejectTechnician(Integer techNo) {
+        Technician technician = technicianRepository.findById(techNo)
+                .orElseThrow(() -> new IllegalArgumentException("技師不存在"));
+        technician.setIsActive(2); // 2: Rejected
+        technicianRepository.save(technician);
+    }
+
+    /**
+     * 技師停權機制
+     * 條件：必須先處理完所有進行中的訂單才能停權，以確保會員權益。
+     */
+    @Transactional
+    public void suspendTechnician(Integer techNo) {
+        long activeOrders = orderRepository.countActiveOrdersByTechnician(techNo);
+        if (activeOrders > 0) {
+            throw new IllegalStateException("該技師尚有未完成的訂單，無法停權");
+        }
+
+        Technician technician = technicianRepository.findById(techNo)
+                .orElseThrow(() -> new IllegalArgumentException("技師不存在"));
+        technician.setIsActive(0); // 設回待審核(停權)狀態
+        technicianRepository.save(technician);
+    }
+
+    // --- 管理員針對基礎項目的 CRUD (Admin CRUD for items/locations) ---
+
+    @Transactional
+    public void createServiceItem(String serviceName, com.karshop.admins.model.AdminVO admin) {
         com.karshop.install.entity.ServiceItem item = new com.karshop.install.entity.ServiceItem();
         item.setServiceName(serviceName);
         item.setAdm(admin);
@@ -463,26 +426,18 @@ public class TechnicianManagementService {
         serviceItemRepository.save(item);
     }
 
-    /**
-     * ✏️ [Admin] 更新服務項目名稱
-     */
     @Transactional
     public void updateServiceItem(Integer serviceNo, String serviceName) {
         com.karshop.install.entity.ServiceItem item = serviceItemRepository.findById(serviceNo)
-                .orElseThrow(() -> new IllegalArgumentException("Service not found"));
+                .orElseThrow(() -> new IllegalArgumentException("項目不存在"));
         item.setServiceName(serviceName);
         serviceItemRepository.save(item);
     }
 
-    /**
-     * 🗑️ [Admin] 刪除服務項目
-     */
     @Transactional
     public void deleteServiceItem(Integer serviceNo) {
         serviceItemRepository.deleteById(serviceNo);
     }
-
-    // --- 場地管理 (Location Management) ---
 
     public List<com.karshop.install.entity.InstallLocation> getAllLocations() {
         return installLocationRepository.findAll();
@@ -500,7 +455,7 @@ public class TechnicianManagementService {
     @Transactional
     public void updateLocation(Integer id, String name, String address, Integer price) {
         com.karshop.install.entity.InstallLocation loc = installLocationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Location not found"));
+                .orElseThrow(() -> new IllegalArgumentException("據點不存在"));
         loc.setLocationName(name);
         loc.setAddress(address);
         loc.setPricePer(price);

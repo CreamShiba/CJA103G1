@@ -41,123 +41,124 @@
             </div>
         </div>
 
-        <div class="product-info-section" style="display: flex; flex-direction: column; min-height: 500px;">
+        <div class="product-info-section" style="display: block; position: relative; border: none !important; min-height: auto !important; height: auto !important;">
 
-            <div>
-                <div class="breadcrumb">
+            <div class="info-header">
+                <div class="breadcrumb" style="color: #888; font-size: 14px; margin-bottom: 10px;">
                     <a th:href="@{/product/all}">首頁</a> / 商品詳情 / <span th:text="${productVO.prodName}"></span>
                 </div>
 
-                <h1 class="product-title" th:text="${productVO.prodName}">商品名稱</h1>
+                <h1 class="product-title" th:text="${productVO.prodName}" style="font-size: 2rem; font-weight: bold; margin-bottom: 10px;">商品名稱</h1>
 
-                <div class="product-rating-detail"
-                     th:with="avg=${productVO.ratingAmount > 0 ? (productVO.ratingStar * 1.0 / productVO.ratingAmount) : 0}">
-                    <span style="color: #ffc107; font-weight: bold; margin-right: 5px;"
-                          th:text="${#numbers.formatDecimal(avg, 1, 1)}">4.8</span>
-                    <th:block th:each="i : ${#numbers.sequence(1, 5)}">
-                        <i class="fas fa-star" th:if="${avg >= i}"></i>
-                        <i class="fas fa-star-half-alt" th:if="${avg < i and avg >= i - 0.5}"></i>
-                        <i class="far fa-star" style="color: #444;" th:if="${avg < i - 0.5}"></i>
-                    </th:block>
-                    <span class="rating-count-detail" th:text="'(' + ${productVO.ratingAmount} + ' 則評價)'"></span>
+                <div class="product-rating-detail" style="display: flex; align-items: center; color: #ffc107; margin-bottom: 15px;">
+            <span style="font-weight: bold; margin-right: 5px;"
+                  th:text="${productVO.ratingAmount > 0 ? #numbers.formatDecimal(productVO.ratingStar * 1.0 / productVO.ratingAmount, 1, 1) : '0.0'}">4.8</span>
+                    <i class="fas fa-star"></i>
+                    <span class="rating-count-detail" style="color: #888; font-size: 13px; margin-left: 8px;"
+                          th:text="'(' + ${productVO.ratingAmount} + ' 則評價)'"></span>
                 </div>
+            </div>
 
-                <div style="margin-top: 15px; margin-bottom: 15px;">
-                    <div th:if="${productVO.carCategory != null}"
-                         style="display: inline-flex; align-items: flex-start;
-                                background: rgba(255,255,255,0.05);
-                                border: 1px solid #444;
-                                padding: 8px 15px;
-                                border-radius: 6px;
-                                color: #eee;
-                                max-width: 100%;">
-                        <i class="fas fa-car" style="color: #00e676; margin-right: 8px; font-size: 1.1em; flex-shrink: 0; margin-top: 2px;"></i>
-                        <span style="color: #aaa; margin-right: 5px; white-space: nowrap; flex-shrink: 0;">適用車款:</span>
-                        <span th:text="${productVO.carCategory.fullName}"
-                              style="font-weight: bold; color: #fff; letter-spacing: 0.5px; white-space: normal; line-height: 1.4;">
-                        </span>
-                    </div>
-
-                    <div th:if="${productVO.carCategory == null}"
-                         style="display: inline-flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px dashed #666; padding: 8px 15px; border-radius: 6px; color: #aaa;">
-                        <i class="fas fa-tools" style="margin-right: 8px;"></i>
-                        <span style="white-space: nowrap;">全車系通用 / 改裝通用款</span>
-                    </div>
+            <div style="margin-bottom: 20px;">
+                <div th:if="${productVO.carCategory != null}"
+                     style="display: inline-flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px solid #444; padding: 8px 15px; border-radius: 6px;">
+                    <i class="fas fa-car" style="color: #00e676; margin-right: 8px;"></i>
+                    <span style="color: #aaa; margin-right: 5px;">適用車款:</span>
+                    <span th:text="${productVO.carCategory.fullName}" style="font-weight: bold; color: #fff;"></span>
                 </div>
+                <div th:if="${productVO.carCategory == null}"
+                     style="display: inline-flex; align-items: center; background: rgba(255,255,255,0.05); border: 1px dashed #666; padding: 8px 15px; border-radius: 6px;">
+                    <i class="fas fa-tools" style="margin-right: 8px; color: #aaa;"></i>
+                    <span style="color: #aaa;">全車系通用</span>
+                </div>
+            </div>
 
-                <div class="seller-info-box">
-                    <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}" class="seller-avatar-link">
-                        <img th:src="@{/seller/reader(sellerNo=${productVO.seller.sellerNo})}"
-                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=Seller&background=random&color=fff';"
-                             class="seller-avatar" alt="賣家頭像">
+            <div class="info-body-wrapper" style="display: block;">
+
+                <div class="seller-info-box" style="display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 20px;">
+                    <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}">
+                        <img th:src="${productVO.seller.imagePath != null && productVO.seller.imagePath != '' ? productVO.seller.imagePath : 'https://ui-avatars.com/api/?name=' + (productVO.seller.shopName != null && productVO.seller.shopName != '' ? productVO.seller.shopName : productVO.seller.sellerName) + '&background=random'}"
+                             alt="賣家頭像"
+                             style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #333;" />
                     </a>
-                    <div class="seller-details">
-                        <span class="seller-label">Seller</span>
+                    <div style="flex: 1;">
+                        <div style="font-size: 11px; color: #888;">SELLER</div>
                         <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}"
-                           class="seller-name-link" th:text="${productVO.seller.sellerName}">
-                            Karshop 官方旗艦店
-                        </a>
+                           th:text="${productVO.seller.shopName != null && productVO.seller.shopName != '' ? productVO.seller.shopName : productVO.seller.sellerName}"
+                           style="font-size: 15px; font-weight: bold; color: #fff;">賣場名稱</a>
                     </div>
-                    <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}" class="visit-shop-btn">
+                    <a th:href="@{/shop(sellerNo=${productVO.seller.sellerNo})}"
+                       style="font-size: 13px; background: #333; color: white; padding: 6px 15px; border-radius: 20px;">
                         逛逛 <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
 
-                <div class="product-desc" th:text="${productVO.prodDesc}"
-                     style="margin-top: 20px; padding-top: 20px; border-top: 1px dashed #333; color: #ccc; line-height: 1.8; min-height: 100px;">
-                    這裡是商品描述...
-                </div>
-            </div>
-
-            <div class="buying-zone">
-                <div style="text-align: right; margin-bottom: 5px;">
-                    <button type="button" class="report-btn" onclick="openReportModal()">
-                        <i class="fas fa-exclamation-circle"></i> 檢舉商品
-                    </button>
+                <div class="product-desc-box" style="margin-bottom: 20px; padding-top: 20px; border-top: 1px dashed #333;">
+                    <p th:text="${productVO.prodDesc}" style="color: #ccc; line-height: 1.8; margin: 0; white-space: pre-line;"></p>
                 </div>
 
-                <div class="product-price"
-                     th:text="${'$' + #numbers.formatInteger(productVO.prodPrice, 1, 'COMMA')}"
-                     style="font-size: 36px; color: #ff5252; font-weight: bold; margin-bottom: 15px; display: block;">
-                    $999
-                </div>
+                <div class="buying-zone" style="margin-top: 20px;">
 
-                <div style="margin-bottom: 15px; color: #00e676; font-size: 13px;" th:if="${productVO.prodQty > 0}">
-                    <i class="fas fa-check-circle"></i> 現貨充足 (剩餘 <span th:text="${productVO.prodQty}"></span>)
-                </div>
+                    <div style="text-align: right; margin-bottom: 5px;">
+                        <button type="button" class="report-btn" onclick="openReportModal()">
+                            <i class="fas fa-exclamation-circle"></i> 檢舉商品
+                        </button>
+                    </div>
 
-                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="price-tag" style="font-size: 36px; color: #ff5252; font-weight: bold; margin-bottom: 15px;">
+                        <span th:text="${'$' + #numbers.formatInteger(productVO.prodPrice, 1, 'COMMA')}">$999</span>
+                    </div>
 
-                    <form th:action="@{/cart/add}" method="post" style="display: flex; align-items: center; gap: 15px; flex: 1;">
-                        <input type="hidden" name="prodNo" th:value="${productVO.prodNo}">
+                    <div th:if="${productVO.seller.sellerStatus != '已開通'}"
+                         style="background: rgba(255, 82, 82, 0.1); border: 1px solid #ff5252; border-radius: 8px; padding: 15px; text-align: center;">
+                        <h3 style="color: #ff5252; margin: 0 0 5px 0; font-size: 16px;"><i class="fas fa-ban"></i> 暫停販售</h3>
+                        <p style="color: #ccc; margin: 0; font-size: 13px;">此賣家目前處於停權狀態，該商品暫時無法購買。</p>
+                    </div>
 
-                        <div class="qty-selector" th:if="${productVO.prodQty > 0}" style="height: 48px; margin: 0;">
-                            <button type="button" class="qty-btn" onclick="updateQty(-1)">-</button>
-                            <input type="number" name="qty" id="qtyInput" class="qty-input" value="1" min="1" th:max="${productVO.prodQty}" readonly>
-                            <button type="button" class="qty-btn" onclick="updateQty(1)">+</button>
+                    <div th:if="${productVO.seller.sellerStatus == '已開通'}" class="active-buying-area">
+
+                        <div style="margin-bottom: 15px; color: #00e676; font-size: 13px;" th:if="${productVO.prodQty > 0}">
+                            <i class="fas fa-check-circle"></i> 現貨充足 (剩餘 <span th:text="${productVO.prodQty}"></span>)
                         </div>
 
-                        <button type="submit" class="add-cart-btn" th:if="${productVO.prodQty > 0}">
-                            <i class="fas fa-cart-plus"></i> 加入購物車
-                        </button>
+                        <form th:action="@{/cart/add}" method="post" style="display: flex; align-items: center; gap: 10px;">
+                            <input type="hidden" name="prodNo" th:value="${productVO.prodNo}" />
 
-                        <button type="submit" name="buyNow" value="true" class="buy-now-btn" th:if="${productVO.prodQty > 0}">
-                            直接購買
-                        </button>
+                            <div class="qty-selector" th:if="${productVO.prodQty > 0}" style="display: flex; border: 1px solid #444; border-radius: 4px; height: 48px;">
+                                <button type="button" onclick="updateQty(-1)" style="background: #222; border: none; color: white; width: 30px;">-</button>
+                                <input type="number" name="qty" id="qtyInput" value="1" min="1" th:max="${productVO.prodQty}" readonly
+                                       style="background: #111; border: none; color: white; width: 40px; text-align: center;" />
+                                <button type="button" onclick="updateQty(1)" style="background: #222; border: none; color: white; width: 30px;">+</button>
+                            </div>
 
-                        <button type="button" class="add-cart-btn" disabled th:if="${productVO.prodQty <= 0}" style="background: #333; border-color: #444; color: #888; width: 100%;">
-                            暫無庫存
-                        </button>
-                    </form>
+                            <button type="submit" class="add-cart-btn" th:if="${productVO.prodQty > 0}"
+                                    style="background: transparent; border: 1px solid #7c4dff; color: #7c4dff; height: 48px; padding: 0 20px; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                                <i class="fas fa-cart-plus"></i> 加入購物車
+                            </button>
 
-                    <button type="button" id="favBtn" class="fav-btn-large"
-                            th:classappend="${isFavorite} ? 'active'"
-                            th:data-prodno="${productVO.prodNo}"
-                            th:title="${isFavorite} ? '取消收藏' : '加入收藏'">
-                        <i id="favIcon" th:class="${isFavorite} ? 'fas fa-heart' : 'far fa-heart'"></i>
-                    </button>
+                            <button type="submit" name="buyNow" value="true" class="buy-now-btn" th:if="${productVO.prodQty > 0}"
+                                    style="background: #ff5722; border: none; color: white; height: 48px; padding: 0 20px; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap;">
+                                直接購買
+                            </button>
+
+                            <button type="button" disabled th:if="${productVO.prodQty <= 0}"
+                                    style="background: #333; color: #888; height: 48px; width: 100%; border: none; border-radius: 6px;">
+                                暫無庫存
+                            </button>
+
+                            <button type="button" id="favBtn" class="fav-btn-large"
+                                    th:classappend="${isFavorite} ? 'active'"
+                                    th:data-prodno="${productVO.prodNo}"
+                                    style="background: transparent; border: 1px solid #444; color: #aaa; width: 48px; height: 48px; border-radius: 6px; cursor: pointer;">
+                                <i id="favIcon" th:class="${isFavorite} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div> </div> </div> <div class="full-width-review-section" style="margin-top: 40px; background: rgba(255,255,255,0.02); padding: 30px; border-radius: 12px; border: 1px solid #333;">
+            </div>
+        </div>
+
+        </div> <div class="full-width-review-section" style="margin-top: 40px; background: rgba(255,255,255,0.02); padding: 30px; border-radius: 12px; border: 1px solid #333;">
     <h3 style="color: #fff; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent-purple, #7c4dff); display: inline-block;">
         商品評價 (<span th:text="${productVO.ratingAmount}">0</span>)
     </h3>
@@ -195,6 +196,7 @@
     </div>
 </div>
 
+</div>
 </div>
 
 <footer th:replace="~{fragments/footer :: Footer}"></footer>

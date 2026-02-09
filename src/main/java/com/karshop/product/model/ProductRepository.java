@@ -36,6 +36,7 @@ public interface ProductRepository extends JpaRepository<ProductVO, Integer> {
 
 //  商城複合查詢
     @Query("SELECT p FROM ProductVO p WHERE p.prodStatus = '上架中' " +
+            "AND p.seller.sellerStatus = '已開通' " +
             "AND (:keyword IS NULL OR p.prodName LIKE %:keyword% OR p.seller.sellerName LIKE %:keyword%) " +
             "AND (:categoryNo IS NULL OR p.productCategory.productCategoryNo = :categoryNo) " +
             "AND (:carCategoryNo IS NULL OR p.carCategory.carCategoryNo = :carCategoryNo) " +

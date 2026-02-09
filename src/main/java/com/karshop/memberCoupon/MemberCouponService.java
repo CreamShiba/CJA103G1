@@ -1,6 +1,7 @@
 package com.karshop.memberCoupon;
 
 
+import com.karshop.coupon.Coupon;
 import com.karshop.coupon.CouponRepository;
 import com.karshop.memberCoupon.MemberCouponRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,35 +117,73 @@ public class MemberCouponService {
 
     //訂單結帳套用優惠券
     @Transactional(readOnly = true)
-    public MemberCoupon validateAndGetCoupon(Integer memberNo, Integer couponNo, Double orderAmount) {
+    public Integer validateAndCalculateDiscount(Integer memberNo, Integer couponNo, Integer currentTotal) {
+        if (couponNo == null) return 0;
+
+        // 1. 取得會員優惠券關聯與主表資訊
         MemberCouponId id = new MemberCouponId();
         id.setMemberNo(memberNo);
         id.setCouponNo(couponNo);
 
-        return memberCouponRepository.findById(id)
-                .filter(mc -> mc.getCouponStatus() == 0) // 必須是未使用
-                .map(mc -> {
-                    var coupon = mc.getCoupon();
-                    // 1. 檢查優惠券主表狀態與有效期限
-                    if (coupon == null || coupon.getCouponStatus() != 1) {
-                        throw new RuntimeException("優惠券已失效");
-                    }
-                    if (coupon.getCouponEnd().isBefore(LocalDateTime.now())) {
-                        throw new RuntimeException("優惠券已過期");
-                    }
+        MemberCoupon mc = memberCouponRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("找不到此優惠券"));
 
-                    // 2. 核心需求：檢查優惠券金額是否超過訂單 20%
-                    // 使用你提供的 discountValue 欄位
-                    double maxDiscountAllowed = orderAmount * 0.2;
-                    if (coupon.getDiscountValue() > maxDiscountAllowed) {
-                        throw new RuntimeException("不符合使用條件：此券折扣金額 (" + coupon.getDiscountValue() +
-                                ") 超過訂單金額的 20% (" + (int)maxDiscountAllowed + ")");
-                    }
+        // 2. 基礎校驗：是否使用過、是否過期
+        if (mc.getCouponStatus() != 0) {
+            throw new RuntimeException("此優惠券已使用或已失效");
+        }
 
-                    return mc;
-                })
-                .orElseThrow(() -> new RuntimeException("找不到該優惠券或已被使用"));
+        Coupon coupon = mc.getCoupon();
+        if (coupon == null || coupon.getCouponStatus() != 1) {
+            throw new RuntimeException("優惠券活動已結束");
+        }
+
+        if (coupon.getCouponEnd().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("優惠券已過期");
+        }
+
+        // 3. 核心需求：檢查優惠券金額是否超過訂單金額的 20%
+        // 小計 + 運費 = currentTotal
+        Integer discountValue = coupon.getDiscountValue();
+        double limit = currentTotal * 0.2;
+
+        if (discountValue > limit) {
+            throw new RuntimeException("不符合使用條件：折扣金額 ($" + discountValue +
+                    ") 超過訂單總額的 20% ($" + (int)limit + ")");
+        }
+
+        return discountValue;
     }
 
+    /**
+     * 結帳完成後，標記優惠券為已使用 (供 cartservice 呼叫)
+     */
+    @Transactional
+    public void markAsUsed(Integer memberNo, Integer couponNo) {
+        MemberCouponId id = new MemberCouponId();
+        id.setMemberNo(memberNo);
+        id.setCouponNo(couponNo);
+        memberCouponRepository.findById(id).ifPresent(mc -> {
+            mc.setCouponStatus(1); // 1: 已使用
+            mc.setUseTime(LocalDateTime.now());
+            memberCouponRepository.save(mc);
+        });
+    }
+
+    /**
+     * 獲取會員目前可使用的優惠券 (結帳下拉選單用)
+     * 條件：member_coupon.coupon_status = 0 (未使用)
+     * 且 coupon.coupon_status = 1 (有效)
+     * 且 coupon.coupon_end > 現在時間
+     */
+    @Transactional(readOnly = true)
+    public List<MemberCoupon> getAvailableCoupons(Integer memberNo) {
+        return memberCouponRepository.findByMemberNoWithCoupon(memberNo).stream()
+                .filter(mc -> mc.getCouponStatus() == 0) // 會員券狀態：未使用
+                .filter(mc -> mc.getCoupon() != null
+                        && mc.getCoupon().getCouponStatus() == 1 // 優惠券主表：有效
+                        && mc.getCoupon().getCouponEnd().isAfter(LocalDateTime.now())) // 未過期
+                .toList();
+    }
 
 }

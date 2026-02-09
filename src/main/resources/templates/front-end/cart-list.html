@@ -3,142 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>購物車 - 卡爾夏汽車百貨</title>
+  <title>購物車 - 卡爾夫汽車百貨</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" th:href="@{/css/front-end/cart-list.css}">
+  <link rel="stylesheet" th:href="@{/css/front-end/index2.css}">
+  <link rel="stylesheet" th:href="@{/css/fragments/front_header.css}">
+
 </head>
 <body>
 
-<body>
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
 
 <div class="cart-main">
-  <a href="/shop" class="back-link">
+  <a th:href="@{/shop}" class="back-link">
     <i class="fas fa-arrow-left"></i> 返回商城
   </a>
 
-  <!-- 提示訊息 -->
-  <div th:if="${success}" class="alert alert-success">
-    <i class="fas fa-check-circle"></i>
-    <span th:text="${success}">操作成功</span>
-  </div>
-  <div th:if="${error}" class="alert alert-error">
-    <i class="fas fa-times-circle"></i>
-    <span th:text="${error}">操作失敗</span>
-  </div>
+  <div th:if="${success}" class="alert alert-success"><span th:text="${success}"></span></div>
+  <div th:if="${error}" class="alert alert-error"><span th:text="${error}"></span></div>
 
-  <!-- 標題 -->
   <div class="cart-header">
     <h1><i class="fas fa-shopping-cart"></i> 我的購物車</h1>
-    <span class="cart-count">共 <span th:text="${itemCount}">0</span> 件商品</span>
+    <div class="select-all-container">
+      <input type="checkbox" id="selectAll" onclick="toggleAll(this)">
+      <label for="selectAll" style="color: white; cursor: pointer;"> 全選商品</label>
+    </div>
   </div>
 
-  <!-- ===== 有商品時 ===== -->
   <div th:if="${itemCount > 0}">
-    <div th:each="item : ${cartItems}" class="cart-item">
-      <!-- 圖片 -->
+    <div th:each="item : ${cartItems}" class="cart-item"
+         th:attr="data-price=${productMap.get(item.prod_no)?.prodPrice}, data-prod-no=${item.prod_no}">
+
+      <div class="item-checkbox">
+        <input type="checkbox" name="selectedItems"
+               th:value="${item.prod_no}"
+               class="item-check"
+               th:attr="data-qty=${item.quantity}"
+               onclick="updateSummary()">
+      </div>
+
       <div class="item-image">
         <th:block th:with="product=${productMap.get(item.prod_no)}">
-          <img th:if="${product != null and product.productImage != null and !product.productImage.isEmpty()}"
-               th:src="@{'/product/showImage/' + ${item.prod_no}}"
-               alt="商品圖片">
-          <i th:if="${product == null or product.productImage == null or product.productImage.isEmpty()}"
-             class="fas fa-car"></i>
+          <img th:if="${product != null and product.productImage != null}"
+               th:src="@{'/product/showImage/' + ${item.prod_no}}" alt="商品圖片">
+          <i th:if="${product == null || product.productImage == null}" class="fas fa-car"></i>
         </th:block>
       </div>
 
-      <!-- 資訊 -->
       <div class="item-info">
         <th:block th:with="product=${productMap.get(item.prod_no)}">
-          <div class="item-name" th:text="${product != null ? product.prodName : '商品編號：' + item.prod_no}">商品名稱</div>
-          <div class="item-desc" th:text="${product != null ? product.prodDesc : ''}"></div>
-          <div class="item-price" th:if="${product != null}">
-            NT$ <span th:text="${#numbers.formatInteger(product.prodPrice, 0, 'COMMA')}">0</span>
-          </div>
+          <div class="item-name" th:text="${product?.prodName}">商品名稱</div>
+          <div class="item-price">NT$ <span class="unit-price" th:text="${product?.prodPrice}">0</span></div>
 
-          <!-- ✅ 庫存警告 -->
           <div class="stock-warning" th:if="${product != null and item.quantity > product.prodQty}">
-            <i class="fas fa-exclamation-triangle"></i>
-            數量超過庫存！剩餘 <span th:text="${product.prodQty}">0</span> 件
-          </div>
-          <div class="stock-warning" th:if="${product != null and '下架中'.equals(product.prodStatus)}">
-            <i class="fas fa-exclamation-triangle"></i>
-            此商品已下架
-          </div>
-
-          <div class="item-time">
-            <i class="fas fa-clock"></i>
-            加入時間：<span th:text="${#temporals.format(item.added_time, 'yyyy-MM-dd HH:mm')}">2024-01-01</span>
+            <i class="fas fa-exclamation-triangle"></i> 庫存不足 (剩 <span th:text="${product.prodQty}"></span>)
           </div>
         </th:block>
       </div>
 
-      <!-- ✅ 數量控制 -->
       <div class="quantity-controls">
-        <button type="button" class="qty-btn"
-                th:onclick="|changeQty(${item.prod_no}, ${item.quantity - 1})|"
-                th:disabled="${item.quantity <= 1}">−</button>
-        <input type="number"
-               class="qty-input"
-               th:value="${item.quantity}"
-               min="1"
-               th:id="'qty-' + ${item.prod_no}"
-               onchange="inputQty(this)"
-               th:attr="data-prod-no=${item.prod_no}">
-        <button type="button" class="qty-btn"
-                th:onclick="|changeQty(${item.prod_no}, ${item.quantity + 1})|">+</button>
+        <button type="button" class="qty-btn" th:onclick="|changeQty(${item.prod_no}, ${item.quantity - 1})|" th:disabled="${item.quantity <= 1}">−</button>
+        <input type="number" class="qty-input" th:value="${item.quantity}" readonly>
+        <button type="button" class="qty-btn" th:onclick="|changeQty(${item.prod_no}, ${item.quantity + 1})|">+</button>
       </div>
 
-      <!-- 小計 + 刪除 -->
       <div class="item-right">
-        <th:block th:with="product=${productMap.get(item.prod_no)}">
-          <div class="item-subtotal" th:if="${product != null}">
-            NT$ <span th:text="${#numbers.formatInteger(product.prodPrice * item.quantity, 0, 'COMMA')}">0</span>
-          </div>
-        </th:block>
-        <form th:action="@{/members/carts/remove}" method="post" style="margin:0;">
+        <div class="item-subtotal">
+          NT$ <span th:text="${#numbers.formatInteger(productMap.get(item.prod_no).prodPrice * item.quantity, 0, 'COMMA')}">0</span>
+        </div>
+        <form th:action="@{/cart/remove}" method="post">
           <input type="hidden" name="prodNo" th:value="${item.prod_no}">
-          <button type="submit" class="btn-remove"
-                  onclick="return confirm('確定要移除這個商品嗎？')">
-            <i class="fas fa-trash"></i> 移除
-          </button>
+          <button type="submit" class="btn-remove" onclick="return confirm('確定移除?')"><i class="fas fa-trash"></i></button>
         </form>
       </div>
     </div>
 
-    <!-- 頁尾：總計 + 操作 -->
     <div class="cart-footer">
       <div class="cart-summary">
-        <span class="summary-label">總計</span>
-        <span class="summary-value">NT$ <span th:text="${#numbers.formatInteger(totalAmount, 0, 'COMMA')}">0</span></span>
+        <span class="summary-label">已選 <span id="checkedCount" style="color:#ff3333; font-weight:bold;">0</span> 項商品</span>
+        <span class="summary-value">合計: <span style="color:#ff3333; font-size: 24px;">NT$ <span id="checkedTotal">0</span></span></span>
       </div>
       <div class="cart-actions">
-        <form th:action="@{/members/carts/clear}" method="post" style="display:inline;">
-          <button type="submit" class="btn btn-clear"
-                  onclick="return confirm('確定要清空購物車嗎？')">
-            <i class="fas fa-trash-alt"></i> 清空購物車
-          </button>
+        <form th:action="@{/cart/clear}" method="post" style="display:inline;">
+          <button type="submit" class="btn btn-clear" onclick="return confirm('確定清空?')">清空購物車</button>
         </form>
-        <a href="/members/carts/checkout">
-          <button type="button" class="btn btn-payment">
+
+        <form id="checkoutForm" th:action="@{/cart/checkout}" method="get" style="display:inline;">
+          <input type="hidden" name="prodNos" id="selectedProdNos">
+          <button type="button" class="btn btn-payment" onclick="goToCheckout()">
             <i class="fas fa-credit-card"></i> 前往結帳
           </button>
-        </a>
+        </form>
       </div>
     </div>
   </div>
 
-  <!-- 空購物車 -->
   <div th:if="${itemCount == 0}" class="empty-cart">
     <i class="fas fa-shopping-cart"></i>
     <h2>購物車是空的</h2>
-    <p>快去挑選您喜歡的商品吧！</p>
-    <a href="/shop" class="btn-shop">前往購物</a>
+    <a th:href="@{/shop}" class="btn-shop">去逛逛</a>
   </div>
 </div>
 
-<div class="chat-btn"></div>
-
+<!-- ✅ 引入修正後的 JS -->
 <script th:src="@{/js/front-end/cart-list.js}"></script>
+<script th:src="@{/js/front-end/index2.js}"></script>
 
 </body>
 </html>

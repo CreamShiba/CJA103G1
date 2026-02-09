@@ -34,12 +34,19 @@
             <div class="page-title">賣家中心</div>
             <div class="user-profile-container" id="userTrigger">
                 <div class="user-profile">
-                    <div class="user-avatar"></div>
-                    <span>賣家帳號</span>
-                    <span style="font-size:10px; color:#aaa;">▼</span>
+                    <img th:src="${session.seller.imagePath != null && session.seller.imagePath != '' ? session.seller.imagePath : 'https://ui-avatars.com/api/?name=' + (session.seller.shopName != null && session.seller.shopName != '' ? session.seller.shopName : session.seller.sellerName) + '&background=random'}"
+                         alt="Avatar"
+                         style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-right: 8px; border: 1px solid #555;">
+
+                    <span th:text="${session.seller.shopName != null && session.seller.shopName != '' ? session.seller.shopName : session.seller.sellerName}"
+                          style="font-weight: 500; color: #fff;">
+                          賣家名稱
+                    </span>
+
+                    <span style="font-size:10px; color:#aaa; margin-left: 5px;">▼</span>
                 </div>
                 <div class="dropdown-menu" id="userDropdown">
-                    <a href="#" class="dropdown-item">個人資料</a>
+                    <a th:href="@{/members/seller/sellerinfo}" class="dropdown-item">個人資料</a>
                     <a th:href="@{/shop}" class="dropdown-item" style="color: var(--accent-purple);">切換為會員</a>
 
                     <form th:action="@{/members/logout}" method="post" id="sellerLogoutForm" style="display: none;"></form>
@@ -64,7 +71,7 @@
                         <div class="stat-value" style="color: var(--success-green);" th:text="${activeProductCount}">0</div>
                         <div style="font-size:12px; color:#aaa;">目前前台可見</div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" onclick="switchTab('orders')">
                         <div>總訂單數</div>
                         <div class="stat-value" style="color:var(--accent-purple)" th:text="${allOrder}">0</div>
                     </div>
@@ -352,7 +359,8 @@
                                       style="display: flex; flex-direction: column; gap: 6px;">
 
                                     <input type="hidden" name="ordNo" th:value="${ord.ordNo}">
-                                    <input type="text" name="ordShipNo" required placeholder="輸入物流單號"
+                                    <input type="text" name="ordShipNo" required placeholder="輸入物流單號 (限英數)"
+                                           oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '')"
                                            style="width: 100%; padding: 6px 10px; border-radius: 4px; border: 1px solid #444; background: #222; color: white; font-size: 13px;">
                                     <button type="submit"
                                             style="width: 100%; background: var(--accent-purple); color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s;">
@@ -366,7 +374,7 @@
                                 </div>
 
                                 <button type="button"
-                                        th:if="${ord.ordStatus == '待出貨' and ord.ordPaymentStatus != '已付款'}"
+                                        th:if="${ord.ordStatus == '待出貨' and ord.ordPaymentStatus != '退款中'}"
                                         th:onclick="'openCancelModal(' + ${ord.ordNo} + ')'"
                                         style="width: 100%; background: transparent; border: 1px solid #ff5252; color: #ff5252; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 12px; transition: 0.3s;">
                                     <i class="fas fa-ban"></i> 取消訂單

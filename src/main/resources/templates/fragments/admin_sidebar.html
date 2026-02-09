@@ -134,11 +134,12 @@
                     </li>
                 </ul>
             </li>
+
             <li class="menu-item has-submenu"
-                th:classappend="${activePage == 'reports'} ? 'open' : ''">
+                th:classappend="${activePage == 'reports'|| activePage == 'reportss'|| activePage == 'install_list'} ? 'open' : ''">
 
                 <a class="submenu-toggle">
-                    <span><i class="fas fa-exclamation-triangle"></i> 檢舉審核</span>
+                    <span><i class="fas fa-exclamation-triangle"></i> 檢舉/申訴審核</span>
                     <i class="fas fa-chevron-down arrow"></i>
                 </a>
 
@@ -148,6 +149,50 @@
                            th:classappend="${activePage == 'reports'} ? 'active' : ''">
                             商品檢舉管理
                         </a>
+                    </li>
+                    <li>
+                        <a th:href="@{/admin/forum/report/list}"
+                           th:classappend="${activePage == 'report'} ? 'active' : ''">
+                            檢舉管理報表
+                        </a>
+                    </li>
+                    <li class="menu-item has-sub-item"
+                        th:classappend="${activePage == 'install_list'} ? 'open' : ''">
+                        <a class="sub-toggle" ><span>申訴總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
+                        <ul class="sub-submenu">
+                            <!-- ✅ 只有「待處理」和「已處理」 -->
+                            <li>
+                                <a th:href="@{/appeals/admin/list(status='待處理')}"
+                                   th:classappend="${activePage == 'install_list'} ? 'active' : ''">
+                                    待處理
+                                </a>
+                            </li>
+                            <li>
+                                <a th:href="@{/appeals/admin/list(status='已處理')}"
+                                   th:classappend="${activePage == 'install_list'} ? 'active' : ''">
+                                    已處理
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-item has-sub-item "
+                        th:classappend="${activePage == 'reportss'} ? 'open' : ''">
+                        <a class="sub-toggle"><span>檢舉總覽報表</span> <i class="fas fa-chevron-down arrow"></i></a>
+                        <ul class="sub-submenu">
+                            <!-- ✅ 只有「待處理」和「已處理」 -->
+                            <li>
+                                <a th:href="@{/reports/admin/list(status='待處理')}"
+                                   th:classappend="${activePage == 'reportss'} ? 'active' : ''">
+                                    待處理
+                                </a>
+                            </li>
+                            <li>
+                                <a th:href="@{/reports/admin/list(status='已處理')}"
+                                   th:classappend="${activePage == 'reportss'} ? 'active' : ''">
+                                    已處理
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </li>
@@ -179,8 +224,6 @@
                     </li>
                 </ul>
             </li>
-
-
 
             <li class="menu-item has-submenu"
                 th:classappend="${activePage == 'announcement' || activePage == 'faq'} ? 'open' : ''">
@@ -222,7 +265,10 @@
         </li>
 
         <li class="menu-item">
-            <a href="#"><i class="fas fa-headset"></i> 自訂</a>
+            <a th:href="@{/admins/system-message}"
+               th:classappend="${activePage == 'system_message'} ? 'active' : ''">
+                <i class="fas fa-bell"></i> 系統通知管理
+            </a>
         </li>
         </ul>
     </nav>

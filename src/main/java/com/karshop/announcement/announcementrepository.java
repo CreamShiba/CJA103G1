@@ -10,7 +10,7 @@ import java.util.List;
 public interface announcementrepository extends JpaRepository<announcement, Integer> {
 
     // 根據管理員編號查詢
-	@Query("SELECT a FROM announcement a WHERE a.adm_no = :admNo")
+	@Query("SELECT a FROM Announcement a WHERE a.adm_no = :admNo")
 	List<announcement> findByAdm_no(@Param("admNo") Integer admNo);
 
     List<announcement> findByStatus(String status);
@@ -23,6 +23,6 @@ public interface announcementrepository extends JpaRepository<announcement, Inte
 
     // ✅ 查詢已發佈的公告，按置頂和時間排序
     // isnew DESC 會讓 true (1) 排在前面，false (0) 排在後面
-    @Query("SELECT a FROM announcement a WHERE a.status = :status ORDER BY a.isnew DESC, a.create_time DESC")
+    @Query("SELECT a FROM Announcement a WHERE a.status = :status ORDER BY a.isnew DESC, a.create_time DESC")
     List<announcement> findPublishedAnnouncementsOrdered(@Param("status") String status);
 }

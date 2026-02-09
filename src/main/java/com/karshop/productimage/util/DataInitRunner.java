@@ -26,58 +26,62 @@ public class DataInitRunner implements CommandLineRunner {
     @Autowired
     private ResourceLoader resourceLoader;
 
-    // 從 application.properties 讀取開關，預設為 false
     @org.springframework.beans.factory.annotation.Value("${project.init-images:false}")
     private boolean shouldInit;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        // 修正點：必須把邏輯包在 if (shouldInit) 的大括號內
         if (shouldInit) {
             System.out.println("【系統訊息】開始執行圖片初始化...");
 
-            // 核心邏輯：讀取 static/images 下的所有檔案
             Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(resourceLoader)
                     .getResources("classpath:static/images/*.*");
 
             for (Resource resource : resources) {
                 String fileName = resource.getFilename();
-                if (fileName == null) {
-                    continue;
-                }
-
-                // 1. 提取檔名中的數字 (例如 "2001.jpg" 變成 2001)
-                String prodNoStr = fileName.replaceAll("[^0-9]", "");
-                if (prodNoStr.isEmpty()) continue;
+                if (fileName == null) continue;
 
                 try {
+                    // 🔥 修改重點 1: 解析檔名邏輯
+                    // 假設檔名是 "2001_1.jpg" 或 "2001.jpg"
+
+                    // A. 先去掉副檔名 (變成 "2001_1" 或 "2001")
+                    String nameWithoutExt = fileName;
+                    if (fileName.contains(".")) {
+                        nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+                    }
+
+                    // B. 透過底線切割，只拿第一部分 (變成 "2001")
+                    String[] parts = nameWithoutExt.split("_");
+                    String prodNoStr = parts[0];
+
+                    // C. 轉成數字
                     Integer prodNo = Integer.parseInt(prodNoStr);
 
-                    // 2. 只處理設定的 2001 ~ 2020 範圍
-                    if (prodNo >= 2001 && prodNo <= 2020) {
+                    if (prodNo >= 2001 && prodNo <= 2030) {
 
-                        // 3. 封裝成 ProductImageVO 物件
+                        // 3. 封裝並存入
                         ProductImageVO piVO = new ProductImageVO();
                         ProductVO productVO = new ProductVO();
                         productVO.setProdNo(prodNo);
 
-                        piVO.setProduct(productVO); // 建立關聯
-                        piVO.setUpFile(resource.getContentAsByteArray()); // 存入圖片內容
+                        piVO.setProduct(productVO);
+                        piVO.setUpFile(resource.getContentAsByteArray());
                         piVO.setUploadDate(LocalDate.now());
 
-                        // 4. 存入資料庫
                         productImageService.addImages(piVO);
-                        System.out.println("【初始化成功】商品編號: " + prodNo + " (檔案: " + fileName + ")");
 
-                        // 清除 Redis 中的舊快取
-                        // 如果該 Key 不存在，Redis 只會回傳 false 或 0，並不會報錯
+                        // 🔥 顯示更詳細的 Log，確認是哪張圖
+                        System.out.println("【初始化成功】商品: " + prodNo + " | 檔案: " + fileName);
+
+                        // 清除 Redis 快取
                         String redisKey = "product:main:" + prodNo;
                         imageRedisTemplate.delete(redisKey);
-                        System.out.println("【初始化】已清除 Redis 快取: " + redisKey);
                     }
                 } catch (NumberFormatException e) {
-                    // 如果檔名解析失敗則跳過該檔案
+                    // 如果檔名第一段不是數字 (例如 "test_image.jpg") 就跳過
+                    System.out.println("【略過檔案】無法解析商品編號: " + fileName);
                     continue;
                 }
             }

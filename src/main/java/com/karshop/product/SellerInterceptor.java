@@ -60,6 +60,8 @@ public class SellerInterceptor implements HandlerInterceptor {
             return true; // 允許訪問個人資料頁
         }
 
+
+
         // 其他所有頁面 (例如: 新增商品、儀表板、訂單管理)
         System.out.println(" 攔截非開通賣家 (" + status + ") 嘗試訪問: " + uri);
         res.sendRedirect(req.getContextPath() + "/members/seller/sellerinfo");

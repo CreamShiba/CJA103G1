@@ -22,7 +22,7 @@ public class faqcontroller {
      * 前台 FAQ 列表頁
      * 路徑：GET /faq
      */
-    @GetMapping("/members/faq")
+    @GetMapping("/faq")
     public String faqListPage(Model model) {
         List<faq> faqs = service.getPublishedFaqs();
         model.addAttribute("faqs", faqs);
@@ -112,7 +112,7 @@ public class faqcontroller {
         faq entity = service.getFaqById(id);
         if (entity != null) {
             // 切換狀態：發布 → 草稿，草稿 → 發布
-            String newStatus = entity.getStatus().equals("發佈") ? "草稿" : "發佈";
+            String newStatus = entity.getStatus().equals("已發佈") ? "草稿" : "已發佈";
             entity.setStatus(newStatus);
             service.updateFaq(id, entity);
         }

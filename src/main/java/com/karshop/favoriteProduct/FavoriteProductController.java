@@ -1,6 +1,8 @@
 package com.karshop.favoriteProduct;
 
 
+import com.karshop.favoriteStore.FavoriteStore;
+import com.karshop.favoriteStore.FavoriteStoreService;
 import com.karshop.members.model.MembersVO;
 import com.karshop.productProd.ProductProd;
 import com.karshop.utils.LoginUserHolder;
@@ -29,6 +31,9 @@ public class FavoriteProductController {
     @Autowired
     private LoginUserHolder loginUserHolder;
 
+    @Autowired
+    private FavoriteStoreService favoriteStoreService;
+
     //  查看個人收藏清單
     @GetMapping("/list-page")
     public String listPage(Model model, HttpSession session) {
@@ -46,8 +51,10 @@ public class FavoriteProductController {
 
         // 4. 抓取資料並回傳
         model.addAttribute("favorites", favoriteProductService.getFavoritesByMember(memberNo));
+        model.addAttribute("favoriteStores", favoriteStoreService.getFavoritesByMember(memberNo));
 
         return "favorite/listAllFavorite";
+
     }
 
     @PostMapping("/addAjax")
