@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-TW" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${post.title} + ' - 文章詳情'">文章詳情</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="stylesheet" th:href="@{/css/favorite.css}">
+    <link rel="stylesheet" th:href="@{/css/front-end/index.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/front_header.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/footer.css}">
+
+    <style>
+        /* 直接沿用你的暗黑風格 */
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #050000;
+            background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px !important;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* 文章區塊 */
+        .article-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .article-header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .article-title {
+            color: #ff3333;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .article-meta {
+            color: #888;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .article-content {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #ddd;
+            white-space: pre-wrap; /* 保留換行 */
+            min-height: 200px;
+        }
+
+        /* 圖片區 */
+        .article-images {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .article-images img {
+            max-height: 300px;
+            border-radius: 5px;
+            border: 1px solid #555;
+        }
+
+        /* 留言區 (靜態展示，若要功能需加 JS) */
+        .comments-section {
+            margin-top: 50px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+        .comment-row {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+            border-bottom: 1px solid #222;
+        }
+        .c-avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; border: 1px solid #555; }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            color: #aaa;
+            text-decoration: none;
+            border: 1px solid #444;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .btn-back:hover {
+            background: #ff3333;
+            color: white;
+            border-color: #ff3333;
+        }
+    </style>
+</head>
+
+<body>
+
+<header th:replace="~{fragments/front_header :: frontHeader}"></header>
+
+<div class="container">
+
+    <div class="article-card">
+        <div class="article-header">
+            <div class="article-title" th:text="${post.title}">文章標題</div>
+            <div class="article-meta">
+                <span>
+                    <i class="fas fa-user"></i> <span th:text="${post.member?.memUsername ?: '訪客'}">作者</span>
+                    &nbsp;|&nbsp;
+                    <i class="fas fa-folder"></i> <span th:text="${post.categories?.name}">分類</span>
+                </span>
+                <span th:text="${#dates.format(post.postDate, 'yyyy-MM-dd HH:mm')}">時間</span>
+            </div>
+        </div>
+
+        <div class="article-content" th:text="${post.postTxt}">
+            文章內容...
+        </div>
+
+        <div class="article-images" th:if="${not #lists.isEmpty(post.postImages)}">
+            <img th:each="img : ${post.postImages}" th:src="@{${img.url}}" />
+        </div>
+    </div>
+
+    <div class="comments-section" th:if="${not #lists.isEmpty(post.comments)}">
+        <h3 style="color: #fff; margin-bottom: 20px;">留言回覆</h3>
+        <div th:each="comment : ${post.comments}" class="comment-row">
+            <div class="c-avatar">
+                <img th:src="'https://api.dicebear.com/7.x/avataaars/svg?seed=' + ${comment.member?.memNo ?: 'default'}" style="width:100%;" />
+            </div>
+            <div>
+                <div style="color: #ff3333; font-weight: bold; margin-bottom: 5px;" th:text="${comment.member?.memUsername}">User</div>
+                <div style="color: #ccc;" th:text="${comment.content}">Content</div>
+                <div style="color: #666; font-size: 12px; margin-top: 5px;" th:text="${#dates.format(comment.commentDate, 'MM-dd HH:mm')}">Date</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center;">
+        <a href="javascript:history.back()" class="btn-back">
+            <i class="fas fa-arrow-left"></i> 返回上一頁
+        </a>
+    </div>
+
+</div>
+
+<footer th:replace="~{fragments/footer :: Footer}"></footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+        const forumTrigger = document.getElementById('forum-center-trigger');
+        const forumDropdown = document.getElementById('forum-dropdown');
+
+        function toggleDropdown(trigger, targetDropdown, others = []) {
+            if (trigger && targetDropdown) {
+                trigger.addEventListener('click', function(e) {
+                    e.preventDefault(); e.stopPropagation();
+                    targetDropdown.classList.toggle('show');
+                    others.forEach(d => { if(d) d.classList.remove('show'); });
+                });
+            }
+        }
+        toggleDropdown(userIcon, userDropdown, [forumDropdown]);
+        toggleDropdown(forumTrigger, forumDropdown, [userDropdown]);
+
+        document.addEventListener('click', function() {
+            if(userDropdown) userDropdown.classList.remove('show');
+            if(forumDropdown) forumDropdown.classList.remove('show');
+        });
+    });
+</script>
+
+</body>
+</html>

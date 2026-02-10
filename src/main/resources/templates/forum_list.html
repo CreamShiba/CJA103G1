@@ -12,64 +12,168 @@
 
     <style>
         /* =========================================
-           1. 基礎設定 & 核心佈局 (完全保留原始樣式)
+           1. 基礎設定 & 全域樣式
         ========================================= */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: #050000;
             background-image: linear-gradient(to bottom, #000000 0%, #3a0000 40%, #000000 100%);
-            color: #fff; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
         }
         a { text-decoration: none; color: inherit; transition: .3s; }
         a:hover { color: #ff3333; }
 
-        /* 這裡保留 Header 的基本樣式，確保 Fragment 載入後排版正確 */
-        header { flex-shrink: 0; z-index: 1050; position: relative; }
-        header .top-bar { display: flex; justify-content: space-between; padding: 10px 40px; font-size: 12px; color: #ccc; border-bottom: 1px solid #333; }
+        /* =========================================
+           2. Header 樣式 (已修復跑版問題)
+        ========================================= */
+        header { flex-shrink: 0; z-index: 1050; position: relative; background: #000; }
+
+        /* 上方 Top Bar */
+        header .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 40px;
+            font-size: 12px;
+            color: #ccc;
+            border-bottom: 1px solid #333;
+        }
         .top-icons { display: flex; gap: 20px; align-items: center; }
-        .search-box { border: 1px solid #555; padding: 5px 10px; width: 150px; display: flex; justify-content: space-between; }
+        .search-box {
+            border: 1px solid #555;
+            padding: 5px 10px;
+            width: 200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 4px;
+        }
         .search-box input { background: transparent; border: none; color: white; font-size: 12px; width: 100%; outline: none; }
 
-        .main-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; }
-        .logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 10px; }
-        .logo::before { content: ''; width: 30px; height: 15px; background: white; border-radius: 10px; }
-        .nav-links { display: flex; gap: 30px; font-size: 14px; align-items: center; }
-        .nav-links a.active { color: #ff3333; }
+        /* 🟢 主導覽列 (關鍵修正：強制橫向排列) */
+        .main-header {
+            display: flex !important;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid #333;
+        }
 
-        .user-dropdown-container { position: relative; display: inline-block; }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-decoration: none;
+        }
+        .logo::before { content: ''; width: 30px; height: 15px; background: white; border-radius: 10px; }
+
+        /* 🟢 導覽連結 (商城、安裝區、論壇...) */
+        .nav-links {
+            display: flex !important; /* 強制橫向 */
+            gap: 30px;
+            font-size: 15px;
+            align-items: center;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-links a {
+            color: #ccc;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap; /* 防止文字換行 */
+        }
+        .nav-links a.active, .nav-links a:hover {
+            color: #ff3333;
+        }
+
+        /* 下拉選單容器 (論壇 ▾ / 會員中心) */
+        .user-dropdown-container {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        /* 下拉選單本體 */
         .dropdown-menu {
             display: none;
             position: absolute;
             top: 100%;
-            left: 0;
+            left: 50%;
+            transform: translateX(-50%); /* 置中對齊 */
             background-color: #222;
             min-width: 160px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
             z-index: 2000;
             border: 1px solid #444;
             border-radius: 4px;
             padding: 5px 0;
+            margin-top: 10px;
         }
-        .dropdown-menu.show { display: block; }
-        .dropdown-menu a { color: #ccc; padding: 10px 15px; display: block; font-size: 14px; }
-        .dropdown-menu a:hover { background-color: #ff3333; color: white; }
+        /* 小箭頭裝飾 */
+        .dropdown-menu::before {
+            content: ''; position: absolute; top: -6px; left: 50%; margin-left: -6px;
+            border-width: 0 6px 6px; border-style: solid; border-color: transparent transparent #444 transparent;
+        }
 
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a {
+            color: #ccc;
+            padding: 12px 20px;
+            display: block;
+            font-size: 14px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .dropdown-menu a:hover { background-color: #333; color: #ff3333; }
+
+        /* =========================================
+           3. 論壇佈局 (左側欄 + 主內容 + 右聊天室)
+        ========================================= */
         .main-container { display: flex; padding: 40px; max-width: 1600px; margin: 0 auto; flex: 1; width: 100%; gap: 30px; align-items: flex-start; }
 
+        /* 左側邊欄 */
         aside.left-sidebar { width: 250px; flex-shrink: 0; }
         .sidebar-title { font-size: 18px; margin-bottom: 20px; color: #ff3333; font-weight: bold; }
         .category-list { list-style: none; }
         .category-list li { padding: 10px 15px; margin-bottom: 8px; font-size: 14px; color: #aaa; cursor: pointer; border-radius: 6px; }
         .category-list li.active, .category-list li:hover { color: #fff; background: #ff3333; font-weight: bold; }
 
+        /* 🟢 個人專區樣式 (黑紅運動風) */
+        .my-sidebar-title {
+            color: #fff; font-size: 18px; font-weight: bold;
+            border-bottom: 2px solid #ff3333; padding-bottom: 10px; margin-bottom: 15px;
+        }
+        .my-sidebar-link {
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: #1a1a1a; color: #ccc; padding: 15px 20px;
+            border-radius: 6px; text-decoration: none; border-left: 4px solid transparent;
+            transition: all 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .my-sidebar-link:hover {
+            background-color: #252525; color: #fff; border-left: 4px solid #ff3333;
+            transform: translateX(5px);
+        }
+        .my-sidebar-link:hover .arrow-icon { color: #ff3333; }
+        .my-sidebar-link .arrow-icon { font-size: 12px; color: #555; transition: 0.3s; }
+
+        /* 中間主要內容區 */
         .forum-main-area { flex: 1; min-width: 0; }
         .filter-tabs { display: flex; gap: 8px; margin-bottom: 15px; }
         .filter-btn { background: #2a2a2a; border: 1px solid #444; color: #ccc; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; }
         .filter-btn.active { background: #ff3333; border-color: #ff3333; color: #fff; }
 
         .action-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.05); padding: 12px 15px; border: 1px solid #444; border-bottom: none; border-radius: 8px 8px 0 0; }
-        .action-btn primary { background: #ff3333; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .action-btn.primary { background: #ff3333; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
         .thread-list { border: 1px solid #444; background: rgba(0,0,0,.4); border-radius: 0 0 8px 8px; }
         .thread-row { display: flex; flex-direction: column; border-bottom: 1px solid #333; cursor: pointer; transition: 0.2s; }
@@ -106,23 +210,27 @@
         .comment-icons i { cursor: pointer; color: #888; margin-left: 10px; transition: 0.2s; }
         .comment-icons i:hover { color: #ff3333; }
 
+        /* 右側聊天室 */
         .chat-sidebar { width: 350px; background-color: #111; border-left: 1px solid #333; display: flex; flex-direction: column; flex-shrink: 0; border-radius: 8px; height: 600px; position: sticky; top: 20px; }
         .chat-header { background: linear-gradient(135deg, #a00, #500); color: white; padding: 15px; font-weight: bold; border-radius: 8px 8px 0 0; }
         .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background-color: #0a0a0a; display: flex; flex-direction: column; gap: 15px; }
         .msg-row { display: flex; gap: 10px; align-items: flex-start; }
 
-        /* 🟢 修正：移除 break-all，改用 fit-content 並強制不隨意斷字 */
+        /* 聊天氣泡 */
         .msg-bubble { background: #222; padding: 8px 12px; border-radius: 12px; font-size: 13px; max-width: 85%; word-break: normal !important; overflow-wrap: anywhere !important; min-width: fit-content; }
-
         .msg-row.self { flex-direction: row-reverse; }
         .msg-row.self .msg-bubble { background: #800; border-top-right-radius: 0; }
         .chat-footer { padding: 10px; background: #111; border-top: 1px solid #333; display: flex; gap: 8px; border-radius: 0 0 8px 8px; }
         .chat-input { flex: 1; background: #222; border: 1px solid #444; color: white; border-radius: 20px; padding: 6px 15px; outline: none; }
 
+        /* Footer */
         footer { flex-shrink: 0; padding: 60px 40px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 40px; font-size: 14px; color: #aaa; border-top: 1px solid #333; background: rgba(0, 0, 0, 0.5); }
         .footer-logo { font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 10px; }
+
+        /* Lightbox */
         .lightbox-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; }
         @media (max-width: 1200px) { .chat-sidebar { display: none; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -138,6 +246,19 @@
             <li onclick="filterCategory('維修保養')">維修保養</li>
             <li onclick="filterCategory('改裝心得')">改裝心得</li>
         </ul>
+
+        <div class="my-sidebar-block" style="margin-top: 30px;">
+            <h3 class="my-sidebar-title">
+                <i class="fas fa-star" style="margin-right: 8px;"></i>個人專區
+            </h3>
+            <a href="/forum/my-collection" class="my-sidebar-link">
+                <div class="link-content">
+                    <i class="fas fa-bookmark" style="font-size: 16px;"></i>
+                    <span style="margin-left: 10px;">我的文章收藏夾</span>
+                </div>
+                <i class="fas fa-chevron-right arrow-icon"></i>
+            </a>
+        </div>
     </aside>
 
     <main class="forum-main-area">
@@ -154,7 +275,6 @@
                 <i class="fa-solid fa-pen"></i> 發布新文章
             </button>
         </div>
-
         <div class="thread-list">
             <div th:each="post : ${forumList}" class="thread-row" th:id="'post-' + ${post.postId}"
                  th:data-category="${post.categories != null ? post.categories.name : '綜合討論'}"
@@ -253,7 +373,7 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    // 1. CSRF Token 設定 (用於保護 POST 請求)
+    // 1. CSRF Token 設定
     const csrfMeta = document.querySelector("meta[name='_csrf']");
     const csrfHeaderMeta = document.querySelector("meta[name='_csrf_header']");
     const csrfToken = csrfMeta ? csrfMeta.content : "";
@@ -263,60 +383,43 @@
     var userName = /*[[${userName}]]*/ 'Guest';
     var socket = null;
 
-    // 3. 頁面載入完成後執行 (事件綁定)
+    // 3. 頁面載入完成後執行
     document.addEventListener('DOMContentLoaded', function() {
-        // 🟢 [修正] 這裡改成抓取 header 裡的正確 ID (user-icon)
         const memberTrigger = document.getElementById('user-icon');
         const memberDropdown = document.getElementById('user-dropdown');
-
-        // 論壇選單 (原本就是對的)
         const forumTrigger = document.getElementById('forum-center-trigger');
         const forumDropdown = document.getElementById('forum-dropdown');
 
-        // 綁定頭像點擊事件
         if (memberTrigger && memberDropdown) {
             memberTrigger.onclick = (e) => {
-                e.stopPropagation(); // 防止事件冒泡到 window
-                // 如果論壇選單是開的，先關掉
+                e.stopPropagation();
                 if(forumDropdown) forumDropdown.classList.remove('show');
-                // 切換自己的開關
                 memberDropdown.classList.toggle('show');
             };
-        } else {
-            console.warn("⚠️ 找不到 user-icon 或 user-dropdown，請確認 Header 是否載入");
         }
-
-        // 綁定論壇選單點擊事件
         if (forumTrigger && forumDropdown) {
             forumTrigger.onclick = (e) => {
                 e.stopPropagation();
-                // 如果會員選單是開的，先關掉
                 if(memberDropdown) memberDropdown.classList.remove('show');
                 forumDropdown.classList.toggle('show');
             };
         }
-
-        // 啟動 WebSocket 連線
         connect();
     });
 
     // 4. 點擊頁面空白處，關閉所有選單
     window.onclick = () => {
-        // 🟢 [修正] 這裡也要改成 user-dropdown
         const memberDropdown = document.getElementById('user-dropdown');
         const forumDropdown = document.getElementById('forum-dropdown');
 
         if(memberDropdown) memberDropdown.classList.remove('show');
         if(forumDropdown) forumDropdown.classList.remove('show');
-
-        // 關閉文章的小選單 (編輯/檢舉那個)
         document.querySelectorAll('.post-dropdown').forEach(d => d.classList.remove('show'));
     };
 
     // 5. 側邊欄分類篩選功能
     function filterCategory(cat) {
         document.querySelectorAll('.filter-btn, .category-list li').forEach(el => {
-            // 處理 "全部主題" 對應 "所有文章" 的文字差異
             el.classList.toggle('active', el.innerText.trim().includes(cat) || (cat === '全部主題' && el.innerText.trim().includes('所有文章')));
         });
         document.querySelectorAll('.thread-row').forEach(row => {
@@ -327,7 +430,6 @@
 
     // 6. 展開/收合文章詳情
     function toggleDetail(el, e) {
-        // 如果點到按鈕、圖片或輸入框，不要展開/收合
         if (e.target.closest('.post-actions') || e.target.closest('.post-menu-container') || e.target.closest('.comment-section') || e.target.tagName === 'IMG') return;
         el.classList.toggle('is-open');
     }
@@ -335,7 +437,6 @@
     // 7. 文章右上角選單 (檢舉/收藏)
     function togglePostMenu(btn, e) {
         e.stopPropagation();
-        // 先關閉其他打開的選單
         document.querySelectorAll('.post-dropdown').forEach(d => {
             if (d !== btn.nextElementSibling) d.classList.remove('show');
         });
@@ -347,7 +448,6 @@
         if(e) e.stopPropagation();
         let headers = {};
         if(csrfHeader) headers[csrfHeader] = csrfToken;
-
         fetch('/forum/like/' + id, {
             method: 'POST',
             headers: headers
@@ -366,7 +466,6 @@
         if(e) e.stopPropagation();
         let headers = {};
         if(csrfHeader) headers[csrfHeader] = csrfToken;
-
         fetch('/forum/favorite/' + id, {
             method: 'POST',
             headers: headers
@@ -375,13 +474,12 @@
             const t = document.getElementById('fav-text-' + id);
             if (data === "success") { i.className = 'fa-solid fa-star text-warning'; t.innerText = '取消收藏'; }
             else if (data === "removed") { i.className = 'fa-regular fa-star'; t.innerText = '收藏文章'; }
-            // 關閉選單
             const dropdown = i.closest('.post-dropdown');
             if(dropdown) dropdown.classList.remove('show');
         });
     }
 
-    // 10. 留言功能 (Enter 鍵與按鈕)
+    // 10. 留言功能
     function handleCommentSubmit(e, input) { if (e.key === 'Enter') submitComment(input.getAttribute('data-post-id'), input.value, input); }
     function submitCommentBtn(id) { const input = document.querySelector(`input[data-post-id='${id}']`); submitComment(id, input.value, input); }
 
@@ -389,7 +487,6 @@
         if (!content.trim()) return;
         let headers = { 'Content-Type': 'application/json' };
         if(csrfHeader) headers[csrfHeader] = csrfToken;
-
         fetch('/forum/addComment', {
             method: 'POST',
             headers: headers,
@@ -416,18 +513,14 @@
             });
     }
 
-    // 11. WebSocket 聊天室功能
+    // 11. WebSocket
     function connect() {
         var host = window.location.host;
-        // 判斷是 ws 還是 wss
         socket = new WebSocket((window.location.protocol==='https:'?'wss://':'ws://') + host + "/FriendWS/" + userName + "/public_room");
-
         socket.onmessage = function(e) {
             var data = JSON.parse(e.data);
             if(data.type === 'chat') {
                 var isSelf = (data.sender === userName);
-
-                // 🟢 [保留] 這裡是你之前修好的樣式，確保文字不會斷行
                 var html = `<div class="msg-row ${isSelf?'self':''}" style="display:flex; ${isSelf?'flex-direction:row-reverse;':''} gap:10px; margin-bottom:12px;">
                     <div class="msg-avatar" style="width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0;"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${data.sender}" style="width:100%"/></div>
                     <div class="msg-content" style="display:flex; flex-direction:column; ${isSelf?'align-items:flex-end;':''} min-width: 0;">
@@ -435,7 +528,6 @@
                         <div class="msg-bubble" style="background:${isSelf?'#800':'#222'}; padding:8px 12px; border-radius:12px; word-break: normal !important; overflow-wrap: anywhere !important; min-width: fit-content;">${data.message}</div>
                     </div>
                 </div>`;
-
                 const chatBox = document.getElementById('chat-box');
                 chatBox.insertAdjacentHTML('beforeend', html);
                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -445,30 +537,14 @@
 
     function sendMessage() {
         var input = document.getElementById('chat-input');
-        if (socket && socket.readyState === 1) {
-            if (input.value.trim()) {
-                var chatData = {
-                    type: "chat",
-                    sender: userName,
-                    receiver: "all",
-                    message: input.value
-                };
-                socket.send(JSON.stringify(chatData));
-                input.value = '';
-            }
-        } else {
-            console.error("❌ WebSocket 尚未連線或已被中斷。");
-            // alert("通訊連線尚未就緒，請稍候。"); // 怕太吵可以註解掉
-            connect(); // 嘗試重新連線
+        if (socket && socket.readyState === 1 && input.value.trim()) {
+            socket.send(JSON.stringify({ type: "chat", sender: userName, receiver: "all", message: input.value }));
+            input.value = '';
         }
     }
+    document.getElementById('chat-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') { sendMessage(); } });
 
-    // 綁定聊天室 Enter 發送
-    document.getElementById('chat-input').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') { sendMessage(); }
-    });
-
-    // 12. 圖片燈箱效果
+    // 12. Lightbox
     function showLightbox(src, e) {
         e.stopPropagation();
         document.getElementById('lightbox-img').src = src;
@@ -476,6 +552,5 @@
     }
     /*]]>*/
 </script>
-<style> @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } } </style>
 </body>
 </html>

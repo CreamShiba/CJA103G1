@@ -4,7 +4,9 @@ import com.karshop.model.entity.*;
 import com.karshop.model.repository.*;
 import com.karshop.members.model.MembersVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,6 +56,8 @@ public class ForumPostController {
 
 		model.addAttribute("myFavIds", myFavIds);
 		model.addAttribute("myLikedIds", myLikedIds);
+
+		// 注意：這裡回傳的是 forum_list，請確保 forum_list.html 語法無誤
 		return "forum_list";
 	}
 
@@ -111,7 +115,7 @@ public class ForumPostController {
 		return "redirect:/forum";
 	}
 
-	// 5. 收藏功能
+	// 5. 收藏功能 (修改為標準的 RESTful 風格回傳字串)
 	@PostMapping("/favorite/{postId}")
 	@ResponseBody
 	public String toggleFavorite(@PathVariable("postId") Integer postId, HttpSession session) {
@@ -137,7 +141,7 @@ public class ForumPostController {
 		return "error";
 	}
 
-	// 6. 按讚功能
+	// 6. 按讚功能 (前台點擊)
 	@PostMapping("/like/{postId}")
 	@ResponseBody
 	public Map<String, Object> likePost(@PathVariable("postId") Integer postId, HttpSession session) {
@@ -157,6 +161,7 @@ public class ForumPostController {
 		}
 
 		Integer memNo = member.getMemNo();
+		// 假設你有在 PostLikeRepository 實作這個方法
 		boolean alreadyLiked = postLikeRepository.existsByMemberNoAndPostId(memNo, postId);
 
 		long currentLikes = (post.getPostLike() == null) ? 0L : post.getPostLike();
@@ -196,7 +201,7 @@ public class ForumPostController {
 		}
 
 		String content = payload.get("content");
-		String postIdStr = payload.get("postId");
+		String postIdStr = payload.get("postId"); // 確保前端送來的是 postId 字串
 
 		if (postIdStr == null || content == null) {
 			response.put("success", false);
@@ -211,6 +216,7 @@ public class ForumPostController {
 			comment.setContent(content);
 			comment.setForumPost(post);
 			comment.setMember(member);
+			comment.setCommentDate(new java.util.Date()); // 補上時間
 			commentRepository.save(comment);
 
 			response.put("success", true);
@@ -233,5 +239,97 @@ public class ForumPostController {
 		} else {
 			return "redirect:/members/login";
 		}
+	}
+
+	// 🟢 9. 新增：跳轉到後台編輯頁面
+	@GetMapping("/admin/edit/{id}")
+	public String adminEditPage(@PathVariable("id") Integer id, Model model) {
+		ForumPost post = forumPostRepository.findById(id).orElseThrow(() -> new RuntimeException("找不到文章"));
+		model.addAttribute("post", post);
+		model.addAttribute("allCategories", categoriesRepository.findAll());
+		return "forum_edit";
+	}
+
+	// 🟢 10. 新增：處理後台文章更新 (含讚數編輯)
+	@Transactional
+	@PostMapping("/admin/forum/article/update")
+	public String updatePost(@ModelAttribute("post") ForumPost formPost) {
+		// 先獲取原始文章，確保不遺失 updatable=false 的欄位 (如日期)
+		ForumPost existingPost = forumPostRepository.findById(formPost.getPostId())
+				.orElseThrow(() -> new RuntimeException("文章不存在"));
+
+		// 更新可編輯內容
+		existingPost.setTitle(formPost.getTitle());
+		existingPost.setPostTxt(formPost.getPostTxt());
+
+		// 更新手動調整的讚數
+		existingPost.setPostLike(formPost.getPostLike());
+
+		// 更新分類
+		if (formPost.getCategories() != null && formPost.getCategories().getCategoryId() != null) {
+			Categories cat = categoriesRepository.findById(formPost.getCategories().getCategoryId()).orElse(null);
+			existingPost.setCategories(cat);
+		}
+
+		forumPostRepository.save(existingPost);
+		return "redirect:/forum"; // 這裡可改成導回你的後台列表頁
+	}
+
+	// 🟢 11. 新增：非同步刪除圖片
+	@DeleteMapping("/admin/images/delete/{imageId}")
+	@ResponseBody
+	public ResponseEntity<?> deleteImage(@PathVariable("imageId") Integer imageId) {
+		try {
+			postImageRepository.deleteById(imageId);
+			Map<String, Object> result = new HashMap<>();
+			result.put("success", true);
+			return ResponseEntity.ok(result);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
+		}
+	}
+
+	// 🟢 12. 新增：導向「我的文章收藏」獨立頁面
+	@GetMapping("/my-collection")
+	public String myCollectionPage(HttpSession session, Model model) {
+		MembersVO member = (MembersVO) session.getAttribute("member");
+
+		if (member == null) {
+			return "redirect:/members/login"; // 沒登入就踢去登入
+		}
+
+		// 1. 抓取收藏資料
+		List<PostFavorite> favRecords = postFavoriteRepository.findByMember_MemNo(member.getMemNo());
+
+		// 2. 取出文章物件
+		List<ForumPost> myFavPosts = new ArrayList<>();
+		for (PostFavorite fav : favRecords) {
+			if (fav.getForumPost() != null) {
+				myFavPosts.add(fav.getForumPost());
+			}
+		}
+
+		// 3. 塞入 Model，變數名稱叫 myFavPosts
+		model.addAttribute("myFavPosts", myFavPosts);
+
+		// 4. 回傳你的新 HTML 檔名 (不要跟組員的 listAllFavorite 重複)
+		return "forum_my_collection";
+	}
+
+	// 🟢 13. 補上這個方法，讓 /forum/detail 能找到文章
+	// ⚠️ 注意：這裡要確認前端是送 postId 還是 id
+	@GetMapping("/detail")
+	public String showPostDetail(@RequestParam("postId") Integer postId, Model model) {
+		// 1. 根據 ID 抓取文章
+		ForumPost post = forumPostRepository.findById(postId).orElse(null);
+
+		// 2. 如果找不到文章，導回列表
+		if (post == null) {
+			return "redirect:/forum";
+		}
+		model.addAttribute("post", post);
+
+		// 🟢 回傳你剛剛新增的 forum_detail.html
+		return "forum_detail";
 	}
 }

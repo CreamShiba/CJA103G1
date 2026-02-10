@@ -19,10 +19,8 @@
     <div class="edit-container">
         <h2 class="header-title"><i class="fa-solid fa-pen-to-square"></i> 編輯文章內容</h2>
 
-        <form th:action="@{/admin/forum/article/update}" th:object="${post}" method="post">
+        <form th:action="@{/forum/admin/forum/article/update}" th:object="${post}" method="post">
             <input type="hidden" th:field="*{postId}" />
-
-            <input type="hidden" name="member.memNo" th:value="${post.member?.memNo}" />
 
             <div class="row">
                 <div class="col-md-6 form-group">
@@ -72,22 +70,30 @@
 
             <hr>
             <div class="text-right">
-                <a th:href="@{/admin/forum/article}" class="btn btn-light btn-cancel">取消返回</a>
+                <a th:href="@{/forum}" class="btn btn-light btn-cancel">取消返回</a>
                 <button type="submit" class="btn btn-primary btn-save">儲存變更</button>
             </div>
         </form>
     </div>
 </div>
+
 <script th:inline="javascript">
     function deleteImage(imageId) {
         if (!confirm("確定要永久刪除這張圖片嗎？")) return;
-        fetch('/admin/images/delete/' + imageId, { method: 'DELETE' })
+
+        // 🟢 修正 URL 路徑，加上 /forum 前綴
+        fetch('/forum/admin/images/delete/' + imageId, { method: 'DELETE' })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     const element = document.getElementById('img-container-' + imageId);
-                    if (element) { element.style.opacity = "0"; setTimeout(() => element.remove(), 500); }
-                } else { alert("刪除失敗：" + data.message); }
+                    if (element) {
+                        element.style.opacity = "0";
+                        setTimeout(() => element.remove(), 500);
+                    }
+                } else {
+                    alert("刪除失敗：" + data.message);
+                }
             }).catch(err => alert("系統錯誤"));
     }
 </script>
