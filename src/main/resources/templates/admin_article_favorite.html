@@ -73,7 +73,9 @@
                     <td>
                         <form th:action="@{/admin/forum/favorite/delete}" method="post" onsubmit="return confirm('確定移除？')">
                             <input type="hidden" name="favId" th:value="${fav.favId}" />
-                            <button type="submit" class="btn-action btn-delete"><i class="fas fa-trash-alt"></i> 移除</button>
+                            <button type="submit" class="btn-action btn-delete">
+                                <i class="fas fa-trash-alt"></i> 移除
+                            </button>
                         </form>
                     </td>
                 </tr>

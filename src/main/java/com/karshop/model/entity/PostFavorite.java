@@ -1,7 +1,7 @@
 package com.karshop.model.entity;
 
 import jakarta.persistence.*;
-import com.karshop.members.model.MembersVO; // 🟢 引用組長實體
+import com.karshop.members.model.MembersVO;
 import java.util.Date;
 
 @Entity
@@ -16,12 +16,12 @@ public class PostFavorite {
 	@JoinColumn(name = "post_id")
 	private ForumPost forumPost;
 
-	// 🟢 修正：對齊 member_no 並使用 MembersVO
 	@ManyToOne
 	@JoinColumn(name = "member_no")
 	private MembersVO member;
 
 	@Column(name = "created_at", insertable = false, updatable = false)
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdAt;
 
 	public PostFavorite() {}
@@ -32,4 +32,6 @@ public class PostFavorite {
 	public void setForumPost(ForumPost forumPost) { this.forumPost = forumPost; }
 	public MembersVO getMember() { return member; }
 	public void setMember(MembersVO member) { this.member = member; }
+	public Date getCreatedAt() { return createdAt; }
+	public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 }

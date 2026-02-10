@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.karshop.members.model.MembersVO; // 🟢 引用組員的實體
+import com.karshop.members.model.MembersVO;
 
 @Entity
-@Table(name = "forum_post")
+@Table(name = "forum_post") // 💡 請確認資料庫是 forum_post 還是 forum_posts，需與資料庫完全一致
 public class ForumPost {
 
 	@Id
@@ -27,10 +27,8 @@ public class ForumPost {
 	@JoinColumn(name = "category_id", nullable = false)
 	private Categories categories;
 
-	// 🟢 修正：原本是 private Integer memberId;
-	// 現在改為與組員的 MembersVO 直接關聯
 	@ManyToOne
-	@JoinColumn(name = "member_no", nullable = false) // 門牌號碼依舊是 member_no
+	@JoinColumn(name = "member_no", nullable = false)
 	private MembersVO member;
 
 	@Column(name = "title")
@@ -43,11 +41,10 @@ public class ForumPost {
 	private Timestamp postDate;
 
 	@Column(name = "post_like")
-	private Long postLike = 0L;
+	private Long postLike = 0L; // 預設值為 0
 
 	public ForumPost() {}
 
-	// Getter & Setter 也要同步修改
 	public Integer getPostId() { return postId; }
 	public void setPostId(Integer postId) { this.postId = postId; }
 
@@ -60,7 +57,6 @@ public class ForumPost {
 	public Categories getCategories() { return categories; }
 	public void setCategories(Categories categories) { this.categories = categories; }
 
-	// 🟢 修正後的 Member 存取方法
 	public MembersVO getMember() { return member; }
 	public void setMember(MembersVO member) { this.member = member; }
 

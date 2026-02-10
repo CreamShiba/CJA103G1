@@ -106,20 +106,6 @@ public class AdminForumController {
 	}
 
 	// ==========================================
-	// 3. 收藏管理 (Favorite Management)
-	// ==========================================
-	@GetMapping({"/favorite", "/favorite/list"})
-	public String favoriteList(Model model) {
-		List<PostFavorite> favList = postFavoriteRepository.findAll();
-		model.addAttribute("favList", favList);
-		return "admin_favorite_list";
-	}
 
-	@PostMapping("/favorite/delete")
-	public String deleteFavorite(@RequestParam(value = "favId", required = false) Integer favId) {
-		if (favId != null) {
-			postFavoriteRepository.deleteById(favId);
-		}
-		return "redirect:/admin/forum/favorite";
-	}
+
 }
