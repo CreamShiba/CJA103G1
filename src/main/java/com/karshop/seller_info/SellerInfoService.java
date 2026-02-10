@@ -23,7 +23,7 @@ public class SellerInfoService {
     private static final int PAGE_SIZE = 10;
 
     // ✅ 改為存在 static 資料夾內,不需要 WebConfig
-    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/seller-images/";
+    private static final String UPLOAD_DIR = "uploads/seller-images/";
 
     @Transactional
     public SellerInfo addSeller(SellerInfo seller) {
@@ -84,24 +84,20 @@ public class SellerInfoService {
 
     @Transactional
     public String uploadImage(MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            return null;
-        }
+        if (file == null || file.isEmpty()) return null;
 
-        // 建立上傳目錄
-        Path uploadPath = Paths.get(UPLOAD_DIR);
+        Path uploadPath = Paths.get(System.getProperty("user.dir"), UPLOAD_DIR);
+
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // 產生唯一檔名
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
         Path filePath = uploadPath.resolve(fileName);
-
-        // 儲存檔案
         Files.copy(file.getInputStream(), filePath);
 
-        return "uploads/seller-images/" + fileName;
+        // 返回相對路徑,配合 Controller 的映射
+        return "/members/seller/uploads/seller-images/" + fileName;
     }
 
     public List<SellerInfo> searchByShopName(String shopName) {
@@ -115,5 +111,27 @@ public class SellerInfoService {
     public SellerInfo getSellerByMemberId(Integer memberId) {
         return repository.findByMemberNo(memberId)
                 .orElseThrow(() -> new RuntimeException("此會員尚未申請成為賣家"));
+    }
+
+    /**
+     * 修正所有舊的圖片路徑格式
+     */
+    @Transactional
+    public int fixAllImagePaths() {
+        List<SellerInfo> allSellers = repository.findAll();
+        int fixedCount = 0;
+
+        for (SellerInfo seller : allSellers) {
+            String oldPath = seller.getImage_path();
+            if (oldPath != null && oldPath.startsWith("/images/uploads/")) {
+                String newPath = oldPath.replace("/images/uploads/", "/uploads/");
+                seller.setImage_path(newPath);
+                repository.save(seller);
+                fixedCount++;
+                System.out.println("修正路徑: " + oldPath + " -> " + newPath);
+            }
+        }
+
+        return fixedCount;
     }
 }

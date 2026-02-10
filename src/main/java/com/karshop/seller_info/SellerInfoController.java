@@ -3,6 +3,11 @@ package com.karshop.seller_info;
 import com.karshop.members.model.MembersVO;
 import com.karshop.sellertest.model.SellerVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Controller
 @RequestMapping("/members/seller")
@@ -151,5 +160,68 @@ public class SellerInfoController {
         legacyVO.setMember((MembersVO) session.getAttribute("member"));
 
         session.setAttribute("seller", legacyVO);
+    }
+
+    //    @GetMapping("/uploads/seller-images/{filename:.+}")
+//    @ResponseBody
+//    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+//        try {
+//            // 設定圖片存放的實體路徑 (必須與 Service 的 UPLOAD_DIR 一致)
+//            Path file = Paths.get(System.getProperty("user.dir"), "src/main/resources/static/uploads/seller-images/").resolve(filename);
+//            Resource resource = new UrlResource(file.toUri());
+//
+//            if (resource.exists() || resource.isReadable()) {
+//
+//                String contentType = filename.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";
+//
+//                return ResponseEntity.ok()
+//                        .contentType(MediaType.IMAGE_PNG) // 或根據副檔名動態判斷
+//                        .body(resource);
+//            } else {
+//                return ResponseEntity.notFound().build();
+//            }
+//        } catch (Exception e) {
+//            return ResponseEntity.internalServerError().build();
+//        }
+//    }
+    // 💡 修改 Mapping，加上 /images
+    // 💡 路徑加上 /file
+    // 💡 攔截帶有 /file 的請求
+    @GetMapping("/uploads/seller-images/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
+        try {
+            // 實體路徑指向專案根目錄下的 uploads
+            Path filePath = Paths.get(System.getProperty("user.dir"), "uploads", "seller-images").resolve(filename).normalize();
+
+            System.out.println("DEBUG >>> 讀取圖片路徑: " + filePath.toAbsolutePath());
+
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                String contentType = Files.probeContentType(filePath);
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_TYPE, contentType != null ? contentType : "image/jpeg")
+                        .body(resource);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    /**
+     * 臨時端點:修正所有圖片路徑
+     * 使用後可以刪除此方法
+     */
+    @GetMapping("/fix-image-paths")
+    @ResponseBody
+    public String fixImagePaths() {
+        try {
+            int count = service.fixAllImagePaths();
+            return "成功修正 " + count + " 筆圖片路徑!<br><br>請重新整理賣家資料頁面查看結果。";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "修正失敗: " + e.getMessage();
+        }
     }
 }

@@ -186,11 +186,9 @@
 
                 <div class="image-section">
                     <!-- 現有圖片 -->
-                    <div class="current-image" th:if="${seller.image_path != null and seller.image_path != ''}">
-                        <img th:src="@{/{path}(path=${seller.image_path}, v=${#dates.createNow().getTime()})}"
-                             alt="店鋪圖片" id="current-img">
-                        <p style="margin-top: 10px; color: #666; font-size: 14px;">目前圖片</p>
-                    </div>
+                    <img th:src="@{${seller.image_path}(v=${#dates.createNow().getTime()})}"
+                         alt="店鋪圖片"
+                         style="width: 150px; height: 150px; object-fit: cover; display: block !important; visibility: visible !important;">
 
                     <!-- 預覽新圖片 -->
                     <div class="image-preview" id="image-preview">

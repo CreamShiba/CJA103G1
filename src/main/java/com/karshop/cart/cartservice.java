@@ -81,9 +81,11 @@ public class cartservice {
             ordVO.setOrdRecipient(receiverName);
             // 合併電話至地址欄位以符合資料庫設計
             ordVO.setOrdAddress(receiverAddress + " (Tel: " + receiverPhone + ")");
-            ordVO.setOrdPaymentStatus("信用卡".equals(paymentMethod) ? "已付款" : "未付款");
-            ordVO.setPayoutStatus("未撥款");
+//            ordVO.setOrdPaymentStatus("信用卡".equals(paymentMethod) ? "已付款" : "未付款");
+//            ordVO.setPayoutStatus("未撥款");
 
+            ordVO.setOrdPaymentStatus("未付款");
+            ordVO.setPayoutStatus("未撥款");
             // C. 處理商品明細與庫存扣除
             int subtotal = 0;
             List<OrdDetailVO> detailList = new ArrayList<>();
@@ -254,12 +256,11 @@ public class cartservice {
                 }).sum();
     }
     // ✅ 無需 SDK 的綠界表單產生器
-    public String genEcpayForm(String orderNo, Integer amount, String method) {
-        String mId = "2000132"; // 測試商號
+    public String genEcpayForm(String orderNo, Integer amount, String method, String basePath) {
+        String mId = "2000132";
         String date = new java.text.SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new java.util.Date());
         String payment = "Credit".equals(method) || "信用卡".equals(method) ? "Credit" : "ATM";
 
-        // 1. 準備參數 (TreeMap 會自動依照字典順序排序 A-Z)
         Map<String, String> params = new TreeMap<>();
         params.put("MerchantID", mId);
         params.put("MerchantTradeNo", orderNo + "T" + System.currentTimeMillis());
@@ -268,15 +269,16 @@ public class cartservice {
         params.put("TotalAmount", amount.toString());
         params.put("TradeDesc", "CarShopOrder");
         params.put("ItemName", "汽車百貨商品一批");
-        params.put("ReturnURL", "https://yourdomain.com/callback"); // 扣款成功通知
-        params.put("OrderResultURL", "http://localhost:8080/cart/list"); // 付完跳回哪
+
+        // ⭐ 這裡改用傳進來的 basePath，自動切換 Local 或 GCP
+        params.put("ReturnURL", basePath + "/cart/ecpay-callback");
+        params.put("OrderResultURL", basePath + "/cart/list");
+
         params.put("ChoosePayment", payment);
         params.put("EncryptType", "1");
 
-        // 2. 計算簽章 (CheckMacValue)
         String checkMacValue = makeMac(params);
 
-        // 3. 生成自動 Submit 的 Form
         StringBuilder sb = new StringBuilder();
         sb.append("<form id='ecPay' action='https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5' method='post'>");
         for (Map.Entry<String, String> entry : params.entrySet()) {
@@ -285,6 +287,17 @@ public class cartservice {
         sb.append("<input type='hidden' name='CheckMacValue' value='").append(checkMacValue).append("'>");
         sb.append("</form><script>document.getElementById('ecPay').submit();</script>");
         return sb.toString();
+    }
+
+    @Transactional
+    public void updateOrderPaymentStatus(String orderNo, Integer paymentStatus) {
+        String cleanNo = orderNo.replaceAll("[^0-9]", "");
+        Integer id = Integer.parseInt(cleanNo);
+        OrdVO ordVO = ordService.getOneOrd(id);
+        if (ordVO != null) {
+            ordVO.setOrdPaymentStatus(paymentStatus == 1 ? "已付款" : "未付款");
+            ordService.updateOrd(ordVO);
+        }
     }
 
     // 🔐 手寫簽章邏輯 (面試亮點：懂 SHA256 與 URL Encode)
