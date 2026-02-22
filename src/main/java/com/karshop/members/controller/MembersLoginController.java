@@ -135,7 +135,7 @@ public class MembersLoginController {
       // --- 新增過濾邏輯 ---
       // 假設後台路徑都以 /admins 開頭
       // 同時也要防止跳轉回登入頁面本身 (避免死循環)
-      if (location.startsWith("/admins") || location.contains("login")) {
+      if (location.startsWith("/admins") || location.contains("login")|| location.contains("verifyEmail")|| location.contains("resetPassword")|| location.contains("verify")) {
         location = "/members/home"; // 強制導向回首頁或會員中心
       }
       // -------------------
