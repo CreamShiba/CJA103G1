@@ -9,11 +9,17 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
+  @Value("${spring.mail.username}")
+  private String emailAccount;
+
+  @Value("${spring.mail.password}")
+  private String emailPassword;
 
   @Autowired
   private RedisTemplate<String, String> redisTemplate;
@@ -31,13 +37,13 @@ public class EmailService {
       // 建立 Session
       Session session = Session.getInstance(props, new Authenticator() {
         protected PasswordAuthentication getPasswordAuthentication() {
-          return new PasswordAuthentication("cja103120213@gmail.com", "mbqczzwiyqtwfxls ");
+          return new PasswordAuthentication(emailAccount, emailPassword);
         }
       });
 
       // 建立郵件訊息
       Message message = new MimeMessage(session);
-      message.setFrom(new InternetAddress("cja103120213@gmail.com"));
+      message.setFrom(new InternetAddress(emailAccount));
       message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
       message.setSubject("會員註冊驗證信");
       message.setText("您好，請點選以下連結完成註冊驗證（30分鐘內有效）：\n\n" + link);
@@ -75,12 +81,12 @@ public class EmailService {
 
       Session session = Session.getInstance(props, new Authenticator() {
         protected PasswordAuthentication getPasswordAuthentication() {
-          return new PasswordAuthentication("cja103120213@gmail.com", "mbqczzwiyqtwfxls");
+          return new PasswordAuthentication(emailAccount, emailPassword);
         }
       });
 
       Message message = new MimeMessage(session);
-      message.setFrom(new InternetAddress("cja103120213@gmail.com"));
+      message.setFrom(new InternetAddress(emailAccount));
       message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
       message.setSubject("重設密碼連結");
       message.setText("您好，請點擊下方連結重設您的密碼（15分鐘內有效）：\n\n" + resetLink);
