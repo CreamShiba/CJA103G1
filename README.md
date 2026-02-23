@@ -32,7 +32,6 @@
 ![jQuery](https://img.shields.io/badge/-jQuery-0769AD?logo=jquery&logoColor=white&style=flat-square)
 ![AJAX](https://img.shields.io/badge/-AJAX-0081CB?logo=jquery&logoColor=white&style=flat-square)
 ![Fetch](https://img.shields.io/badge/-Fetch-000000?logo=javascript&logoColor=white&style=flat-square)
-![Bootstrap](https://img.shields.io/badge/-Bootstrap-7952B3?logo=bootstrap&logoColor=white&style=flat-square)
 ![DataTables](https://img.shields.io/badge/-DataTables-1E90FF?logo=databricks&logoColor=white&style=flat-square)
 
 
