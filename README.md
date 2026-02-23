@@ -98,7 +98,8 @@ src
 
 ```
 spring.datasource.password=你的密碼
-
+spring.mail.username=發送者的信箱
+spring.mail.password=發送者的密碼
 ```
 
 📌 此檔案不應被 commit，已在 `.gitignore` 中排除，保障安全。
