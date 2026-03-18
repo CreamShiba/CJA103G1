@@ -1,19 +1,19 @@
-package com.karshop.report.controller;
+package com.karshop.report.controller; // 路徑
 
-import com.karshop.report.model.Reports;
-import com.karshop.report.service.ReportsService;
-import com.karshop.members.model.MembersVO; // 💡 導入會員 VO
-import com.karshop.members.model.MembersService; // 💡 導入會員 Service
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.jdbc.core.JdbcTemplate; // 💡 導入 JdbcTemplate 用於快速抓取商品名稱
-import org.springframework.stereotype.Controller;
+import com.karshop.report.model.Reports; // 引入Reports VO
+import com.karshop.report.service.ReportsService; // 引入ReportsService
+import com.karshop.members.model.MembersVO; // 引入會員 VO
+import com.karshop.members.model.MembersService; // 導入會員 Service
+import org.springframework.beans.factory.annotation.Autowired; // 用來實現依賴注入,自動裝配 Spring Bean
+import org.springframework.data.domain.Page; //引入分頁與排序工具
+import org.springframework.jdbc.core.JdbcTemplate; // 導入 JdbcTemplate 用於快速抓取商品名稱
+import org.springframework.stereotype.Controller; // 讓 Spring Boot 知道這個類別用來處理網頁瀏覽器的請求
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes; //官方術語：重定向屬性,用於顯示操作成功,顯示完後跳轉頁面
+import java.time.LocalDateTime; // 提供操作陣列的靜態方法（例如將陣列轉為 List）。
+import java.util.Arrays; // 提供操作陣列的靜態方法（如將陣列轉為 List）
+import java.util.List; // 定義列表集合，用於儲存多筆資料
 import jakarta.servlet.http.HttpSession; // 💡 導入 Session
 
 @Controller
@@ -24,10 +24,10 @@ public class ReportsController {
     private ReportsService reportsService;
 
     @Autowired
-    private MembersService membersService; // 💡 注入會員服務
+    private MembersService membersService; // 注入會員服務
 
     @Autowired
-    private JdbcTemplate jdbcTemplate; // 💡 注入 JDBC 工具
+    private JdbcTemplate jdbcTemplate; // 注入 JDBC 工具
 
     // 顯示前台新增檢舉頁面
     @GetMapping("/add")
@@ -40,7 +40,7 @@ public class ReportsController {
     public String handleReport(
             @ModelAttribute Reports report,
             @RequestParam(required = false) String source,  // ← 接收來源標記
-            HttpSession session,                            // ← 💡 接收 Session 抓真實會員
+            HttpSession session,                            // ← 接收 Session 抓真實會員
             RedirectAttributes redirectAttributes,           // ← 用於傳遞訊息
             Model model) {
 

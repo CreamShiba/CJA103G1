@@ -1,16 +1,16 @@
-package com.karshop.report.service; //路徑
+package com.karshop.report.service; // 路徑
 
-import com.karshop.report.model.Reports; //引入Reports Vo
-import com.karshop.report.repository.ReportsRepository; //引入ReportsRepository
-import org.springframework.beans.factory.annotation.Autowired; //引入Spring Boot依賴注入
-import org.springframework.data.domain.Page; //引入分頁與排序工具
-import org.springframework.data.domain.PageRequest; //引入分頁請求工具 //PageRequest 是 Spring Data 框架进行分页查询时的参数构建器 //https://docs.spring.io/spring-data/commons/docs/current/api/index.html?org/springframework/data/domain/PageRequest.html
+import com.karshop.report.model.Reports; // 引入Reports Vo
+import com.karshop.report.repository.ReportsRepository; // 引入ReportsRepository
+import org.springframework.beans.factory.annotation.Autowired; // 引入Spring Boot依賴注入
+import org.springframework.data.domain.Page; // 引入分頁與排序工具
+import org.springframework.data.domain.PageRequest; // 引入分頁請求工具 PageRequest 是 Spring Data 框架进行分页查询时的参数构建器 //https://docs.spring.io/spring-data/commons/docs/current/api/index.html?org/springframework/data/domain/PageRequest.html
 import org.springframework.data.domain.Pageable; // 分頁查詢和排序功能
-import org.springframework.data.domain.Sort; //排序規則,功能：用來設定資料呈現的順序（例：按時間由新到舊排）。
-import org.springframework.stereotype.Service; //業務邏輯,大腦
-import org.springframework.transaction.annotation.Transactional; //官方術語：宣告式事務管理,要嘛全成功，要嘛全失敗
-import java.time.LocalDateTime; //紀錄時間,獲取目前電腦系統的精確時間
-import java.util.Arrays; //提供操作陣列的各種方法
+import org.springframework.data.domain.Sort; // 排序規則,功能：用來設定資料呈現的順序（例：按時間由新到舊排）。
+import org.springframework.stereotype.Service; // 業務邏輯,大腦
+import org.springframework.transaction.annotation.Transactional; // 官方術語：宣告式事務管理,要嘛全成功，要嘛全失敗
+import java.time.LocalDateTime; // 紀錄時間,獲取目前電腦系統的精確時間
+import java.util.Arrays; // 提供操作陣列的各種方法
 import java.util.List; // 引入List
 
 @Service
