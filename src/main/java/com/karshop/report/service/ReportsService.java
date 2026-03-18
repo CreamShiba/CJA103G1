@@ -1,22 +1,22 @@
-package com.karshop.report.service;
+package com.karshop.report.service; //路徑
 
-import com.karshop.report.model.Reports;
-import com.karshop.report.repository.ReportsRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import com.karshop.report.model.Reports; //引入Reports Vo
+import com.karshop.report.repository.ReportsRepository; //引入ReportsRepository
+import org.springframework.beans.factory.annotation.Autowired; //引入Spring Boot依賴注入
+import org.springframework.data.domain.Page; //引入分頁與排序工具
+import org.springframework.data.domain.PageRequest; //引入分頁請求工具 //PageRequest 是 Spring Data 框架进行分页查询时的参数构建器 //https://docs.spring.io/spring-data/commons/docs/current/api/index.html?org/springframework/data/domain/PageRequest.html
+import org.springframework.data.domain.Pageable; // 分頁查詢和排序功能
+import org.springframework.data.domain.Sort; //排序規則,功能：用來設定資料呈現的順序（例：按時間由新到舊排）。
+import org.springframework.stereotype.Service; //業務邏輯
+import org.springframework.transaction.annotation.Transactional; //官方術語：宣告式事務管理,要嘛全成功，要嘛全失敗
+import java.time.LocalDateTime; //紀錄時間,獲取目前電腦系統的精確時間
+import java.util.Arrays; //提供操作陣列的各種方法
+import java.util.List; // 引入List
 
 @Service
 public class ReportsService {
 
-    @Autowired
+    @Autowired // 依賴注入
     private ReportsRepository reportsRepository;
 
     // ==========================================
@@ -25,6 +25,7 @@ public class ReportsService {
     /**
      * ✅ 會員送出檢舉表單時呼叫
      */
+    // 按下送出後會開始跑,如果檢舉的是商品,就用商品名稱去抓商品編號
     public void submitReport(Reports report) {
 
         // ✨ 新增連動邏輯：如果檢舉類型是「商品」，嘗試根據名稱自動填入 prod_no
@@ -36,15 +37,10 @@ public class ReportsService {
             }
         }
 
-        report.setReportsTimestamp(LocalDateTime.now());
-        report.setStatus("待處理"); // ✅ 統一使用「待處理」
-        report.setAdmNo(1);
-        reportsRepository.save(report);
-
-        System.out.println("✅ 新增檢舉成功！編號：" + report.getReportsNo() + "，狀態：" + report.getStatus());
-        if (report.getProdNo() != null) {
-            System.out.println("🔗 已自動關聯商品編號：" + report.getProdNo() + "，組員現在看得到這筆了！");
-        }
+        report.setReportsTimestamp(LocalDateTime.now());    // 抓現在的時間
+        report.setStatus("待處理");                          // 預設狀況為待處理
+        report.setAdmNo(1);                                 //預設管理員編號為1
+        reportsRepository.save(report);                     //將這筆案件存進資料庫
     }
 
     // ==========================================
