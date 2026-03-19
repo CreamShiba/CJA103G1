@@ -3,8 +3,8 @@ package com.karshop.report.controller;
 import com.karshop.report.model.*;
 import com.karshop.report.service.InstallAppealsService;
 import com.karshop.report.service.ProductAppealsService;
-import com.karshop.report.repository.OrdForReportRepository; // 💡 注入妳剛創的 Repository
-import com.karshop.report.repository.InstallOrderForReportRepository; // 💡 注入妳剛創的 Repository
+import com.karshop.report.repository.OrdForReportRepository; // 💡 注入 Repository
+import com.karshop.report.repository.InstallOrderForReportRepository; // 💡 注入 Repository
 import com.karshop.members.model.MembersVO; // 💡 必須 import 組員的 VO 才能讀取 Session
 import com.karshop.members.model.MembersService; // 💡 注入 MembersService 以取得會員詳細資料
 import org.springframework.beans.factory.annotation.Autowired;
